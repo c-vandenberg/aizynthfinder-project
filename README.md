@@ -59,3 +59,47 @@ Retrosynthesis involves:
     </p>
   </div>
 <br>
+
+### 1.1.2 Retrosynthetis Search Tree
+
+Typically, the retrosynthetic analysis of a target molecule is an **iterative process** whereby the **subsequent fragments are themselves broken down** until we **reach a stop criterion**. This stop criterion is typically when we reach **precursors that are commerically available/in stock**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/bb4d5580-028b-4610-b95e-8b2f4fc234ba", alt="retrosynthetic-tree"/>
+    <p>
+      <b>Fig 6</b> Chemical representation of a retrosynthesis search tree <b><sup>1</sup></b>
+    </p>
+  </div>
+<br>
+
+This iterative process results in a **retrosynthesis tree** where the **bredth is incredibly large**, but the **depth is quite small/shallow**. In comparison to the search trees for games such as chess and Go (**Fig 6**), the **bredth of a retrosynthesis search tree is incredibly large** because you could **theoretically break any bonds** in the target molecule, and the subsequent fragments. This leads to an **explosion in child nodes** from the **first few substrees**.
+
+The **depth** of a retrosynthesis search tree is **small/shallow** on the other hand, as it only takes a **few disconnections before viable precursors are found**. This is ideal since we don't want **linear synthetic reactions** with an **excessive number of steps**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/6c3efa40-bf2c-4124-bd13-4ad9f5a5d6b0", alt="retrosynthetic-search-tree-bredth-depth"/>
+    <p>
+      <b>Fig 6</b> Retrosynthesis search tree bredth and depth compared to the search trees in chess and Go. <b><sup>2</sup></b>
+    </p>
+  </div>
+<br>
+
+In order to **reduce the bredth** of the retrosynthesis search tree, we need to **define the disconnection rules clearly and efficiently**.
+
+Additionally, in order to **traverse the retrosynthesis search tree** we need an **effective search algorithm**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/06068a46-d07c-4aa0-b0dd-9e82725bda74", alt="retrosynthetic-tree"/>
+    <p>
+      <b>Fig 7</b> Retrosynthesis search tree. The search tree starts from the target molecule; each node in the tree is either discarded or picked up for expansion; a leaf node ends when it has no child node to expand or arrives at the starting materials.
+    </p>
+  </div>
+<br>
+
+## References
+
+**[1]** Zhao, D., Tu, S. and Xu, L. (2024) ‘Efficient retrosynthetic planning with MCTS Exploration Enhanced A* search’, Communications Chemistry, 7(1). <br><br>
+**[2]** Genheden, S. (2022) 'AiZynthFinder', AstraZeneca R&D Presentation. Available at: https://www.youtube.com/watch?v=r9Dsxm-mcgA (Accessed: 22 August 2024). <br><br>
