@@ -1,0 +1,15 @@
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+
+# Ignore all files in the .idea directory
+.idea/
+
+# Ignore pkl files
+*.pkl
+
+# Ignore env files
+.env
+
+# Ignore all files in .run directory
+.run/
