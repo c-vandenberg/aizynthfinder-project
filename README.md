@@ -1,8 +1,8 @@
 # AiZynthFinder Project
 
-## 1.1 Retrosynthesis with AiZynthFinder - Overview
+## 1 Retrosynthesis with AiZynthFinder - Overview
 
-### 1.1.1 Basics of Retrosynthesis 
+### 1.1 Basics of Retrosynthesis 
 
 **Retrosynthetic analysis** involves the **deconstruction of a target molecule** into **simpler precursor structures** in order to **probe different synthetic routes** to the target molecule and **compare the different routes** in terms of synthetic viability.
 
@@ -60,7 +60,7 @@ Retrosynthesis involves:
   </div>
 <br>
 
-### 1.1.2 Retrosynthetis Search Tree
+### 1.2 Retrosynthetis Search Tree
 
 Typically, the retrosynthetic analysis of a target molecule is an **iterative process** whereby the **subsequent fragments are themselves broken down** until we **reach a stop criterion**. This stop criterion is typically when we reach **precursors that are commerically available/in stock**.
 
@@ -86,9 +86,9 @@ The **depth** of a retrosynthesis search tree is **small/shallow** on the other 
   </div>
 <br>
 
-In order to **reduce the bredth** of the retrosynthesis search tree, we need to **define the disconnection rules clearly and efficiently**.
-
-Additionally, in order to **traverse the retrosynthesis search tree** we need an **effective search algorithm**.
+For **effective retrosynthetic analysis**, a retrosynthesis program must:
+1. **Define the disconnection rules clearly and efficiently** in order to **reduce the bredth** of the retrosynthesis search tree.
+2. **Traverse the retrosynthesis search tree efficiently** using an **effective search algorithm**.
 
 <br>
   <div align="center">
@@ -98,6 +98,10 @@ Additionally, in order to **traverse the retrosynthesis search tree** we need an
     </p>
   </div>
 <br>
+
+### 1.3 Template-Based Retrosynthesis
+
+AiZynthFinder uses a **template-based retrosynthesis model** to **define the disconnection rules**. This approach utilises a **curated database** of **transformation rules** that are **extracted from external reaction databases** that are then **encoded computationally into reaction templates**. These reaction templates are then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
 
 ## References
 
