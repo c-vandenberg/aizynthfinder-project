@@ -68,7 +68,7 @@ Typically, the retrosynthetic analysis of a target molecule is an **iterative pr
   <div align="center">
     <img src="https://github.com/user-attachments/assets/bb4d5580-028b-4610-b95e-8b2f4fc234ba", alt="retrosynthetic-tree"/>
     <p>
-      <b>Fig 6</b> Chemical representation of a retrosynthesis search tree <b><sup>1</sup></b>
+      <b>Fig 6</b> Chemical representation of a retrosynthesis search tree. <b><sup>1</sup></b>
     </p>
   </div>
 <br>
@@ -99,9 +99,28 @@ For **effective retrosynthetic analysis**, a retrosynthesis program must:
   </div>
 <br>
 
-### 1.3 Template-Based Retrosynthesis
+### 1.3 AiZynthFinder Template-Based Retrosynthesis Model
 
-AiZynthFinder uses a **template-based retrosynthesis model** to **define the disconnection rules**. This approach utilises a **curated database** of **transformation rules** that are **extracted from external reaction databases** that are then **encoded computationally into reaction templates**. These reaction templates are then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
+AiZynthFinder uses a **template-based retrosynthesis model** to **define the disconnection rules**. This approach utilises a **curated database** of **transformation rules** that are **extracted from external reaction databases** that are then **encoded computationally into reaction templates** as **SMIRKS**. 
+* **SMIRKS** is a form of **linear notation** used for **molecular reaction representation**. It was developed by **Daylight** and can be thought of as a hybrid between **SMILES** and **SMARTS**
+
+These reaction templates can then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
+
+However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** (**Fig 8**)
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/8e60a52c-d9b1-474d-ad72-faf6f8592626", alt="template-neural-network"/>
+    <p>
+      <b>Fig 8</b> Reaction template ranking using Expansion policy neural network. <b><sup>2</sup></b>
+    </p>
+  </div>
+<br>
+
+This **expansion policy neural network template ranking** works as follows:
+1. **Encoding of query molecule/target molecule**: The query molecule/target molecule is encoded as an **extended-connectivity fingerprint (ECFP) bit string**, specifically an **ECFP4 bit string**.
+2. **
+
 
 ## References
 
