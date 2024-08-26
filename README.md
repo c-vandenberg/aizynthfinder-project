@@ -99,18 +99,18 @@ For **effective retrosynthetic analysis**, a retrosynthesis program must:
   </div>
 <br>
 
-### 1.3 AiZynthFinder Template-Based Retrosynthesis Model
+### 1.3 AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)
 
 AiZynthFinder uses a **template-based retrosynthesis model** to **define the disconnection rules**. This approach utilises a **curated database** of **transformation rules** that are **extracted from external reaction databases** that are then **encoded computationally into reaction templates** as **SMIRKS**. 
 * **SMIRKS** is a form of **linear notation** used for **molecular reaction representation**. It was developed by **Daylight** and can be thought of as a hybrid between **SMILES** and **SMARTS**
 
 These reaction templates can then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
 
-However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** (**Fig 8**)
+However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** **<sup>3</sup>** (**Fig 8**).
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/8e60a52c-d9b1-474d-ad72-faf6f8592626", alt="template-neural-network"/>
+    <img src="https://github.com/user-attachments/assets/8e60a52c-d9b1-474d-ad72-faf6f8592626", alt="aizynthfinder-template-neural-network"/>
     <p>
       <b>Fig 8</b> Reaction template ranking using Expansion policy neural network. <b><sup>2</sup></b>
     </p>
@@ -118,11 +118,29 @@ However, before they are used, AiZynthFinder uses a **simple neural network (Exp
 <br>
 
 This **expansion policy neural network template ranking** works as follows:
-1. **Encoding of query molecule/target molecule**: The query molecule/target molecule is encoded as an **extended-connectivity fingerprint (ECFP) bit string**, specifically an **ECFP4 bit string**.
-2. **
+1. **Encoding of query molecule/target molecule**: The query molecule/target molecule is encoded as an **extended-connectivity fingerprint (ECFP) bit string**, **<sup>4</sup>** specifically an **ECFP4 bit string**.
+2. **Expansion policy neural network**: The ECFP4 fingerprints are then **fed into a simple neural network**, called an **expansion policy**. The **output of this neural network** is a **ranked list of templates**.
+3. **Keep top-ranked templates and apply to target molecule**: The top-ranked templates are kept (typically the **top 50**), and are **applied to the target molecule**, producing **different sets of precursors**
 
+However, because the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
+
+Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**).**<sup>5</sup>**
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/2ab97b1a-54b8-48cd-bd46-2f32c74d82b0", alt="aizynthfinder-neural-network-reaction-filter"/>
+    <p>
+      <b>Fig 9</b> <b>a)</b> An example suggested route from the expansion policy without the filter neural network. The single step route would not practical in the wet-laboratory however due to selectivity issues. <b>b)</b> The suggested route when the filter neural network is applied. Although not perfect, it is a much more feasible route. <b><sup>5</sup></b>
+    </p>
+  </div>
+<br>
+
+### 1.4 Monte Carlo Tree Search: Finding the Best Routes (Traverse the Retrosynthesis Search Tree Efficiently)
 
 ## References
 
 **[1]** Zhao, D., Tu, S. and Xu, L. (2024) ‘Efficient retrosynthetic planning with MCTS Exploration Enhanced A* search’, Communications Chemistry, 7(1). <br><br>
 **[2]** Genheden, S. (2022) 'AiZynthFinder', AstraZeneca R&D Presentation. Available at: https://www.youtube.com/watch?v=r9Dsxm-mcgA (Accessed: 22 August 2024). <br><br>
+**[3]** Thakkar, A. et al. (2020) ‘Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain’, Chemical Science, 11(1), pp. 154–168. 
+**[4]** David, L. et al. (2020) ‘Molecular representations in AI-Driven Drug Discovery: A review and practical guide’, Journal of Cheminformatics, 12(1). <br><br>
+**[5]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning. <br><br>
