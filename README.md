@@ -193,9 +193,24 @@ Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The numb
   </div>
 <br>
 
-## 1.5 Other Route Scoring Metrics in AiZynthFinder
+## 1.5 AiZynthFinder Post-Processing Tools - Route Scoring
 
+AiZynthFinder also uses a number of **scoring algorithms** to **score routes during post-processing** (**Fig 12**).
 
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/191465e0-9f78-473f-b7f1-d0ec06fbfdb1", alt="post-processing-route-scoring-algorithms"/>
+    <p>
+      <b>Fig 12</b> AiZynthFinder post-processing route scoring algorithm formulae <b><sup>2</sup></b>
+    </p>
+  </div>
+<br>
+
+## 1.6 Route Clustering
+
+AiZynthFinder also has the ability to **cluster routes** in order to perform a **cluster analysis** via **hierarchical clustering**.
+
+The specific type of hierarchical clustering that AiZynthFinder uses is **agglomerative ("bottom-up") hierarchical clustering** **<sup>8</sup>**. It creates s **dendrogram** (a common visualisation tookis from the `ClusteringHelper` class uses 
 
 ## References
 
@@ -206,3 +221,4 @@ Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The numb
 **[5]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning. <br><br>
 **[6]** Coulom, R. (2007) ‘Efficient selectivity and backup operators in Monte-Carlo Tree Search’, Lecture Notes in Computer Science, pp. 72–83. <br><br>
 **[7]** Kroese, D.P. et al. (2014) ‘Why the monte Carlo method is so important today’, WIREs Computational Statistics, 6(6), pp. 386–392. <br><br>
+**[8]** Genheden, S., Engkvist, O. and Bjerrum, E. (2021) ‘Clustering of synthetic routes using tree edit distance’, Journal of Chemical Information and Modeling, 61(8), pp. 3899–3907. <br><br>
