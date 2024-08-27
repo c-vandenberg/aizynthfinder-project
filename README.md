@@ -124,7 +124,7 @@ This **expansion policy neural network template ranking** works as follows:
 
 However, because the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
 
-Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**).**<sup>5</sup>**
+Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**). **<sup>5</sup>**
 
 <br>
   <div align="center">
@@ -139,13 +139,11 @@ Therefore, AiZynthFinder has **another trained neural network** called **filter 
 
 ### 1.4.1 Heuristic Search Algorithms
 
-**Monte Carlo Tree Search (MCTS)** is a powerful search algorithm that uses **heuristics** (i.e. **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
+**Monte Carlo Tree Search (MCTS)** **<sup>6</sup>** is a powerful search algorithm that uses **heuristics** (i.e. **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
 
-Like with other **heuristic search algorithms**, the goal of MCTS is to **find a good enough solution within a reasonable amount of time**, rather than **guaranteeing the optimal solution** by **examining all possible outcomes**.
-
-Heuristic search algorithms like MCTS are guided by a **heuristic function**, which is a mathematical function used to estimate the **cost, distance or likelihood of reaching the goal from a given state or node**. This function helps **prioritse which paths or options to explore**, based on their likelihood of **leading to an optimal or near-optimal solution**.
-
-Heuristic search algorithms aim to **reduce the search space**, making them **more efficient than exhaustive search methods**. By **focusing on promised paths**, they can often **find solutions faster**, especially in complex or large problem spaces. Although these solutions **may not be optimal**, they are **usually good enough for practical purposes**.
+  * Like with other **heuristic search algorithms**, the goal of MCTS is to **find a good enough solution within a reasonable amount of time**, rather than **guaranteeing the optimal solution** by **examining all possible outcomes**.
+  * Heuristic search algorithms like MCTS are guided by a **heuristic function**, which is a mathematical function used to estimate the **cost, distance or likelihood of reaching the goal from a given state or node**. This function helps **prioritse which paths or options to explore**, based on their likelihood of **leading to an optimal or near-optimal solution**.
+  * Heuristic search algorithms aim to **reduce the search space**, making them **more efficient than exhaustive search methods**. By **focusing on promised paths**, they can often **find solutions faster**, especially in complex or large problem spaces. Although these solutions **may not be optimal**, they are **usually good enough for practical purposes**.
 
 ### 1.4.2 Monte Carlo Tree Search in AiZynthFinder
 
@@ -155,7 +153,7 @@ To recap, the **retrosynthesis tree structure representation** consists of:
 * **Nodes**: Each node in the tree represents **a state of the retrosynthesis problem**. In AiZynthFinder, a node corresponds to **a set of one or more intermediate molecules** that can be used to **synthesise the molecule(s)** in the **current node's parent node**.
 * **Edges**: The edges between the nodes represent the **application of a specific reaction template (disconnection rule)** to **decompose the molecule set in the parent node** into **simpler precursor molecules in the child node**
 
-In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** to explore potential synthetic routes as follows:
+In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<sup>7</sup>** to explore potential synthetic routes as follows:
 
 **1. Selection**
 * Starting at the **root node** (target molecule), the MCTS algorithm selects the **most promising node for expansion** based on a balance of **exploration (trying new reactions)**, and **exploitation (further exploring known good reactions)**
@@ -199,6 +197,8 @@ Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The numb
 
 **[1]** Zhao, D., Tu, S. and Xu, L. (2024) ‘Efficient retrosynthetic planning with MCTS Exploration Enhanced A* search’, Communications Chemistry, 7(1). <br><br>
 **[2]** Genheden, S. (2022) 'AiZynthFinder', AstraZeneca R&D Presentation. Available at: https://www.youtube.com/watch?v=r9Dsxm-mcgA (Accessed: 22 August 2024). <br><br>
-**[3]** Thakkar, A. et al. (2020) ‘Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain’, Chemical Science, 11(1), pp. 154–168. 
+**[3]** Thakkar, A. et al. (2020) ‘Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain’, Chemical Science, 11(1), pp. 154–168. <br><br>
 **[4]** David, L. et al. (2020) ‘Molecular representations in AI-Driven Drug Discovery: A review and practical guide’, Journal of Cheminformatics, 12(1). <br><br>
 **[5]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning. <br><br>
+**[6]** Coulom, R. (2007) ‘Efficient selectivity and backup operators in Monte-Carlo Tree Search’, Lecture Notes in Computer Science, pp. 72–83. <br><br>
+**[7]** Kroese, D.P. et al. (2014) ‘Why the monte Carlo method is so important today’, WIREs Computational Statistics, 6(6), pp. 386–392. <br><br>
