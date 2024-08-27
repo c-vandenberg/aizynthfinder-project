@@ -180,7 +180,8 @@ In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<
 **4. Update/Backpropagation**
 * Once the **terminal node is reached**, the **Monte Carlo simulation** is complete and a **complete synthetic route is generated**. This completed simulation/synthetic route is known as a **playout**.
 * The **score of the terminal node** (and hence the **score of the playout/synthetic route**) is then **propagated up through the tree**.
-* This score is based on the **Upper Confidence Bound (UCB) Score** of the **nodes in the playout/synthetic route** (**Fig 10**), and gives an quantitative analysis of the **quality of the synthetic route** 
+* This score of the terminal node is the **accumulated reward (Q)** in the **UCB Score formula** (**Fig 10**), which is s function of the **tree depth** at the terminal node (i.e. **how many synthesis steps** between it and the target molecule), and the **fraction of the precursor molecules in that route that are in stock**.
+* This gives a quantitative analysis of the **quality of the synthetic route**.
 
 Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The number of itertations is governed by a **predefined limit**, or a **predefined search time**. This iterative process is illustrated in **Fig 11**.
 
@@ -192,6 +193,10 @@ Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The numb
     </p>
   </div>
 <br>
+
+## 1.5 Other Route Scoring Metrics in AiZynthFinder
+
+
 
 ## References
 
