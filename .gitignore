@@ -19,3 +19,11 @@ __pycache__/
 
 # All files Jupyter notebooks extensions folder
 .virtual_documents/
+
+# Ignore all AiZynthFinder stock and trained model data
+*.hdf5
+*.onnx
+*csv.gz
+
+# Ignore configuration file
+*.yml
