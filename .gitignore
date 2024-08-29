@@ -13,3 +13,9 @@ __pycache__/
 
 # Ignore all files in .run directory
 .run/
+
+# All files Jupyter notebooks checkpoints folder
+.ipynb_checkpoints/
+
+# All files Jupyter notebooks extensions folder
+.virtual_documents/
