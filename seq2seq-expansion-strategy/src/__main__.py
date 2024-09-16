@@ -106,7 +106,8 @@ def main():
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001, clipnorm=5.0)
     model.compile(optimizer=optimizer, loss=masked_sparse_categorical_crossentropy, metrics=['accuracy'])
 
-    # 9. Define callbacks for early stopping and checkpointing
+    # 9. Define callbacks for early stopping, checkpointing and visualisation of training and validation metrics
+    # over epochs.
     early_stopping = tf.keras.callbacks.EarlyStopping(
         monitor='val_loss',
         patience=5,
@@ -119,6 +120,8 @@ def main():
         save_best_only=True
     )
 
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir='../logs')
+
     # 10. Train the Model
     model.fit(
         [encoder_input_data, decoder_input_data],
@@ -129,7 +132,7 @@ def main():
             [encoder_input_valid, decoder_input_valid],
             decoder_target_valid
         ),
-        callbacks=[early_stopping, checkpoint]
+        callbacks=[early_stopping, checkpoint, tensorboard_callback]
     )
 
     # 11. Save the Trained Model
