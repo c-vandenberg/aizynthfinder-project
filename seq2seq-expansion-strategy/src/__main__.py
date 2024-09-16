@@ -98,8 +98,8 @@ def main():
     model = RetrosynthesisSeq2SeqModel(
         input_vocab_size=vocab_size,
         output_vocab_size=vocab_size,
-        embedding_dim=512,
-        units=512
+        embedding_dim=256,
+        units=256
     )
 
     # 8. Compile the Model with the Custom Loss Function
@@ -123,8 +123,8 @@ def main():
     model.fit(
         [encoder_input_data, decoder_input_data],
         decoder_target_data,
-        batch_size=32,
-        epochs=1,
+        batch_size=16,
+        epochs=50,
         validation_data=(
             [encoder_input_valid, decoder_input_valid],
             decoder_target_valid
@@ -150,10 +150,6 @@ def main():
     )
     print(f"Test Loss: {test_loss}")
     print(f"Test Accuracy: {test_accuracy}")
-
-
-def remove_rx_pattern(line):
-    return re.sub(r'<RX_\d+>', '', line).strip()
 
 
 if __name__ == '__main__':
