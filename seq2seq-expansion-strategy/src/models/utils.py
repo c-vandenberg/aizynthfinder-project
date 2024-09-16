@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import tensorflow as tf
 from sklearn.model_selection import ShuffleSplit, cross_validate
@@ -19,15 +20,32 @@ def load_smiles_data_from_csv(csv_file, smiles_column='Smiles'):
     return smiles_list
 
 
+def smiles_tokenizer(smiles):
+    pattern = r"(\[.*?\])|Cl?|Br?|Si|@@?|==?|[B-NOP-Zb-nop-z0-9]|\S"
+    tokens = re.findall(pattern, smiles)
+    tokens = ['<START>'] + tokens + ['<END>']
+    return tokens
+
+
 def preprocess_smiles(smiles_list, tokenizer, max_length):
-    sequences = tokenizer.texts_to_sequences(smiles_list)
+    # Tokenize SMILES strings
+    tokenized_smiles = [smiles_tokenizer(smiles) for smiles in smiles_list]
+
+    # Convert tokens to sequences of integers
+    sequences = tokenizer.texts_to_sequences(tokenized_smiles)
+
+    # Pad sequences
     padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
     return padded_sequences
 
 
-def create_tokenizer(smiles_list):
-    tokenizer = tf.keras.preprocessing.text.Tokenizer(char_level=True, filters='')
-    tokenizer.fit_on_texts(smiles_list)
+def create_smiles_tokenizer(smiles_list):
+    # Tokenize each SMILES string in dataset
+    tokenized_smiles = [smiles_tokenizer(smiles) for smiles in smiles_list]
+
+    # Flatten the tokens list for fitting the tokenizer
+    tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', lower=False, oov_token='<OOV>')
+    tokenizer.fit_on_texts(tokenized_smiles)
     return tokenizer
 
 
@@ -47,3 +65,14 @@ def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, 
         scoring=scoring_metrics,
         cv=cross_validator
     )
+
+
+def loss_function(real, pred):
+    # Padding mask
+    mask = tf.math.logical_not(tf.math.equal(real, 0))
+
+    loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
+    loss = loss_object(real, pred)
+    mask = tf.cast(mask, dtype=loss.dtype)
+    loss *= mask
+    return tf.reduce_mean(loss)
