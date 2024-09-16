@@ -27,29 +27,29 @@ def smiles_tokenizer(smiles):
     return tokens
 
 
-def preprocess_smiles(smiles_list, tokenizer, max_length):
-    # Tokenize SMILES strings
-    tokenized_smiles = [smiles_tokenizer(smiles) for smiles in smiles_list]
-
+def preprocess_smiles(tokenized_smiles_list, tokenizer, max_seq_length):
     # Convert tokens to sequences of integers
-    sequences = tokenizer.texts_to_sequences(tokenized_smiles)
+    sequences = tokenizer.texts_to_sequences(tokenized_smiles_list)
 
     # Pad sequences
-    padded_sequences = pad_sequences(sequences, maxlen=max_length, padding='post')
+    padded_sequences = pad_sequences(
+        sequences,
+        maxlen=max_seq_length,
+        padding='post',
+        truncating='post'
+    )
     return padded_sequences
 
 
-def create_smiles_tokenizer(smiles_list):
-    # Tokenize each SMILES string in dataset
-    tokenized_smiles = [smiles_tokenizer(smiles) for smiles in smiles_list]
-
+def create_smiles_tokenizer(tokenized_smiles_list):
     # Flatten the tokens list for fitting the tokenizer
     tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', lower=False, oov_token='<OOV>')
-    tokenizer.fit_on_texts(tokenized_smiles)
+    tokenizer.fit_on_texts(tokenized_smiles_list)
     return tokenizer
 
 
-def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, seq2seq_model, feature_matrix, target_matrix):
+def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, seq2seq_model, feature_matrix,
+                            target_matrix):
     cross_validator: ShuffleSplit = ShuffleSplit(
         n_splits=n_splits,
         test_size=test_size,

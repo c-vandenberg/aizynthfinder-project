@@ -34,10 +34,18 @@ def main():
     assert len(products_x_valid_dataset) == len(reactants_y_valid_dataset), "Mismatch in validation dataset lengths."
 
     # 2. Create the Tokenizer
-    # Combine all SMILES strings to build a common tokenizer
-    all_smiles = (products_x_dataset + reactants_y_dataset +
-                  products_x_valid_dataset + reactants_y_valid_dataset)
-    tokenizer = create_smiles_tokenizer(all_smiles)
+    # Tokenize the datasets
+    tokenized_products_x_dataset = [smiles_tokenizer(smiles) for smiles in products_x_dataset]
+    tokenized_reactants_y_dataset = [smiles_tokenizer(smiles) for smiles in reactants_y_dataset]
+
+    tokenized_products_x_valid_dataset = [smiles_tokenizer(smiles) for smiles in products_x_valid_dataset]
+    tokenized_reactants_y_valid_dataset = [smiles_tokenizer(smiles) for smiles in reactants_y_valid_dataset]
+
+    # Combine all tokenized SMILES strings to build a common tokenizer
+    all_tokenized_smiles = (tokenized_products_x_dataset + tokenized_reactants_y_dataset +
+                            tokenized_products_x_valid_dataset + tokenized_reactants_y_valid_dataset)
+
+    tokenizer = create_smiles_tokenizer(all_tokenized_smiles)
 
     # Save the tokenizer for future use
     tokenizer_path = '../data/tokenizers/pande_et_al_data_tokenizer.json'
@@ -45,18 +53,18 @@ def main():
         f.write(tokenizer.to_json())
 
     # 3. Split data into training and test data sets
-    (seq2seq_model_x_train_data, seq2seq_model_x_test_data,
-     seq2seq_model_y_train_data, seq2seq_model_y_test_data) = train_test_split(
-        products_x_dataset,
-        reactants_y_dataset,
+    (tokenized_products_x_train_data, tokenized_products_x_test_data,
+     tokenized_reactants_y_train_data, tokenized_reactants_y_test_data) = train_test_split(
+        tokenized_products_x_dataset,
+        tokenized_reactants_y_dataset,
         test_size=0.3,  # 30% of the data is reserved for testing, and 70% is used for training
         random_state=42  # Random number generator seed
     )
 
     # 4. Determine Maximum Sequence Lengths
     # Tokenize to find the maximum lengths
-    max_encoder_seq_length = max(len(smiles_tokenizer(smiles)) for smiles in seq2seq_model_x_train_data)
-    max_decoder_seq_length = max(len(smiles_tokenizer(smiles)) for smiles in seq2seq_model_y_train_data)
+    max_encoder_seq_length = 140
+    max_decoder_seq_length = 140
 
     # Add buffer to max lengths
     max_encoder_seq_length += 10
@@ -64,16 +72,16 @@ def main():
 
     # 5. Preprocess the SMILES Data
     # Preprocess encoder input training data
-    encoder_input_data = preprocess_smiles(seq2seq_model_x_train_data, tokenizer, max_encoder_seq_length)
+    encoder_input_data = preprocess_smiles(tokenized_products_x_train_data, tokenizer, max_encoder_seq_length)
 
     # Preprocess encoder input validation data
-    encoder_input_valid = preprocess_smiles(products_x_valid_dataset, tokenizer, max_encoder_seq_length)
+    encoder_input_valid = preprocess_smiles(tokenized_products_x_valid_dataset, tokenizer, max_encoder_seq_length)
 
     # Preprocess decoder input and target training data
-    decoder_input_data_full = preprocess_smiles(seq2seq_model_y_train_data, tokenizer, max_decoder_seq_length)
+    decoder_input_data_full = preprocess_smiles(tokenized_reactants_y_train_data, tokenizer, max_decoder_seq_length)
 
     # Preprocess decoder input and target validation data
-    decoder_input_valid_full = preprocess_smiles(reactants_y_valid_dataset, tokenizer, max_decoder_seq_length)
+    decoder_input_valid_full = preprocess_smiles(tokenized_reactants_y_valid_dataset, tokenizer, max_decoder_seq_length)
 
     # Prepare decoder input and target training data by shifting
     decoder_input_data = decoder_input_data_full[:, :-1]
@@ -90,12 +98,12 @@ def main():
     model = RetrosynthesisSeq2SeqModel(
         input_vocab_size=vocab_size,
         output_vocab_size=vocab_size,
-        embedding_dim=64,
-        units=128
+        embedding_dim=512,
+        units=512
     )
 
     # 8. Compile the Model with the Custom Loss Function
-    optimizer = tf.keras.optimizers.Adam()
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001, clipnorm=5.0)
     model.compile(optimizer=optimizer, loss=masked_sparse_categorical_crossentropy, metrics=['accuracy'])
 
     # 9. Define callbacks for early stopping and checkpointing
@@ -131,8 +139,8 @@ def main():
 
     # 12. Evaluate the model
     # Preprocess test data
-    encoder_input_test = preprocess_smiles(seq2seq_model_x_test_data, tokenizer, max_encoder_seq_length)
-    decoder_input_test_full = preprocess_smiles(seq2seq_model_y_test_data, tokenizer, max_decoder_seq_length)
+    encoder_input_test = tokenized_products_x_test_data
+    decoder_input_test_full = tokenized_reactants_y_test_data
     decoder_input_test = decoder_input_test_full[:, :-1]
     decoder_target_test = decoder_input_test_full[:, 1:]
 
