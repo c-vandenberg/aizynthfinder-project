@@ -6,8 +6,13 @@ import re
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from aizynthfinder.aizynthfinder import AiZynthFinder
-from models.utils import smiles_tokenizer, preprocess_smiles, create_smiles_tokenizer, loss_function
 from models.seq2seq import RetrosynthesisSeq2SeqModel
+from models.utils import (
+    smiles_tokenizer,
+    preprocess_smiles,
+    create_smiles_tokenizer,
+    masked_sparse_categorical_crossentropy
+)
 
 
 def main():
@@ -91,7 +96,7 @@ def main():
 
     # 8. Compile the Model with the Custom Loss Function
     optimizer = tf.keras.optimizers.Adam()
-    model.compile(optimizer=optimizer, loss=loss_function, metrics=['accuracy'])
+    model.compile(optimizer=optimizer, loss=masked_sparse_categorical_crossentropy, metrics=['accuracy'])
 
     # 9. Define callbacks for early stopping and checkpointing
     early_stopping = tf.keras.callbacks.EarlyStopping(

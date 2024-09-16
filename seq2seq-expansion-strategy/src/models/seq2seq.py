@@ -37,11 +37,11 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         decoder_input_embedded = self.embedding_decoder(decoder_input)
         decoder_output, _, _ = self.decoder(decoder_input_embedded, initial_state=[encoder_state_h, encoder_state_c])
 
-        # Attention
+        # Attention Mechanism
         # Calculate attention scores
         # Expand dimensions to match the shapes for broadcasting
-        decoder_output_expanded = tf.expand_dims(decoder_output, 2)  # Shape: (batch_size, seq_len_decoder, 1, units)
         encoder_output_expanded = tf.expand_dims(encoder_output, 1)  # Shape: (batch_size, 1, seq_len_encoder, units)
+        decoder_output_expanded = tf.expand_dims(decoder_output, 2)  # Shape: (batch_size, seq_len_decoder, 1, units)
 
         # Compute the score
         score = tf.nn.tanh(

@@ -67,12 +67,19 @@ def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, 
     )
 
 
-def loss_function(real, pred):
-    # Padding mask
+def masked_sparse_categorical_crossentropy(real, pred):
+    # Create a mask to ignore padding tokens (assumed to be 0)
     mask = tf.math.logical_not(tf.math.equal(real, 0))
 
+    # Define and instantiate the loss object
     loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
+
+    # Compute the loss for each token
     loss = loss_object(real, pred)
+
+    # Cast mask to the same dtype as loss and apply it
     mask = tf.cast(mask, dtype=loss.dtype)
     loss *= mask
+
+    # Return the mean loss over non-padding tokens
     return tf.reduce_mean(loss)
