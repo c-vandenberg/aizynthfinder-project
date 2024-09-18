@@ -19,100 +19,37 @@ tf.random.set_seed(42)
 def main():
     smiles_tokenizer = SmilesTokenizer()
 
-    # 1. Load data
-    with open('../data/processed/pande-et-al/products_smiles', 'r') as file:
-        products_x_dataset = [line.strip() for line in file.readlines()]
+    # Paths to your data files
+    products_file = '../data/processed/pande-et-al/products_smiles'
+    reactants_file = '../data/processed/pande-et-al/reactants_smiles'
+    products_valid_file = '../data/processed/pande-et-al/validation_products_smiles'
+    reactants_valid_file = '../data/processed/pande-et-al/validation_reactants_smiles'
 
-    with open('../data/processed/pande-et-al/reactants_smiles', 'r') as file:
-        reactants_y_dataset = [line.strip() for line in file.readlines()]
+    # Initialize DataLoader
+    data_loader = DataLoader(
+        products_file=products_file,
+        reactants_file=reactants_file,
+        products_valid_file=products_valid_file,
+        reactants_valid_file=reactants_valid_file,
+        num_samples=100,
+        max_encoder_seq_length=150,
+        max_decoder_seq_length=150,
+        batch_size=16,
+        test_size=0.3,
+        random_state=42
+    )
 
-    with open('../data/processed/pande-et-al/validation_products_smiles', 'r') as file:
-        products_x_valid_dataset = [line.strip() for line in file.readlines()]
+    # Load and prepare data
+    data_loader.load_and_prepare_data()
 
-    with open('../data/processed/pande-et-al/validation_reactants_smiles', 'r') as file:
-        reactants_y_valid_dataset = [line.strip() for line in file.readlines()]
-
-    # Ensure that the datasets have the same length
-    assert len(products_x_dataset) == len(reactants_y_dataset), "Mismatch in dataset lengths."
-    assert len(products_x_valid_dataset) == len(reactants_y_valid_dataset), "Mismatch in validation dataset lengths."
-
-    num_samples = 100
-
-    # 2. Create the Tokenizer
-    # Tokenize the datasets
-    tokenized_products_x_dataset = smiles_tokenizer.tokenize_list(products_x_dataset)
-    tokenized_products_x_dataset = tokenized_products_x_dataset[:num_samples]
-
-    tokenized_reactants_y_dataset = smiles_tokenizer.tokenize_list(reactants_y_dataset)
-    tokenized_reactants_y_dataset = tokenized_reactants_y_dataset[:num_samples]
-
-    tokenized_products_x_valid_dataset = smiles_tokenizer.tokenize_list(products_x_valid_dataset)
-    tokenized_products_x_valid_dataset = tokenized_products_x_valid_dataset[:num_samples]
-
-    tokenized_reactants_y_valid_dataset = smiles_tokenizer.tokenize_list(reactants_y_valid_dataset)
-    tokenized_reactants_y_valid_dataset = tokenized_reactants_y_valid_dataset[:num_samples]
-
-    # Combine all tokenized SMILES strings to build a common tokenizer
-    all_tokenized_smiles = (tokenized_products_x_dataset + tokenized_reactants_y_dataset +
-                            tokenized_products_x_valid_dataset + tokenized_reactants_y_valid_dataset)
-
-    tokenizer = smiles_tokenizer.create_tokenizer(all_tokenized_smiles)
+    # Access the tokenizer and vocab size
+    tokenizer = data_loader.tokenizer
+    vocab_size = data_loader.vocab_size
 
     # Save the tokenizer for future use
     tokenizer_path = '../data/tokenizers/pande_et_al_tokenizer.json'
     with open(tokenizer_path, 'w') as f:
         f.write(tokenizer.to_json())
-
-    # 3. Split data into training and test data sets
-    (tokenized_products_x_train_data, tokenized_products_x_test_data,
-     tokenized_reactants_y_train_data, tokenized_reactants_y_test_data) = train_test_split(
-        tokenized_products_x_dataset,
-        tokenized_reactants_y_dataset,
-        test_size=0.3,  # 30% of the data is reserved for testing, and 70% is used for training
-        random_state=42  # Random number generator seed
-    )
-
-    # 4. Determine Maximum Sequence Lengths
-    # Tokenize to find the maximum lengths
-    max_encoder_seq_length = 140
-    max_decoder_seq_length = 140
-
-    # Add buffer to max lengths
-    max_encoder_seq_length += 10
-    max_decoder_seq_length += 10
-
-    # 5. Preprocess the SMILES Data
-    # Preprocess encoder input training data
-    encoder_data_processor = DataPreprocessor(tokenizer, max_encoder_seq_length)
-    decoder_data_processor = DataPreprocessor(tokenizer, max_decoder_seq_length)
-
-    encoder_input_train_data = encoder_data_processor.preprocess_smiles(tokenized_products_x_train_data)
-
-    # Preprocess encoder input validation data
-    encoder_input_valid_data = encoder_data_processor.preprocess_smiles(tokenized_products_x_valid_dataset)
-
-    # Preprocess encoder input testing data
-    encoder_input_test_data = encoder_data_processor.preprocess_smiles(tokenized_products_x_test_data)
-
-    # Preprocess decoder full training data (input and target training data)
-    decoder_full_train_data = encoder_data_processor.preprocess_smiles(tokenized_reactants_y_train_data)
-
-    # Preprocess decoder full validation data (input and target validation data)
-    decoder_full_valid_data = encoder_data_processor.preprocess_smiles(tokenized_reactants_y_valid_dataset)
-
-    # Preprocess decoder full testing data (input and target training data)
-    decoder_full_test_data = encoder_data_processor.preprocess_smiles(tokenized_reactants_y_test_data)
-
-    # Prepare decoder input and target training data by shifting
-    decoder_input_train_data = decoder_full_train_data[:, :-1]
-    decoder_target_train_data = decoder_full_train_data[:, 1:]
-
-    # Prepare decoder input and target validation data by shifting
-    decoder_input_valid_data = decoder_full_valid_data[:, :-1]
-    decoder_target_valid_data = decoder_full_valid_data[:, 1:]
-
-    # 6. Get Vocabulary Size (+1 for padding token)
-    vocab_size = len(tokenizer.word_index) + 1
 
     # 7. Initialize the Model
     model = RetrosynthesisSeq2SeqModel(
@@ -128,7 +65,7 @@ def main():
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001, clipnorm=5.0)
     model.compile(optimizer=optimizer, loss=seq2seq_model_utils.masked_sparse_categorical_crossentropy, metrics=['accuracy'])
 
-    build_seq2seq_model(model, encoder_input_train_data, decoder_input_train_data)
+    build_seq2seq_model(model, data_loader)
 
     # 9. Define callbacks for early stopping, checkpointing and visualisation of training and validation metrics
     # over epochs.
@@ -162,16 +99,16 @@ def main():
 
     checkpoint = CustomCheckpointCallback(checkpoint_manager)
 
+    # Get datasets
+    train_dataset = data_loader.get_train_dataset()
+    valid_dataset = data_loader.get_valid_dataset()
+    test_dataset = data_loader.get_test_dataset()
+
     # 10. Train the Model
     model.fit(
-        [encoder_input_train_data, decoder_input_train_data],
-        decoder_target_train_data,
-        batch_size=16,
+        train_dataset,
         epochs=1,
-        validation_data=(
-            [encoder_input_valid_data, decoder_input_valid_data],
-            decoder_target_valid_data
-        ),
+        validation_data=valid_dataset,
         callbacks=[early_stopping, checkpoint, tensorboard_callback]
     )
 
@@ -181,23 +118,19 @@ def main():
     print(f"Model saved to {model_save_path}")
 
     # 12. Evaluate the model
-
-    decoder_input_test_data = decoder_full_test_data[:, :-1]
-    decoder_target_test_data = decoder_full_test_data[:, 1:]
-
-    test_loss, test_accuracy = model.evaluate(
-        [encoder_input_test_data, decoder_input_test_data],
-        decoder_target_test_data
-    )
+    # Evaluate the model
+    test_loss, test_accuracy = model.evaluate(test_dataset)
     print(f"Test Loss: {test_loss}")
     print(f"Test Accuracy: {test_accuracy}")
 
 
-def build_seq2seq_model(model, encoder_input_data, decoder_input_data):
+def build_seq2seq_model(model, data_loader):
     print("Building the model with sample data to initialize variables...")
-    sample_encoder_input = tf.constant(encoder_input_data[:1])  # (1, max_encoder_seq_length)
-    sample_decoder_input = tf.constant(decoder_input_data[:1])  # (1, max_decoder_seq_length - 1)
-    model([sample_encoder_input, sample_decoder_input])
+    # Get a batch from the training dataset
+    for batch in data_loader.get_train_dataset().take(1):
+        (sample_encoder_input, sample_decoder_input), _ = batch
+        model([sample_encoder_input, sample_decoder_input])
+        break
     print("Model built successfully.\n")
 
 

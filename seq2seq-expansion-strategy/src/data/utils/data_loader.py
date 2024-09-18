@@ -149,7 +149,7 @@ class DataLoader:
         return self.get_dataset(self.test_data, training=False)
 
     @staticmethod
-    def load_smiles(self, file_path):
+    def load_smiles(file_path):
         with open(file_path, 'r') as file:
             smiles_list = [line.strip() for line in file.readlines()]
         return smiles_list
