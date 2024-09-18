@@ -1,65 +1,155 @@
 import tensorflow as tf
-import numpy as np
-from typing import Tuple
-
+from sklearn.model_selection import train_test_split
+from data.utils.tokenization import SmilesTokenizer
+from data.utils.preprocessing import DataPreprocessor
 
 class DataLoader:
-    def __init__(self, encoder_inputs, decoder_inputs, decoder_targets, batch_size: int, buffer_size: int = 10000):
-        self.encoder_inputs = encoder_inputs
-        self.decoder_inputs = decoder_inputs
-        self.decoder_targets = decoder_targets
+    def __init__(
+        self,
+        products_file,
+        reactants_file,
+        products_valid_file,
+        reactants_valid_file,
+        num_samples=None,
+        max_encoder_seq_length=150,
+        max_decoder_seq_length=150,
+        batch_size=16,
+        buffer_size=10000,
+        test_size=0.3,
+        random_state=42
+    ):
+        self.products_file = products_file
+        self.reactants_file = reactants_file
+        self.products_valid_file = products_valid_file
+        self.reactants_valid_file = reactants_valid_file
+        self.num_samples = num_samples
+        self.max_encoder_seq_length = max_encoder_seq_length
+        self.max_decoder_seq_length = max_decoder_seq_length
         self.batch_size = batch_size
         self.buffer_size = buffer_size
+        self.test_size = test_size
+        self.random_state = random_state
 
-    def get_dataset(self) -> tf.data.Dataset:
+        self.smiles_tokenizer = SmilesTokenizer()
+        self.tokenizer = None
+        self.vocab_size = None
+
+        self.encoder_data_processor = None
+        self.decoder_data_processor = None
+
+        self.train_data = None
+        self.valid_data = None
+        self.test_data = None
+
+    def load_and_prepare_data(self):
+        # 1. Load data
+        products_x_dataset = self.load_smiles(self.products_file)
+        reactants_y_dataset = self.load_smiles(self.reactants_file)
+        products_x_valid_dataset = self.load_smiles(self.products_valid_file)
+        reactants_y_valid_dataset = self.load_smiles(self.reactants_valid_file)
+
+        # Ensure that the datasets have the same length
+        assert len(products_x_dataset) == len(reactants_y_dataset), "Mismatch in dataset lengths."
+        assert len(products_x_valid_dataset) == len(reactants_y_valid_dataset), \
+            "Mismatch in validation dataset lengths."
+
+        # Limit the number of samples if specified
+        if self.num_samples is not None:
+            products_x_dataset = products_x_dataset[:self.num_samples]
+            reactants_y_dataset = reactants_y_dataset[:self.num_samples]
+            products_x_valid_dataset = products_x_valid_dataset[:self.num_samples]
+            reactants_y_valid_dataset = reactants_y_valid_dataset[:self.num_samples]
+
+        # 2. Tokenize the datasets
+        tokenized_products_x_dataset = self.smiles_tokenizer.tokenize_list(products_x_dataset)
+        tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(reactants_y_dataset)
+        tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(products_x_valid_dataset)
+        tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(reactants_y_valid_dataset)
+
+        # 3. Split data into training and test datasets before preprocessing to prevent data leakage
+        (tokenized_products_x_train_data, tokenized_products_x_test_data,
+         tokenized_reactants_y_train_data, tokenized_reactants_y_test_data) = train_test_split(
+            tokenized_products_x_dataset,
+            tokenized_reactants_y_dataset,
+            test_size=self.test_size,
+            random_state=self.random_state
+        )
+
+        # 3. Create the Tokenizer
+        # Combine all tokenized SMILES strings to build a common tokenizer based on training data to
+        # prevent data leakage
+        train_tokenized_smiles = tokenized_products_x_train_data + tokenized_reactants_y_train_data
+
+        # Create and fit the tokenizer
+        self.tokenizer = self.smiles_tokenizer.create_tokenizer(train_tokenized_smiles)
+        self.vocab_size = len(self.tokenizer.word_index) + 1  # +1 for padding token
+
+        # 4. Initialize DataPreprocessors and preprocess data
+        self.encoder_data_processor = DataPreprocessor(self.tokenizer, self.max_encoder_seq_length)
+        self.decoder_data_processor = DataPreprocessor(self.tokenizer, self.max_decoder_seq_length)
+
+        # 5. Preprocess the datasets
+        # Preprocess the training data
+        encoder_input_train = self.encoder_data_processor.preprocess_smiles(tokenized_products_x_train_data)
+        decoder_full_train = self.decoder_data_processor.preprocess_smiles(tokenized_reactants_y_train_data)
+        decoder_input_train = decoder_full_train[:, :-1]
+        decoder_target_train = decoder_full_train[:, 1:]
+
+        # Preprocess test data
+        encoder_input_test = self.encoder_data_processor.preprocess_smiles(tokenized_products_x_test_data)
+        decoder_full_test = self.decoder_data_processor.preprocess_smiles(tokenized_reactants_y_test_data)
+        decoder_input_test = decoder_full_test[:, :-1]
+        decoder_target_test = decoder_full_test[:, 1:]
+
+        # Preprocess validation data
+        encoder_input_valid = self.encoder_data_processor.preprocess_smiles(tokenized_products_x_valid_dataset)
+        decoder_full_valid = self.decoder_data_processor.preprocess_smiles(tokenized_reactants_y_valid_dataset)
+        decoder_input_valid = decoder_full_valid[:, :-1]
+        decoder_target_valid = decoder_full_valid[:, 1:]
+
+        # 6. Store datasets
+        self.train_data = (
+            (encoder_input_train, decoder_input_train),
+            decoder_target_train
+        )
+        self.valid_data = (
+            (encoder_input_valid, decoder_input_valid),
+            decoder_target_valid
+        )
+        self.test_data = (
+            (encoder_input_test, decoder_input_test),
+            decoder_target_test
+        )
+
+    def get_dataset(self, data, training=True):
+        """
+        Create a tf.data.Dataset from the given data.
+        """
+        (encoder_input, decoder_input), decoder_target = data
+
         dataset = tf.data.Dataset.from_tensor_slices((
-            (self.encoder_inputs, self.decoder_inputs),
-            self.decoder_targets
+            (encoder_input, decoder_input),
+            decoder_target
         ))
-        dataset = dataset.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
+
+        if training:
+            dataset = dataset.shuffle(self.buffer_size)
+
+        dataset = dataset.batch(self.batch_size, drop_remainder=True)
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
         return dataset
 
-    def get_train_valid_datasets(self, validation_split=0.1) -> Tuple[tf.data.Dataset, tf.data.Dataset]:
-        total_samples = len(self.encoder_inputs)
-        indices = np.arange(total_samples)
-        np.random.shuffle(indices)
+    def get_train_dataset(self):
+        return self.get_dataset(self.train_data, training=True)
 
-        valid_size = int(total_samples * validation_split)
-        train_indices = indices[valid_size:]
-        valid_indices = indices[:valid_size]
+    def get_valid_dataset(self):
+        return self.get_dataset(self.valid_data, training=False)
 
-        train_dataset = tf.data.Dataset.from_tensor_slices((
-            (self.encoder_inputs[train_indices], self.decoder_inputs[train_indices]),
-            self.decoder_targets[train_indices]
-        )).shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
+    def get_test_dataset(self):
+        return self.get_dataset(self.test_data, training=False)
 
-        valid_dataset = tf.data.Dataset.from_tensor_slices((
-            (self.encoder_inputs[valid_indices], self.decoder_inputs[valid_indices]),
-            self.decoder_targets[valid_indices]
-        )).batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
-
-        return train_dataset, valid_dataset
-
-    def load_smiles_data_from_csv(self, csv_file):
-        """
-        Load SMILES data from a CSV file.
-
-        Args:
-            csv_file (str): Path to the CSV file.
-
-        Returns:
-            List[str]: A list of SMILES strings.
-        """
-        import pandas as pd
-
-        df = pd.read_csv(csv_file)
-
-        smiles_col = self.smiles_column.lower()
-
-        if smiles_col not in df.columns.str.lower():
-            raise ValueError(f"Column '{self.smiles_column}' not found in the CSV file.")
-
-        # Drop NaN values and convert to a list
-        smiles_list = df[self.smiles_column].dropna().tolist()
-
+    @staticmethod
+    def load_smiles(self, file_path):
+        with open(file_path, 'r') as file:
+            smiles_list = [line.strip() for line in file.readlines()]
         return smiles_list
