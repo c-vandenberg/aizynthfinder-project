@@ -1,86 +1,81 @@
-import re
-import pandas as pd
-import numpy as np
+import random
 import tensorflow as tf
+import tf2onnx
 from sklearn.model_selection import ShuffleSplit, cross_validate
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 from typing import List
 
-
-def load_smiles_data_from_csv(csv_file, smiles_column='Smiles'):
-    df = pd.read_csv(csv_file)
-
-    smiles_col = smiles_column.lower()
-
-    if smiles_column.lower() not in df.columns:
-        raise ValueError(f"Column '{smiles_column}' not found in the CSV file.")
-
-    # Drop NaN values and convert to a list
-    smiles_list = df[smiles_column].dropna().tolist()
-
-    return smiles_list
+random.seed(42)
+tf.random.set_seed(42)
 
 
-def smiles_tokenizer(smiles):
-    pattern = r"(\[.*?\])|Cl?|Br?|Si|@@?|==?|[B-NOP-Zb-nop-z0-9]|\S"
-    tokens = re.findall(pattern, smiles)
-    tokens = ['<START>'] + tokens + ['<END>']
-    return tokens
+class Seq2SeqModelUtils:
+    @staticmethod
+    def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, seq2seq_model, feature_matrix,
+                                target_matrix):
+        cross_validator: ShuffleSplit = ShuffleSplit(
+            n_splits=n_splits,
+            test_size=test_size,
+            random_state=random_state
+        )
 
+        scoring_metrics: List[str] = ['r2', 'neg_mean_absolute_error']
 
-def preprocess_smiles(tokenized_smiles_list, tokenizer, max_seq_length):
-    # Convert tokens to sequences of integers
-    sequences = tokenizer.texts_to_sequences(tokenized_smiles_list)
+        return cross_validate(
+            seq2seq_model,
+            feature_matrix,
+            target_matrix,
+            scoring=scoring_metrics,
+            cv=cross_validator
+        )
 
-    # Pad sequences
-    padded_sequences = pad_sequences(
-        sequences,
-        maxlen=max_seq_length,
-        padding='post',
-        truncating='post'
-    )
-    return tf.constant(padded_sequences, dtype=tf.int32)
+    @staticmethod
+    def masked_sparse_categorical_crossentropy(real, pred):
+        """
+        Computes the sparse categorical cross-entropy loss while masking out padding tokens.
 
+        Args:
+            real (tf.Tensor): The ground truth tensor.
+            pred (tf.Tensor): The predicted tensor.
 
-def create_smiles_tokenizer(tokenized_smiles_list):
-    # Flatten the tokens list for fitting the tokenizer
-    tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='', lower=False, oov_token='<OOV>')
-    tokenizer.fit_on_texts(tokenized_smiles_list)
-    return tokenizer
+        Returns:
+            tf.Tensor: The computed loss.
+        """
+        # Create a mask to ignore padding tokens (assumed to be 0)
+        mask = tf.math.logical_not(tf.math.equal(real, 0))
 
+        # Define and instantiate the loss object
+        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
 
-def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, seq2seq_model, feature_matrix,
-                            target_matrix):
-    cross_validator: ShuffleSplit = ShuffleSplit(
-        n_splits=n_splits,
-        test_size=test_size,
-        random_state=random_state
-    )
+        # Compute the loss for each token
+        loss = loss_object(real, pred)
 
-    scoring_metrics: List[str] = ['r2', 'neg_mean_absolute_error']
+        # Cast mask to the same dtype as loss and apply it
+        mask = tf.cast(mask, dtype=loss.dtype)
+        loss *= mask
 
-    return cross_validate(
-        seq2seq_model,
-        feature_matrix,
-        target_matrix,
-        scoring=scoring_metrics,
-        cv=cross_validator
-    )
+        # Return the mean loss over non-padding tokens
+        return tf.reduce_mean(loss)
 
+    @staticmethod
+    def save_model(model, save_path):
+        """
+        Save the model in TensorFlow SavedModel format.
+        """
+        model.save(save_path)
+        print(f"Model saved to {save_path}")
 
-def masked_sparse_categorical_crossentropy(real, pred):
-    # Create a mask to ignore padding tokens (assumed to be 0)
-    mask = tf.math.logical_not(tf.math.equal(real, 0))
+    @staticmethod
+    def convert_to_onnx(saved_model_path, onnx_file_path):
+        """
+        Convert the TensorFlow SavedModel to ONNX format and save it.
+        """
+        # Load the TensorFlow model
+        model = tf.keras.models.load_model(saved_model_path)
 
-    # Define and instantiate the loss object
-    loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
+        # Convert the TensorFlow model to ONNX format
+        onnx_model = tf2onnx.convert.from_keras(model)
 
-    # Compute the loss for each token
-    loss = loss_object(real, pred)
-
-    # Cast mask to the same dtype as loss and apply it
-    mask = tf.cast(mask, dtype=loss.dtype)
-    loss *= mask
-
-    # Return the mean loss over non-padding tokens
-    return tf.reduce_mean(loss)
+        # Save the ONNX model to a file
+        with open(onnx_file_path, "wb") as f:
+            f.write(onnx_model.SerializeToString())
+        print(f"ONNX model saved to {onnx_file_path}")
