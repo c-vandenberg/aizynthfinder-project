@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import ShuffleSplit, cross_validate
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -38,7 +39,7 @@ def preprocess_smiles(tokenized_smiles_list, tokenizer, max_seq_length):
         padding='post',
         truncating='post'
     )
-    return padded_sequences
+    return tf.constant(padded_sequences, dtype=tf.int32)
 
 
 def create_smiles_tokenizer(tokenized_smiles_list):
