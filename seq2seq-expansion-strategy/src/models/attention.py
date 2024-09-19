@@ -3,9 +3,9 @@ from tensorflow.keras.layers import Dense
 from models.interfaces import AttentionInterface
 
 
-class RetrosynthesisAttention(tf.keras.layers.Layer, AttentionInterface):
+class BahdanauAttention(tf.keras.layers.Layer, AttentionInterface):
     def __init__(self, units):
-        super(RetrosynthesisAttention, self).__init__()
+        super(BahdanauAttention, self).__init__()
         self.units = units
         self.attention_dense1 = Dense(units, name='attention_dense1')
         self.attention_dense2 = Dense(units, name='attention_dense2')

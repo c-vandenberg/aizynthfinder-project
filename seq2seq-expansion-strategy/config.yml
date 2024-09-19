@@ -1,0 +1,11 @@
+expansion:
+  uspto:
+    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_model.onnx
+    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_templates.csv.gz
+  ringbreaker:
+    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_ringbreaker_model.onnx
+    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_ringbreaker_templates.csv.gz
+filter:
+  uspto: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_filter_model.onnx
+stock:
+  zinc: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/zinc_stock.hdf5

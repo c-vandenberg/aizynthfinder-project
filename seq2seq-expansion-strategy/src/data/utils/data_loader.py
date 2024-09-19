@@ -135,7 +135,9 @@ class DataLoader:
         if training:
             dataset = dataset.shuffle(self.buffer_size)
 
-        dataset = dataset.batch(self.batch_size, drop_remainder=True)
+        # Only use drop remainder for batching for training data
+        drop_remainder = training
+        dataset = dataset.batch(self.batch_size, drop_remainder=drop_remainder)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
         return dataset
 

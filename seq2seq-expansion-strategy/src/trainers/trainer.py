@@ -1,7 +1,7 @@
 import os
 import yaml
 import tensorflow as tf
-from models.seq2seq import RetrosynthesisSeq2SeqModel, CustomCheckpointCallback
+from models.seq2seq import RetrosynthesisSeq2SeqModel, BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
@@ -66,11 +66,13 @@ class Trainer:
         # Initialize DataLoader with paths and parameters from 'data' config
         data_conf = self.config['data']
         model_conf = self.config['model']
+        train_conf = self.config['training']
         self.data_loader = DataLoader(
             products_file=data_conf['products_file'],
             reactants_file=data_conf['reactants_file'],
             products_valid_file=data_conf['products_valid_file'],
             reactants_valid_file=data_conf['reactants_valid_file'],
+            num_samples=train_conf.get('num_samples', None),
             max_encoder_seq_length=data_conf['max_encoder_seq_length'],
             max_decoder_seq_length=data_conf['max_decoder_seq_length'],
             batch_size=data_conf['batch_size'],

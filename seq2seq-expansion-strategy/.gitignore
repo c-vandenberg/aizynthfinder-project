@@ -114,6 +114,3 @@ cython_debug/
 *.tmp
 *.temp
 *.bak
-
-# Ignore configuration file
-*.yml

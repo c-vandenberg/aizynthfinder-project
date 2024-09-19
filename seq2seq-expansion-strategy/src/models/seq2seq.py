@@ -1,9 +1,7 @@
 import tensorflow as tf
-import tf2onnx
 from tensorflow.keras.layers import Input, Embedding, LSTM, Bidirectional, Dense, Dropout
-from models.encoder import RetrosynthesisEncoder
-from models.decoder import RetrosynthesisDecoder
-from models.attention import RetrosynthesisAttention
+from models.encoder import StackedBidirectionalLSTMEncoder
+from models.decoder import StackedLSTMDecoder
 
 
 class RetrosynthesisSeq2SeqModel(tf.keras.Model):
@@ -11,8 +9,8 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
 
         self.units = units
-        self.encoder = RetrosynthesisEncoder(input_vocab_size, embedding_dim, units, dropout_rate)
-        self.decoder = RetrosynthesisDecoder(output_vocab_size, embedding_dim, units, dropout_rate)
+        self.encoder = StackedBidirectionalLSTMEncoder(input_vocab_size, embedding_dim, units, dropout_rate)
+        self.decoder = StackedLSTMDecoder(output_vocab_size, embedding_dim, units, dropout_rate)
 
         # Save the vocabulary sizes
         self.input_vocab_size = input_vocab_size
@@ -41,7 +39,7 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         encoder_input, decoder_input = inputs
 
         # Encoder
-        encoder_output, state_h, state_c = self.encoder(encoder_input, training=training)
+        encoder_output, state_h, state_c = self.encoder.call(encoder_input, training=training)
 
         # Map encoder final states to decoder initial states
         decoder_initial_state_h = self.enc_state_h(state_h)  # (batch_size, units)
@@ -52,7 +50,7 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         decoder_inputs = (decoder_input, decoder_initial_state, encoder_output)
 
         # Decoder
-        output = self.decoder(
+        output = self.decoder.call(
             decoder_inputs,
             training=training
         )
@@ -60,9 +58,9 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         return output
 
 
-class CustomCheckpointCallback(tf.keras.callbacks.Callback):
+class BestValLossCheckpointCallback(tf.keras.callbacks.Callback):
     def __init__(self, checkpoint_manager):
-        super(CustomCheckpointCallback, self).__init__()
+        super(BestValLossCheckpointCallback, self).__init__()
         self.checkpoint_manager = checkpoint_manager
         self.best_val_loss = float('inf')  # Initialize with infinity
 
@@ -72,4 +70,7 @@ class CustomCheckpointCallback(tf.keras.callbacks.Callback):
             if current_val_loss < self.best_val_loss:
                 self.best_val_loss = current_val_loss
                 save_path = self.checkpoint_manager.save()
-                print(f"\nEpoch {epoch+1}: Validation loss improved to {current_val_loss:.4f}. Saving checkpoint to {save_path}")
+                print(
+                    f"\nEpoch {epoch+1}: Validation loss improved to {current_val_loss:.4f}. "
+                    f"Saving checkpoint to {save_path}"
+                )
