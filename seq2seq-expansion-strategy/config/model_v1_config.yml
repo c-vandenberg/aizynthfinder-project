@@ -40,7 +40,7 @@ training:
   model_save_path: 'data/training/pande-et-al/models/model-v1'
   log_dir: 'logs/pande-et-al/model-v1'
   checkpoint_dir: 'data/training/pande-et-al/checkpoints/model-v1'
-  num_samples: 100  # Number of samples to use for debugging model (adjust as needed)
+  num_samples: null  # Number of samples to use for debugging model
 
 # Environment Configuration
 env:
