@@ -1,11 +1,12 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Embedding, LSTM, Bidirectional, Dense, Dropout
-from models.encoder import StackedBidirectionalLSTMEncoder
-from models.decoder import StackedLSTMDecoder
+from models.encoders import StackedBidirectionalLSTMEncoder
+from models.decoders import StackedLSTMDecoder
 
 
 class RetrosynthesisSeq2SeqModel(tf.keras.Model):
-    def __init__(self, input_vocab_size, output_vocab_size, embedding_dim, units, dropout_rate=0.2, *args, **kwargs):
+    def __init__(self,  input_vocab_size: int, output_vocab_size: int, embedding_dim: int, units: int,
+                 dropout_rate: float = 0.2, *args, **kwargs):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
 
         self.units = units
@@ -48,11 +49,13 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
 
         # Prepare decoder inputs as a tuple
         decoder_inputs = (decoder_input, decoder_initial_state, encoder_output)
+        encoder_mask = self.encoder.compute_mask(encoder_input)
 
         # Decoder
         output = self.decoder.call(
             decoder_inputs,
-            training=training
+            training=training,
+            mask=encoder_mask
         )
 
         return output

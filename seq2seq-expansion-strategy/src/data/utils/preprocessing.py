@@ -1,5 +1,5 @@
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 import tensorflow as tf
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 class DataPreprocessor:

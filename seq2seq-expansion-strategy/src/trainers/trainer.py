@@ -1,5 +1,7 @@
 import os
 import yaml
+import random
+import numpy as np
 import tensorflow as tf
 from models.seq2seq import RetrosynthesisSeq2SeqModel, BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
@@ -50,11 +52,34 @@ class Trainer:
 
     def setup_environment(self):
         """
-        Set up the environment, such as setting random seeds.
+         Set up the environment for deterministic (reproducible) training
         """
-        seed = self.config.get('misc', {}).get('seed', 42)
-        tf.random.set_seed(seed)
-        os.environ['PYTHONHASHSEED'] = str(seed)
+        determinism_conf = self.config['env']['determinism']
+
+        # 1. Set Python's built-in hash seed
+        os.environ['PYTHONHASHSEED'] = str(determinism_conf['python_seed'])
+
+        # 2. Set Python's random module seed
+        random.seed(determinism_conf['random_seed'])
+
+        # 3. Set NumPy's random seed
+        np.random.seed(determinism_conf['numpy_seed'])
+
+        # 4. Set TensorFlow's random seed
+        tf.random.set_seed(determinism_conf['tf_seed'])
+
+        # 5. Configure TensorFlow for deterministic operations
+        os.environ['TF_DETERMINISTIC_OPS'] = '1'
+
+        # Disable GPU for full determinism (optional, heavily impacts performance)
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
+        # Configure TensorFlow session for single-threaded execution (optional, heavily impacts performance)
+        # tf.config.threading.set_intra_op_parallelism_threads(1)
+        # tf.config.threading.set_inter_op_parallelism_threads(1)
+
+        print("Environment setup for deterministic (reproducible) training complete.")
+
 
     def initialize_components(self):
         """
@@ -186,11 +211,11 @@ class Trainer:
             print("Initializing from scratch.")
 
         # Initialize CustomCheckpointCallback
-        custom_checkpoint_callback = CustomCheckpointCallback(checkpoint_manager)
+        best_val_loss_checkpoint_callback = BestValLossCheckpointCallback(checkpoint_manager)
 
         self.callbacks = [
             early_stopping,
-            custom_checkpoint_callback,
+            best_val_loss_checkpoint_callback,
             tensorboard_callback
         ]
 

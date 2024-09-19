@@ -112,3 +112,7 @@ class StackedBidirectionalLSTMEncoder(tf.keras.layers.Layer, EncoderInterface):
         final_state_c = states_c[-1]
 
         return encoder_output, final_state_h, final_state_c
+
+    def compute_mask(self, inputs, mask=None):
+        # Propagate the mask forward
+        return self.embedding.compute_mask(inputs, mask)

@@ -85,12 +85,12 @@ class StackedLSTMDecoder(tf.keras.layers.Layer, DecoderInterface):
         ])
 
         # Attention Mechanism
-        self.attention = BahdanauAttention(units)
+        self.attention = BahdanauAttention(units=units)
 
         # Output layer
         self.dense = Dense(vocab_size, activation='softmax')
 
-    def call(self, inputs, training=False, **kwargs):
+    def call(self, inputs, training=False, mask=None, **kwargs):
         # Extract initial state and encoder output from inputs
         decoder_input, initial_state, encoder_output = inputs
 
@@ -113,8 +113,14 @@ class StackedLSTMDecoder(tf.keras.layers.Layer, DecoderInterface):
                 # Apply Dropout
                 decoder_output = layer(decoder_output, training=training)
 
+        # Extract only the encoder_mask from the mask list
+        if mask is not None and isinstance(mask, (list, tuple)):
+            encoder_mask = mask[1]
+        else:
+            encoder_mask = mask
+
         # Apply attention
-        context_vector, attention_weights = self.attention([encoder_output, decoder_output])
+        context_vector, attention_weights = self.attention(inputs=[encoder_output, decoder_output], mask=encoder_mask)
 
         # Concatenate decoder outputs and context vector
         concat_output = tf.concat([decoder_output, context_vector], axis=-1)  # (batch_size, seq_len_dec, units + units_enc)

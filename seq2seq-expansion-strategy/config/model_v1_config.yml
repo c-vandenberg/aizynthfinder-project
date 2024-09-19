@@ -22,6 +22,7 @@ data:
   batch_size: 32
   test_size: 0.3
   random_state: 4
+
 # Model Configuration and Hyperparameters
 model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
@@ -39,8 +40,12 @@ training:
   model_save_path: 'data/training/pande-et-al/models/model-v1'
   log_dir: 'logs/pande-et-al/model-v1'
   checkpoint_dir: 'data/training/pande-et-al/checkpoints/model-v1'
-  num_samples: null  # Number of samples to use for debugging model (adjust as needed)
+  num_samples: 100  # Number of samples to use for debugging model (adjust as needed)
 
-# Miscellaneous
-misc:
-  seed: 42
+# Environment Configuration
+env:
+  determinism:
+    python_seed: "44478977"
+    random_seed: 440651
+    numpy_seed: 110789
+    tf_seed: 61592
