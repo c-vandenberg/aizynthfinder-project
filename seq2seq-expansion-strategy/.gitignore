@@ -3,7 +3,7 @@
 # ------------------------------
 
 # .idea and .run directories
-.idea/
+../.idea/
 .run/
 
 # Byte-compiled/optimized/DLL files
@@ -95,7 +95,7 @@ cython_debug/
 /data/training/**/models/
 
 # Tokenizer Files
-/data/tokenizers/*.json
+/data/training/**/tokenizers/
 
 # Logs Directory
 /logs/
