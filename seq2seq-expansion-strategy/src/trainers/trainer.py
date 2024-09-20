@@ -50,9 +50,42 @@ class Trainer:
             config = yaml.safe_load(file)
         return config
 
-    def setup_environment(self):
+    def setup_environment(self) -> None:
         """
-         Set up the environment for deterministic (reproducible) training
+        Set up the environment for deterministic (reproducible) training.
+
+        This method ensures that the training environment is configured to be deterministic, enabling reproducibility
+        across runs. It sets seeds for Python, NumPy, and TensorFlow, and configures TensorFlow for deterministic
+        operations.
+
+        The process follows best practices for setting up deterministic environments, including setting the hash seed,
+        configuring random number generators, and enabling deterministic operations in TensorFlow.
+
+        More information on deterministic training and reproducibility can be found at:
+        - NVIDIA Clara Train documentation: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html
+        - NVIDIA Reproducibility Framework GitHub: https://github.com/NVIDIA/framework-reproducibility/tree/master/doc/d9m
+
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        1. Sets the `PYTHONHASHSEED` environment variable to control the hash seed used by Python.
+        2. Seeds Python's `random` module, NumPy, and TensorFlow's random number generators for consistency.
+        3. Enables deterministic operations in TensorFlow by setting `TF_DETERMINISTIC_OPS=1`.
+        4. Optionally disables GPU and limits TensorFlow to single-threaded execution.
+            - This is because modern GPUs and CPUs are designed to execute computations in parallel across many cores.
+            - This parallelism is typically managed asynchronously, meaning that the order of operations or the
+            availability of computing resources can vary slightly from one run to another
+            - It is this asynchronous parallelism that can introduce random noise, and hence, non-deterministic
+            behaviour.
+            - However, configuring TensorFlow to use the CPU (`os.environ['CUDA_VISIBLE_DEVICES'] = ''`) and configuring
+            Tensorflow to use single-threaded execution severely impacts performance.
         """
         determinism_conf = self.config['env']['determinism']
 
@@ -71,7 +104,7 @@ class Trainer:
         # 5. Configure TensorFlow for deterministic operations
         os.environ['TF_DETERMINISTIC_OPS'] = '1'
 
-        # Disable GPU for full determinism (optional, heavily impacts performance)
+        # Configure (optional, heavily impacts performance)
         os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
         # Configure TensorFlow session for single-threaded execution (optional, heavily impacts performance)
