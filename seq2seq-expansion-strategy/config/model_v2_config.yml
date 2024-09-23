@@ -1,0 +1,51 @@
+# Seq2Seq Model Architecture
+# 1. Encoder: StackedBidirectionalLSTMEncoder (2-layer Bidirectional LSTM):
+#   - A Stacked Bidirectional LSTM encoder with segregated Dropout layers.
+#   - Utilizes 2 layers of Bidirectional LSTM to capture contextual information from both directions.
+#   - Dropout rate is set to 0.2, applied after each LSTM layer to prevent overfitting.
+# 2. Decoder: StackedLSTMDecoder (4-layer Unidirectional LSTM):
+#   - A Stacked LSTM decoder with segregated Dropout layers.
+#   - Comprises 4 layers of LSTM to generate target sequences.
+#   - Dropout rate is set to 0.2, applied after each LSTM layer to enhance generalization.
+# 3. Attention Mechanism: BahdanauAttention
+#   - Implements an additive attention mechanism to focus on relevant parts of the encoder's output during decoding.
+
+# Data Configuration and Hyperparameters
+data:
+  products_file: 'data/processed/pande-et-al/products_smiles'
+  reactants_file: 'data/processed/pande-et-al/reactants_smiles'
+  products_valid_file: 'data/processed/pande-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/processed/pande-et-al/validation_reactants_smiles'
+  tokenizer_save_path: 'data/training/pande-et-al/tokenizers/model_v2_tokenizer.json'
+  max_encoder_seq_length: 140
+  max_decoder_seq_length: 140
+  batch_size: 32
+  test_size: 0.3
+  random_state: 4
+
+# Model Configuration and Hyperparameters
+model:
+  input_vocab_size: null  # To be set dynamically based on tokenizer
+  output_vocab_size: null  # To be set dynamically based on tokenizer
+  embedding_dim: 256
+  units: 256
+  dropout_rate: 0.2
+  learning_rate: 0.0001
+  metrics: ['accuracy']
+
+# Training Configuration and Hyperparameters
+training:
+  epochs: 10
+  patience: 5
+  model_save_path: 'data/training/pande-et-al/models/model-v2'
+  log_dir: 'logs/pande-et-al/model-v2'
+  checkpoint_dir: 'data/training/pande-et-al/checkpoints/model-v2'
+  num_samples: null  # Number of samples to use for debugging model
+
+# Environment Configuration
+env:
+  determinism:
+    python_seed: "44478977"
+    random_seed: 440651
+    numpy_seed: 110789
+    tf_seed: 61592

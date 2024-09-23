@@ -44,7 +44,11 @@ class Seq2SeqModelUtils:
         mask = tf.math.logical_not(tf.math.equal(real, 0))
 
         # Define and instantiate the loss object
-        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
+        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
+            from_logits=False,
+            reduction='none',
+            label_smoothing=0.1
+        )
 
         # Compute the loss for each token
         loss = loss_object(real, pred)
