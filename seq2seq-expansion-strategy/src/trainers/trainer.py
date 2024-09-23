@@ -246,9 +246,17 @@ class Trainer:
         # Initialize CustomCheckpointCallback
         best_val_loss_checkpoint_callback = BestValLossCheckpointCallback(checkpoint_manager)
 
+        # Initialize a learning rate scheduler
+        lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor='val_loss',
+            factor=0.1,
+            patience=3
+        )
+
         self.callbacks = [
             early_stopping,
             best_val_loss_checkpoint_callback,
+            lr_scheduler,
             tensorboard_callback
         ]
 
