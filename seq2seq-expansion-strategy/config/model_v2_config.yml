@@ -1,6 +1,7 @@
 # Seq2Seq Model Architecture
-# - Model architecture mostly the same Model V1, except for the decoder. The decoder logic was refactored slightly to
-#   ensure that the decoder mask was passed to the decoder LSTM layers.
+# - Model architecture mostly the same Model V1. The only changes were made in the decoder and callbacks:
+#     * The decoder logic was refactored slightly to ensure that the decoder mask was passed to the decoder LSTM layers.
+#     * Additionally, a learning rate scheduler callback has been added.
 
 # Data Configuration and Hyperparameters
 data:

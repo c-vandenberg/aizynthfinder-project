@@ -1,6 +1,5 @@
 # Seq2Seq Model Architecture
-# - Model architecture mostly the same Model V2. The only difference is the addition of a learning rate scheduler
-#   callback.
+#
 
 # Data Configuration and Hyperparameters
 data:
