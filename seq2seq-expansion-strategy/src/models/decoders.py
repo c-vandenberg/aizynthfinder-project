@@ -97,18 +97,19 @@ class StackedLSTMDecoder(tf.keras.layers.Layer, DecoderInterface):
         if decoder_input is None or initial_state is None or encoder_output is None:
             raise ValueError('decoder_input, initial_state and encoder_output must be provided to the Decoder.')
 
-        # Embed the input
+        # Embed the input and extract decoder mask
         decoder_output = self.embedding(decoder_input)
+        decoder_mask = self.embedding.compute_mask(decoder_input)
 
         # Process through decoder layers
         for layer in self.decoder_layers.layers:
             if isinstance(layer, LSTM):
                 if layer.name == 'lstm_decoder_1':
                     # Use the mapped encoder states as initial state for the first decoder LSTM layer
-                    decoder_output, state_h, state_c = layer(decoder_output, initial_state=initial_state,
-                                                             training=training)
+                    decoder_output, state_h, state_c = layer(decoder_output, mask=decoder_mask,
+                                                             initial_state=initial_state, training=training)
                 else:
-                    decoder_output, state_h, state_c = layer(decoder_output, training=training)
+                    decoder_output, state_h, state_c = layer(decoder_output, mask=decoder_mask, training=training)
             elif isinstance(layer, Dropout):
                 # Apply Dropout
                 decoder_output = layer(decoder_output, training=training)
