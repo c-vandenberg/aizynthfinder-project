@@ -28,7 +28,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 1
+  epochs: 3
   patience: 5
   model_save_path: 'data/training/pande-et-al/model-v3/model'
   log_dir: 'logs/pande-et-al/model-v3'

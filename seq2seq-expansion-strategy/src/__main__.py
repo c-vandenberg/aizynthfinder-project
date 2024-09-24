@@ -5,7 +5,7 @@ from trainers.trainer import Trainer
 
 def main():
     # Path to the configuration file
-    config_path = 'config/model_v2_config.yml'
+    config_path = 'config/model_v3_config.yml'
 
     # Initialize the Trainer with the configuration
     trainer = Trainer(config_path=config_path)

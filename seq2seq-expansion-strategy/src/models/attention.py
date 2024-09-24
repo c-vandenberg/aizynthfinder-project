@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Dense
 from models.interfaces import AttentionInterface
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 
 class BahdanauAttention(Layer, AttentionInterface):
@@ -14,7 +14,7 @@ class BahdanauAttention(Layer, AttentionInterface):
         self.supports_masking = True
 
     def call(self, inputs: List[tf.Tensor], mask: Optional[tf.Tensor] = None,
-             training: bool = False) -> Tuple[tf.Tensor, tf.Tensor]:
+             training: Union[None, bool] = None) -> Tuple[tf.Tensor, tf.Tensor]:
         # Unpack inputs
         encoder_output, decoder_output = inputs
 
