@@ -10,4 +10,4 @@ class DecoderInterface(Layer, metaclass=ABCMeta):
 
     @abstractmethod
     def call(self, inputs, training=None, mask=None):
-        pass
+        raise NotImplementedError('Decoder layer subclasses must implement `call` method')

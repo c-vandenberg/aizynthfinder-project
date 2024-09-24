@@ -10,4 +10,4 @@ class EncoderInterface(Layer, metaclass=ABCMeta):
 
     @abstractmethod
     def call(self, encoder_inputs, training=None):
-        raise NotImplementedError
+        raise NotImplementedError('Encoder layer subclasses must implement `call` method')

@@ -1,11 +1,7 @@
-import random
 import tensorflow as tf
 import tf2onnx
 from sklearn.model_selection import ShuffleSplit, cross_validate
 from typing import List
-
-random.seed(42)
-tf.random.set_seed(42)
 
 
 class Seq2SeqModelUtils:

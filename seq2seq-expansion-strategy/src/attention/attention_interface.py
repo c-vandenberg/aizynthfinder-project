@@ -8,4 +8,4 @@ class AttentionInterface(Layer, metaclass=ABCMeta):
 
     @abstractmethod
     def call(self, outputs):
-        pass
+        raise NotImplementedError('Attention layer subclasses must implement `call` method')
