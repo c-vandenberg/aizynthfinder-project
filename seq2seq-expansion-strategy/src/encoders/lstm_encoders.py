@@ -1,9 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout
-from models.interfaces import EncoderInterface
+from encoders.encoder_interface import EncoderInterface
 
 
-class StackedBidirectionalLSTMEncoder(tf.keras.layers.Layer, EncoderInterface):
+class StackedBidirectionalLSTMEncoder(EncoderInterface):
     """
     Encoder: StackedBidirectionalLSTMEncoder
 

@@ -1,11 +1,11 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Dense
-from models.interfaces import AttentionInterface
+from attention.attention_interface import AttentionInterface
 from typing import List, Optional, Tuple, Union
 
 
-class BahdanauAttention(Layer, AttentionInterface):
-    def __init__(self, units):
+class BahdanauAttention(AttentionInterface):
+    def __init__(self, units: int):
         super(BahdanauAttention, self).__init__()
         self.units = units
         self.attention_dense1 = Dense(units, name='attention_dense1')

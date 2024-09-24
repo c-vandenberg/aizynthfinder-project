@@ -1,10 +1,10 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense
-from models.interfaces import DecoderInterface
-from models.attention import BahdanauAttention
+from decoders.decoder_interface import DecoderInterface
+from attention.attention import BahdanauAttention
 
 
-class StackedLSTMDecoder(tf.keras.layers.Layer, DecoderInterface):
+class StackedLSTMDecoder(DecoderInterface):
     """
     Decoder: StackedLSTMDecoder
 
@@ -108,7 +108,7 @@ class StackedLSTMDecoder(tf.keras.layers.Layer, DecoderInterface):
         # Output layer
         self.dense = Dense(vocab_size, activation='softmax')
 
-    def call(self, inputs, training=None, mask=None, **kwargs):
+    def call(self, inputs, training=None, mask=None):
         # Extract initial state and encoder output from inputs
         decoder_input, initial_state, encoder_output = inputs
 

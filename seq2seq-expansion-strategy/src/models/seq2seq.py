@@ -1,7 +1,7 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Embedding, LSTM, Bidirectional, Dense, Dropout
-from models.encoders import StackedBidirectionalLSTMEncoder
-from models.decoders import StackedLSTMDecoder
+from tensorflow.keras.layers import Dense
+from encoders.encoders import StackedBidirectionalLSTMEncoder
+from decoders.decoders import StackedLSTMDecoder
 
 
 class RetrosynthesisSeq2SeqModel(tf.keras.Model):

@@ -1,17 +1,11 @@
 # Seq2Seq Model Architecture
-# - Identical architecture to model V2, except for following change:
-#   * Reverse Source Sequence before Encoding:
-#     - Analysis of paper by Liu et al shows that they reverse the source sequence (the SMILES string of the target
-#       molecule) before feeding it into the encoder.
-#     - This technique can help improve the alignment between the input and output, especially in cases where the
-#       dependencies are more at the end of the input sequence. This was originally introduced in neural machine
-#       translations and has shown benefits in sequence-to-sequence tasks.
-#   * Switching to Character-Wise Encoding:
-#       - Analysis of paper by Liu et al shows that they use character-wise encoding of SMILES strings, meaning that
-#         each character in the SMILES notation is treated as a separate token.
-#       - Character-wise encoding captures the fine-grain structure of SMILES strings, allowing the model to learn
-#         detailed patterns and potentially reduce vocabulary size.
-#
+# - Identical architecture to model V3, except for following change:
+#   * Implement Beam Search Decoding During Inference Instead of Greedy Decoding:
+#     - Analysis of paper by Liu et al shows that they use a beam search with a beam width of 5 during inference to
+#       generate multiple candidate sequences and select the best one based on overall sequence probabilities.
+#     - Beam search explores multiple possible output sequences, potentially improving the quality of the generated
+#       sequences compared to greedy decoding (which selects the highest probability token at each step)
+#   *
 
 # Data Configuration and Hyperparameters
 data:
