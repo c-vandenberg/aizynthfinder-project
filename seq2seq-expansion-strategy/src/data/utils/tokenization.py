@@ -10,17 +10,15 @@ class SmilesTokenizer:
 
     def tokenize(self, smiles):
         """
-        Tokenize a single SMILES string.
+        Tokenize a single SMILES string into individual characters.
 
         Args:
             smiles (str): A SMILES string.
 
         Returns:
-            List[str]: A list of tokens.
+            List[str]: A list of character tokens.
         """
-        pattern = r"(\[.*?\])|Cl?|Br?|Si|@@?|==?|[B-NOP-Zb-nop-z0-9]|\S"
-        tokens = re.findall(pattern, smiles)
-        tokens = [self.start_token] + tokens + [self.end_token]
+        tokens = [self.start_token] + list(smiles) + [self.end_token]
         return tokens
 
     def tokenize_list(self, smiles_list):
@@ -43,6 +41,6 @@ class SmilesTokenizer:
             tokenized_smiles_list (List[List[str]]): A list of tokenized SMILES strings.
         """
 
-        self.tokenizer = Tokenizer(filters='', lower=False, oov_token='<OOV>')
+        self.tokenizer = Tokenizer(filters='', lower=False, char_level=False, oov_token='<OOV>')
         self.tokenizer.fit_on_texts(tokenized_smiles_list)
         return self.tokenizer

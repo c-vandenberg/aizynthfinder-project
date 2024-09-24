@@ -1,14 +1,24 @@
 # Seq2Seq Model Architecture
-# - Identical architecture to model V2, except for reduced layers in encoder and decoder:
-#   * Encoder: Single Layer Bidirectional LSTM encoder with segregated Dropout layer.
-#   * Decoder: Single Layer LSTM decoder with segregated Dropout layer.
+# - Identical architecture to model V2, except for following change:
+#   * Reverse Source Sequence before Encoding:
+#     - Analysis of paper by Liu et al shows that they reverse the SMILES string
+#       of the target molecule before feeding it into the encoder.
+#     - This technique can help improve the alignment between the input and output, especially in cases where the
+#       dependencies are more at the end of the input sequence. This was originally introduced in neural machine
+#       translations and has shown benefits in sequence-to-sequence tasks.
+#   * Switching to Character-Wise Encoding:
+#       - Analysis of paper by Liu et al shows that they use character-wise encoding of SMILES strings, meaning that
+#         each character in the SMILES notation is treated as a separate token.
+#       - Character-wise encoding captures the fine-grain structure of SMILES strings, allowing the model to learn
+#         detailed patterns and potentially reduce vocabulary size.
+#
 
 # Data Configuration and Hyperparameters
 data:
-  products_file: 'data/processed/pande-et-al/products_smiles'
-  reactants_file: 'data/processed/pande-et-al/reactants_smiles'
-  products_valid_file: 'data/processed/pande-et-al/validation_products_smiles'
-  reactants_valid_file: 'data/processed/pande-et-al/validation_reactants_smiles'
+  products_file: 'data/preprocessed/pande-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
   tokenizer_save_path: 'data/training/pande-et-al/model-v3/tokenizer/model_v3_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140

@@ -60,6 +60,10 @@ class DataLoader:
             products_x_valid_dataset = products_x_valid_dataset[:self.num_samples]
             reactants_y_valid_dataset = reactants_y_valid_dataset[:self.num_samples]
 
+        # As we are using character-wise encoding, reverse the source (product) SMILES strings before tokenization
+        products_x_dataset = [smiles[::-1] for smiles in products_x_dataset]
+        products_x_valid_dataset = [smiles[::-1] for smiles in products_x_valid_dataset]
+
         # 2. Tokenize the datasets
         tokenized_products_x_dataset = self.smiles_tokenizer.tokenize_list(products_x_dataset)
         tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(reactants_y_dataset)
@@ -75,7 +79,7 @@ class DataLoader:
             random_state=self.random_state
         )
 
-        # 3. Create the Tokenizer
+        # 4. Create the Tokenizer
         # Combine all tokenized SMILES strings to build a common tokenizer based on training data to
         # prevent data leakage
         train_tokenized_smiles = tokenized_products_x_train_data + tokenized_reactants_y_train_data

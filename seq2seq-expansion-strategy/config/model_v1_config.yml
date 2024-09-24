@@ -12,10 +12,10 @@
 
 # Data Configuration and Hyperparameters
 data:
-  products_file: 'data/processed/pande-et-al/products_smiles'
-  reactants_file: 'data/processed/pande-et-al/reactants_smiles'
-  products_valid_file: 'data/processed/pande-et-al/validation_products_smiles'
-  reactants_valid_file: 'data/processed/pande-et-al/validation_reactants_smiles'
+  products_file: 'data/preprocessed/pande-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
   tokenizer_save_path: 'data/training/pande-et-al/tokenizers/model_v1_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
