@@ -73,15 +73,6 @@ class StackedLSTMDecoder(tf.keras.layers.Layer, DecoderInterface):
             LSTM(units, return_sequences=True, return_state=True, dropout=0.0, recurrent_dropout=0.0,
                  name='lstm_decoder_1'),
             Dropout(dropout_rate, name='decoder_dropout_1'),
-            LSTM(units, return_sequences=True, return_state=True, dropout=0.0, recurrent_dropout=0.0,
-                 name='lstm_decoder_2'),
-            Dropout(dropout_rate, name='decoder_dropout_2'),
-            LSTM(units, return_sequences=True, return_state=True, dropout=0.0, recurrent_dropout=0.0,
-                 name='lstm_decoder_3'),
-            Dropout(dropout_rate, name='decoder_dropout_3'),
-            LSTM(units, return_sequences=True, return_state=True, dropout=0.0, recurrent_dropout=0.0,
-                 name='lstm_decoder_4'),
-            Dropout(dropout_rate, name='decoder_dropout_4')
         ])
 
         # Attention Mechanism

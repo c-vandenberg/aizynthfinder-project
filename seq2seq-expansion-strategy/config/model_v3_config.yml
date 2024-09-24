@@ -1,5 +1,7 @@
 # Seq2Seq Model Architecture
-#
+# - Reduced layers in encoder and decoder:
+#   * Encoder: Single Layer Bidirectional LSTM encoder with segregated Dropout layer.
+
 
 # Data Configuration and Hyperparameters
 data:
@@ -26,12 +28,12 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 10
+  epochs: 1
   patience: 5
   model_save_path: 'data/training/pande-et-al/model-v3/model'
   log_dir: 'logs/pande-et-al/model-v3'
   checkpoint_dir: 'data/training/pande-et-al/model-v3/checkpoints'
-  num_samples: null # Number of samples to use for debugging model
+  num_samples: 100 # Number of samples to use for debugging model
 
 # Environment Configuration
 env:
