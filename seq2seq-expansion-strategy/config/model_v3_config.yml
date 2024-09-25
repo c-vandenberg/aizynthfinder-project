@@ -1,4 +1,4 @@
-# Seq2Seq Model Architecture
+# Seq2Seq Model Architecture:
 # - Identical architecture to model V2, except for following change:
 #   * Reverse Source Sequence before Encoding:
 #     - Analysis of paper by Liu et al shows that they reverse the source sequence (the SMILES string of the target
@@ -12,6 +12,13 @@
 #       - Character-wise encoding captures the fine-grain structure of SMILES strings, allowing the model to learn
 #         detailed patterns and potentially reduce vocabulary size.
 #
+# Training run metrics:
+#   - Train Loss (Smoothed): 0.280
+#   - Train Accuracy (Smoothed): 0.607
+#   - Validation Loss (Smoothed): 0.256
+#   - Validation Accuracy (Smoothed): 0.614
+#   - Test Loss (Smoothed): 0.239
+#   - Test Accuracy (Smoothed): 0.620
 
 # Data Configuration and Hyperparameters
 data:

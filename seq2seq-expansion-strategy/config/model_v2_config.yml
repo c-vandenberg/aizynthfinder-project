@@ -4,6 +4,14 @@
 #                Additionally, layers are now defined separately instead of sequentially for clarity.
 #     * Decoder: Decoder logic refactored to ensure that the decoder mask is passed to the decoder LSTM layers.
 #     * Learning Rate Scheduler: A learning rate scheduler callback has been added.
+#
+# Training run metrics:
+#   - Train Loss (Smoothed): 0.043
+#   - Train Accuracy (Smoothed): 0.342
+#   - Validation Loss (Smoothed): 0.042
+#   - Validation Accuracy (Smoothed): 0.343
+#   - Test Loss (Smoothed):
+#   - Test Accuracy (Smoothed):
 
 # Data Configuration and Hyperparameters
 data:

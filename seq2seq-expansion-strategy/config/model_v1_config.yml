@@ -9,6 +9,14 @@
 #   - Dropout rate is set to 0.2, applied after each LSTM layer to enhance generalization.
 # 3. Attention Mechanism: BahdanauAttention
 #   - Implements an additive attention mechanism to focus on relevant parts of the encoder's output during decoding.
+#
+# Training run metrics:
+#   - Train Loss (Smoothed): 0.047
+#   - Train Accuracy (Smoothed): 0.341
+#   - Validation Loss (Smoothed): 0.047
+#   - Validation Accuracy (Smoothed): 0.342
+#   - Test Loss (Smoothed):
+#   - Test Accuracy (Smoothed):
 
 # Data Configuration and Hyperparameters
 data:
