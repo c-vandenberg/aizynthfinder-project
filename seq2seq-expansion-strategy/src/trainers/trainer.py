@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 from models.seq2seq import RetrosynthesisSeq2SeqModel, BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
+from inference.inference_model import InferenceModel
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
@@ -182,6 +183,10 @@ class Trainer:
             units=units,
             dropout_rate=dropout_rate
         )
+
+        # Set encoder and decoder preprocessors
+        self.model.encoder_data_processor = self.encoder_preprocessor
+        self.model.decoder_data_processor = self.decoder_preprocessor
 
         # Set up the optimizer
         learning_rate = model_conf.get('learning_rate', 0.0001)

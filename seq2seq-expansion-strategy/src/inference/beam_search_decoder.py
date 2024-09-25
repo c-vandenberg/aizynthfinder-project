@@ -39,7 +39,11 @@ class BeamSearchDecoder(InferenceDecoderInterface):
         decoder_input = tf.expand_dims([self.start_token_index], 0)  # Shape: (1, 1)
         decoder_state_h = self.model.enc_state_h(state_h)
         decoder_state_c = self.model.enc_state_c(state_c)
-        decoder_states = [decoder_state_h, decoder_state_c]
+
+        # Initialize states for all layers
+        zero_state = tf.zeros_like(decoder_state_h)
+        decoder_states = [decoder_state_h, decoder_state_c, zero_state, zero_state, zero_state, zero_state, zero_state,
+                          zero_state]
 
         # Initialize the beam with the start token sequence
         sequences = [([self.start_token_index], 0.0, decoder_states)]  # (sequence, score, states)
@@ -57,7 +61,7 @@ class BeamSearchDecoder(InferenceDecoderInterface):
                 decoder_input = tf.cast(decoder_input, tf.int32)
 
                 # Run the decoder for one step
-                decoder_output, state_h, state_c = self.model.decoder.single_step(
+                decoder_output, decoder_states = self.model.decoder.single_step(
                     decoder_input, states, encoder_output
                 )
 
@@ -70,7 +74,7 @@ class BeamSearchDecoder(InferenceDecoderInterface):
                 for idx in top_k_indices:
                     candidate_seq = seq + [idx]
                     candidate_score = score + log_probs[idx]
-                    candidate_states = [state_h, state_c]
+                    candidate_states = decoder_states
                     all_candidates.append((candidate_seq, candidate_score, candidate_states))
 
             # Select the top beam_width sequences

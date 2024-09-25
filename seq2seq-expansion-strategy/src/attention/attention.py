@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Union
 
 class BahdanauAttention(AttentionInterface):
     def __init__(self, units: int):
-        super(BahdanauAttention, self).__init__()
+        super(BahdanauAttention, self).__init__(units)
         self.units = units
         self.attention_dense1 = Dense(units, name='attention_dense1')
         self.attention_dense2 = Dense(units, name='attention_dense2')
@@ -33,12 +33,19 @@ class BahdanauAttention(AttentionInterface):
 
         # Apply mask if available
         if mask is not None:
+            # If mask is a list or tuple, both encoder and decoder mask have been passed.
+            # Extract the encoder mask
+            if isinstance(mask, (list, tuple)):
+                encoder_mask = mask[0]
+            else:
+                encoder_mask = mask
+
             # mask shape: (batch_size, seq_len_encoder)
             # Expand mask to match score dimensions
-            mask = tf.cast(tf.expand_dims(mask, 1), dtype=score.dtype)  # (batch_size, 1, seq_len_encoder)
-            mask = tf.expand_dims(mask, -1)  # (batch_size, 1, seq_len_encoder, 1)
+            encoder_mask = tf.cast(tf.expand_dims(encoder_mask, 1), dtype=score.dtype)  # (batch_size, 1, seq_len_encoder)
+            encoder_mask = tf.expand_dims(encoder_mask, -1)  # (batch_size, 1, seq_len_encoder, 1)
             # Add a large negative value to masked positions to nullify their effect after softmax
-            score += (1.0 - mask) * -1e9
+            score += (1.0 - encoder_mask) * -1e9
 
         attention_weights = tf.nn.softmax(self.attention_v(score),
                                           axis=2)  # Shape: (batch_size, seq_len_decoder, seq_len_encoder, 1)

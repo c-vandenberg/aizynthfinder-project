@@ -66,7 +66,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
     final states.
     """
     def __init__(self, vocab_size: int, embedding_dim: int, units: int, dropout_rate=0.2):
-        super(StackedBidirectionalLSTMEncoder, self).__init__()
+        super(StackedBidirectionalLSTMEncoder, self).__init__(vocab_size, embedding_dim, units)
         self.units = units
         self.embedding = Embedding(vocab_size, embedding_dim, mask_zero=True)
 

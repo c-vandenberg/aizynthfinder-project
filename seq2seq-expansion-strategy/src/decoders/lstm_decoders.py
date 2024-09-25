@@ -64,7 +64,7 @@ class StackedLSTMDecoder(DecoderInterface):
     The attention mechanism helps the decoder focus on relevant encoder outputs during each timestep of decoding.
     """
     def __init__(self, vocab_size, embedding_dim, units, dropout_rate=0.2):
-        super(StackedLSTMDecoder, self).__init__()
+        super(StackedLSTMDecoder, self).__init__(vocab_size, embedding_dim, units)
         self.units = units
         self.embedding = Embedding(vocab_size, embedding_dim, mask_zero=True)
 
@@ -169,3 +169,73 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_output = self.dense(concat_output)  # (batch_size, seq_len_dec, vocab_size)
 
         return decoder_output
+
+    def single_step(self, decoder_input, states, encoder_output):
+        """
+        Performs a single decoding step.
+
+        Args:
+            decoder_input: The input token at the current time step (shape: [batch_size, 1]).
+            states: The initial state of the decoder LSTM layers (list of tensors).
+            encoder_output: The output from the encoder (shape: [batch_size, seq_len_enc, units]).
+
+        Returns:
+            Tuple of (decoder_output, state_h, state_c)
+        """
+        # Unpack states
+        if len(states) == 2:
+            # Initial state provided only for the first LSTM layer
+            state_h1, state_c1 = states
+            state_h2 = tf.zeros_like(state_h1)
+            state_c2 = tf.zeros_like(state_c1)
+            state_h3 = tf.zeros_like(state_h1)
+            state_c3 = tf.zeros_like(state_c1)
+            state_h4 = tf.zeros_like(state_h1)
+            state_c4 = tf.zeros_like(state_c1)
+        else:
+            # States for all layers provided
+            state_h1, state_c1, state_h2, state_c2, state_h3, state_c3, state_h4, state_c4 = states
+
+        # Embed the input
+        decoder_output = self.embedding(decoder_input)
+
+        # First LSTM layer with initial state
+        decoder_output, state_h1, state_c1 = self.lstm_decoder_1(
+            decoder_output,
+            initial_state=[state_h1, state_c1],
+            training=False
+        )
+        # No dropout during inference
+        # Subsequent LSTM layers
+        decoder_output, state_h2, state_c2 = self.lstm_decoder_2(
+            decoder_output,
+            initial_state=[state_h2, state_c2],
+            training=False
+        )
+        decoder_output, state_h3, state_c3 = self.lstm_decoder_3(
+            decoder_output,
+            initial_state=[state_h3, state_c3],
+            training=False
+        )
+        decoder_output, state_h4, state_c4 = self.lstm_decoder_4(
+            decoder_output,
+            initial_state=[state_h4, state_c4],
+            training=False
+        )
+
+        # Attention mechanism
+        context_vector, attention_weights = self.attention(
+            inputs=[encoder_output, decoder_output],
+            mask=None  # No mask during inference
+        )
+
+        # Concatenate decoder outputs and context vector
+        concat_output = tf.concat([decoder_output, context_vector], axis=-1)
+
+        # Generate outputs
+        decoder_output = self.dense(concat_output)  # Shape: (batch_size, 1, vocab_size)
+
+        # Collect all states
+        decoder_states = [state_h1, state_c1, state_h2, state_c2, state_h3, state_c3, state_h4, state_c4]
+
+        return decoder_output, decoder_states

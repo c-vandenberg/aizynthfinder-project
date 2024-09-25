@@ -1,11 +1,20 @@
 # Seq2Seq Model Architecture
 # - Identical architecture to model V3, except for following change:
-#   * Implement Beam Search Decoding During Inference Instead of Greedy Decoding:
-#     - Analysis of paper by Liu et al shows that they use a beam search with a beam width of 5 during inference to
-#       generate multiple candidate sequences and select the best one based on overall sequence probabilities.
-#     - Beam search explores multiple possible output sequences, potentially improving the quality of the generated
-#       sequences compared to greedy decoding (which selects the highest probability token at each step)
-#   *
+#   * Add Tahn Activation Function:
+#     - Add `activation='tanh' to encoder `Dense` layers (self.enc_state_h and self.enc_state_c).
+#     - This means that the `Dense` layers apply a linear transformation followed by the tahn activation function.
+#     - As a result, the output of each layer is passed through the tanh function, which maps values to a range between
+#       -1 and 1.
+#     - The effect on the Decoder's initial sates is as follows:
+#         * The outputs of the Dense layers are used to initialize the decoder's LSTM hidden state (h) and cell state (c).
+#         * Since LSTM hidden states typically use the tanh activation internally, initializing them with values in the
+#           range [−1,1][−1,1] is appropriate.
+#     - Potential benefits include:
+#         * Stability: Helps in stabilizing the training process by providing initial states within the expected range.
+#         * Compatibility: Aligns the initial state values with the internal activations of the LSTM, which can improve
+#           performance.
+#     - To conserve time, this change will be measured over 5 epochs. To evaluate the effect of this change on model
+#       performance, we will compare this to the first 5 epochs of model V3
 
 # Data Configuration and Hyperparameters
 data:
@@ -32,7 +41,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 10
+  epochs: 5
   patience: 5
   model_save_path: 'data/training/pande-et-al/model-v4/model'
   log_dir: 'logs/pande-et-al/model-v4'
