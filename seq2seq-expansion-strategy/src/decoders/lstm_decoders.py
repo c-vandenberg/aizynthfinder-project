@@ -63,10 +63,10 @@ class StackedLSTMDecoder(DecoderInterface):
     The decoder consists of four LSTM layers, each followed by a dropout layer to enhance generalization.
     The attention mechanism helps the decoder focus on relevant encoder outputs during each timestep of decoding.
     """
-    def __init__(self, vocab_size, embedding_dim, units, dropout_rate=0.2):
-        super(StackedLSTMDecoder, self).__init__(vocab_size, embedding_dim, units)
+    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, dropout_rate=0.2):
+        super(StackedLSTMDecoder, self).__init__(vocab_size, decoder_embedding_dim, units)
         self.units = units
-        self.embedding = Embedding(vocab_size, embedding_dim, mask_zero=True)
+        self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
 
         # Decoder: 4-layer LSTM without internal Dropout
         # Define LSTM and Dropout layers individually

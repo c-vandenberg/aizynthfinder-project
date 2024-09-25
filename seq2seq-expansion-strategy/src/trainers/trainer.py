@@ -171,7 +171,8 @@ class Trainer:
         Initialize and compile the model.
         """
         model_conf = self.config['model']
-        embedding_dim = model_conf.get('embedding_dim', 256)
+        encoder_embedding_dim = model_conf.get('encoder_embedding_dim', 256)
+        decoder_embedding_dim = model_conf.get('decoder_embedding_dim', 256)
         units = model_conf.get('units', 256)
         dropout_rate = model_conf.get('dropout_rate', 0.2)
 
@@ -179,7 +180,8 @@ class Trainer:
         self.model = RetrosynthesisSeq2SeqModel(
             input_vocab_size=self.vocab_size,
             output_vocab_size=self.vocab_size,
-            embedding_dim=embedding_dim,
+            encoder_embedding_dim=encoder_embedding_dim,
+            decoder_embedding_dim=decoder_embedding_dim,
             units=units,
             dropout_rate=dropout_rate
         )

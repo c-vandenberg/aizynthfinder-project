@@ -65,10 +65,10 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
     The hidden and cell states from both forward and backward passes of the LSTM are concatenated and returned as
     final states.
     """
-    def __init__(self, vocab_size: int, embedding_dim: int, units: int, dropout_rate=0.2):
-        super(StackedBidirectionalLSTMEncoder, self).__init__(vocab_size, embedding_dim, units)
+    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, dropout_rate=0.2):
+        super(StackedBidirectionalLSTMEncoder, self).__init__(vocab_size, encoder_embedding_dim, units)
         self.units = units
-        self.embedding = Embedding(vocab_size, embedding_dim, mask_zero=True)
+        self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
 
         self.bidirectional_lstm_1 = Bidirectional(
             LSTM(units, return_sequences=True, return_state=True),

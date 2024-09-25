@@ -5,21 +5,22 @@ from decoders.lstm_decoders import StackedLSTMDecoder
 
 
 class RetrosynthesisSeq2SeqModel(tf.keras.Model):
-    def __init__(self,  input_vocab_size: int, output_vocab_size: int, embedding_dim: int, units: int,
-                 dropout_rate: float = 0.2, *args, **kwargs):
+    def __init__(self,  input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
+                 decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2,
+                 *args, **kwargs):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
 
         self.units = units
-        self.encoder = StackedBidirectionalLSTMEncoder(input_vocab_size, embedding_dim, units, dropout_rate)
-        self.decoder = StackedLSTMDecoder(output_vocab_size, embedding_dim, units, dropout_rate)
+        self.encoder = StackedBidirectionalLSTMEncoder(input_vocab_size, encoder_embedding_dim, units, dropout_rate)
+        self.decoder = StackedLSTMDecoder(output_vocab_size, decoder_embedding_dim, units, dropout_rate)
 
         # Save the vocabulary sizes
         self.input_vocab_size = input_vocab_size
         self.output_vocab_size = output_vocab_size
 
         # Mapping encoder final states to decoder initial states
-        self.enc_state_h = Dense(units, activation='tanh', name='enc_state_h')
-        self.enc_state_c = Dense(units, activation='tanh', name='enc_state_c')
+        self.enc_state_h = Dense(units, name='enc_state_h')
+        self.enc_state_c = Dense(units, name='enc_state_c')
 
         # Store the data processors (to be set externally)
         self.encoder_data_processor = None
