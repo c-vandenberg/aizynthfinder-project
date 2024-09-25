@@ -36,12 +36,12 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 3
+  epochs: 10
   patience: 5
   model_save_path: 'data/training/pande-et-al/model-v5/model'
   log_dir: 'logs/pande-et-al/model-v5'
   checkpoint_dir: 'data/training/pande-et-al/model-v5/checkpoints'
-  num_samples: 100 # Number of samples to use for debugging model
+  num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
 env:
