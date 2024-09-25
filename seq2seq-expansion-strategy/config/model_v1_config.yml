@@ -10,13 +10,14 @@
 # 3. Attention Mechanism: BahdanauAttention
 #   - Implements an additive attention mechanism to focus on relevant parts of the encoder's output during decoding.
 #
-# Training run metrics:
+# Training run metrics (Model evaluation on test data started on V3 once significant improvements in train and
+# validation metrics were observed):
 #   - Train Loss (Smoothed): 0.047
 #   - Train Accuracy (Smoothed): 0.341
 #   - Validation Loss (Smoothed): 0.047
 #   - Validation Accuracy (Smoothed): 0.342
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): N/A
+#   - Test Accuracy (Smoothed): N/A
 
 # Data Configuration and Hyperparameters
 data:
