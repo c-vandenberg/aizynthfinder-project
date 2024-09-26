@@ -5,6 +5,7 @@
 # .idea and .run directories
 ../.idea/
 .run/
+.idea/
 
 # Byte-compiled/optimized/DLL files
 *.pyc
@@ -89,7 +90,7 @@ cython_debug/
 # ------------------------------
 
 # TensorFlow Checkpoints
-/data/training/pande-et-al/model-v1/checkpoints/
+/data/training/pande-et-al/**/checkpoints/
 
 # TensorFlow Saved Models
 /data/training/**/model/
