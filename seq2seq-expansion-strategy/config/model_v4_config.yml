@@ -15,6 +15,17 @@
 #           performance.
 #     - To conserve time, this change will be measured over 5 epochs. To evaluate the effect of this change on model
 #       performance, we will compare this to the first 5 epochs of model V3
+# - Based on training metrics below, model has performed worse with tanh activation function.
+
+# Training run metrics:
+#   - Train Loss (Smoothed): 0.696
+#   - Train Accuracy (Smoothed): 0.499
+#
+#   - Validation Loss (Smoothed): 0.583
+#   - Validation Accuracy (Smoothed): 0.526
+#
+#   - Test Loss (Smoothed): N/A (Not recorded as comparison cannot be made to V3 for test metrics)
+#   - Test Accuracy (Smoothed): N/A (Not recorded as comparison cannot be made to V3 for test metrics)
 
 # Data Configuration and Hyperparameters
 data:

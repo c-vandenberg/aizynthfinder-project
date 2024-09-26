@@ -15,8 +15,10 @@
 # Training run metrics:
 #   - Train Loss (Smoothed): 0.280
 #   - Train Accuracy (Smoothed): 0.607
+#
 #   - Validation Loss (Smoothed): 0.256
 #   - Validation Accuracy (Smoothed): 0.614
+#
 #   - Test Loss (Smoothed): 0.239
 #   - Test Accuracy (Smoothed): 0.620
 

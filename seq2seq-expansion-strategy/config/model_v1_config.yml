@@ -14,8 +14,10 @@
 # validation metrics were observed):
 #   - Train Loss (Smoothed): 0.047
 #   - Train Accuracy (Smoothed): 0.341
+#
 #   - Validation Loss (Smoothed): 0.047
 #   - Validation Accuracy (Smoothed): 0.342
+#
 #   - Test Loss (Smoothed): N/A
 #   - Test Accuracy (Smoothed): N/A
 

@@ -8,6 +8,15 @@
 #   * They also have attention dimension of 512, however the current model iteration does not have the functionality to
 #     configure attention layer dimension. This will be done in a future iteration.
 #
+# Training run metrics:
+#   - Train Loss (Smoothed): 0.264
+#   - Train Accuracy (Smoothed): 0.620
+#
+#   - Validation Loss (Smoothed): 0.194
+#   - Validation Accuracy (Smoothed): 0.641
+#
+#   - Test Loss (Smoothed): 0.147
+#   - Test Accuracy (Smoothed): 0.658
 
 # Data Configuration and Hyperparameters
 data:
