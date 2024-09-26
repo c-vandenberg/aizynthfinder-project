@@ -1,5 +1,5 @@
 # Seq2Seq Model Architecture
-# - Identical architecture to model V3, except for following change:
+# - No architectural changes were made to model V3; only configuration and hyperparameter adjustments were applied:
 #   * Split encoder and decoder embedding dim to match the paper by Pande et al.
 #   * They have both the encoder and decoder embedding dimensions at 512, however because the encoder is bidirectional,
 #     each direction (forward and backward) has its own LSTM units.

@@ -1,5 +1,5 @@
 # Seq2Seq Model Architecture:
-# - Identical architecture to model V2, except for following change:
+# - The following architectural changes were made to model V2:
 #   * Reverse Source Sequence before Encoding:
 #     - Analysis of paper by Pande et al shows that they reverse the source sequence (the SMILES string of the target
 #       molecule) before feeding it into the encoder.

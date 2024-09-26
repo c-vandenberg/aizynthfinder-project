@@ -1,5 +1,5 @@
 # Seq2Seq Model Architecture
-# - Identical architecture to model V3, except for following change:
+# - The following architectural changes were made to model V3:
 #   * Add Tahn Activation Function:
 #     - Add `activation='tanh' to encoder `Dense` layers (self.enc_state_h and self.enc_state_c).
 #     - This means that the `Dense` layers apply a linear transformation followed by the tahn activation function.
