@@ -1,5 +1,12 @@
 # Seq2Seq Model Architecture
-#
+# - No model architectural changes have been made. Model V6 is intended to be a benchmark for a 5 epoch training run
+#   for future iterations.
+# - The separation of attention, encoder and decoder dimensions from model V5 have been kept, but they have been reduced
+#   to 256, 128 and 256 respectively (the halving of the encoder dimensions to account to bidirectionality has been kept
+#   from model V5).
+# - Units have also been reduced to 256
+# - The reduction in epochs, as well as attention, encoder and decoder dimensions is to reduce training time. Optimal
+#   future model will have these all increased.
 #
 
 # Data Configuration and Hyperparameters
@@ -19,7 +26,9 @@ data:
 model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
   output_vocab_size: null  # To be set dynamically based on tokenizer
-  embedding_dim: 128
+  attention_dim: 256
+  encoder_embedding_dim: 128
+  decoder_embedding_dim: 256
   units: 256
   dropout_rate: 0.2
   learning_rate: 0.0001
