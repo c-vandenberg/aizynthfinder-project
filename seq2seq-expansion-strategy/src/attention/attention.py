@@ -5,8 +5,8 @@ from typing import List, Optional, Tuple, Union
 
 
 class BahdanauAttention(AttentionInterface):
-    def __init__(self, units: int):
-        super(BahdanauAttention, self).__init__(units)
+    def __init__(self, units: int, **kwargs):
+        super(BahdanauAttention, self).__init__(units, **kwargs)
         self.units = units
         self.attention_dense1 = Dense(units, name='attention_dense1')
         self.attention_dense2 = Dense(units, name='attention_dense2')
@@ -39,13 +39,13 @@ class BahdanauAttention(AttentionInterface):
                 encoder_mask = mask[0]
             else:
                 encoder_mask = mask
-
-            # mask shape: (batch_size, seq_len_encoder)
-            # Expand mask to match score dimensions
-            encoder_mask = tf.cast(tf.expand_dims(encoder_mask, 1), dtype=score.dtype)  # (batch_size, 1, seq_len_encoder)
-            encoder_mask = tf.expand_dims(encoder_mask, -1)  # (batch_size, 1, seq_len_encoder, 1)
-            # Add a large negative value to masked positions to nullify their effect after softmax
-            score += (1.0 - encoder_mask) * -1e9
+            if encoder_mask is not None:
+                # mask shape: (batch_size, seq_len_encoder)
+                # Expand mask to match score dimensions
+                encoder_mask = tf.cast(tf.expand_dims(encoder_mask, 1), dtype=score.dtype)  # (batch_size, 1, seq_len_encoder)
+                encoder_mask = tf.expand_dims(encoder_mask, -1)  # (batch_size, 1, seq_len_encoder, 1)
+                # Add a large negative value to masked positions to nullify their effect after softmax
+                score += (1.0 - encoder_mask) * -1e9
 
         attention_weights = tf.nn.softmax(self.attention_v(score),
                                           axis=2)  # Shape: (batch_size, seq_len_decoder, seq_len_encoder, 1)
@@ -60,3 +60,36 @@ class BahdanauAttention(AttentionInterface):
     def compute_mask(inputs, mask=None):
         # This layer does not propagate the mask further
         return None
+
+    def get_config(self):
+        """
+        Returns the configuration of the layer for serialization.
+
+        Returns:
+            dict: A Python dictionary containing the layer's configuration.
+        """
+        config = super(BahdanauAttention, self).get_config()
+        config.update({
+            'units': self.units,
+            'attention_dense1': tf.keras.layers.serialize(self.attention_dense1),
+            'attention_dense2': tf.keras.layers.serialize(self.attention_dense2),
+            'attention_v': tf.keras.layers.serialize(self.attention_v),
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        """
+        Creates a layer from its config.
+
+        Args:
+            config (dict): A Python dictionary containing the layer's configuration.
+
+        Returns:
+            BahdanauAttention: A new instance of BahdanauAttention configured using the provided config.
+        """
+        # Deserialize layers
+        config['attention_dense1'] = tf.keras.layers.deserialize(config['attention_dense1'])
+        config['attention_dense2'] = tf.keras.layers.deserialize(config['attention_dense2'])
+        config['attention_v'] = tf.keras.layers.deserialize(config['attention_v'])
+        return cls(**config)

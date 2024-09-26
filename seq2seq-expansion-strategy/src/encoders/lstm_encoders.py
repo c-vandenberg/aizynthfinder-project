@@ -65,10 +65,11 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
     The hidden and cell states from both forward and backward passes of the LSTM are concatenated and returned as
     final states.
     """
-    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, dropout_rate=0.2):
-        super(StackedBidirectionalLSTMEncoder, self).__init__(vocab_size, encoder_embedding_dim, units)
+    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, dropout_rate=0.2, **kwargs):
+        super(StackedBidirectionalLSTMEncoder, self).__init__(vocab_size, encoder_embedding_dim, units, **kwargs)
         self.units = units
         self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
+        self.dropout_rate = dropout_rate
 
         self.bidirectional_lstm_1 = Bidirectional(
             LSTM(units, return_sequences=True, return_state=True),
@@ -117,3 +118,44 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
     def compute_mask(self, inputs, mask=None):
         # Propagate the mask forward
         return self.embedding.compute_mask(inputs, mask)
+
+    def get_config(self):
+        """
+        Returns the configuration of the layer for serialization.
+
+        Returns:
+            dict: A Python dictionary containing the layer's configuration.
+        """
+        config = super(StackedBidirectionalLSTMEncoder, self).get_config()
+        config.update({
+            'vocab_size': self.embedding.input_dim,
+            'encoder_embedding_dim': self.embedding.output_dim,
+            'units': self.units,
+            'dropout_rate': self.dropout_rate,
+            'embedding': tf.keras.layers.serialize(self.embedding),
+            'bidirectional_lstm_1': tf.keras.layers.serialize(self.bidirectional_lstm_1),
+            'dropout_1': tf.keras.layers.serialize(self.dropout_1),
+            'bidirectional_lstm_2': tf.keras.layers.serialize(self.bidirectional_lstm_2),
+            'dropout_2': tf.keras.layers.serialize(self.dropout_2),
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        """
+        Creates a layer from its config.
+
+        Args:
+            config (dict): A Python dictionary containing the layer's configuration.
+
+        Returns:
+            StackedBidirectionalLSTMEncoder: A new instance of StackedBidirectionalLSTMEncoder configured using the
+            provided config.
+        """
+        # Deserialize layers
+        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
+        config['bidirectional_lstm_1'] = tf.keras.layers.deserialize(config['bidirectional_lstm_1'])
+        config['dropout_1'] = tf.keras.layers.deserialize(config['dropout_1'])
+        config['bidirectional_lstm_2'] = tf.keras.layers.deserialize(config['bidirectional_lstm_2'])
+        config['dropout_2'] = tf.keras.layers.deserialize(config['dropout_2'])
+        return cls(**config)

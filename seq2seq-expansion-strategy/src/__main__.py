@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
 from trainers.trainer import Trainer
+import tensorflow as tf
+from models.seq2seq import RetrosynthesisSeq2SeqModel
+from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
+from decoders.lstm_decoders import StackedLSTMDecoder
+from attention.attention import BahdanauAttention
 
 
 def main():
     # Path to the configuration file
-    config_path = 'config/model_v6_config.yml'
+    config_path = 'config/model_v7_config.yml'
 
     # Initialize the Trainer with the configuration
     trainer = Trainer(config_path=config_path)

@@ -13,6 +13,8 @@
 #         detailed patterns and potentially reduce vocabulary size.
 #
 # Training run metrics:
+#   - Epochs: 10
+#
 #   - Train Loss (Smoothed): 0.280
 #   - Train Accuracy (Smoothed): 0.607
 #

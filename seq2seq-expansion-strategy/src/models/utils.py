@@ -53,12 +53,26 @@ class Seq2SeqModelUtils:
         return tf.reduce_mean(loss)
 
     @staticmethod
-    def save_model(model, save_path):
+    def inspect_model_layers(model):
         """
-        Save the model in TensorFlow SavedModel format.
+        Recursively inspect each layer and sublayer in the model and print their configuration.
         """
-        model.save(save_path)
-        print(f"Model saved to {save_path}")
+        def _inspect_layer(layer, indent=0):
+            indent_str = "  " * indent
+            print(f"{indent_str}Layer: {layer.name}")
+            config = layer.get_config()
+            for key, value in config.items():
+                print(f"{indent_str}  - {key}: {value}")
+
+            # Recursively inspect sublayers if any
+            if hasattr(layer, 'layers'):  # For layers like Bidirectional, TimeDistributed, etc.
+                for sublayer in layer.layers:
+                    _inspect_layer(sublayer, indent + 1)
+            elif hasattr(layer, 'layer'):  # For layers like RNN that contain a single layer
+                _inspect_layer(layer.layer, indent + 1)
+
+        for layer in model.layers:
+            _inspect_layer(layer)
 
     @staticmethod
     def convert_to_onnx(saved_model_path, onnx_file_path):

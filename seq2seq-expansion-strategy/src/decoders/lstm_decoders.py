@@ -63,10 +63,12 @@ class StackedLSTMDecoder(DecoderInterface):
     The decoder consists of four LSTM layers, each followed by a dropout layer to enhance generalization.
     The attention mechanism helps the decoder focus on relevant encoder outputs during each timestep of decoding.
     """
-    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, dropout_rate=0.2):
-        super(StackedLSTMDecoder, self).__init__(vocab_size, decoder_embedding_dim, units)
+    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, dropout_rate=0.2, **kwargs):
+        super(StackedLSTMDecoder, self).__init__(vocab_size, decoder_embedding_dim, units, **kwargs)
         self.units = units
         self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
+        self.vocab_size = vocab_size
+        self.dropout_rate = dropout_rate
 
         # Decoder: 4-layer LSTM without internal Dropout
         # Define LSTM and Dropout layers individually
@@ -239,3 +241,55 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_states = [state_h1, state_c1, state_h2, state_c2, state_h3, state_c3, state_h4, state_c4]
 
         return decoder_output, decoder_states
+
+    def get_config(self):
+        """
+        Returns the configuration of the layer for serialization.
+
+        Returns:
+            dict: A Python dictionary containing the layer's configuration.
+        """
+        config = super(StackedLSTMDecoder, self).get_config()
+        config.update({
+            'vocab_size': self.vocab_size,
+            'decoder_embedding_dim': self.embedding.output_dim,
+            'units': self.units,
+            'dropout_rate': self.dropout_rate,
+            'embedding': tf.keras.layers.serialize(self.embedding),
+            'lstm_decoder_1': tf.keras.layers.serialize(self.lstm_decoder_1),
+            'dropout_1': tf.keras.layers.serialize(self.dropout_1),
+            'lstm_decoder_2': tf.keras.layers.serialize(self.lstm_decoder_2),
+            'dropout_2': tf.keras.layers.serialize(self.dropout_2),
+            'lstm_decoder_3': tf.keras.layers.serialize(self.lstm_decoder_3),
+            'dropout_3': tf.keras.layers.serialize(self.dropout_3),
+            'lstm_decoder_4': tf.keras.layers.serialize(self.lstm_decoder_4),
+            'dropout_4': tf.keras.layers.serialize(self.dropout_4),
+            'attention': tf.keras.layers.serialize(self.attention),
+            'dense': tf.keras.layers.serialize(self.dense),
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        """
+        Creates a layer from its config.
+
+        Args:
+            config (dict): A Python dictionary containing the layer's configuration.
+
+        Returns:
+            StackedLSTMDecoder: A new instance of StackedLSTMDecoder configured using the provided config.
+        """
+        # Deserialize layers
+        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
+        config['lstm_decoder_1'] = tf.keras.layers.deserialize(config['lstm_decoder_1'])
+        config['dropout_1'] = tf.keras.layers.deserialize(config['dropout_1'])
+        config['lstm_decoder_2'] = tf.keras.layers.deserialize(config['lstm_decoder_2'])
+        config['dropout_2'] = tf.keras.layers.deserialize(config['dropout_2'])
+        config['lstm_decoder_3'] = tf.keras.layers.deserialize(config['lstm_decoder_3'])
+        config['dropout_3'] = tf.keras.layers.deserialize(config['dropout_3'])
+        config['lstm_decoder_4'] = tf.keras.layers.deserialize(config['lstm_decoder_4'])
+        config['dropout_4'] = tf.keras.layers.deserialize(config['dropout_4'])
+        config['attention'] = tf.keras.layers.deserialize(config['attention'])
+        config['dense'] = tf.keras.layers.deserialize(config['dense'])
+        return cls(**config)

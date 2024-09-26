@@ -1,12 +1,5 @@
 # Seq2Seq Model Architecture
-# - No model architectural changes have been made. Model V6 is intended to be a benchmark for a 5 epoch training run
-#   for future iterations.
-# - The separation of attention, encoder and decoder dimensions from model V5 have been kept, but they have been reduced
-#   to 256, 128 and 256 respectively (the halving of the encoder dimensions to account to bidirectionality has been kept
-#   from model V5).
-# - Units have also been reduced to 256
-# - The reduction in epochs, as well as attention, encoder and decoder dimensions is to reduce training time. Optimal
-#   future model will have these all increased.
+#
 #
 # Training run metrics:
 #   - Epochs: 5
@@ -17,8 +10,8 @@
 #   - Validation Loss (Smoothed):
 #   - Validation Accuracy (Smoothed):
 #
-#   - Test Loss (Smoothed): 0.417
-#   - Test Accuracy (Smoothed): 0.5
+#   - Test Loss (Smoothed):
+#   - Test Accuracy (Smoothed):
 
 # Data Configuration and Hyperparameters
 data:
@@ -26,7 +19,7 @@ data:
   reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
   products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
   reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/pande-et-al/model-v6/tokenizer/model_v6_tokenizer.json'
+  tokenizer_save_path: 'data/training/pande-et-al/model-v7/tokenizer/model_v7_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -47,12 +40,12 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 5
+  epochs: 1
   patience: 5
-  model_save_path: 'data/training/pande-et-al/model-v6/model'
-  log_dir: 'logs/pande-et-al/model-v6'
-  checkpoint_dir: 'data/training/pande-et-al/model-v6/checkpoints'
-  num_samples: null # Number of samples to use for debugging model
+  model_save_path: 'data/training/pande-et-al/model-v7/model'
+  log_dir: 'logs/pande-et-al/model-v7'
+  checkpoint_dir: 'data/training/pande-et-al/model-v7/checkpoints'
+  num_samples: 100 # Number of samples to use for debugging model
 
 # Environment Configuration
 env:

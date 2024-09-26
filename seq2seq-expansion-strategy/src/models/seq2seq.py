@@ -5,7 +5,7 @@ from decoders.lstm_decoders import StackedLSTMDecoder
 
 
 class RetrosynthesisSeq2SeqModel(tf.keras.Model):
-    def __init__(self,  input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
+    def __init__(self, input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
                  decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2,
                  *args, **kwargs):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
@@ -25,6 +25,9 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         # Store the data processors (to be set externally)
         self.encoder_data_processor = None
         self.decoder_data_processor = None
+
+        # Store dropout rate
+        self.dropout_rate = dropout_rate
 
     def build(self, input_shape):
         # Define the input shapes for encoder and decoder
@@ -64,6 +67,47 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         )
 
         return output
+
+    def get_config(self):
+        """
+        Returns the configuration of the layer for serialization.
+
+        Returns:
+            dict: A Python dictionary containing the layer's configuration.
+        """
+        config = super(RetrosynthesisSeq2SeqModel, self).get_config()
+        config.update({
+            'units': self.units,
+            'input_vocab_size': self.input_vocab_size,
+            'output_vocab_size': self.output_vocab_size,
+            'encoder_embedding_dim': self.encoder.embedding.output_dim,
+            'decoder_embedding_dim': self.decoder.embedding.output_dim,
+            'dropout_rate': self.dropout_rate,
+            'encoder': tf.keras.layers.serialize(self.encoder),
+            'decoder': tf.keras.layers.serialize(self.decoder),
+            'enc_state_h': tf.keras.layers.serialize(self.enc_state_h),
+            'enc_state_c': tf.keras.layers.serialize(self.enc_state_c)
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        """
+        Creates a layer from its config.
+
+        Args:
+            config (dict): A Python dictionary containing the layer's configuration.
+
+        Returns:
+            RetrosynthesisSeq2SeqModel: A new instance of RetrosynthesisSeq2SeqModel configured using the provided
+            config.
+        """
+        # Deserialize layers
+        config['encoder'] = tf.keras.layers.deserialize(config['encoder'])
+        config['decoder'] = tf.keras.layers.deserialize(config['decoder'])
+        config['enc_state_h'] = tf.keras.layers.deserialize(config['enc_state_h'])
+        config['enc_state_c'] = tf.keras.layers.deserialize(config['enc_state_c'])
+        return cls(**config)
 
 
 class BestValLossCheckpointCallback(tf.keras.callbacks.Callback):

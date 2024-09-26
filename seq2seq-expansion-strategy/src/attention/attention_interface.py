@@ -2,8 +2,8 @@ from abc import abstractmethod, ABCMeta
 from tensorflow.keras.layers import Layer, Embedding
 
 class AttentionInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, units: int):
-        super(AttentionInterface, self).__init__()
+    def __init__(self, units: int, **kwargs):
+        super(AttentionInterface, self).__init__(**kwargs)
         self.units = units
 
     @abstractmethod

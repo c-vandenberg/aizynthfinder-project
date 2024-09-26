@@ -6,7 +6,9 @@
 #     * Learning Rate Scheduler: A learning rate scheduler callback has been added.
 #
 # Training run metrics (Model evaluation on test data started on V3 once significant improvements in train and
-## validation metrics were observed):
+# validation metrics were observed):
+#   - Epochs: 10
+#
 #   - Train Loss (Smoothed): 0.043
 #   - Train Accuracy (Smoothed): 0.342
 #

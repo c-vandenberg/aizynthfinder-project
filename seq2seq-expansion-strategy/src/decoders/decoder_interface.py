@@ -3,8 +3,8 @@ from tensorflow.keras.layers import Layer, Embedding
 
 
 class DecoderInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int):
-        super(DecoderInterface, self).__init__()
+    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, **kwargs):
+        super(DecoderInterface, self).__init__(**kwargs)
         self.units = units
         self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=None)
 

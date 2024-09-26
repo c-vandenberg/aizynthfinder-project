@@ -5,7 +5,6 @@ import numpy as np
 import tensorflow as tf
 from models.seq2seq import RetrosynthesisSeq2SeqModel, BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
-from inference.inference_model import InferenceModel
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
@@ -215,6 +214,7 @@ class Trainer:
 
         print("Model built successfully.\n")
 
+
     def setup_callbacks(self):
         """
         Set up training callbacks: EarlyStopping, TensorBoard, and CustomCheckpointCallback.
@@ -295,8 +295,9 @@ class Trainer:
 
     def save_model(self):
         """
-        Save the trained model to the specified path.
+        Save the trained model in TensorFlow SavedModel format.
         """
+        Seq2SeqModelUtils.inspect_model_layers(self.model)
         training_conf = self.config['training']
         model_save_path = training_conf['model_save_path']
         os.makedirs(model_save_path, exist_ok=True)

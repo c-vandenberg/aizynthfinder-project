@@ -3,8 +3,8 @@ from tensorflow.keras.layers import Layer, Embedding
 
 
 class EncoderInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, vocab_size: int, embedding_dim: int, units: int):
-        super(EncoderInterface, self).__init__()
+    def __init__(self, vocab_size: int, embedding_dim: int, units: int, **kwargs):
+        super(EncoderInterface, self).__init__(**kwargs)
         self.units = units
         self.embedding = Embedding(vocab_size, embedding_dim)
 

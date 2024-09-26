@@ -9,6 +9,8 @@
 #     configure attention layer dimension. This will be done in a future iteration.
 #
 # Training run metrics:
+#   - Epochs: 5
+#
 #   - Train Loss (Smoothed): 0.264
 #   - Train Accuracy (Smoothed): 0.620
 #
