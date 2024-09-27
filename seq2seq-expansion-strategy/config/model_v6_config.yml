@@ -11,14 +11,14 @@
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.623
+#   - Train Accuracy (Smoothed): 0.514
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.536
+#   - Validation Accuracy (Smoothed): 0.537
 #
 #   - Test Loss (Smoothed): 0.417
-#   - Test Accuracy (Smoothed): 0.5
+#   - Test Accuracy (Smoothed): 0.570
 
 # Data Configuration and Hyperparameters
 data:
