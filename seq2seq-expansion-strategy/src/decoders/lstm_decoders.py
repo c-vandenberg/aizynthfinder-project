@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense
 from decoders.decoder_interface import DecoderInterface
 from attention.attention import BahdanauAttention
+from typing import List, Optional, Tuple, Union, Any
 
 
 class StackedLSTMDecoder(DecoderInterface):
@@ -63,54 +64,68 @@ class StackedLSTMDecoder(DecoderInterface):
     The decoder consists of four LSTM layers, each followed by a dropout layer to enhance generalization.
     The attention mechanism helps the decoder focus on relevant encoder outputs during each timestep of decoding.
     """
-    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, dropout_rate=0.2, **kwargs):
+    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2,
+                 **kwargs) -> None:
         super(StackedLSTMDecoder, self).__init__(vocab_size, decoder_embedding_dim, units, **kwargs)
-        self.units = units
-        self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
-        self.vocab_size = vocab_size
-        self.dropout_rate = dropout_rate
+        self.units: int = units
+        self.embedding: Embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
+        self.vocab_size: int = vocab_size
+        self.dropout_rate: float = dropout_rate
 
         # Decoder: 4-layer LSTM without internal Dropout
         # Define LSTM and Dropout layers individually
-        self.lstm_decoder_1 = LSTM(
+        self.lstm_decoder_1: LSTM = LSTM(
             units,
             return_sequences=True,
             return_state=True,
             name='lstm_decoder_1'
         )
-        self.dropout_1 = Dropout(dropout_rate, name='decoder_dropout_1')
+        self.dropout_1: Dropout = Dropout(dropout_rate, name='decoder_dropout_1')
 
-        self.lstm_decoder_2 = LSTM(
+        self.lstm_decoder_2: LSTM = LSTM(
             units,
             return_sequences=True,
             return_state=True,
             name='lstm_decoder_2'
         )
-        self.dropout_2 = Dropout(dropout_rate, name='decoder_dropout_2')
+        self.dropout_2: Dropout = Dropout(dropout_rate, name='decoder_dropout_2')
 
-        self.lstm_decoder_3 = LSTM(
+        self.lstm_decoder_3: LSTM = LSTM(
             units,
             return_sequences=True,
             return_state=True,
             name='lstm_decoder_3'
         )
-        self.dropout_3 = Dropout(dropout_rate, name='decoder_dropout_3')
+        self.dropout_3: Dropout = Dropout(dropout_rate, name='decoder_dropout_3')
 
-        self.lstm_decoder_4 = LSTM(
+        self.lstm_decoder_4: LSTM = LSTM(
             units,
             return_sequences=True,
             return_state=True,
             name='lstm_decoder_4'
         )
-        self.dropout_4 = Dropout(dropout_rate, name='decoder_dropout_4')
+        self.dropout_4: Dropout = Dropout(dropout_rate, name='decoder_dropout_4')
 
         # Attention Mechanism
-        self.attention = BahdanauAttention(units=units)
+        self.attention: BahdanauAttention = BahdanauAttention(units=units)
 
         # Output layer
-        self.dense = Dense(vocab_size, activation='softmax')
+        self.dense: Dense = Dense(vocab_size, activation='softmax')
 
-    def call(self, inputs, training=None, mask=None):
+    def call(self, inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor], training: Optional[bool] = None,
+             mask: Optional[tf.Tensor] = None) -> tf.Tensor:
+        """
+        Forward pass of the decoder.
+
+        Args:
+            inputs (Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor]): Tuple containing decoder input, initial state,
+            and encoder output.
+            training (Optional[bool], optional): Training flag. Defaults to None.
+            mask (Optional[tf.Tensor], optional): Encoder mask. Defaults to None.
+
+        Returns:
+            tf.Tensor: The predicted token probabilities for each timestep in the target sequence.
+        """
         # Extract initial state and encoder output from inputs
         decoder_input, initial_state, encoder_output = inputs
 
@@ -118,8 +133,8 @@ class StackedLSTMDecoder(DecoderInterface):
             raise ValueError('decoder_input, initial_state and encoder_output must be provided to the Decoder.')
 
         # Embed the input and extract decoder mask
-        decoder_output = self.embedding(decoder_input)
-        decoder_mask = self.embedding.compute_mask(decoder_input)
+        decoder_output: tf.Tensor = self.embedding(decoder_input)
+        decoder_mask: Optional[tf.Tensor] = self.embedding.compute_mask(decoder_input)
 
         # Process through decoder layers
         # First LSTM layer with initial state
@@ -129,7 +144,7 @@ class StackedLSTMDecoder(DecoderInterface):
             initial_state=initial_state,
             training=training
         )
-        decoder_output = self.dropout_1(decoder_output, training=training)
+        decoder_output: tf.Tensor = self.dropout_1(decoder_output, training=training)
 
         # Second LSTM layer
         decoder_output, _, _ = self.lstm_decoder_2(
@@ -137,7 +152,7 @@ class StackedLSTMDecoder(DecoderInterface):
             mask=decoder_mask,
             training=training
         )
-        decoder_output = self.dropout_2(decoder_output, training=training)
+        decoder_output: tf.Tensor = self.dropout_2(decoder_output, training=training)
 
         # Third LSTM layer
         decoder_output, _, _ = self.lstm_decoder_3(
@@ -145,7 +160,7 @@ class StackedLSTMDecoder(DecoderInterface):
             mask=decoder_mask,
             training=training
         )
-        decoder_output = self.dropout_3(decoder_output, training=training)
+        decoder_output: tf.Tensor = self.dropout_3(decoder_output, training=training)
 
         # Fourth LSTM layer
         decoder_output, final_state_h, final_state_c = self.lstm_decoder_4(
@@ -153,7 +168,7 @@ class StackedLSTMDecoder(DecoderInterface):
             mask=decoder_mask,
             training=training
         )
-        decoder_output = self.dropout_4(decoder_output, training=training)
+        decoder_output: tf.Tensor = self.dropout_4(decoder_output, training=training)
 
         # Extract only the encoder_mask from the mask list
         if mask is not None and isinstance(mask, (list, tuple)):
@@ -162,17 +177,20 @@ class StackedLSTMDecoder(DecoderInterface):
             encoder_mask = mask
 
         # Apply attention
-        context_vector, attention_weights = self.attention(inputs=[encoder_output, decoder_output], mask=encoder_mask)
+        context_vector, attention_weights = self.attention(
+            inputs=[encoder_output, decoder_output],
+            mask=encoder_mask
+        )
 
         # Concatenate decoder outputs and context vector
-        concat_output = tf.concat([decoder_output, context_vector], axis=-1)  # (batch_size, seq_len_dec, units + units_enc)
+        concat_output: tf.Tensor = tf.concat([decoder_output, context_vector], axis=-1)  # (batch_size, seq_len_dec, units + units_enc)
 
         # Generate outputs
-        decoder_output = self.dense(concat_output)  # (batch_size, seq_len_dec, vocab_size)
+        decoder_output: tf.Tensor = self.dense(concat_output)  # (batch_size, seq_len_dec, vocab_size)
 
         return decoder_output
 
-    def single_step(self, decoder_input, states, encoder_output):
+    def single_step(self, decoder_input: tf.Tensor, states: List[tf.Tensor], encoder_output: tf.Tensor):
         """
         Performs a single decoding step.
 
@@ -199,7 +217,7 @@ class StackedLSTMDecoder(DecoderInterface):
             state_h1, state_c1, state_h2, state_c2, state_h3, state_c3, state_h4, state_c4 = states
 
         # Embed the input
-        decoder_output = self.embedding(decoder_input)
+        decoder_output: tf.Tensor = self.embedding(decoder_input)
 
         # First LSTM layer with initial state
         decoder_output, state_h1, state_c1 = self.lstm_decoder_1(
@@ -232,17 +250,32 @@ class StackedLSTMDecoder(DecoderInterface):
         )
 
         # Concatenate decoder outputs and context vector
-        concat_output = tf.concat([decoder_output, context_vector], axis=-1)
+        concat_output: tf.Tensor = tf.concat([decoder_output, context_vector], axis=-1)
 
         # Generate outputs
-        decoder_output = self.dense(concat_output)  # Shape: (batch_size, 1, vocab_size)
+        decoder_output: tf.Tensor = self.dense(concat_output)  # Shape: (batch_size, 1, vocab_size)
 
         # Collect all states
-        decoder_states = [state_h1, state_c1, state_h2, state_c2, state_h3, state_c3, state_h4, state_c4]
+        decoder_states: List[tf.Tensor] = [state_h1, state_c1, state_h2, state_c2, state_h3, state_c3,
+                                           state_h4, state_c4]
 
         return decoder_output, decoder_states
 
-    def get_config(self):
+    @staticmethod
+    def compute_mask(inputs: Any, mask: Optional[Any] = None) -> None:
+        """
+        This layer does not propagate the mask further.
+
+        Args:
+            inputs (Any): Input tensors.
+            mask (Optional[Any], optional): Input mask. Defaults to None.
+
+        Returns:
+            None
+        """
+        return None
+
+    def get_config(self) -> dict:
         """
         Returns the configuration of the layer for serialization.
 
@@ -270,7 +303,7 @@ class StackedLSTMDecoder(DecoderInterface):
         return config
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: dict) -> 'StackedLSTMDecoder':
         """
         Creates a layer from its config.
 

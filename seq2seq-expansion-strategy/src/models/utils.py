@@ -25,7 +25,7 @@ class Seq2SeqModelUtils:
         )
 
     @staticmethod
-    def masked_sparse_categorical_crossentropy(real, pred):
+    def masked_sparse_categorical_crossentropy(real: tf.Tensor, pred: tf.Tensor) -> tf.Tensor:
         """
         Computes the sparse categorical cross-entropy loss while masking out padding tokens.
 

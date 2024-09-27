@@ -1,33 +1,44 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
+from tensorflow.train import Checkpoint, CheckpointManager
+from tensorflow.keras.callbacks import Callback
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
+from typing import Optional, Any, Tuple
 
 
 class RetrosynthesisSeq2SeqModel(tf.keras.Model):
     def __init__(self, input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
-                 decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2,
-                 *args, **kwargs):
+                 decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2, *args, **kwargs):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
 
-        self.units = units
-        self.encoder = StackedBidirectionalLSTMEncoder(input_vocab_size, encoder_embedding_dim, units, dropout_rate)
-        self.decoder = StackedLSTMDecoder(output_vocab_size, decoder_embedding_dim, units, dropout_rate)
+        # Save the number of units (neurons)
+        self.units: int = units
+
+        # Encoder layer
+        self.encoder: StackedBidirectionalLSTMEncoder = StackedBidirectionalLSTMEncoder(
+            input_vocab_size, encoder_embedding_dim, units, dropout_rate
+        )
+
+        # Decoder layer
+        self.decoder: StackedLSTMDecoder = StackedLSTMDecoder(
+            output_vocab_size, decoder_embedding_dim, units, dropout_rate
+        )
 
         # Save the vocabulary sizes
-        self.input_vocab_size = input_vocab_size
-        self.output_vocab_size = output_vocab_size
+        self.input_vocab_size: int = input_vocab_size
+        self.output_vocab_size: int = output_vocab_size
 
         # Mapping encoder final states to decoder initial states
-        self.enc_state_h = Dense(units, name='enc_state_h')
-        self.enc_state_c = Dense(units, name='enc_state_c')
+        self.enc_state_h: Dense = Dense(units, name='enc_state_h')
+        self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
         # Store the data processors (to be set externally)
-        self.encoder_data_processor = None
-        self.decoder_data_processor = None
+        self.encoder_data_processor: Optional[Any] = None
+        self.decoder_data_processor: Optional[Any] = None
 
-        # Store dropout rate
-        self.dropout_rate = dropout_rate
+        # Save the dropout rate
+        self.dropout_rate: float = dropout_rate
 
     def build(self, input_shape):
         # Define the input shapes for encoder and decoder
@@ -43,7 +54,17 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         # Mark the model as built
         super(RetrosynthesisSeq2SeqModel, self).build(input_shape)
 
-    def call(self, inputs, training=None):
+    def call(self, inputs: Tuple[tf.Tensor, tf.Tensor], training: Optional[bool] = None) -> tf.Tensor:
+        """
+        Forward pass of the Seq2Seq model.
+
+        Args:
+            inputs (Tuple[tf.Tensor, tf.Tensor]): Tuple containing encoder and decoder inputs.
+            training (Optional[bool], optional): Training flag. Defaults to None.
+
+        Returns:
+            tf.Tensor: The output predictions from the decoder.
+        """
         # Extract encoder and decoder inputs
         encoder_input, decoder_input = inputs
 
@@ -51,16 +72,22 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         encoder_output, state_h, state_c = self.encoder.call(encoder_input, training=training)
 
         # Map encoder final states to decoder initial states
-        decoder_initial_state_h = self.enc_state_h(state_h)  # (batch_size, units)
-        decoder_initial_state_c = self.enc_state_c(state_c)  # (batch_size, units)
-        decoder_initial_state = [decoder_initial_state_h, decoder_initial_state_c]
+        decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # (batch_size, units)
+        decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # (batch_size, units)
+        decoder_initial_state: Tuple[tf.Tensor, tf.Tensor] = (decoder_initial_state_h, decoder_initial_state_c)
 
         # Prepare decoder inputs as a tuple
-        decoder_inputs = (decoder_input, decoder_initial_state, encoder_output)
-        encoder_mask = self.encoder.compute_mask(encoder_input)
+        decoder_inputs: Tuple[tf.Tensor, Tuple[tf.Tensor, tf.Tensor], tf.Tensor] = (
+            decoder_input,
+            decoder_initial_state,
+            encoder_output
+        )
+
+        # Extract encoder mask
+        encoder_mask: Optional[tf.Tensor] = self.encoder.compute_mask(encoder_input)
 
         # Decoder
-        output = self.decoder.call(
+        output: tf.Tensor = self.decoder.call(
             decoder_inputs,
             training=training,
             mask=encoder_mask
@@ -68,7 +95,7 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
 
         return output
 
-    def get_config(self):
+    def get_config(self) -> dict:
         """
         Returns the configuration of the layer for serialization.
 
@@ -91,7 +118,7 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         return config
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: dict) -> 'RetrosynthesisSeq2SeqModel':
         """
         Creates a layer from its config.
 
@@ -110,18 +137,18 @@ class RetrosynthesisSeq2SeqModel(tf.keras.Model):
         return cls(**config)
 
 
-class BestValLossCheckpointCallback(tf.keras.callbacks.Callback):
-    def __init__(self, checkpoint_manager):
+class BestValLossCheckpointCallback(Callback):
+    def __init__(self, checkpoint_manager: CheckpointManager):
         super(BestValLossCheckpointCallback, self).__init__()
-        self.checkpoint_manager = checkpoint_manager
-        self.best_val_loss = float('inf')  # Initialize with infinity
+        self.checkpoint_manager: CheckpointManager = checkpoint_manager
+        self.best_val_loss: float = float('inf')  # Initialize with infinity
 
     def on_epoch_end(self, epoch, logs=None):
-        current_val_loss = logs.get('val_loss')
+        current_val_loss: float = logs.get('val_loss')
         if current_val_loss is not None:
             if current_val_loss < self.best_val_loss:
                 self.best_val_loss = current_val_loss
-                save_path = self.checkpoint_manager.save()
+                save_path: str = self.checkpoint_manager.save()
                 print(
                     f"\nEpoch {epoch+1}: Validation loss improved to {current_val_loss:.4f}. "
                     f"Saving checkpoint to {save_path}"

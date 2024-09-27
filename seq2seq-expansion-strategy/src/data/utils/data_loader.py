@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.python.types.data import DatasetV2
 from sklearn.model_selection import train_test_split
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
@@ -125,7 +126,7 @@ class DataLoader:
             decoder_target_test
         )
 
-    def get_dataset(self, data, training=True):
+    def get_dataset(self, data, training=True) -> DatasetV2:
         """
         Create a tf.data.Dataset from the given data.
         """
@@ -145,13 +146,13 @@ class DataLoader:
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
         return dataset
 
-    def get_train_dataset(self):
+    def get_train_dataset(self) -> DatasetV2:
         return self.get_dataset(self.train_data, training=True)
 
-    def get_valid_dataset(self):
+    def get_valid_dataset(self) -> DatasetV2:
         return self.get_dataset(self.valid_data, training=False)
 
-    def get_test_dataset(self):
+    def get_test_dataset(self) -> DatasetV2:
         return self.get_dataset(self.test_data, training=False)
 
     @staticmethod

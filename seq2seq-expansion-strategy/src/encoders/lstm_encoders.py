@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout
 from encoders.encoder_interface import EncoderInterface
-
+from typing import Tuple, Optional
 
 class StackedBidirectionalLSTMEncoder(EncoderInterface):
     """
@@ -65,26 +65,39 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
     The hidden and cell states from both forward and backward passes of the LSTM are concatenated and returned as
     final states.
     """
-    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, dropout_rate=0.2, **kwargs):
+    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, dropout_rate: float = 0.2, **kwargs):
         super(StackedBidirectionalLSTMEncoder, self).__init__(vocab_size, encoder_embedding_dim, units, **kwargs)
-        self.units = units
-        self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
-        self.dropout_rate = dropout_rate
+        self.units: int = units
+        self.embedding: Embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
+        self.dropout_rate: float = dropout_rate
 
-        self.bidirectional_lstm_1 = Bidirectional(
+        self.bidirectional_lstm_1: Bidirectional = Bidirectional(
             LSTM(units, return_sequences=True, return_state=True),
             name='bidirectional_lstm_1'
         )
-        self.dropout_1 = Dropout(dropout_rate, name='encoder_dropout_1')
-        self.bidirectional_lstm_2 = Bidirectional(
+
+        self.dropout_1: Dropout = Dropout(dropout_rate, name='encoder_dropout_1')
+
+        self.bidirectional_lstm_2: Bidirectional = Bidirectional(
             LSTM(units, return_sequences=True, return_state=True),
             name='bidirectional_lstm_2'
         )
-        self.dropout_2 = Dropout(dropout_rate, name='encoder_dropout_2')
 
-    def call(self, encoder_input, training=None):
+        self.dropout_2: Dropout = Dropout(dropout_rate, name='encoder_dropout_2')
+
+    def call(self, encoder_input: tf.Tensor, training: Optional[bool] = None):
+        """
+        Forward pass of the encoder.
+
+        Args:
+            encoder_input (tf.Tensor): Input tensor for the encoder.
+            training (Optional[bool], optional): Training flag. Defaults to None.
+
+        Returns:
+            Tuple[tf.Tensor, tf.Tensor, tf.Tensor]: Encoder output, final hidden state, and final cell state.
+        """
         # Embed the input and obtain mask
-        encoder_output = self.embedding(encoder_input)
+        encoder_output: tf.Tensor = self.embedding(encoder_input)
         mask = self.embedding.compute_mask(encoder_input)
 
         # Process through encoder layers
@@ -93,33 +106,44 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             encoder_output, mask=mask, training=training
         )
         # Concatenate forward and backward states
-        state_h_1 = tf.concat([forward_h, backward_h], axis=-1)
-        state_c_1 = tf.concat([forward_c, backward_c], axis=-1)
+        state_h_1: tf.Tensor = tf.concat([forward_h, backward_h], axis=-1)
+        state_c_1: tf.Tensor = tf.concat([forward_c, backward_c], axis=-1)
 
         # Apply dropout
-        encoder_output = self.dropout_1(encoder_output, training=training)
+        encoder_output: Optional[tf.Tensor] = self.dropout_1(encoder_output, training=training)
 
         # Second LSTM layer
         encoder_output, forward_h, forward_c, backward_h, backward_c = self.bidirectional_lstm_2(
             encoder_output, mask=mask, training=training
         )
+
         # Concatenate forward and backward states
-        state_h_2 = tf.concat([forward_h, backward_h], axis=-1)
-        state_c_2 = tf.concat([forward_c, backward_c], axis=-1)
+        state_h_2: tf.Tensor = tf.concat([forward_h, backward_h], axis=-1)
+        state_c_2: tf.Tensor = tf.concat([forward_c, backward_c], axis=-1)
+
         # Apply dropout
-        encoder_output = self.dropout_2(encoder_output, training=training)
+        encoder_output: tf.Tensor = self.dropout_2(encoder_output, training=training)
 
         # Final states
-        final_state_h = state_h_2
-        final_state_c = state_c_2
+        final_state_h: tf.Tensor = state_h_2
+        final_state_c: tf.Tensor = state_c_2
 
         return encoder_output, final_state_h, final_state_c
 
-    def compute_mask(self, inputs, mask=None):
-        # Propagate the mask forward
+    def compute_mask(self, inputs: tf.Tensor, mask: Optional[tf.Tensor] = None) -> Optional[tf.Tensor]:
+        """
+        Propagates the mask forward.
+
+        Args:
+            inputs (tf.Tensor): Input tensors.
+            mask (Optional[tf.Tensor], optional): Input mask. Defaults to None.
+
+        Returns:
+            Optional[tf.Tensor]: Propagated mask.
+        """
         return self.embedding.compute_mask(inputs, mask)
 
-    def get_config(self):
+    def get_config(self) -> dict:
         """
         Returns the configuration of the layer for serialization.
 
@@ -141,7 +165,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         return config
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config: dict) -> 'StackedBidirectionalLSTMEncoder':
         """
         Creates a layer from its config.
 

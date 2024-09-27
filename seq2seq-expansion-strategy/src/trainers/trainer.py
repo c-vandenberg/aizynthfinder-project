@@ -3,12 +3,16 @@ import yaml
 import random
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import Callback, EarlyStopping, TensorBoard, ReduceLROnPlateau
+from tensorflow.train import Checkpoint, CheckpointManager
+from tensorflow.python.types.data import DatasetV2
 from models.seq2seq import RetrosynthesisSeq2SeqModel, BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
-from typing import Union
+from typing import Dict, Any, Optional, List
 
 
 class Trainer:
@@ -19,19 +23,19 @@ class Trainer:
         Args:
             config_path (str): Path to the configuration YAML file.
         """
-        self.config = self.load_config(config_path)
+        self.config:Dict[str, Any] = self.load_config(config_path)
         self.setup_environment()
 
-        self.tokenizer: Union[SmilesTokenizer, None] = None
-        self.data_loader: Union[DataLoader, None] = None
-        self.vocab_size: Union[int, None] = None
-        self.encoder_preprocessor: Union[DataPreprocessor, None] = None
-        self.decoder_preprocessor: Union[DataPreprocessor, None] = None
-        self.model: Union[RetrosynthesisSeq2SeqModel, None] = None
-        self.optimizer: Union[tf.keras.optimizers.Adam, None] = None
-        self.loss_function = None
-        self.metrics = None
-        self.callbacks = None
+        self.tokenizer: Optional[SmilesTokenizer] = None
+        self.data_loader: Optional[DataLoader] = None
+        self.vocab_size: Optional[int] = None
+        self.encoder_preprocessor: Optional[DataPreprocessor] = None
+        self.decoder_preprocessor: Optional[DataPreprocessor] = None
+        self.model: Optional[RetrosynthesisSeq2SeqModel] = None
+        self.optimizer: Optional[Adam] = None
+        self.loss_function: Any = None
+        self.metrics: Optional[List[str]] = None
+        self.callbacks: Optional[List[Callback]] = None
 
         self.initialize_components()
 
@@ -87,7 +91,7 @@ class Trainer:
             - However, configuring TensorFlow to use the CPU (`os.environ['CUDA_VISIBLE_DEVICES'] = ''`) and configuring
             Tensorflow to use single-threaded execution severely impacts performance.
         """
-        determinism_conf = self.config['env']['determinism']
+        determinism_conf: dict[str, Any] = self.config['env']['determinism']
 
         # 1. Set Python's built-in hash seed
         os.environ['PYTHONHASHSEED'] = str(determinism_conf['python_seed'])
@@ -119,12 +123,13 @@ class Trainer:
         Initialize DataLoader, Tokenizer, Preprocessor, and hyperparameters.
         """
         # Initialize SmilesTokenizer
-        self.tokenizer = SmilesTokenizer()
+        self.tokenizer: SmilesTokenizer = SmilesTokenizer()
 
         # Initialize DataLoader with paths and parameters from 'data' config
-        data_conf = self.config['data']
-        model_conf = self.config['model']
-        train_conf = self.config['training']
+        data_conf: dict[str, Any] = self.config['data']
+        model_conf: dict[str, Any] = self.config['model']
+        train_conf: dict[str, Any] = self.config['training']
+
         self.data_loader = DataLoader(
             products_file=data_conf['products_file'],
             reactants_file=data_conf['reactants_file'],
@@ -142,11 +147,11 @@ class Trainer:
         self.data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokenizer = self.data_loader.tokenizer
-        self.vocab_size = self.data_loader.vocab_size
+        self.tokenizer: SmilesTokenizer = self.data_loader.tokenizer
+        self.vocab_size: int = self.data_loader.vocab_size
 
         # Save the tokenizer
-        tokenizer_path = data_conf['tokenizer_save_path']
+        tokenizer_path: str = data_conf['tokenizer_save_path']
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
         with open(tokenizer_path, 'w') as f:
             f.write(self.tokenizer.to_json())
@@ -156,11 +161,11 @@ class Trainer:
         model_conf['output_vocab_size'] = self.vocab_size
 
         # Initialize Preprocessors
-        self.encoder_preprocessor = DataPreprocessor(
+        self.encoder_preprocessor: DataPreprocessor = DataPreprocessor(
             tokenizer=self.tokenizer,
             max_seq_length=data_conf['max_encoder_seq_length']
         )
-        self.decoder_preprocessor = DataPreprocessor(
+        self.decoder_preprocessor: DataPreprocessor = DataPreprocessor(
             tokenizer=self.tokenizer,
             max_seq_length=data_conf['max_decoder_seq_length']
         )
@@ -169,14 +174,14 @@ class Trainer:
         """
         Initialize and compile the model.
         """
-        model_conf = self.config['model']
-        encoder_embedding_dim = model_conf.get('encoder_embedding_dim', 256)
-        decoder_embedding_dim = model_conf.get('decoder_embedding_dim', 256)
-        units = model_conf.get('units', 256)
-        dropout_rate = model_conf.get('dropout_rate', 0.2)
+        model_conf: dict[str, Any] = self.config['model']
+        encoder_embedding_dim: int = model_conf.get('encoder_embedding_dim', 256)
+        decoder_embedding_dim: int = model_conf.get('decoder_embedding_dim', 256)
+        units: int = model_conf.get('units', 256)
+        dropout_rate: float = model_conf.get('dropout_rate', 0.2)
 
         # Initialize the model
-        self.model = RetrosynthesisSeq2SeqModel(
+        self.model: RetrosynthesisSeq2SeqModel = RetrosynthesisSeq2SeqModel(
             input_vocab_size=self.vocab_size,
             output_vocab_size=self.vocab_size,
             encoder_embedding_dim=encoder_embedding_dim,
@@ -190,12 +195,12 @@ class Trainer:
         self.model.decoder_data_processor = self.decoder_preprocessor
 
         # Set up the optimizer
-        learning_rate = model_conf.get('learning_rate', 0.0001)
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate, clipnorm=5.0)
+        learning_rate: float = model_conf.get('learning_rate', 0.0001)
+        self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
         self.loss_function = Seq2SeqModelUtils.masked_sparse_categorical_crossentropy
-        self.metrics = model_conf.get('metrics', ['accuracy'])
+        self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
 
         # Compile the model
         self.model.compile(optimizer=self.optimizer, loss=self.loss_function, metrics=self.metrics)
@@ -219,25 +224,25 @@ class Trainer:
         """
         Set up training callbacks: EarlyStopping, TensorBoard, and CustomCheckpointCallback.
         """
-        training_conf = self.config['training']
+        training_conf: dict[str, Any] = self.config['training']
 
         # Early Stopping
-        early_stopping = tf.keras.callbacks.EarlyStopping(
+        early_stopping: EarlyStopping = EarlyStopping(
             monitor='val_loss',
             patience=training_conf.get('patience', 5),
             restore_best_weights=True
         )
 
         # TensorBoard
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(
+        tensorboard_callback: EarlyStopping = TensorBoard(
             log_dir=training_conf['log_dir']
         )
 
         # Custom Checkpoint Callback
-        checkpoint_dir = training_conf['checkpoint_dir']
+        checkpoint_dir: str = training_conf['checkpoint_dir']
         os.makedirs(checkpoint_dir, exist_ok=True)
-        checkpoint = tf.train.Checkpoint(model=self.model, optimizer=self.optimizer)
-        checkpoint_manager = tf.train.CheckpointManager(
+        checkpoint: Checkpoint = Checkpoint(model=self.model, optimizer=self.optimizer)
+        checkpoint_manager: CheckpointManager = CheckpointManager(
             checkpoint,
             directory=checkpoint_dir,
             max_to_keep=5  # Keeps the latest 5 checkpoints
@@ -251,10 +256,12 @@ class Trainer:
             print("Initializing from scratch.")
 
         # Initialize CustomCheckpointCallback
-        best_val_loss_checkpoint_callback = BestValLossCheckpointCallback(checkpoint_manager)
+        best_val_loss_checkpoint_callback: BestValLossCheckpointCallback = BestValLossCheckpointCallback(
+            checkpoint_manager
+        )
 
         # Initialize a learning rate scheduler
-        lr_scheduler = tf.keras.callbacks.ReduceLROnPlateau(
+        lr_scheduler: ReduceLROnPlateau = ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.1,
             patience=3
@@ -271,10 +278,10 @@ class Trainer:
         """
         Train the Seq2Seq model using the training and validation datasets.
         """
-        training_conf = self.config['training']
+        training_conf: dict[str, Any] = self.config['training']
 
-        train_dataset = self.data_loader.get_train_dataset()
-        valid_dataset = self.data_loader.get_valid_dataset()
+        train_dataset: dict[str, Any] = self.data_loader.get_train_dataset()
+        valid_dataset: dict[str, Any] = self.data_loader.get_valid_dataset()
 
         self.model.fit(
             train_dataset,
@@ -287,7 +294,7 @@ class Trainer:
         """
         Evaluate the trained model on the test dataset.
         """
-        test_dataset = self.data_loader.get_test_dataset()
+        test_dataset: DatasetV2 = self.data_loader.get_test_dataset()
 
         test_loss, test_accuracy = self.model.evaluate(test_dataset)
         print(f"Test Loss: {test_loss}")
@@ -298,8 +305,8 @@ class Trainer:
         Save the trained model in TensorFlow SavedModel format.
         """
         Seq2SeqModelUtils.inspect_model_layers(self.model)
-        training_conf = self.config['training']
-        model_save_path = training_conf['model_save_path']
+        training_conf: dict[str, Any] = self.config['training']
+        model_save_path: str = training_conf['model_save_path']
         os.makedirs(model_save_path, exist_ok=True)
 
         tf.saved_model.save(self.model, model_save_path)
