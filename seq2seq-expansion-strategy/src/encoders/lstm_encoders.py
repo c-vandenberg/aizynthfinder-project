@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout
+from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout, Dense, Layer
 from encoders.encoder_interface import EncoderInterface
 from typing import Tuple, Optional
 
@@ -183,3 +183,21 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         config['bidirectional_lstm_2'] = tf.keras.layers.deserialize(config['bidirectional_lstm_2'])
         config['dropout_2'] = tf.keras.layers.deserialize(config['dropout_2'])
         return cls(**config)
+
+
+# Example of a simplified encoder using a Dense layer
+class SimpleEncoder(Layer):
+    def __init__(self, output_dim, **kwargs):
+        super(SimpleEncoder, self).__init__(**kwargs)
+        self.dense = Dense(output_dim, activation='relu')
+
+    def call(self, inputs):
+        return self.dense(inputs)
+
+    def get_config(self):
+        config = super(SimpleEncoder, self).get_config()
+        config.update({
+            'dense': self.dense,
+        })
+        return config
+

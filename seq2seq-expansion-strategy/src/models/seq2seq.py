@@ -1,13 +1,14 @@
 import tensorflow as tf
+from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
 from tensorflow.train import Checkpoint, CheckpointManager
 from tensorflow.keras.callbacks import Callback
-from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
+from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder, SimpleEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 from typing import Optional, Any, Tuple
 
 
-class RetrosynthesisSeq2SeqModel(tf.keras.Model):
+class RetrosynthesisSeq2SeqModel(Model):
     def __init__(self, input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
                  decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2, *args, **kwargs):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
