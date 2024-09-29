@@ -15,11 +15,31 @@ Each node/neuron can be thought of as a **linear regression model**, that involv
 2. **Weights**: Numerical parameters that determine the **strength and direction** of the **connection between neurons in adjacent layers**. Each input is **assigned a weight** which helps to **determine the correlation of each input to the output**.
    * **Positive Weights** indicate a **positive correlation between the input and the output**. With positive weights, as the **input increases**, the **neurons activation tends to increase**.
    * **Negative Weights** indicate a **negative correlation between the input and the output**. With negative weights, as the **input increases**, the **neurons activation tends to decrease**.
-4. **Biases/Thresholds**: These **shift the activation function**, enabling the **neuron to activate even when all input signals are zero**. This allows the model to better fit training data by allowing neurons to **activate in a broader range of scenarios**.
-5. **Output data**: The output value passed to the next node/neuron in the adjacent layer if it **exceeds a given threshold**.
+4. **Biases**: These **shift the activation threshold**, enabling the **neuron to activate even when all input signals are zero**. This allows the model to better fit training data by allowing neurons to **activate in a broader range of scenarios**.
+5. **Output data**: The output value passed to the next node/neuron in the adjacent layer if it **exceeds the activation threshold**.
    * Once **all inputs are multipied by their respective weights and summed**, this value is **passed through an activation function**, which determines the output.
-   * If this output **exceeds a given threshold**, the node/neuron **fires (or activates)**, and the **output data is passed to a node in the next layer** in the network.
-   * As a result, the **output of one node
+   * If this output **exceeds the given activation threshold**, the node/neuron **fires (or activates)**, and the **output data is passed to a node/neuron in the next layer** in the network.
+   * As a result, the **output of one node/neuron** becomes the **input of the next node/neuron**.
+  
+Mathematically, this can be represented as:
+
+1. **Input Data**: The node/neuron receives inputs from the previous layer (or the input data itself if it is the input layer).
+2. **Weighted Sum**: Each input is **multiplied by its corresponding weight**, and all these products are **summed together along with the bias**. This is why the bias can **shift the activation threshold**, because if it is a large enough value, it can cause the output to exceed the threshold even if all inputs are zero.
+
+$$z =  \sum_{i=1}^{n} w_ix_i + b$$
+
+where:
+  * $$x_i$$ : Input from the $$i^{th}$$ neuron of the previous layer (or $$i^{th}$$ feature if input layer).
+  * $wx_i$$ : Weight associated with the $$i^{th}$$ input.
+  * $$b$$ : The bias term.
+  * $$z$$ : The **weighted sum + bias term**. This is also known as the neuron's **pre-activation value**.
+
+3. **Activation Function**: The **pre-activation value** $$z$$ is then **passed through an activation function** $$\sigma(z)$$ to produce the **node/neuron's output**:
+
+$$ a = \sigma(z)$$
+
+where:
+  * $$a$$ : The **activated output of the neuron**.
 
 Every neural network consists of **layers of nodes (artificial neurons)**. These layers are:
 
