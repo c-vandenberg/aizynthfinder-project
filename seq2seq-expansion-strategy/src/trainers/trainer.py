@@ -320,5 +320,6 @@ class Trainer:
         self.build_model()
         self.setup_callbacks()
         self.train()
+        self.model.summary()
         self.save_model()
         self.evaluate()

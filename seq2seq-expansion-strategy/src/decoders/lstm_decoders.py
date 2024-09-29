@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense
+from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense, Layer
 from decoders.decoder_interface import DecoderInterface
 from attention.attention import BahdanauAttention
 from typing import List, Optional, Tuple, Union, Any
@@ -111,6 +111,86 @@ class StackedLSTMDecoder(DecoderInterface):
 
         # Output layer
         self.dense: Dense = Dense(vocab_size, activation='softmax')
+
+    def build(self, input_shape):
+        """
+        Build the StackedLSTMDecoder layer by initializing its sublayers.
+
+        Args:
+            input_shape (Tuple[tf.TensorShape, List[tf.TensorShape], tf.TensorShape]):
+                A tuple containing:
+                    - decoder_input_shape
+                    - initial_state_shape (list of TensorShapes)
+                    - encoder_output_shape
+        """
+        if not isinstance(input_shape, (list, tuple)) or len(input_shape) != 3:
+            raise ValueError("Input shape must be a tuple or list of three TensorShape objects.")
+
+        decoder_input_shape, initial_state_shape, encoder_output_shape = input_shape
+
+        # Ensure decoder_input_shape and encoder_output_shape are of type TensorShape
+        if isinstance(decoder_input_shape, tuple):
+            decoder_input_shape = tf.TensorShape(decoder_input_shape)
+        if isinstance(encoder_output_shape, tuple):
+            encoder_output_shape = tf.TensorShape(encoder_output_shape)
+        # Ensure initial_state_shape is of type TensorShape
+        if isinstance(initial_state_shape, list) or isinstance(initial_state_shape, tuple):
+            initial_state_shape = [
+                tf.TensorShape(s) if isinstance(s, tuple) else s for s in initial_state_shape
+            ]
+        else:
+            raise ValueError(f"initial_state_shape must be a list of TensorShape objects. Type {type(initial_state_shape)} found")
+
+        # Build the embedding layer
+        self.embedding.build(decoder_input_shape)
+        embedded_shape = self.embedding.compute_output_shape(decoder_input_shape)
+
+        # Build first LSTM layer with initial state
+        self.lstm_decoder_1.build(embedded_shape)
+        lstm1_output_shape = self.lstm_decoder_1.compute_output_shape(embedded_shape)[0]  # Extract only output shape
+        lstm1_output_shape = tf.TensorShape(lstm1_output_shape) if isinstance(lstm1_output_shape,
+                                                                              tuple) else lstm1_output_shape
+        self.dropout_1.build(lstm1_output_shape)
+
+        # Build second LSTM layer
+        self.lstm_decoder_2.build(lstm1_output_shape)
+        lstm2_output_shape = self.lstm_decoder_2.compute_output_shape(lstm1_output_shape)[0]  # Extract only output shape
+        lstm2_output_shape = tf.TensorShape(lstm2_output_shape) if isinstance(lstm2_output_shape,
+                                                                              tuple) else lstm2_output_shape
+        self.dropout_2.build(lstm2_output_shape)
+
+        # Build third LSTM layer
+        self.lstm_decoder_3.build(lstm2_output_shape)
+        lstm3_output_shape = self.lstm_decoder_3.compute_output_shape(lstm2_output_shape)[0]  # Extract only output shape
+        lstm3_output_shape = tf.TensorShape(lstm3_output_shape) if isinstance(lstm3_output_shape,
+                                                                              tuple) else lstm3_output_shape
+        self.dropout_3.build(lstm3_output_shape)
+
+        # Build fourth LSTM layer
+        self.lstm_decoder_4.build(lstm3_output_shape)
+        lstm4_output_shape = self.lstm_decoder_4.compute_output_shape(lstm3_output_shape)[0]  # Extract only output shape
+        lstm4_output_shape = tf.TensorShape(lstm4_output_shape) if isinstance(lstm4_output_shape,
+                                                                              tuple) else lstm4_output_shape
+        self.dropout_4.build(lstm4_output_shape)
+
+        # Build the attention layer
+        # BahdanauAttention expects encoder_output and decoder_output as inputs
+        self.attention.build([encoder_output_shape, lstm4_output_shape])
+
+        # Determine the Correct Input Shape for the Dense Layer
+        # - The Dense layer receives the concatenated output of decoder and context vectors.
+        # - decoder_output_shape: (batch_size, seq_len_dec, units_decoder)
+        # - context_vector_shape: (batch_size, seq_len_dec, units_encoder)
+        # - Thus, concat_output_shape: (batch_size, seq_len_dec, units_decoder + units_encoder)
+        units_decoder = lstm4_output_shape[-1]  # 256
+        units_encoder = encoder_output_shape[-1]  # 512
+        concat_last_dim = units_decoder + units_encoder  # 768
+
+        # Build the Dense Layer with the Correct Input Shape
+        self.dense.build(tf.TensorShape((concat_last_dim,)))  # (768,)
+
+        # Mark the layer as built
+        super(StackedLSTMDecoder, self).build(input_shape)
 
     def call(self, inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor], training: Optional[bool] = None,
              mask: Optional[tf.Tensor] = None) -> tf.Tensor:
@@ -326,3 +406,110 @@ class StackedLSTMDecoder(DecoderInterface):
         config['attention'] = tf.keras.layers.deserialize(config['attention'])
         config['dense'] = tf.keras.layers.deserialize(config['dense'])
         return cls(**config)
+
+
+class SimpleDecoder(Layer):
+    def __init__(
+        self,
+        vocab_size: int,
+        embedding_dim: int,
+        units: int,
+        dropout_rate: float = 0.2,
+        **kwargs
+    ):
+        super(SimpleDecoder, self).__init__(**kwargs)
+        self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
+        self.units = units
+        self.dropout_rate = dropout_rate
+
+        # Define layers
+        self.embedding = Embedding(
+            input_dim=vocab_size,
+            output_dim=embedding_dim,
+            mask_zero=True,
+            name='decoder_embedding'
+        )
+        self.lstm = LSTM(
+            units,
+            return_sequences=True,
+            return_state=True,
+            name='decoder_lstm'
+        )
+        self.dropout = Dropout(dropout_rate, name='decoder_dropout')
+        self.dense = Dense(vocab_size, activation='softmax', name='decoder_dense')
+
+    def build(self, input_shape):
+        decoder_input_shape, initial_states_shape = input_shape
+
+        self.embedding.build(decoder_input_shape)
+
+        embedding_output_shape = self.embedding.compute_output_shape(decoder_input_shape)
+        self.lstm.build(embedding_output_shape)
+
+        lstm_output_shape = self.lstm.compute_output_shape(embedding_output_shape)
+        self.dropout.build(lstm_output_shape)
+
+        dropout_output_shape = self.dropout.compute_output_shape(lstm_output_shape)
+        self.dense.build(dropout_output_shape)
+
+        super(SimpleDecoder, self).build(input_shape)
+
+    def call(
+        self,
+        inputs: Tuple[tf.Tensor, Tuple[tf.Tensor, tf.Tensor]],
+        training: Optional[bool] = None,
+        mask: Optional[tf.Tensor] = None
+    ) -> tf.Tensor:
+        decoder_input, initial_state = inputs
+
+        if decoder_input is None or initial_state is None:
+            raise ValueError('decoder_input and initial_state must be provided to the Decoder.')
+
+        # Embed input
+        x = self.embedding(decoder_input)  # (batch_size, seq_len_decoder, embedding_dim)
+
+        # Pass through LSTM
+        lstm_output, state_h, state_c = self.lstm(
+            x,
+            initial_state=initial_state,
+            training=training,
+            mask=None  # LSTM uses mask from embedding
+        )  # (batch_size, seq_len_decoder, units)
+
+        # Apply Dropout
+        lstm_output = self.dropout(lstm_output, training=training)  # (batch_size, seq_len_decoder, units)
+
+        # Output layer
+        output = self.dense(lstm_output)  # (batch_size, seq_len_decoder, vocab_size)
+
+        return output
+
+    def compute_mask(self, inputs: Tuple, mask: Optional[tf.Tensor] = None) -> None:
+        # This decoder does not propagate the mask further
+        return None
+
+    def get_config(self) -> dict:
+        config = super(SimpleDecoder, self).get_config()
+        config.update({
+            'vocab_size': self.vocab_size,
+            'embedding_dim': self.embedding_dim,
+            'units': self.units,
+            'dropout_rate': self.dropout_rate,
+            'embedding': tf.keras.layers.serialize(self.embedding),
+            'lstm': tf.keras.layers.serialize(self.lstm),
+            'dropout': tf.keras.layers.serialize(self.dropout),
+            'dense': tf.keras.layers.serialize(self.dense),
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config: dict) -> 'SimpleDecoder':
+        # Deserialize layers
+        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
+        config['lstm'] = tf.keras.layers.deserialize(config['lstm'])
+        config['dropout'] = tf.keras.layers.deserialize(config['dropout'])
+        config['dense'] = tf.keras.layers.deserialize(config['dense'])
+        return cls(**config)
+
+

@@ -85,6 +85,39 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
         self.dropout_2: Dropout = Dropout(dropout_rate, name='encoder_dropout_2')
 
+    def build(self, input_shape):
+        """
+        Build the StackedBidirectionalLSTMEncoder layer by initializing its sublayers.
+
+        Args:
+            input_shape (tf.TensorShape): Shape of the encoder input.
+        """
+        # Build the embedding layer
+        self.embedding.build(input_shape)
+        embedded_shape = self.embedding.compute_output_shape(input_shape)
+
+        # Build first Bidirectional LSTM layer
+        # For LSTM layers with `return_type=True`, method `compute_output_shape` returns a tuple containing:
+        # 1. Output Shape: Shape of the output tensor.
+        # 2. State Shapes: Shapes of the hidden state (state_h) and cell state (state_c).
+        # We therefore must only extract the first element (i.e. the output shape)
+        self.bidirectional_lstm_1.build(embedded_shape)
+        lstm1_output_shape = self.bidirectional_lstm_1.compute_output_shape(embedded_shape)[0]  # Extract only output shape
+        # Ensure lstm1_output_shape is a TensorShape
+        if isinstance(lstm1_output_shape, tuple):
+            lstm1_output_shape = tf.TensorShape(lstm1_output_shape)
+        self.dropout_1.build(lstm1_output_shape)
+
+        # Build second Bidirectional LSTM layer
+        self.bidirectional_lstm_2.build(lstm1_output_shape)
+        lstm2_output_shape = self.bidirectional_lstm_2.compute_output_shape(lstm1_output_shape)[0]  # Extract only output shape
+        if isinstance(lstm2_output_shape, tuple):
+            lstm2_output_shape = tf.TensorShape(lstm2_output_shape)
+        self.dropout_2.build(lstm2_output_shape)
+
+        # Mark the layer as built
+        super(StackedBidirectionalLSTMEncoder, self).build(input_shape)
+
     def call(self, encoder_input: tf.Tensor, training: Optional[bool] = None):
         """
         Forward pass of the encoder.
@@ -185,19 +218,74 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         return cls(**config)
 
 
-# Example of a simplified encoder using a Dense layer
 class SimpleEncoder(Layer):
-    def __init__(self, output_dim, **kwargs):
+    def __init__(self, vocab_size: int, embedding_dim: int, units: int, dropout_rate: float = 0.2, **kwargs):
         super(SimpleEncoder, self).__init__(**kwargs)
-        self.dense = Dense(output_dim, activation='relu')
+        self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
+        self.units = units
+        self.dropout_rate = dropout_rate
 
-    def call(self, inputs):
-        return self.dense(inputs)
+        self.embedding = Embedding(input_dim=vocab_size, output_dim=embedding_dim, mask_zero=True, name='simple_embedding')
+        self.dense = Dense(units, activation='relu', name='simple_dense')
+        self.dropout = Dropout(dropout_rate, name='simple_dropout')
 
-    def get_config(self):
+    def build(self, input_shape):
+        """
+        Build method to initialize sublayers with the correct input shapes.
+        """
+        # Build the embedding layer
+        self.embedding.build(input_shape)
+
+        # Compute the output shape after embedding
+        embedding_output_shape = self.embedding.compute_output_shape(input_shape)
+        self.dense.build(embedding_output_shape)
+
+        # Compute the output shape after dense
+        dense_output_shape = self.dense.compute_output_shape(embedding_output_shape)
+        self.dropout.build(dense_output_shape)
+
+        # Finally, call the superclass build method
+        super(SimpleEncoder, self).build(input_shape)
+
+    def call(self, inputs: tf.Tensor, training: Optional[bool] = None) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+        # Embed input
+        x = self.embedding(inputs)  # Shape: (batch_size, sequence_length, embedding_dim)
+
+        # Apply Dense layer
+        encoder_output = self.dense(x)  # Shape: (batch_size, sequence_length, units)
+
+        # Apply Dropout
+        encoder_output = self.dropout(encoder_output, training=training)
+
+        # For compatibility, return dummy states
+        state_h = tf.zeros_like(encoder_output[:, 0, :])  # Shape: (batch_size, units)
+        state_c = tf.zeros_like(encoder_output[:, 0, :])  # Shape: (batch_size, units)
+
+        return encoder_output, state_h, state_c
+
+    def compute_mask(self, inputs: tf.Tensor, mask: Optional[tf.Tensor] = None) -> Optional[tf.Tensor]:
+        return self.embedding.compute_mask(inputs, mask)
+
+    def get_config(self) -> dict:
         config = super(SimpleEncoder, self).get_config()
         config.update({
-            'dense': self.dense,
+            'vocab_size': self.vocab_size,
+            'embedding_dim': self.embedding_dim,
+            'units': self.units,
+            'dropout_rate': self.dropout_rate,
+            'embedding': tf.keras.layers.serialize(self.embedding),
+            'dense': tf.keras.layers.serialize(self.dense),
+            'dropout': tf.keras.layers.serialize(self.dropout),
         })
         return config
+
+    @classmethod
+    def from_config(cls, config: dict) -> 'SimpleEncoder':
+        # Deserialize layers
+        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
+        config['dense'] = tf.keras.layers.deserialize(config['dense'])
+        config['dropout'] = tf.keras.layers.deserialize(config['dropout'])
+        return cls(**config)
+
 

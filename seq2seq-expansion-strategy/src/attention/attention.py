@@ -13,6 +13,37 @@ class BahdanauAttention(AttentionInterface):
         self.attention_v: Dense = Dense(1, name='attention_v')
         self.supports_masking: bool = True
 
+    def build(self, input_shape):
+        """
+        Build the BahdanauAttention layer by initializing its Dense sublayers.
+
+        Args:
+            input_shape (List[tf.TensorShape]): A list containing the shapes of encoder_output and decoder_output.
+        """
+        # input_shape is a list of two shapes: [encoder_output_shape, decoder_output_shape]
+        if not isinstance(input_shape, (list, tuple)) or len(input_shape) != 2:
+            raise ValueError("Input shape must be a list or tuple of two TensorShape objects.")
+
+        encoder_output_shape, decoder_output_shape = input_shape
+
+        # Ensure encoder_output_shape and decoder_output_shape are TensorShape
+        if isinstance(encoder_output_shape, tuple):
+            encoder_output_shape = tf.TensorShape(encoder_output_shape)
+        if isinstance(decoder_output_shape, tuple):
+            decoder_output_shape = tf.TensorShape(decoder_output_shape)
+
+        # Build sublayers with appropriate input shapes
+        self.attention_dense1.build(encoder_output_shape)
+        self.attention_dense2.build(decoder_output_shape)
+        # The shape for attention_v needs to match the combined dimensions after Dense layers
+        # Assuming encoder_output has shape (..., units*2) and decoder_output has shape (..., units)
+        combined_units = self.units
+        attention_v_input_shape = tf.TensorShape((None, *decoder_output_shape[1:-1], self.units))
+        self.attention_v.build(attention_v_input_shape)
+
+        # Mark the layer as built
+        super(BahdanauAttention, self).build(input_shape)
+
     def call(self, inputs: List[tf.Tensor], mask: Optional[tf.Tensor] = None,
              training: Union[None, bool] = None) -> Tuple[tf.Tensor, tf.Tensor]:
         """
