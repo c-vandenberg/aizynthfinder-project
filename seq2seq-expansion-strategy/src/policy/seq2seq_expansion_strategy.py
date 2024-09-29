@@ -18,9 +18,18 @@ from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.chem.reaction import RetroReaction
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import Any, Dict, List, Optional, Sequence, StrDict, Tuple
+from data.utils.tokenization import SmilesTokenizer
 
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
+    """
+    A Seq2Seq-based expansion strategy using an ONNX model for retrosynthesis prediction.
+
+    :param key: the key or label
+    :param config: the configuration of the tree search
+    :param model_path: path to the ONNX model file
+    :param top_k: number of top predictions to consider
+    """
     def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
         super().__init__(key, config, **kwargs)
 
@@ -32,6 +41,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         # Load your Seq2Seq model
         self.model = load_model(model, self.key, self.use_remote_models)
+        self.smiles_tokenizer = SmilesTokenizer()
 
     def get_actions(
             self,
@@ -39,7 +49,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             cache_molecules: Optional[Sequence[TreeMolecule]] = None,
     ) -> Tuple[List[RetroReaction], List[float]]:
         """
-        Get all the probable actions of a set of molecules using the Seq2Seq model.
+        Generate retrosynthetic actions using the Seq2Seq model.
 
         :param molecules: the molecules to consider
         :param cache_molecules: additional molecules to submit to the expansion
@@ -50,11 +60,13 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         priors = []
 
         for mol in molecules:
-            # Convert the molecule to the input format expected by your Seq2Seq model
-            input_representation = mol.smiles  # or mol.inchi, depending on your model
+            smiles_representation = mol.smiles
+            tokenized_smiles = self.smiles_tokenizer.tokenize(smiles_representation)
+
+            self._logger.debug(f"Generating retrosynthesis for molecules: {smiles_representation}")
 
             # Use the Seq2Seq model to predict the reactants
-            predicted_reactants, predicted_probabilities = self.model.predict(input_representation)
+            predicted_reactants, predicted_probabilities = self.model.predict(tokenized_smiles)
 
             for reactants, prob in zip(predicted_reactants, predicted_probabilities):
                 reactants_str = ".".join(reactants)
@@ -73,11 +85,3 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
                 priors.append(prob)
 
         return possible_actions, priors
-
-    def load_seq2seq_model(model_path: str):
-        # Load your Seq2Seq model here, for example:
-        # if using TensorFlow/Keras
-        model = load_model(model_path)
-
-
-        return model
