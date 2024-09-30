@@ -2,6 +2,10 @@
 
 # 1 Retrosynthesis with AiZynthFinder - Overview
 
+**AiZynthFinder** is a **computer-aided synthesis planning (CASP)** tool developed by **AstraZeneca's MolecularAI department**. Specifically, it is a **computer-assisted synthesis prediction tool** that seeks to identify the **optimal sequence of chemical reaction steps** capable of transforming a set of **commercially available starting materials** into a **desired chemical compound**. **<sup>1</sup>**  **<sup>2</sup>**
+
+AiZynthfinder leverages recent advancements in **machine learning techniques**, specifically **deep neural networks**, to **predict synthetic pathways via retrosynthetic analysis** with **minimal human intervention**. **<sup>1</sup>**  **<sup>3</sup>**
+
 ## 1.1 Basics of Retrosynthesis 
 
 **Retrosynthetic analysis** involves the **deconstruction of a target molecule** into **simpler precursor structures** in order to **probe different synthetic routes** to the target molecule and **compare the different routes** in terms of synthetic viability.
@@ -76,7 +80,7 @@ Typically, the retrosynthetic analysis of a target molecule is an **iterative pr
   <div align="center">
     <img src="https://github.com/user-attachments/assets/bb4d5580-028b-4610-b95e-8b2f4fc234ba", alt="retrosynthetic-tree"/>
     <p>
-      <b>Fig 6</b> Chemical representation of a retrosynthesis search tree. <b><sup>1</sup></b>
+      <b>Fig 6</b> Chemical representation of a retrosynthesis search tree. <b><sup>4</sup></b>
     </p>
   </div>
 <br>
@@ -89,7 +93,7 @@ The **depth** of a retrosynthesis search tree is **small/shallow** on the other 
   <div align="center">
     <img src="https://github.com/user-attachments/assets/6c3efa40-bf2c-4124-bd13-4ad9f5a5d6b0", alt="retrosynthetic-search-tree-bredth-depth"/>
     <p>
-      <b>Fig 7</b> Retrosynthesis search tree bredth and depth compared to the search trees in chess and Go. <b><sup>2</sup></b>
+      <b>Fig 7</b> Retrosynthesis search tree bredth and depth compared to the search trees in chess and Go. <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -105,31 +109,31 @@ AiZynthFinder uses a **template-based retrosynthesis model** to **define the dis
 
 These reaction templates can then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
 
-However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** **<sup>3</sup>** (**Fig 8**).
+However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** **<sup>6</sup>** (**Fig 8**).
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/8e60a52c-d9b1-474d-ad72-faf6f8592626", alt="aizynthfinder-template-neural-network"/>
     <p>
-      <b>Fig 8</b> Reaction template ranking using Expansion policy neural network. <b><sup>2</sup></b>
+      <b>Fig 8</b> Reaction template ranking using Expansion policy neural network. <b><sup>5</sup></b>
     </p>
   </div>
 <br>
 
 This **expansion policy neural network template ranking** works as follows:
-1. **Encoding of query molecule/target molecule**: The query molecule/target molecule is encoded as an **extended-connectivity fingerprint (ECFP) bit string**, **<sup>4</sup>** specifically an **ECFP4 bit string**.
+1. **Encoding of query molecule/target molecule**: The query molecule/target molecule is encoded as an **extended-connectivity fingerprint (ECFP) bit string**, **<sup>7</sup>** specifically an **ECFP4 bit string**.
 2. **Expansion policy neural network**: The ECFP4 fingerprints are then **fed into a simple neural network**, called an **expansion policy**. The **output of this neural network** is a **ranked list of templates**.
 3. **Keep top-ranked templates and apply to target molecule**: The top-ranked templates are kept (typically the **top 50**), and are **applied to the target molecule**, producing **different sets of precursors**
 
 However, because the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
 
-Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**). **<sup>5</sup>**
+Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**). **<sup>8</sup>**
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/2ab97b1a-54b8-48cd-bd46-2f32c74d82b0", alt="aizynthfinder-neural-network-reaction-filter"/>
     <p>
-      <b>Fig 9</b> <b>a)</b> An example suggested route from the expansion policy without the filter neural network. The single step route would not practical in the wet-laboratory however due to selectivity issues. <b>b)</b> The suggested route when the filter neural network is applied. Although not perfect, it is a much more feasible route. <b><sup>5</sup></b>
+      <b>Fig 9</b> <b>a)</b> An example suggested route from the expansion policy without the filter neural network. The single step route would not practical in the wet-laboratory however due to selectivity issues. <b>b)</b> The suggested route when the filter neural network is applied. Although not perfect, it is a much more feasible route. <b><sup>8</sup></b>
     </p>
   </div>
 <br>
@@ -138,7 +142,7 @@ Therefore, AiZynthFinder has **another trained neural network** called **filter 
 
 ### 1.4.1 Heuristic Search Algorithms
 
-**Monte Carlo Tree Search (MCTS)** **<sup>6</sup>** is a powerful search algorithm that uses **heuristics** (i.e. **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
+**Monte Carlo Tree Search (MCTS)** **<sup>9</sup>** is a powerful search algorithm that uses **heuristics** (i.e. **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
 
   * Like with other **heuristic search algorithms**, the goal of MCTS is to **find a good enough solution within a reasonable amount of time**, rather than **guaranteeing the optimal solution** by **examining all possible outcomes**.
   * Heuristic search algorithms like MCTS are guided by a **heuristic function**, which is a mathematical function used to estimate the **cost, distance or likelihood of reaching the goal from a given state or node**. This function helps **prioritse which paths or options to explore**, based on their likelihood of **leading to an optimal or near-optimal solution**.
@@ -152,7 +156,7 @@ To recap, the **retrosynthesis tree structure representation** consists of:
 * **Nodes**: Each node in the tree represents **a state of the retrosynthesis problem**. In AiZynthFinder, a node corresponds to **a set of one or more intermediate molecules** that can be used to **synthesise the molecule(s)** in the **current node's parent node**.
 * **Edges**: The edges between the nodes represent the **application of a specific reaction template (disconnection rule)** to **decompose the molecule set in the parent node** into **simpler precursor molecules in the child node**
 
-In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<sup>7</sup>** to explore potential synthetic routes as follows:
+In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<sup>10</sup>** to explore potential synthetic routes as follows:
 
 **1. Selection**
 * Starting at the **root node** (target molecule), the MCTS algorithm selects the **most promising node for expansion** based on a balance of **exploration (trying new reactions)**, and **exploitation (further exploring known good reactions)**
@@ -162,7 +166,7 @@ In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<
   <div align="center">
     <img src="https://github.com/user-attachments/assets/c062ee48-e9cc-468d-90ea-3e5001ad40e9", alt="upper-confidence-bound-score"/>
     <p>
-      <b>Fig 10</b> AiZynthFinder Upper Confidence Bound (UCB) score formula for selecting and scoring synthetic routes in a retrosynthesis tree <b><sup>2</sup></b>
+      <b>Fig 10</b> AiZynthFinder Upper Confidence Bound (UCB) score formula for selecting and scoring synthetic routes in a retrosynthesis tree <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -188,7 +192,7 @@ Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The numb
   <div align="center">
     <img src="https://github.com/user-attachments/assets/237073ea-3bd3-4c2c-b7a0-bd779d3d09d9", alt="mcts-simulation-playout"/>
     <p>
-      <b>Fig 11</b> AiZynthFinder Monte Carlo Tree Search (MCTS) steps <b><sup>2</sup></b>
+      <b>Fig 11</b> AiZynthFinder Monte Carlo Tree Search (MCTS) steps <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -201,26 +205,29 @@ AiZynthFinder also uses a number of **scoring algorithms** to **score routes dur
   <div align="center">
     <img src="https://github.com/user-attachments/assets/191465e0-9f78-473f-b7f1-d0ec06fbfdb1", alt="post-processing-route-scoring-algorithms"/>
     <p>
-      <b>Fig 12</b> AiZynthFinder post-processing route scoring algorithm formulae <b><sup>2</sup></b>
+      <b>Fig 12</b> AiZynthFinder post-processing route scoring algorithm formulae <b><sup>5</sup></b>
     </p>
   </div>
 <br>
 
 ## 1.6 Route Clustering
 
-AiZynthFinder also has the ability to **cluster routes** in order to perform a **cluster analysis** via **hierarchical clustering**.
+AiZynthFinder also has the ability to **cluster routes** in order to perform a **cluster analysis** via **hierarchical clustering**. **<sup>11</sup>**
 
-The specific type of hierarchical clustering that AiZynthFinder uses is **agglomerative ("bottom-up") hierarchical clustering** **<sup>8</sup>**. This involves:
+The specific type of hierarchical clustering that AiZynthFinder uses is **agglomerative ("bottom-up") hierarchical clustering** **<sup>9</sup>**. This involves:
 1. Creating a **dendrogram** (a common visualisation tookis from the `scipy.cluster.hierarchy` package), to represent the **hierarchy of clusters of routes formed at different levels of distance**.
 2. Using a **linkage matrix** (`linkage_matrix`) to  **calculate the Euclidean distance between the clusters** at **each step of the clustering process**. This gives a **measure of similarity or dissimilarity** between the clusters of routes. This `linkage_matrix` is generated by the `ClusterHelper` class, which uses the agglomerative clustering algorithm implemented in **Scikit-learn**
 
 ## References
 
-**[1]** Zhao, D., Tu, S. and Xu, L. (2024) ‘Efficient retrosynthetic planning with MCTS Exploration Enhanced A* search’, Communications Chemistry, 7(1). <br><br>
-**[2]** Genheden, S. (2022) 'AiZynthFinder', AstraZeneca R&D Presentation. Available at: https://www.youtube.com/watch?v=r9Dsxm-mcgA (Accessed: 22 August 2024). <br><br>
-**[3]** Thakkar, A. et al. (2020) ‘Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain’, Chemical Science, 11(1), pp. 154–168. <br><br>
-**[4]** David, L. et al. (2020) ‘Molecular representations in AI-Driven Drug Discovery: A review and practical guide’, Journal of Cheminformatics, 12(1). <br><br>
-**[5]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning. <br><br>
-**[6]** Coulom, R. (2007) ‘Efficient selectivity and backup operators in Monte-Carlo Tree Search’, Lecture Notes in Computer Science, pp. 72–83. <br><br>
-**[7]** Kroese, D.P. et al. (2014) ‘Why the monte Carlo method is so important today’, WIREs Computational Statistics, 6(6), pp. 386–392. <br><br>
-**[8]** Genheden, S., Engkvist, O. and Bjerrum, E. (2021) ‘Clustering of synthetic routes using tree edit distance’, Journal of Chemical Information and Modeling, 61(8), pp. 3899–3907. <br><br>
+**[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
+**[2]** Coley, C.W. et al. (2017) ‘Prediction of organic reaction outcomes using machine learning’, ACS Central Science, 3(5), pp. 434–443. <br><br>
+**[3]** Ishida, S. et al. (2022) ‘Ai-driven synthetic route design incorporated with Retrosynthesis Knowledge’, Journal of Chemical Information and Modeling, 62(6), pp. 1357–1367. <br><br>
+**[2]** Zhao, D., Tu, S. and Xu, L. (2024) ‘Efficient retrosynthetic planning with MCTS Exploration Enhanced A* search’, Communications Chemistry, 7(1). <br><br>
+**[5]** Genheden, S. (2022) 'AiZynthFinder', AstraZeneca R&D Presentation. Available at: https://www.youtube.com/watch?v=r9Dsxm-mcgA (Accessed: 22 August 2024). <br><br>
+**[6]** Thakkar, A. et al. (2020) ‘Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain’, Chemical Science, 11(1), pp. 154–168. <br><br>
+**[7]** David, L. et al. (2020) ‘Molecular representations in AI-Driven Drug Discovery: A review and practical guide’, Journal of Cheminformatics, 12(1). <br><br>
+**[8]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning. <br><br>
+**[9]** Coulom, R. (2007) ‘Efficient selectivity and backup operators in Monte-Carlo Tree Search’, Lecture Notes in Computer Science, pp. 72–83. <br><br>
+**[10]** Kroese, D.P. et al. (2014) ‘Why the monte Carlo method is so important today’, WIREs Computational Statistics, 6(6), pp. 386–392. <br><br>
+**[11]** Genheden, S., Engkvist, O. and Bjerrum, E. (2021) ‘Clustering of synthetic routes using tree edit distance’, Journal of Chemical Information and Modeling, 61(8), pp. 3899–3907. <br><br>
