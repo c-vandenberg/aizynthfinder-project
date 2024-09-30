@@ -38,17 +38,22 @@ At its core, a Seq2Seq model consists of two main components: an **encoder** and
 Both the encoder and decoder are neural networks, specifically a type of **recurrent neural network (RNN)** called **Long Short-Term Memory (LSTM)** models (or sometimes **Gated Recurrent Unit (GRU)** models)
 
 ### 3.3.1 Encoder
-* **Function**: The encoder reads the input sequence and **compresses it into a fixed-size vector**, called **interal state vectors** or **context vectors**. In the case of LSTM models, these are called the **hidden state vector** (`state_h`) and **cell state vector** (`state_c`).
-* **Structure**: Often implemented using RNNs like LSTM or GRU, though other architectures like **Transformers** can serve as encoders.
+
+* **Function**: The encoder reads the input sequence and **compresses it into a fixed-size vector**, called **internal state vectors** or **context vectors**. In the case of LSTM models, these are called the **hidden state vector** (`state_h`) and **cell state vector** (`state_c`).
+* **Structure**: Often implemented using RNNs like LSTM or GRU. These can a a **single RNN layer**, or a **stack of several RNN layers**. However other architectures like **Transformers** can serve as encoders.
 * **Operation**: It **reads the input sequence token by token** and **updates its hidden state accordingly**, thus **capturing the information from the entire input**. The **outputs of the encoder are discarded** and only the **internal states/context vectors are preserved**
 
-The context vector aims to **encapsulate the information for all input elements** in order to **help the decoder make accurate predictions**.
+The context vectors aims to **encapsulate the information for all input elements** in order to **help the decoder make accurate predictions**.
+
+Using the example of an LSTM RNN, an LSTM unit maintains **two types of internal states**:
+1. **Hidden State ($$h_t$$)**: This represents the **output of the LSTM at time step $$t$$**.
+2. **Cell State ($$c_t$$)**: This **carries long-term dependencies** and acts as a **memory** for the LSTM.
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/2bef59f1-672e-41e6-a211-dd25c8a8b412", alt="seq2seq-model-encoder"/>
     <p>
-      <b>Fig 1</b> Seq2Seq model LSTM encoder architecture <b><sup>4</sup></b>
+      <b>Fig 1</b> LSTM encoder architecture in a Seq2Seq model <b><sup>4</sup></b>
     </p>
   </div>
 <br>
@@ -63,12 +68,36 @@ In **Fig 1**, we can see that the **LSTM encoder reads the input data, one token
 
 ### 3.3.2 Decoder
 
-The encoder takes the input sequence and **compresses it into a fixed-size vector**, often referred to as the **context vector** or the **thought vector**. This vector contains the **most important information** from the input sequence and serves as the **initial state for the decoder**.
-2. **Decoder**: The decoder then generates the output sequence by **predicting one token at a time**.
+* **Function**: The decoder then **generates the output sequence** from the **context vector** provided by the encoder.
+* **Structure**: Like the encoder, it is often implemented using RNNs like LSTM or GRU. These can a a **single RNN layer**, or a **stack of several RNN layers**
+* **Operation**: It **produces the output sequence one token at a time**, using the **context vector** and its **own previously generated output tokens** to **predict the next token in the sequence**.
 
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/93afac63-7dc2-42d6-a307-6c1e3cf71c04", alt="seq2seq-lstm-encoder-decoder-internal-state-transfer"/>
+    <p>
+      <b>Fig 2</b> Encoder final internal state vectors are used as the initial state of the decoder <b><sup>5</sup></b>
+    </p>
+  </div>
+<br>
+
+An LSTM decoder uses the **final internal state vectors of the LSTM encoder** as its **initial state** (**Fig 2**). Using these **initial states**,  the LSTM decoder **starts generating the output sequence, one token at a time**, and the **internal state vectors of the output token** are used to **predict future output tokens**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/4a366c6d-b7ff-4876-a73c-1cdb53e35b24", alt="seq2seq-model-decoder"/>
+    <p>
+      <b>Fig 3</b> LSTM decoder architecture in a Seq2Seq model <b><sup>4</sup></b>
+    </p>
+  </div>
+<br>
+
+In **Fig 3**, we can see that at the beginning of its prediction: the decoder is fed the **final internal state vectors of the encoder**, and a **start token**
+1. **Initialisation**: The **final hidden state ($$h_0$$)** and the **final cell state ($$c_0$$)** from the encoder are used to **initialise the decoder's hidden and cell states**.
 
 ## References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
 **[3]** Nam, J., Kim, J. (2016) ‘Linking the Neural Machine Translation and the Prediction of Organic Chemistry Reactions’. 1612.09529. <br><br>
-**[4]** Introduction to seq2seq models (2024) Analytics Vidhya. Available at: https://www.analyticsvidhya.com/blog/2020/08/a-simple-introduction-to-sequence-to-sequence-models/ (Accessed: 30 September 2024). 
+**[4]** Introduction to seq2seq models (2024) Analytics Vidhya. Available at: https://www.analyticsvidhya.com/blog/2020/08/a-simple-introduction-to-sequence-to-sequence-models/ (Accessed: 30 September 2024). <br><br>
+**[5]** Chollet, F. (no date) The keras blog, The Keras Blog ATOM. Available at: https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html (Accessed: 30 September 2024). <br><br>
