@@ -2,7 +2,7 @@
 
 ## 2.1 What is AiZynthFinder's Expansion Policy Neural Network?
 
-AiZynthFinder employs a **feedforward neural network**, specifically a **Multi-Layer Perception (MLP)**, as its standard expansion policy. **<sup>1</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
+AiZynthFinder employs a type of ***feedforward neural network** called a **Muti-Layer Perceptron**, as its standard expansion policy. **<sup>1</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
 
 The architecture effectively **maps molecular representations to reaction probabilities**, generating a **ranked list of reaction templates** representing the most feasbile sets of reactions.
 
@@ -83,11 +83,15 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
   
 ## 2.3 Feedforward Neural Networks (FNNs)
 
-**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any, FNNs can have zero or more hidden layers), and to the output nodes. There are **no cycles or loops** in the network. 
+**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any)), and to the output nodes. There are **no cycles or loops** in the network.
+
+The first type of neural network developed was called **single-layer perceptrons**. These consisted of only an **input layer** and an **output layer** and could only recognise/predict **linear patterns** between the input and output data, as there were no hidden layers (and so no associated activation functions) to **introduce non-linearity**.
 
 FNNs were the first type of artificial neural network invented and are simpler than their counterparts like **recurrent neural networks** and **convolutional neural networks**.
 
-The training of FNNs involves two main phases:
+Modern FNNs are called **multilayer perceptrons (MLPs)** and consist of **one or more hidden layers** as well as the input and output layer. As a result, they are able to recognise/predict **non-linear patterns** between the input and output data, due to **nonlinear activation functions** present within the hidden layers.
+
+The training of MLP FNNs involves two main phases:
 1. **Feedforward Phase**:
    * In this phase, the input data is fed into the network, and it **propagates forward through the network.
    * At each hidden layer, the **weighted sum of the inputs** from the previous layer is calculated and **passed through an activation function**, introducing non-linearity into the model.
