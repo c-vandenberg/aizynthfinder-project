@@ -70,6 +70,17 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
    * **Function**: Produces the final prediction or outoput for the given inputs.
    * **Structure**: Number of nodes/neurons in the output layer depends on the desired output format (e.g., classes for classification).
   
+**N.B.** Although **deep learning and neural networks are often used interchangeably**, it is worth noting that the **"deep"** in deep learning simply refers to the **depth of the layers** in a neural network. Generally, a neural network that consists of **more than three layers** (i.e. an input layer, one hidden layer, and an output layer) can be considered a **deep learning algoritm** (**Fig 2**).
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/04f5f505-b0c1-44af-8f63-23142b4e8d21", alt="deep-learning-neural-network"/>
+    <p>
+      <b>Fig 2</b> Deep learning neural network schematic. <b><sup>3</sup></b>
+    </p>
+  </div>
+<br>
+  
 ## 2.3 Feedforward Neural Networks (FNNs)
 
 **Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any, FNNs can have zero or more hidden layers), and to the output nodes. There are **no cycles or loops** in the network. 
@@ -86,13 +97,13 @@ The training of FNNs involves two main phases:
    * This error is then **propagated back through the network**, and the **weights are adjusted to minimize the error**.
    * The process of adjusting the weights is typically done using a **gradient descent optimization algorithm**.
 
-This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached** (**Fig 2**).
+This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached** (**Fig 3**).
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/16d294fc-c27e-442f-986d-a8d2619c7473", alt="loss-function-gradient-descent"/>
     <p>
-      <b>Fig 2</b> Gradient descent of error in prediction, calculated by a loss function. <b><sup>2</sup></b>
+      <b>Fig 3</b> Gradient descent of error in prediction, calculated by a loss function. <b><sup>3</sup></b>
     </p>
   </div>
 <br>
