@@ -1,10 +1,22 @@
 # 2 AiZynthFinder's Expansion Policy Neural Network
 
+For **neural network-guided one-step retrosynthesis**, there are two primary methodologies used to **define the disconnection rules** and so **model the reverse reaction**: **<sup>1</sup>**
+1. **Template-Based Methods**
+2. **SMILES-Based (Template-Free) Methods**
+
+The primary methodology AiZynthFinder uses is a **template-based method**, during its **expansion policy** (*c.f.* **Section 1.3**).
+
+In template-based retrosynthetic methods, a set of **predefined molecular transformations** are applied to the target molecule. These template rules can either be **bespoke rules written by in-house synthetic chemists**, or obtained by **data mining reaction databases**. **<sup>2</sup>**
+
+The neural network is trained on these template rules, and the trained model is fed a **molecular representation of the target molecule** (in AiZynthFinder's case, an **ECFP4 bit string**) as input. The trained model then **predicts the most appropriate template to use**, giving a **set of reaction precursors**. This process is then **recursively employed** to **construct a retrosynthetic tree**. **<sup>1</sup>** **<sup>3</sup>**
+
 ## 2.1 What is AiZynthFinder's Expansion Policy Neural Network?
 
-AiZynthFinder employs a type of ***feedforward neural network** called a **Muti-Layer Perceptron**, as its standard expansion policy. **<sup>1</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
+AiZynthFinder employs a type of ***feedforward neural network** called a **Muti-Layer Perceptron**, as its standard expansion policy. **<sup>4</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
 
 The architecture effectively **maps molecular representations to reaction probabilities**, generating a **ranked list of reaction templates** representing the most feasbile sets of reactions.
+
+This approach is a **template-based** expansion policy
 
 ## 2.2 Neural Networks Overview
 
@@ -51,7 +63,7 @@ where:
   <div align="center">
     <img src="https://github.com/user-attachments/assets/f4c954c2-e0f7-43f4-a1a7-82d2699696e9", alt="simple-neural-network"/>
     <p>
-      <b>Fig 1</b> Simple neural network architecture. <b><sup>2</sup></b>
+      <b>Fig 1</b> Simple neural network architecture. <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -76,7 +88,7 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
   <div align="center">
     <img src="https://github.com/user-attachments/assets/04f5f505-b0c1-44af-8f63-23142b4e8d21", alt="deep-learning-neural-network"/>
     <p>
-      <b>Fig 2</b> Deep learning neural network schematic. <b><sup>3</sup></b>
+      <b>Fig 2</b> Deep learning neural network schematic. <b><sup>6</sup></b>
     </p>
   </div>
 <br>
@@ -107,14 +119,16 @@ This is an **iterative process** where the training dataset is **passed through 
   <div align="center">
     <img src="https://github.com/user-attachments/assets/16d294fc-c27e-442f-986d-a8d2619c7473", alt="loss-function-gradient-descent"/>
     <p>
-      <b>Fig 3</b> Gradient descent of error in prediction, calculated by a loss function. <b><sup>3</sup></b>
+      <b>Fig 3</b> Gradient descent of error in prediction, calculated by a loss function. <b><sup>6</sup></b>
     </p>
   </div>
 <br>
 
 
 ## References
-
-**[1]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) 'A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning.'<br><br>
-**[2]** Chen, J. (no date) What is a neural network?, Investopedia. Available at: https://www.investopedia.com/terms/n/neuralnetwork.asp (Accessed: 30 September 2024).<br><br>
-**[3]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024).<br><br>
+**[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
+**[2]** Fortunato, M.E. et al. (2020) ‘Data augmentation and pretraining for template-based retrosynthetic prediction in computer-aided synthesis planning’, Journal of Chemical Information and Modeling, 60(7), pp. 3398–3407. <br><br>
+**[3]** Thakkar, A. et al. (2020) ‘Datasets and their influence on the development of computer assisted synthesis planning tools in the pharmaceutical domain’, Chemical Science, 11(1), pp. 154–168. <br><br>
+**[4]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) 'A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning.' <br><br>
+**[5]** Chen, J. (no date) What is a neural network?, Investopedia. Available at: https://www.investopedia.com/terms/n/neuralnetwork.asp (Accessed: 30 September 2024). <br><br>
+**[6]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024). <br><br>
