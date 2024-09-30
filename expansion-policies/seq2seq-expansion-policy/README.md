@@ -93,7 +93,37 @@ An LSTM decoder uses the **final internal state vectors of the LSTM encoder** as
 <br>
 
 In **Fig 3**, we can see that at the beginning of its prediction: the decoder is fed the **final internal state vectors of the encoder**, and a **start token**
-1. **Initialisation**: The **final hidden state ($$h_0$$)** and the **final cell state ($$c_0$$)** from the encoder are used to **initialise the decoder's hidden and cell states**.
+1. **Initialisation**:
+   * **Initial States**: The **final hidden state ($$h_0$$)** and the **final cell state ($$c_0$$)** from the LSTM encoder are used to **initialise the LSTM decoder's hidden and cell states**.
+
+$$h_0^{dec} = h_{enc}$$
+
+$$c_0^{dec} = c_{enc}$$
+
+2. **Generating the First Token**:
+   * **Input to Decoder**: A **special start-of-sequence token** (e.g. **`<START>`**) is **fed into the decoder**.
+   * **Processing**: The LSTM decoder **processes this token**, along with the **initial states** to **produce the first output token** and **update its internal states**.
+     
+$$h_1^{dec},\ c_1^{dec} = \text{LSTM}(\langle \text{START} \rangle,\ h_0^{dec},\ c_0^{dec})$$
+
+   * **Output**: The **first token $$Y_1$$** (e.g. "Hello") is generated.
+
+3. **Generating Subsequent Tokens**:
+   * **Input**:
+      * **During training** - A technique called **teacher forcing** is used whereby the **ground truth token** (i.e. the **correct token**) from the **previous time step** is passed to the LSTM decoder for the next token generation.
+      * **During Inference** - The **decoders own predicted token** from the previous time step is used.
+   * **Processing**: The LSTM decoder **processes this input**, along with the **current hidden and cell states** to generate the **next token** and **update its internal states**
+
+4. **Iterative Processing**:
+   * Step 3 **continues iteratively**:
+      * **Internal State Propagation**: At each time step, the **current hidden and cell states** ($$ $$) **encapsulate all the information processed up to that point**.
+      * **Prediction dependency**: The prediction of the next token depends not only on the **current input token**, but also on the **cumulative context captured in the internal states**.
+    
+$$h_t^{dec},\ c_t^{dec} = \text{LSTM}(x_{t-1},\ h_{t-1}^{dec},\ c_{t-1}^{dec})$$
+
+where:
+   * $$x_{t-1}$$: The **input token at time $$t - 1$$** (either **ground truth token** if **teacher forcing**, or **previous prediction**).
+   * $$h_t^{dec},\ c_t^{dec}$$: The **previous hidden and cell states**
 
 ## References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
