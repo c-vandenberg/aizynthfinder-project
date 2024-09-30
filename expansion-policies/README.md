@@ -82,15 +82,24 @@ The training of FNNs involves two main phases:
    * At each hidden layer, the **weighted sum of the inputs** from the previous layer is calculated and **passed through an activation function**, introducing non-linearity into the model.
    * This process continues **until the output layer is reached**, and a **prediction is made**.
 2. **Backpropagation Phase**:
-   * Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated.
+   * Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated using a **loss function** (also known as a **cost function**).
    * This error is then **propagated back through the network**, and the **weights are adjusted to minimize the error**.
    * The process of adjusting the weights is typically done using a **gradient descent optimization algorithm**.
 
-This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until a **stop criterion is reached**.
+This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached** (**Fig 2**).
 
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/16d294fc-c27e-442f-986d-a8d2619c7473", alt="loss-function-gradient-descent"/>
+    <p>
+      <b>Fig 2</b> Gradient descent of error in prediction, calculated by a loss function. <b><sup>2</sup></b>
+    </p>
+  </div>
+<br>
 
 
 ## References
 
 **[1]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) 'A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning.'<br><br>
 **[2]** Chen, J. (no date) What is a neural network?, Investopedia. Available at: https://www.investopedia.com/terms/n/neuralnetwork.asp (Accessed: 30 September 2024).<br><br>
+**[3]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024).<br><br>
