@@ -125,6 +125,11 @@ where:
    * $$x_{t-1}$$: The **input token at time $$t - 1$$** (either **ground truth token** if **teacher forcing**, or **previous prediction**).
    * $$h_t^{dec},\ c_t^{dec}$$: The **previous hidden and cell states**
 
+Within the decoder, there is **another key component** of a Seq2Seq model we must talk about; The **Attention Mechanism**.
+
+### 3.3.3 Attention Mechanism
+
+
 ## References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
