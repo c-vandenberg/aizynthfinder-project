@@ -4,7 +4,7 @@ For **neural network-guided one-step retrosynthesis**, there are two primary met
 1. **Template-Based Methods**
 2. **SMILES-Based (Template-Free) Methods**
 
-The primary methodology AiZynthFinder uses is a **template-based method**, during its **expansion policy** (*c.f.* **Section 1.3**).
+AiZynthFinder primarily uses a **template-based method**, during its **expansion policy** (*c.f.* **Section 1.3**).
 
 In template-based retrosynthetic methods, a set of **predefined molecular transformations** are applied to the target molecule. These template rules can either be **bespoke rules written by in-house synthetic chemists**, or obtained by **data mining reaction databases**. **<sup>2</sup>**
 
