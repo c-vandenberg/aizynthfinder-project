@@ -10,8 +10,20 @@ This project aims to implement a SMILES-based (template-free) retrosynthetic met
 
 A template-based retrosynthetic method is based on a predefined set of rules, and thus **inherit the limitations of these rules**:
 1. The primary limitation of such methods is that they are **fundamentally dependent on the rules on which the neural network is trained**, and thus these approaches have **issues with making accurate predictions outside of this rule-based knowledge base**. **<sup>2</sup>**
+   
 2. There is also an **inherent trade-off** between defining **general rules**, which can **introduce noise** and **reduce the accuracy or reliability of a model’s predictions**, and defining **very specific rules**, which **restrict the model’s predictions to a narrow set of reactants and products**. **<sup>2</sup>**
+   
 3. Additionally, the reaction rules are **inadequate representations of the underlying chemistry** as they focus on **local reaction center molecular environments only**. **<sup>2</sup>**
+   
+4. Finally, a rules-based system **does not fully account for stereochemistry**. **<sup>2</sup>**
+
+## 3.2 Alternative SMILES-Based Retrosynthetic Method
+
+A deep learning approach that **avoids a template-based/rule-based approach** could **avoid the above limitations**.
+
+*Pande et al.* appraoched the problem as a **sequence-to-sequence prediction task**, **mapping a text-based linear notation of the reactants to that of the product, or vice versa**. **<sup>2</sup>** 
+
+In their paper, *Pande et al.* reference the work of **Nam and Kim**, where a **neural seq2seq model** was employed for **forward reaction prediction**, using the **SMILES representation** of reactants as input to predict the SMILES of the product. <sup>3</sup> *Pande et al.* aimed to extend this approach to **retrosynthetic (backward) reaction prediction**.
 
 ## 3.2 Sequence-to-Sequence Model Overview
 
