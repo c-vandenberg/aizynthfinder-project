@@ -44,10 +44,10 @@ Mathematically, this can be represented as:
 $$z =  \sum_{i=1}^{n} w_ix_i + b$$
 
 where:
-  * $$x_i$$ : Input from the $$i^{th}$$ neuron of the previous layer (or $$i^{th}$$ feature if input layer).
-  * $$w_ix_i$$ : Weight associated with the $$i^{th}$$ input.
-  * $$b$$ : The bias term.
-  * $$z$$ : The **weighted sum + bias term**. This is also known as the neuron's **pre-activation value**.
+  * $$x_i$$ = Input from the $$i^{th}$$ neuron of the previous layer (or $$i^{th}$$ feature if input layer).
+  * $$w_ix_i$$ = Weight associated with the $$i^{th}$$ input.
+  * $$b$$ = The bias term.
+  * $$z$$ = The **weighted sum + bias term**. This is also known as the neuron's **pre-activation value**.
 
 3. **Activation Function**: The **weighted sum/pre-activation value** $$z$$ is then **passed through an activation function** $$\sigma(z)$$ to produce the **node/neuron's output**.
    * This activation function introduces **non-linear properties** to the neural network, allowing the model to **learn more complex patterns**. Without the activation function, the neural network would only be able to learn **linear patterns**.
@@ -55,7 +55,7 @@ where:
 $$ a = \sigma(z)$$
 
 where:
-  * $$a$$ : The **activated output of the neuron**.
+  * $$a$$ = The **activated output of the neuron**.
 
 <br>
   <div align="center">
