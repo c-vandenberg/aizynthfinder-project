@@ -23,7 +23,7 @@ A deep learning approach that **avoids a template-based/rule-based approach** co
 
 *Pande et al.* appraoched the problem as a **sequence-to-sequence prediction task**, **mapping a text-based linear notation of the reactants to that of the product, or vice versa**. **<sup>2</sup>** 
 
-In their paper, *Pande et al.* reference the work of **Nam and Kim**, where a **neural seq2seq model** was employed for **forward reaction prediction**, using the **SMILES representation** of reactants as input to predict the SMILES of the product. <sup>3</sup> *Pande et al.* aimed to extend this approach to **retrosynthetic (backward) reaction prediction**.
+In their paper, *Pande et al.* reference the work of **Nam and Kim**, where a **neural seq2seq model** was employed for **forward reaction prediction**, using the **SMILES representation** of reactants as input to predict the SMILES of the product. **<sup>3</sup>** *Pande et al.* aimed to extend this approach to **retrosynthetic (backward) reaction prediction**.
 
 ## 3.2 Sequence-to-Sequence Model Overview
 
@@ -32,3 +32,4 @@ In their paper, *Pande et al.* reference the work of **Nam and Kim**, where a **
 ## References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
+**[3]** Nam, J., Kim, J. (2016) ‘Linking the Neural Machine Translation and the Prediction of Organic Chemistry Reactions’. 1612.09529.
