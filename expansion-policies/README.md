@@ -39,7 +39,8 @@ where:
   * $$b$$ : The bias term.
   * $$z$$ : The **weighted sum + bias term**. This is also known as the neuron's **pre-activation value**.
 
-3. **Activation Function**: The **pre-activation value** $$z$$ is then **passed through an activation function** $$\sigma(z)$$ to produce the **node/neuron's output**:
+3. **Activation Function**: The **weighted sum/pre-activation value** $$z$$ is then **passed through an activation function** $$\sigma(z)$$ to produce the **node/neuron's output**.
+   * This activation function introduces **non-linear properties** to the neural network, allowing the model to **learn more complex patterns**. Without the activation function, the neural network would only be able to learn **linear patterns**.
 
 $$ a = \sigma(z)$$
 
@@ -58,20 +59,36 @@ where:
 The architecture of a simple neural network is shown in **Fig 1** and consists of:
 
 1. **Input Layer**
-   * **Function**: Receives the input data.
-   * **Structure**: Contains neurons corresponding to the number of input features. Depending on the neural network architecture, the nodes/neurons in the input layer may also calculate weighted sums and pass them through activation functions.
+   * **Function**: Nodes/neurons in the input layer receive inputs/input data and pass them onto the next layer (first hidden layer). Depending on the neural network architecture, the nodes/neurons in the input layer may also calculate weighted sums and pass them through activation functions.
+   * **Structure**: The number of nodes/neurons in the input layer is determined by the number of dimensions/features of the input data.
 
 2. **Hidden Layers**
-   * **Function**: Perform intermediate computations and feature extraction.
+   * **Function**: These layers are **not exposed directly to raw input or output data** and can be considered as the **computational engines** of the neural network. Each hidden layer's nodes/neurons take the outputs from **nodes in the previous layer** as input, compute a **weighted sum of these inputs** and apply an **activation function**. This output is then **pass the result to the next layer**. 
    * **Structure**: One or more layers with neurons applying activation functions to weighted sums of inputs.
   
 3. **Output Layer**
-   * **Function**: Produces the final prediction or outoput.
-   * **Structure**: Number of neurons corresponds to the desired output format (e.g., classes for classification).
+   * **Function**: Produces the final prediction or outoput for the given inputs.
+   * **Structure**: Number of nodes/neurons in the output layer depends on the desired output format (e.g., classes for classification).
   
 ## 2.3 Feedforward Neural Networks (FNNs)
 
-**Feedforward Neural Networks (FNNs)** are the **simplest type** of a
+**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any, FNNs can have zero or more hidden layers), and to the output nodes. There are **no cycles or loops** in the network. 
+
+FNNs were the first type of artificial neural network invented and are simpler than their counterparts like **recurrent neural networks** and **convolutional neural networks**.
+
+The training of FNNs involves two main phases:
+1. **Feedforward Phase**:
+   * In this phase, the input data is fed into the network, and it **propagates forward through the network.
+   * At each hidden layer, the **weighted sum of the inputs** from the previous layer is calculated and **passed through an activation function**, introducing non-linearity into the model.
+   * This process continues **until the output layer is reached**, and a **prediction is made**.
+2. **Backpropagation Phase**:
+   * Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated.
+   * This error is then **propagated back through the network**, and the **weights are adjusted to minimize the error**.
+   * The process of adjusting the weights is typically done using a **gradient descent optimization algorithm**.
+
+This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until a **stop criterion is reached**.
+
+
 
 ## References
 
