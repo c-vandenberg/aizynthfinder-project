@@ -122,8 +122,8 @@ $$h_1^{dec},\ c_1^{dec} = \text{LSTM}(\langle \text{START} \rangle,\ h_0^{dec},\
 $$h_t^{dec},\ c_t^{dec} = \text{LSTM}(x_{t-1},\ h_{t-1}^{dec},\ c_{t-1}^{dec})$$
 
 where:
-   * $$x_{t-1}$$: The **input token at time $$t - 1$$** (either **ground truth token** if **teacher forcing**, or **previous prediction**).
-   * $$h_t^{dec},\ c_t^{dec}$$: The **previous hidden and cell states**
+   * $$x_{t-1}$$ = The **input token at time $$t - 1$$** (either **ground truth token** if **teacher forcing**, or **previous prediction**).
+   * $$h_t^{dec},\ c_t^{dec}$$ = The **previous hidden and cell states**
 
 Within the decoder, there is **another key component** of a Seq2Seq model we must talk about; The **Attention Mechanism**.
 
