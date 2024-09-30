@@ -35,7 +35,7 @@ $$z =  \sum_{i=1}^{n} w_ix_i + b$$
 
 where:
   * $$x_i$$ : Input from the $$i^{th}$$ neuron of the previous layer (or $$i^{th}$$ feature if input layer).
-  * $wx_i$$ : Weight associated with the $$i^{th}$$ input.
+  * $$w_ix_i$$ : Weight associated with the $$i^{th}$$ input.
   * $$b$$ : The bias term.
   * $$z$$ : The **weighted sum + bias term**. This is also known as the neuron's **pre-activation value**.
 
