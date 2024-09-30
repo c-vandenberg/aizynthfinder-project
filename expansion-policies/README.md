@@ -70,7 +70,7 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
    * **Function**: Produces the final prediction or outoput for the given inputs.
    * **Structure**: Number of nodes/neurons in the output layer depends on the desired output format (e.g., classes for classification).
   
-**N.B.** Although **deep learning and neural networks are often used interchangeably**, it is worth noting that the **"deep"** in deep learning simply refers to the **depth of the layers** in a neural network. Generally, a neural network that consists of **more than three layers** (i.e. an input layer, one hidden layer, and an output layer) can be considered a **deep learning algoritm** (**Fig 2**).
+**N.B.** Although **deep learning and neural networks are often used interchangeably**, it is worth noting that the **"deep"** in deep learning simply refers to the **depth of the layers** in a neural network. Generally, a neural network that consists of **more than three layers** (i.e. an input layer, one hidden layer, and an output layer) can be considered a **deep learning neural network** (**Fig 2**).
 
 <br>
   <div align="center">
