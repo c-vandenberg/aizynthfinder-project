@@ -309,7 +309,7 @@ class Trainer:
         model_save_path: str = training_conf['model_save_path']
         os.makedirs(model_save_path, exist_ok=True)
 
-        tf.saved_model.save(self.model, model_save_path)
+        self.model.export(model_save_path)
         print(f"Model saved to {model_save_path}")
 
     def run(self):

@@ -96,6 +96,21 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         return output
 
+    def get_config(self) -> dict:
+        config = {
+            'input_vocab_size': self.input_vocab_size,
+            'output_vocab_size': self.output_vocab_size,
+            'encoder_embedding_dim': self.encoder.embedding.output_dim,
+            'decoder_embedding_dim': self.decoder.embedding.output_dim,
+            'units': self.units,
+            'dropout_rate': self.dropout_rate,
+            'name': self.name,
+        }
+        return config
+
+    @classmethod
+    def from_config(cls, config: dict) -> 'RetrosynthesisSeq2SeqModel':
+        return cls(**config)
 
 class BestValLossCheckpointCallback(Callback):
     def __init__(self, checkpoint_manager: CheckpointManager):

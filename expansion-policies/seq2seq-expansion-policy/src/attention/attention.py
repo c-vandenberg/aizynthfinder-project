@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Layer, Dense
 from attention.attention_interface import AttentionInterface
 from typing import List, Optional, Tuple, Union
 
-
+@tf.keras.utils.register_keras_serializable()
 class BahdanauAttention(AttentionInterface):
     def __init__(self, units: int, **kwargs):
         super(BahdanauAttention, self).__init__(units, **kwargs)
@@ -113,9 +113,6 @@ class BahdanauAttention(AttentionInterface):
         config = super(BahdanauAttention, self).get_config()
         config.update({
             'units': self.units,
-            'attention_dense1': tf.keras.layers.serialize(self.attention_dense1),
-            'attention_dense2': tf.keras.layers.serialize(self.attention_dense2),
-            'attention_v': tf.keras.layers.serialize(self.attention_v),
         })
         return config
 
@@ -130,8 +127,4 @@ class BahdanauAttention(AttentionInterface):
         Returns:
             BahdanauAttention: A new instance of BahdanauAttention configured using the provided config.
         """
-        # Deserialize layers
-        config['attention_dense1'] = tf.keras.layers.deserialize(config['attention_dense1'])
-        config['attention_dense2'] = tf.keras.layers.deserialize(config['attention_dense2'])
-        config['attention_v'] = tf.keras.layers.deserialize(config['attention_v'])
         return cls(**config)

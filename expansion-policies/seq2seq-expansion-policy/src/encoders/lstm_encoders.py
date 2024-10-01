@@ -3,6 +3,7 @@ from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout, Den
 from encoders.encoder_interface import EncoderInterface
 from typing import Tuple, Optional
 
+@tf.keras.utils.register_keras_serializable()
 class StackedBidirectionalLSTMEncoder(EncoderInterface):
     """
     Encoder: StackedBidirectionalLSTMEncoder
@@ -189,11 +190,6 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             'encoder_embedding_dim': self.embedding.output_dim,
             'units': self.units,
             'dropout_rate': self.dropout_rate,
-            'embedding': tf.keras.layers.serialize(self.embedding),
-            'bidirectional_lstm_1': tf.keras.layers.serialize(self.bidirectional_lstm_1),
-            'dropout_1': tf.keras.layers.serialize(self.dropout_1),
-            'bidirectional_lstm_2': tf.keras.layers.serialize(self.bidirectional_lstm_2),
-            'dropout_2': tf.keras.layers.serialize(self.dropout_2),
         })
         return config
 
@@ -209,83 +205,4 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             StackedBidirectionalLSTMEncoder: A new instance of StackedBidirectionalLSTMEncoder configured using the
             provided config.
         """
-        # Deserialize layers
-        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
-        config['bidirectional_lstm_1'] = tf.keras.layers.deserialize(config['bidirectional_lstm_1'])
-        config['dropout_1'] = tf.keras.layers.deserialize(config['dropout_1'])
-        config['bidirectional_lstm_2'] = tf.keras.layers.deserialize(config['bidirectional_lstm_2'])
-        config['dropout_2'] = tf.keras.layers.deserialize(config['dropout_2'])
         return cls(**config)
-
-
-class SimpleEncoder(Layer):
-    def __init__(self, vocab_size: int, embedding_dim: int, units: int, dropout_rate: float = 0.2, **kwargs):
-        super(SimpleEncoder, self).__init__(**kwargs)
-        self.vocab_size = vocab_size
-        self.embedding_dim = embedding_dim
-        self.units = units
-        self.dropout_rate = dropout_rate
-
-        self.embedding = Embedding(input_dim=vocab_size, output_dim=embedding_dim, mask_zero=True, name='simple_embedding')
-        self.dense = Dense(units, activation='relu', name='simple_dense')
-        self.dropout = Dropout(dropout_rate, name='simple_dropout')
-
-    def build(self, input_shape):
-        """
-        Build method to initialize sublayers with the correct input shapes.
-        """
-        # Build the embedding layer
-        self.embedding.build(input_shape)
-
-        # Compute the output shape after embedding
-        embedding_output_shape = self.embedding.compute_output_shape(input_shape)
-        self.dense.build(embedding_output_shape)
-
-        # Compute the output shape after dense
-        dense_output_shape = self.dense.compute_output_shape(embedding_output_shape)
-        self.dropout.build(dense_output_shape)
-
-        # Finally, call the superclass build method
-        super(SimpleEncoder, self).build(input_shape)
-
-    def call(self, inputs: tf.Tensor, training: Optional[bool] = None) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
-        # Embed input
-        x = self.embedding(inputs)  # Shape: (batch_size, sequence_length, embedding_dim)
-
-        # Apply Dense layer
-        encoder_output = self.dense(x)  # Shape: (batch_size, sequence_length, units)
-
-        # Apply Dropout
-        encoder_output = self.dropout(encoder_output, training=training)
-
-        # For compatibility, return dummy states
-        state_h = tf.zeros_like(encoder_output[:, 0, :])  # Shape: (batch_size, units)
-        state_c = tf.zeros_like(encoder_output[:, 0, :])  # Shape: (batch_size, units)
-
-        return encoder_output, state_h, state_c
-
-    def compute_mask(self, inputs: tf.Tensor, mask: Optional[tf.Tensor] = None) -> Optional[tf.Tensor]:
-        return self.embedding.compute_mask(inputs, mask)
-
-    def get_config(self) -> dict:
-        config = super(SimpleEncoder, self).get_config()
-        config.update({
-            'vocab_size': self.vocab_size,
-            'embedding_dim': self.embedding_dim,
-            'units': self.units,
-            'dropout_rate': self.dropout_rate,
-            'embedding': tf.keras.layers.serialize(self.embedding),
-            'dense': tf.keras.layers.serialize(self.dense),
-            'dropout': tf.keras.layers.serialize(self.dropout),
-        })
-        return config
-
-    @classmethod
-    def from_config(cls, config: dict) -> 'SimpleEncoder':
-        # Deserialize layers
-        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
-        config['dense'] = tf.keras.layers.deserialize(config['dense'])
-        config['dropout'] = tf.keras.layers.deserialize(config['dropout'])
-        return cls(**config)
-
-

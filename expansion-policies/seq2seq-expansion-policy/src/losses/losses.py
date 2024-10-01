@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+@tf.keras.utils.register_keras_serializable()
 class MaskedSparseCategoricalCrossentropy(tf.keras.losses.Loss):
     def __init__(self, padding_idx: int = 0, name: str = "masked_sparse_categorical_crossentropy", **kwargs):
         """

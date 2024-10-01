@@ -4,7 +4,7 @@ from decoders.decoder_interface import DecoderInterface
 from attention.attention import BahdanauAttention
 from typing import List, Optional, Tuple, Union, Any
 
-
+@tf.keras.utils.register_keras_serializable()
 class StackedLSTMDecoder(DecoderInterface):
     """
     Decoder: StackedLSTMDecoder
@@ -368,17 +368,6 @@ class StackedLSTMDecoder(DecoderInterface):
             'decoder_embedding_dim': self.embedding.output_dim,
             'units': self.units,
             'dropout_rate': self.dropout_rate,
-            'embedding': tf.keras.layers.serialize(self.embedding),
-            'lstm_decoder_1': tf.keras.layers.serialize(self.lstm_decoder_1),
-            'dropout_1': tf.keras.layers.serialize(self.dropout_1),
-            'lstm_decoder_2': tf.keras.layers.serialize(self.lstm_decoder_2),
-            'dropout_2': tf.keras.layers.serialize(self.dropout_2),
-            'lstm_decoder_3': tf.keras.layers.serialize(self.lstm_decoder_3),
-            'dropout_3': tf.keras.layers.serialize(self.dropout_3),
-            'lstm_decoder_4': tf.keras.layers.serialize(self.lstm_decoder_4),
-            'dropout_4': tf.keras.layers.serialize(self.dropout_4),
-            'attention': tf.keras.layers.serialize(self.attention),
-            'dense': tf.keras.layers.serialize(self.dense),
         })
         return config
 
@@ -393,123 +382,4 @@ class StackedLSTMDecoder(DecoderInterface):
         Returns:
             StackedLSTMDecoder: A new instance of StackedLSTMDecoder configured using the provided config.
         """
-        # Deserialize layers
-        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
-        config['lstm_decoder_1'] = tf.keras.layers.deserialize(config['lstm_decoder_1'])
-        config['dropout_1'] = tf.keras.layers.deserialize(config['dropout_1'])
-        config['lstm_decoder_2'] = tf.keras.layers.deserialize(config['lstm_decoder_2'])
-        config['dropout_2'] = tf.keras.layers.deserialize(config['dropout_2'])
-        config['lstm_decoder_3'] = tf.keras.layers.deserialize(config['lstm_decoder_3'])
-        config['dropout_3'] = tf.keras.layers.deserialize(config['dropout_3'])
-        config['lstm_decoder_4'] = tf.keras.layers.deserialize(config['lstm_decoder_4'])
-        config['dropout_4'] = tf.keras.layers.deserialize(config['dropout_4'])
-        config['attention'] = tf.keras.layers.deserialize(config['attention'])
-        config['dense'] = tf.keras.layers.deserialize(config['dense'])
         return cls(**config)
-
-
-class SimpleDecoder(Layer):
-    def __init__(
-        self,
-        vocab_size: int,
-        embedding_dim: int,
-        units: int,
-        dropout_rate: float = 0.2,
-        **kwargs
-    ):
-        super(SimpleDecoder, self).__init__(**kwargs)
-        self.vocab_size = vocab_size
-        self.embedding_dim = embedding_dim
-        self.units = units
-        self.dropout_rate = dropout_rate
-
-        # Define layers
-        self.embedding = Embedding(
-            input_dim=vocab_size,
-            output_dim=embedding_dim,
-            mask_zero=True,
-            name='decoder_embedding'
-        )
-        self.lstm = LSTM(
-            units,
-            return_sequences=True,
-            return_state=True,
-            name='decoder_lstm'
-        )
-        self.dropout = Dropout(dropout_rate, name='decoder_dropout')
-        self.dense = Dense(vocab_size, activation='softmax', name='decoder_dense')
-
-    def build(self, input_shape):
-        decoder_input_shape, initial_states_shape = input_shape
-
-        self.embedding.build(decoder_input_shape)
-
-        embedding_output_shape = self.embedding.compute_output_shape(decoder_input_shape)
-        self.lstm.build(embedding_output_shape)
-
-        lstm_output_shape = self.lstm.compute_output_shape(embedding_output_shape)
-        self.dropout.build(lstm_output_shape)
-
-        dropout_output_shape = self.dropout.compute_output_shape(lstm_output_shape)
-        self.dense.build(dropout_output_shape)
-
-        super(SimpleDecoder, self).build(input_shape)
-
-    def call(
-        self,
-        inputs: Tuple[tf.Tensor, Tuple[tf.Tensor, tf.Tensor]],
-        training: Optional[bool] = None,
-        mask: Optional[tf.Tensor] = None
-    ) -> tf.Tensor:
-        decoder_input, initial_state = inputs
-
-        if decoder_input is None or initial_state is None:
-            raise ValueError('decoder_input and initial_state must be provided to the Decoder.')
-
-        # Embed input
-        x = self.embedding(decoder_input)  # (batch_size, seq_len_decoder, embedding_dim)
-
-        # Pass through LSTM
-        lstm_output, state_h, state_c = self.lstm(
-            x,
-            initial_state=initial_state,
-            training=training,
-            mask=None  # LSTM uses mask from embedding
-        )  # (batch_size, seq_len_decoder, units)
-
-        # Apply Dropout
-        lstm_output = self.dropout(lstm_output, training=training)  # (batch_size, seq_len_decoder, units)
-
-        # Output layer
-        output = self.dense(lstm_output)  # (batch_size, seq_len_decoder, vocab_size)
-
-        return output
-
-    def compute_mask(self, inputs: Tuple, mask: Optional[tf.Tensor] = None) -> None:
-        # This decoder does not propagate the mask further
-        return None
-
-    def get_config(self) -> dict:
-        config = super(SimpleDecoder, self).get_config()
-        config.update({
-            'vocab_size': self.vocab_size,
-            'embedding_dim': self.embedding_dim,
-            'units': self.units,
-            'dropout_rate': self.dropout_rate,
-            'embedding': tf.keras.layers.serialize(self.embedding),
-            'lstm': tf.keras.layers.serialize(self.lstm),
-            'dropout': tf.keras.layers.serialize(self.dropout),
-            'dense': tf.keras.layers.serialize(self.dense),
-        })
-        return config
-
-    @classmethod
-    def from_config(cls, config: dict) -> 'SimpleDecoder':
-        # Deserialize layers
-        config['embedding'] = tf.keras.layers.deserialize(config['embedding'])
-        config['lstm'] = tf.keras.layers.deserialize(config['lstm'])
-        config['dropout'] = tf.keras.layers.deserialize(config['dropout'])
-        config['dense'] = tf.keras.layers.deserialize(config['dense'])
-        return cls(**config)
-
-
