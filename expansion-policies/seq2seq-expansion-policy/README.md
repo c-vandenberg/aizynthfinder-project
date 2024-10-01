@@ -93,14 +93,14 @@ An LSTM decoder uses the **final internal state vectors of the LSTM encoder** as
 <br>
 
 In **Fig 3**, we can see that at the beginning of its prediction: the decoder is fed the **final internal state vectors of the encoder**, and a **start token**
-1. **Initialisation**:
+1. **Initialisation**
    * **Initial States**: The **final hidden state ($$h_0$$)** and the **final cell state ($$c_0$$)** from the LSTM encoder are used to **initialise the LSTM decoder's hidden and cell states**.
 
 $$h_0^{dec} = h_{enc}$$
 
 $$c_0^{dec} = c_{enc}$$
 
-2. **Generating the First Token**:
+2. **Generating the First Token**
    * **Input to Decoder**: A **special start-of-sequence token** (e.g. **`<START>`**) is **fed into the decoder**.
    * **Processing**: The LSTM decoder **processes this token**, along with the **initial states** to **produce the first output token** and **update its internal states**.
      
@@ -108,13 +108,13 @@ $$h_1^{dec},\ c_1^{dec} = \text{LSTM}(\langle \text{START} \rangle,\ h_0^{dec},\
 
    * **Output**: The **first token $$Y_1$$** (e.g. "Hello") is generated.
 
-3. **Generating Subsequent Tokens**:
+3. **Generating Subsequent Tokens**
    * **Input**:
       * **During training** - A technique called **teacher forcing** is used whereby the **ground truth token** (i.e. the **correct token**) from the **previous time step** is passed to the LSTM decoder for the next token generation.
       * **During Inference** - The **decoders own predicted token** from the previous time step is used.
    * **Processing**: The LSTM decoder **processes this input**, along with the **current hidden and cell states** to generate the **next token** and **update its internal states**
 
-4. **Iterative Processing**:
+4. **Iterative Processing**
    * Step 3 **continues iteratively**:
       * **Internal State Propagation**: At each time step, the **current hidden and cell states** ($$ $$) **encapsulate all the information processed up to that point**.
       * **Prediction dependency**: The prediction of the next token depends not only on the **current input token**, but also on the **cumulative context captured in the internal states**.
@@ -125,9 +125,48 @@ where:
    * $$x_{t-1}$$ = The **input token at time $$t - 1$$** (either **ground truth token** if **teacher forcing**, or **previous prediction**).
    * $$h_t^{dec},\ c_t^{dec}$$ = The **previous hidden and cell states**
 
+
 Within the decoder, there is **another key component** of a Seq2Seq model we must talk about; The **Attention Mechanism**.
 
 ### 3.3.3 Attention Mechanism
+
+The **attention mechanism** is a **pivotal enhancement** to Seq2Seq models, significantly improving their performance/accuracy. Introduced to address the limitations of traditinoal Seq2Seq architectures, the attention mechanism allows the decoder to **dynamically focus on the most relevant parts of the input sequence at each time step**.
+
+One of the **main limitations** of basic Seq2Seq models is that relying on the **compression of all input information into a single context vector can be problematic**, especially for **long sequences**, as it **may not capture all the necessary information effectively.**
+
+The attention mechanism was introduced to **mitigate the limitations of the fixed-size context vector** by allowing the decoder to **access different parts of the input sequence dynamically during each time step of the output generation**. Therefore, instead of **summarising the entire input into a single vector**, attention enables the model to **create a context vector tailored to each output token**.
+
+The **key aspects of the attention mechanism** include: **<sup>4</sup>** 
+1. **Dynamic Weighting**
+   * Instead of relying on a **fixed-length context vector** to encode the entire input sequence, attention mechanisms **assign different weights** to **different parts of the input sequence** based on their **relevance to the current step of the output sequence**.
+   * This dynamic weighting enables the model's decoder to focus more on **relevant information** and **ignore irrelevant parts**.
+     
+2. **Soft Alignment**
+   * Attention mechanisms create a **soft alignment** between the **input and output sequences** by computing a **distribution of attention weights over the input sequence**.
+   * This allows the model's decoder to **consider multiple input elements simultaneously** at each time step, unlike **hard alignment methods** that force the model to **choose only one input element at each time step**.
+     
+3. **Scalability**
+   * Attention mechanisms are **scalable to sequences of varying lengths**.
+   * This means they can **adapt to longer input sequences without significantly increasing computational complexity**, unlike fixed-length context vectors, which may **struggle with long sequences**.
+     
+4. **Interpretable Representations**:
+   * **Attention weights** represent the **model's decision-making process**.
+   * By visualising these weights, researchers and practioners can **gain insight into which parts of the input sequence are most relevant** for generating specific parts of the output sequence
+  
+At a high-level, the **attention mechanism's role within the decoder** is as follows:
+1. **Encoder Processing**
+   * The encoder prcoesses the input sequence and **produces a sequence of hidden states** $$\\{h_1,h_2,...,h_n\\}$$, where each $$h_i$$ corresponds to a the **hidden state of an input token**
+
+2. **Decoding with Attention**
+   * For **each decoding time step $$t$$**:
+     1. **Compute Alignment Scores:**
+        * For each hidden state $$h_i$$, **calculate a score $$e_{t,i}$$** that indicates its **relevance to the current decoding step**. Common methods for this include:
+        * **Example 1 - Dot-Product:** $$e_{t,i} = h_t^{dec} . h_i^{enc}$$
+        * **Example 2 - Additive (Bahdanau) Attention:** $$e_{t,i} = v^T tanh(W_1h_t^{dec} + W_2h_i^{enc})$$
+     2. **Generate Attention Weights:**
+        * Apply a **softmax function** to the alignment scores to **obtain attention weights $$\alpha_{t,i}$$**:
+
+             $$\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{j=1}^n \exp(e_{t,j})}$$
 
 
 ## References
