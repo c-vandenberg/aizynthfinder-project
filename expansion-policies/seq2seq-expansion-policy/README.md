@@ -164,20 +164,33 @@ At a high-level, the **attention mechanism's role within the decoder** is as fol
         * **Example 1 - Dot-Product:** $$e_{t,i} = h_t^{dec} . h_i^{enc}$$
         * **Example 2 - Additive (Bahdanau) Attention:** $$e_{t,i} = v^T tanh(W_1h_t^{dec} + W_2h_i^{enc})$$
           
-     2. **Generate Attention Weights:**
+     2. **Generate Attention Weights**:
         * Apply a **softmax function** to the alignment scores to **obtain attention weights $$\alpha_{t,i}$$**:
           
-          $$\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{j=1}^n \exp(e_{t,j})}$$
+          $$\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{j=1}^{n} \exp(e_{t,j})}$$
         
         * These weights indicate the **importance of each encoder hidden state** for the **current decoding step**
           
-     3. **Compute the Context Vector**
+     3. **Compute the Context Vector**:
         * Create a context vector **$$c_t$$** as a **weighted sum of the encoder hidden states**:
     
-          $$c_t = \sum_{i=1}^n \alpha_{t,i}h_i^{enc}$$
+          $$c_t = \sum_{i=1}^{n} \alpha_{t,i}h_i^{enc}$$
           
-        * This vector **encapsulates the most relevant information from the input sequence** for generating the current output token
+        * This vector **encapsulates the most relevant information from the input sequence** for generating the current output token.
+
+     4. **Generate the Output Token**:
+        * The decoder then uses the context vector $$c_t$$, along with its **previous hidden state** and the **previous output token**, to generate the current output token:
+          
+          $$h_t^{dec} = \text{LSTM}(y_{t-1},h_{t-1}^{dec},c_t$$
+
+          $$\hat{y}_t = \text{Softmax}(Wh_t^{dec} + Vc_t)$$
        
+        * Here **$$y_{t-1}$$** is the **previous token**, **$$\hat{y}_t$$** is the **predicted token** at **step $$t$$**, and **$$W$$**, **$$V$$** are **weighted matrices**.
+       
+   3. **Iterative Process**:
+      * Step 2 is **repeated iteratively** for **each token in the output sequence**, allowing the decoder to **focus on different parts of the input as needed**.
+       
+
 
 ## References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
