@@ -163,11 +163,21 @@ At a high-level, the **attention mechanism's role within the decoder** is as fol
         * For each hidden state $$h_i$$, **calculate a score $$e_{t,i}$$** that indicates its **relevance to the current decoding step**. Common methods for this include:
         * **Example 1 - Dot-Product:** $$e_{t,i} = h_t^{dec} . h_i^{enc}$$
         * **Example 2 - Additive (Bahdanau) Attention:** $$e_{t,i} = v^T tanh(W_1h_t^{dec} + W_2h_i^{enc})$$
+          
      2. **Generate Attention Weights:**
         * Apply a **softmax function** to the alignment scores to **obtain attention weights $$\alpha_{t,i}$$**:
-
-             $$\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{j=1}^n \exp(e_{t,j})}$$
-
+          
+          $$\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{j=1}^n \exp(e_{t,j})}$$
+        
+        * These weights indicate the **importance of each encoder hidden state** for the **current decoding step**
+          
+     3. **Compute the Context Vector**
+        * Create a context vector **$$c_t$$** as a **weighted sum of the encoder hidden states**:
+    
+          $$c_t = \sum_{i=1}^n \alpha_{t,i}h_i^{enc}$$
+          
+        * This vector **encapsulates the most relevant information from the input sequence** for generating the current output token
+       
 
 ## References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
