@@ -187,8 +187,8 @@ At a high-level, the **attention mechanism's role within the decoder** is as fol
        
         * Here **$$y_{t-1}$$** is the **previous token**, **$$\hat{y}_t$$** is the **predicted token** at **step $$t$$**, and **$$W$$**, **$$V$$** are **weighted matrices**.
        
-   3. **Iterative Process**:
-      * Step 2 is **repeated iteratively** for **each token in the output sequence**, allowing the decoder to **focus on different parts of the input as needed**.
+3. **Iterative Process**:
+   * Step 2 is **repeated iteratively** for **each token in the output sequence**, allowing the decoder to **focus on different parts of the input as needed**.
        
 
 
