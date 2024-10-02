@@ -4,9 +4,8 @@ from tensorflow.keras.layers import Layer, Embedding
 from typing import List, Tuple
 
 class AttentionInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, units: int, **kwargs):
+    def __init__(self, **kwargs):
         super(AttentionInterface, self).__init__(**kwargs)
-        self.units: int = units
 
     @abstractmethod
     def call(self, outputs: List[tf.Tensor]) -> Tuple[tf.Tensor, tf.Tensor]:

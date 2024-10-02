@@ -5,6 +5,47 @@ from typing import Tuple, Optional, Union
 
 @tf.keras.utils.register_keras_serializable()
 class StackedBidirectionalLSTMEncoder(EncoderInterface):
+    """
+    StackedBidirectionalLSTMEncoder
+
+    A custom TensorFlow Keras layer that encodes input sequences into context-rich representations for a Seq2Seq model.
+
+    Architecture:
+        - Embedding Layer: Converts input token indices into dense embedding vectors.
+        - Stacked Bidirectional LSTM Layers: Processes embeddings in both forward and backward directions to capture
+                                                 context from past and future tokens.
+        - Dropout Layers: Applies dropout after each LSTM layer to prevent overfitting.
+
+    Encoder output is the processed sequence representations, along with the concatenated hidden and cell states from
+    the last Bidirectional LSTM layer. These states serve as the initial states for the decoder.
+
+    Parameters
+    ----------
+    vocab_size : int
+        Size of the input vocabulary.
+    embedding_dim : int
+        Dimensionality of the embedding vectors.
+    units : int
+        Number of units in each LSTM layer.
+    num_layers : int, optional
+        Number of stacked Bidirectional LSTM layers (default is 2).
+    dropout_rate : float, optional
+        Dropout rate applied after each LSTM layer (default is 0.2).
+
+    Methods
+    -------
+    call(encoder_input, training=False)
+        Encodes the input sequence and returns the encoder outputs and final states.
+
+    Returns
+    -------
+    encoder_output : tf.Tensor
+        Encoded sequence representations.
+    final_state_h : tf.Tensor
+        Concatenated hidden state from the last Bidirectional LSTM layer.
+    final_state_c : tf.Tensor
+        Concatenated cell state from the last Bidirectional LSTM layer.
+    """
     def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, num_layers: int,
                  dropout_rate: float = 0.2, **kwargs):
         super(StackedBidirectionalLSTMEncoder, self).__init__(**kwargs)
@@ -31,27 +72,47 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
     def call(self, encoder_input: tf.Tensor, training: Optional[bool] = None):
         """
-        Forward pass of the encoder.
+        Encodes the input sequence and returns the encoder outputs and final states.
 
-        Args:
-            encoder_input (tf.Tensor): Input tensor for the encoder.
-            training (Optional[bool], optional): Training flag. Defaults to None.
+        Parameters
+        ----------
+        encoder_input: tf.Tensor Input tensor for the encoder.
+        training: bool, optional
+            Training flag. Defaults to None.
 
-        Returns:
-            Tuple[tf.Tensor, tf.Tensor, tf.Tensor]: Encoder output, final hidden state, and final cell state.
+        Returns
+        ----------
+        encoder output, final hidden state, final cell state: Tuple[tf.Tensor, tf.Tensor, tf.Tensor]
+            Encoder processed sequence and final encoder context vectors.
         """
         # Embed the input and obtain mask
-        encoder_output: tf.Tensor = self.embedding(encoder_input)
+        encoder_output: tf.Tensor = self.embedding(encoder_input) # Shape: (batch_size, seq_len, embedding_dim)
+
         final_state_h: Union[None, tf.Tensor] = None
         final_state_c: Union[None, tf.Tensor] = None
 
         for lstm_layer, dropout_layer in zip(self.bidirectional_lstm_layers, self.dropout_layers):
+            # Pass through the Bidirectional LSTM layer
+            # encoder_output shape: (batch_size, seq_len, units * 2)
+            # forward_h shape: (batch_size, units)
+            # backward_h shape: (batch_size, units)
+            # forward_c shape: (batch_size, units)
+            # backward_c shape: (batch_size, units)
             encoder_output, forward_h, forward_c, backward_h, backward_c = lstm_layer(
                 encoder_output, training=training
             )
-            final_state_h = tf.concat([forward_h, backward_h], axis=-1)
-            final_state_c = tf.concat([forward_c, backward_c], axis=-1)
-            encoder_output: tf.Tensor = dropout_layer(encoder_output, training=training)
+
+            # Concatenate the final forward and backward hidden states
+            final_state_h = tf.concat([forward_h, backward_h], axis=-1) # Shape: (batch_size, units * 2)
+
+            # Concatenate the final forward and backward cell states
+            final_state_c = tf.concat([forward_c, backward_c], axis=-1) # Shape: (batch_size, units * 2)
+
+            # Apply dropout to the encoder output
+            encoder_output: tf.Tensor = dropout_layer(
+                encoder_output,
+                training=training
+            ) # Shape: (batch_size, seq_len, units * 2)
 
         if final_state_h is None or final_state_c is None:
             raise ValueError("No Encoder LSTM layers detected; Encoder 'num_layers' must be at least 1.")
@@ -60,14 +121,19 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
     def compute_mask(self, inputs: tf.Tensor, mask: Optional[tf.Tensor] = None) -> Optional[tf.Tensor]:
         """
-        Propagates the mask forward.
+        Propagates the mask forward by computing an output mask tensor for the layer.
 
-        Args:
-            inputs (tf.Tensor): Input tensors.
-            mask (Optional[tf.Tensor], optional): Input mask. Defaults to None.
+        Parameters
+        ----------
+        inputs: tf.Tensor
+            Input tensor.
+        mask: tf.Tensor, optional
+            Input encoder mask. Defaults to None.
 
-        Returns:
-            Optional[tf.Tensor]: Propagated mask.
+        Returns
+        ----------
+        encoder_mask: tf.Tensor
+            Mask tensor based on the encoder's mask.
         """
         return self.embedding.compute_mask(inputs, mask)
 
@@ -75,8 +141,10 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         """
         Returns the configuration of the layer for serialization.
 
-        Returns:
-            dict: A Python dictionary containing the layer's configuration.
+        Returns
+        ----------
+        config: dict
+            A Python dictionary containing the layer's configuration.
         """
         config = super(StackedBidirectionalLSTMEncoder, self).get_config()
         config.update({
@@ -93,11 +161,14 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         """
         Creates a layer from its config.
 
-        Args:
-            config (dict): A Python dictionary containing the layer's configuration.
+        Parameters
+        ----------
+        config: dict
+            A Python dictionary containing the layer's configuration.
 
-        Returns:
-            StackedBidirectionalLSTMEncoder: A new instance of StackedBidirectionalLSTMEncoder configured using the
-            provided config.
+        Returns
+        ----------
+        decoder: StackedBidirectionalLSTMEncoder
+            A new instance of StackedBidirectionalLSTMEncoder configured using the provided config.
         """
         return cls(**config)

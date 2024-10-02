@@ -1,16 +1,26 @@
 # Seq2Seq Model Architecture
+# - Encoder, decoder and attention mechanism logic has been refactored to improve efficiency and maintainability.
+# - This has brought about an improvement in model performance.
+# - This could be for a variety of reasons, including:
+#     1. Enhanced efficiency leading to better training within the same number of epochs
+#     2. Enhanced efficiency reducing computational overhead, reducing time per batch and potentially allowing the
+#        optimizer to process more batches within each epoch.
+#     3. Enhanced efficiency improving hardware utilization.
+#     4. Reduction in code complexity and streamlining may have resolved a previously unidentified bug.
 #
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.450
+#   - Train Accuracy (Smoothed): 0.561
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.388
+#   - Validation Accuracy (Smoothed): 0.577
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.313
+#   - Test Accuracy (Smoothed): 0.599
+
+
 
 # Data Configuration and Hyperparameters
 data:

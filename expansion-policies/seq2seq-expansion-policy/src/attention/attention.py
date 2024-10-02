@@ -5,96 +5,104 @@ from typing import List, Optional, Tuple, Union
 
 @tf.keras.utils.register_keras_serializable()
 class BahdanauAttention(AttentionInterface):
+    """
+    BahdanauAttention
+
+    Implements the Bahdanau attention mechanism for Seq2Seq models, allowing the decoder to dynamically focus on
+    different parts of the encoder processed input sequence at each decoding time step.
+
+    Parameters
+    ----------
+    units : int
+        Number of units in the attention mechanism.
+
+    Methods
+    -------
+    call(inputs, mask=None, training=None)
+        Computes the context vector and attention weights.
+    """
     def __init__(self, units: int, **kwargs):
-        super(BahdanauAttention, self).__init__(units, **kwargs)
-        self.units: int = units
-        self.attention_dense1: Dense = Dense(units, name='attention_dense1')
-        self.attention_dense2: Dense = Dense(units, name='attention_dense2')
-        self.attention_v: Dense = Dense(1, name='attention_v')
-        self.supports_masking: bool = True
-
-    def build(self, input_shape):
-        """
-        Build the BahdanauAttention layer by initializing its Dense sublayers.
-
-        Args:
-            input_shape (List[tf.TensorShape]): A list containing the shapes of encoder_output and decoder_output.
-        """
-        # input_shape is a list of two shapes: [encoder_output_shape, decoder_output_shape]
-        if not isinstance(input_shape, (list, tuple)) or len(input_shape) != 2:
-            raise ValueError("Input shape must be a list or tuple of two TensorShape objects.")
-
-        encoder_output_shape, decoder_output_shape = input_shape
-
-        # Ensure encoder_output_shape and decoder_output_shape are TensorShape
-        if isinstance(encoder_output_shape, tuple):
-            encoder_output_shape = tf.TensorShape(encoder_output_shape)
-        if isinstance(decoder_output_shape, tuple):
-            decoder_output_shape = tf.TensorShape(decoder_output_shape)
-
-        # Build sublayers with appropriate input shapes
-        self.attention_dense1.build(encoder_output_shape)
-        self.attention_dense2.build(decoder_output_shape)
-        # The shape for attention_v needs to match the combined dimensions after Dense layers
-        # Assuming encoder_output has shape (..., units*2) and decoder_output has shape (..., units)
-        combined_units = self.units
-        attention_v_input_shape = tf.TensorShape((None, *decoder_output_shape[1:-1], self.units))
-        self.attention_v.build(attention_v_input_shape)
-
-        # Mark the layer as built
-        super(BahdanauAttention, self).build(input_shape)
+        super(BahdanauAttention, self).__init__(**kwargs)
+        self.units = units
+        self.attention_dense1 = Dense(units, name='attention_dense1')
+        self.attention_dense2 = Dense(units, name='attention_dense2')
+        self.attention_v = Dense(1, name='attention_v')
+        self.supports_masking = True
 
     def call(self, inputs: List[tf.Tensor], mask: Optional[tf.Tensor] = None,
              training: Union[None, bool] = None) -> Tuple[tf.Tensor, tf.Tensor]:
         """
-        Compute the context vector and attention weights.
+        Computes the context vector and attention weights using the Bahdanau attention mechanism.
 
-        Args:
-            inputs (List[tf.Tensor]): A list containing encoder and decoder outputs.
-            mask (Optional[tf.Tensor], optional): Mask tensor. Defaults to None.
-            training (Union[None, bool], optional): Training flag. Defaults to None.
+        Parameters
+        ----------
+        inputs : list of tf.Tensor
+            A list containing:
+                - encoder_output : tf.Tensor
+                    The outputs from the encoder.
+                    Shape: (batch_size, seq_len_enc, enc_units)
+                - decoder_output : tf.Tensor
+                    The outputs from the decoder before attention is applied.
+                    Shape: (batch_size, seq_len_dec, dec_units)
+        mask : tf.Tensor or list of tf.Tensor, optional
+            Mask tensor or list of masks to prevent attention over padded positions.
+            If a list, the first element should be the encoder mask.
+            Shape: (batch_size, seq_len_enc)
+        training : bool, optional
+            Indicates whether the layer should behave in training mode or inference mode.
 
-        Returns:
-            Tuple[tf.Tensor, tf.Tensor]: Context vector and attention weights.
+        Returns
+        -------
+        context_vector : tf.Tensor
+            The context vector computed as a weighted sum of encoder outputs.
+            Shape: (batch_size, seq_len_dec, enc_units)
+        attention_weights : tf.Tensor
+            The attention weights for each encoder output.
+            Shape: (batch_size, seq_len_dec, seq_len_enc)
         """
         # Unpack inputs
+        encoder_output: tf.Tensor  # Shape: (batch_size, seq_len_enc, enc_units)
+        decoder_output: tf.Tensor  # Shape: (batch_size, seq_len_dec, dec_units)
         encoder_output, decoder_output = inputs
 
-        # Attention Mechanism
-        # Calculate attention scores
-        # Expand dimensions to match the shapes for broadcasting
-        encoder_output_expanded: tf.Tensor = tf.expand_dims(encoder_output,
-                                                 1)  # Shape: (batch_size, 1, seq_len_encoder, units*2)
-        decoder_output_expanded: tf.Tensor = tf.expand_dims(decoder_output,
-                                                 2)  # Shape: (batch_size, seq_len_decoder, 1, units)
+        # Compute attention scores for encoder outputs
+        score_enc: tf.Tensor = self.attention_dense1(encoder_output)  # Shape: (batch_size, seq_len_enc, units)
+        score_dec: tf.Tensor = self.attention_dense2(decoder_output)  # Shape: (batch_size, seq_len_dec, units)
 
-        # Compute the attention scores
-        score: tf.Tensor = tf.nn.tanh(
-            self.attention_dense1(encoder_output_expanded) + self.attention_dense2(decoder_output_expanded)
-        )  # Shape: (batch_size, seq_len_decoder, seq_len_encoder, units)
+        # Compute attention scores for decoder outputs
+        # Expand dimensions to enable broadcasting for addition
+        score_enc_expanded: tf.Tensor = tf.expand_dims(score_enc, axis=1) # Shape: (batch_size, 1, seq_len_enc, units)
+        score_dec_expanded: tf.Tensor = tf.expand_dims(score_dec, axis=2) # Shape: (batch_size, seq_len_dec, 1, units)
 
-        # Apply mask if available
+        # Calculate the combined score using tanh activation
+        score_combined: tf.Tensor = tf.nn.tanh(
+            score_enc_expanded + score_dec_expanded
+        )  # Shape: (batch_size, seq_len_dec, seq_len_enc, units)
+
+        # Compute final attention scores
+        score: tf.Tensor = self.attention_v(score_combined)  # Shape: (batch_size, seq_len_dec, seq_len_enc, 1)
+
+        # Remove the last dimension of size 1
+        score = tf.squeeze(score, axis=-1)  # Shape: (batch_size, seq_len_dec, seq_len_enc)
+
+        # Apply encoder mask if available
         if mask is not None:
-            # If mask is a list or tuple, both encoder and decoder mask have been passed.
-            # Extract the encoder mask
             if isinstance(mask, (list, tuple)):
-                encoder_mask: tf.Tensor = mask[0]
+                encoder_mask: Optional[tf.Tensor] = mask[0] # Shape: (batch_size, seq_len_enc)
             else:
-                encoder_mask = mask
+                encoder_mask = mask # Shape: (batch_size, seq_len_enc)
             if encoder_mask is not None:
-                # mask shape: (batch_size, seq_len_encoder)
-                # Expand mask to match score dimensions
-                encoder_mask = tf.cast(tf.expand_dims(encoder_mask, 1), dtype=score.dtype)  # (batch_size, 1, seq_len_encoder)
-                encoder_mask = tf.expand_dims(encoder_mask, -1)  # (batch_size, 1, seq_len_encoder, 1)
-                # Add a large negative value to masked positions to nullify their effect after softmax
-                score += (1.0 - encoder_mask) * -1e9
+                # Expand mask dimensions to align with score tensor
+                encoder_mask_expanded = tf.expand_dims(encoder_mask, axis=1)  # Shape: (batch_size, 1, seq_len_enc)
 
-        attention_weights: tf.Tensor = tf.nn.softmax(self.attention_v(score),
-                                          axis=2)  # Shape: (batch_size, seq_len_decoder, seq_len_encoder, 1)
+                # Cast mask to float and adjust score
+                score += (1.0 - tf.cast(encoder_mask_expanded, score.dtype)) * -1e9
 
-        # Compute the context vector
-        context_vector: tf.Tensor = attention_weights * encoder_output_expanded  # Shape: (batch_size, seq_len_decoder, seq_len_encoder, units*2)
-        context_vector: tf.Tensor = tf.reduce_sum(context_vector, axis=2)  # Shape: (batch_size, seq_len_decoder, units*2)
+        # Compute attention weights using softmax over the encoder sequence length
+        attention_weights = tf.nn.softmax(score, axis=-1)  # Shape: (batch_size, seq_len_dec, seq_len_enc)
+
+        # Compute context vector as weighted sum of encoder outputs
+        context_vector = tf.matmul(attention_weights, encoder_output)  # Shape: (batch_size, seq_len_dec, enc_units)
 
         return context_vector, attention_weights
 
@@ -104,12 +112,6 @@ class BahdanauAttention(AttentionInterface):
         return None
 
     def get_config(self) -> dict:
-        """
-        Returns the configuration of the layer for serialization.
-
-        Returns:
-            dict: A Python dictionary containing the layer's configuration.
-        """
         config = super(BahdanauAttention, self).get_config()
         config.update({
             'units': self.units,
@@ -118,13 +120,4 @@ class BahdanauAttention(AttentionInterface):
 
     @classmethod
     def from_config(cls, config: dict) -> 'BahdanauAttention':
-        """
-        Creates a layer from its config.
-
-        Args:
-            config (dict): A Python dictionary containing the layer's configuration.
-
-        Returns:
-            BahdanauAttention: A new instance of BahdanauAttention configured using the provided config.
-        """
         return cls(**config)
