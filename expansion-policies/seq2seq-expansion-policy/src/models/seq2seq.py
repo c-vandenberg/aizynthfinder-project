@@ -1,8 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
-from tensorflow.train import Checkpoint, CheckpointManager
-from tensorflow.keras.callbacks import Callback
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 from typing import Optional, Any, Tuple
@@ -120,20 +118,3 @@ class RetrosynthesisSeq2SeqModel(Model):
     @classmethod
     def from_config(cls, config: dict) -> 'RetrosynthesisSeq2SeqModel':
         return cls(**config)
-
-class BestValLossCheckpointCallback(Callback):
-    def __init__(self, checkpoint_manager: CheckpointManager):
-        super(BestValLossCheckpointCallback, self).__init__()
-        self.checkpoint_manager: CheckpointManager = checkpoint_manager
-        self.best_val_loss: float = float('inf')  # Initialize with infinity
-
-    def on_epoch_end(self, epoch, logs=None):
-        current_val_loss: float = logs.get('val_loss')
-        if current_val_loss is not None:
-            if current_val_loss < self.best_val_loss:
-                self.best_val_loss = current_val_loss
-                save_path: str = self.checkpoint_manager.save()
-                print(
-                    f"\nEpoch {epoch+1}: Validation loss improved to {current_val_loss:.4f}. "
-                    f"Saving checkpoint to {save_path}"
-                )

@@ -7,7 +7,8 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import Callback, EarlyStopping, TensorBoard, ReduceLROnPlateau
 from tensorflow.train import Checkpoint, CheckpointManager
 from tensorflow.python.types.data import DatasetV2
-from models.seq2seq import RetrosynthesisSeq2SeqModel, BestValLossCheckpointCallback
+from models.seq2seq import RetrosynthesisSeq2SeqModel
+from checkpoints.checkpoints import BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
