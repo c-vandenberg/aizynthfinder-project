@@ -1,7 +1,9 @@
+from typing import Optional, Union
+
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout, Dense, Layer
+
 from encoders.encoder_interface import EncoderInterface
-from typing import Tuple, Optional, Union
 
 @tf.keras.utils.register_keras_serializable()
 class StackedBidirectionalLSTMEncoder(EncoderInterface):

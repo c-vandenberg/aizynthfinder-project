@@ -1,8 +1,8 @@
-import tensorflow as tf
-import tf2onnx
-from sklearn.model_selection import ShuffleSplit, cross_validate
 from typing import List
 
+import tf2onnx
+import tensorflow as tf
+from sklearn.model_selection import ShuffleSplit, cross_validate
 
 class Seq2SeqModelUtils:
     @staticmethod

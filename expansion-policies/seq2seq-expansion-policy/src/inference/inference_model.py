@@ -1,6 +1,6 @@
-from inference.beam_search_decoder import BeamSearchDecoder
 import tensorflow as tf
 
+from inference.beam_search_decoder import BeamSearchDecoder
 
 class InferenceModel:
     def __init__(self, model, tokenizer):

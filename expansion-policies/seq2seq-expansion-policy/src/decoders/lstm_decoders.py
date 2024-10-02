@@ -1,8 +1,10 @@
+from typing import List, Optional, Tuple, Union
+
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense, Layer
+
 from decoders.decoder_interface import DecoderInterface
 from attention.attention import BahdanauAttention
-from typing import List, Optional, Tuple, Union, Any
 
 @tf.keras.utils.register_keras_serializable()
 class StackedLSTMDecoder(DecoderInterface):

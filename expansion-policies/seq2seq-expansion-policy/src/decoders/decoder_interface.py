@@ -1,7 +1,8 @@
-import tensorflow as tf
 from abc import abstractmethod, ABCMeta
-from tensorflow.keras.layers import Layer, Embedding
 from typing import Optional, Any
+
+import tensorflow as tf
+from tensorflow.keras.layers import Layer, Embedding
 
 
 class DecoderInterface(Layer, metaclass=ABCMeta):

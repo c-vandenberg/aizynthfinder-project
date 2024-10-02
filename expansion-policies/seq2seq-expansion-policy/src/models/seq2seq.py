@@ -1,10 +1,11 @@
+from typing import Optional, Any, Tuple
+
 import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
+
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
-from typing import Optional, Any, Tuple
-
 
 class RetrosynthesisSeq2SeqModel(Model):
     def __init__(self, input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,

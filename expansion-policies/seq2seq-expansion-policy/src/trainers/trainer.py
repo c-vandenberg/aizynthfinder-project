@@ -3,17 +3,19 @@ import yaml
 import random
 import numpy as np
 import tensorflow as tf
+from typing import Dict, Any, Optional, List
+
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import Callback, EarlyStopping, TensorBoard, ReduceLROnPlateau
 from tensorflow.train import Checkpoint, CheckpointManager
 from tensorflow.python.types.data import DatasetV2
+
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from checkpoints.checkpoints import BestValLossCheckpointCallback
 from models.utils import Seq2SeqModelUtils
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
-from typing import Dict, Any, Optional, List
 
 
 class Trainer:
