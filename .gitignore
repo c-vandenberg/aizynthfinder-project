@@ -88,18 +88,6 @@ cython_debug/
 # ** Project-Specific Ignored Files **
 # ------------------------------
 
-# TensorFlow Checkpoints
-/data/training/pande-et-al/**/checkpoints/
-
-# TensorFlow Saved Models
-/data/training/**/model/
-
-# Tokenizer Files
-/data/training/**/tokenizer/
-
-# Logs Directory
-/logs/
-
 # # AiZynthFinder stock and trained model files
 *.h5
 *.hdf5

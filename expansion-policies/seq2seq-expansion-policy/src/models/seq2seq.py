@@ -28,7 +28,11 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         # Decoder layer
         self.decoder: StackedLSTMDecoder = StackedLSTMDecoder(
-            output_vocab_size, decoder_embedding_dim, units, dropout_rate
+            vocab_size=output_vocab_size,
+            decoder_embedding_dim=decoder_embedding_dim,
+            units=units,
+            num_layers=num_decoder_layers,
+            dropout_rate=dropout_rate
         )
 
         # Save the vocabulary sizes

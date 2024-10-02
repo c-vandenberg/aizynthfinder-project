@@ -14,6 +14,8 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         self.num_layers = num_layers
         self.dropout_rate= dropout_rate
 
+        self.supports_masking = True
+
         # Build first Bidirectional LSTM layer
         self.bidirectional_lstm_layers = []
         self.dropout_layers = []
