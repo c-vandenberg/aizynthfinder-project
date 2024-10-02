@@ -5,20 +5,22 @@ from typing import Tuple, Optional, Union
 
 @tf.keras.utils.register_keras_serializable()
 class StackedBidirectionalLSTMEncoder(EncoderInterface):
-    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, num_layers: int = 2,
+    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, num_layers: int,
                  dropout_rate: float = 0.2, **kwargs):
         super(StackedBidirectionalLSTMEncoder, self).__init__(**kwargs)
+        self.vocab_size = vocab_size
+        self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
+        self.units= units
         self.num_layers = num_layers
-        self.units: int = units
-        self.embedding: Embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
-        self.dropout_rate: float = dropout_rate
+        self.dropout_rate= dropout_rate
 
+        # Build first Bidirectional LSTM layer
         self.bidirectional_lstm_layers = []
         self.dropout_layers = []
         for i in range(num_layers):
             lstm_layer = Bidirectional(
                 LSTM(units, return_sequences=True, return_state=True),
-                name=f'bidirectional_lstm_{i + 1}'
+                name=f'bidirectional_lstm_encoder_{i + 1}'
             )
             dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
             self.bidirectional_lstm_layers.append(lstm_layer)

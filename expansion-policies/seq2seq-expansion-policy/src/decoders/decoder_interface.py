@@ -5,10 +5,8 @@ from typing import Optional, Any
 
 
 class DecoderInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, **kwargs):
+    def __init__(self, **kwargs):
         super(DecoderInterface, self).__init__(**kwargs)
-        self.units: int = units
-        self.embedding: Embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=None)
 
     @abstractmethod
     def call(self,inputs: tf.Tensor,training: Optional[bool] = None,mask: Optional[tf.Tensor] = None) -> Any:

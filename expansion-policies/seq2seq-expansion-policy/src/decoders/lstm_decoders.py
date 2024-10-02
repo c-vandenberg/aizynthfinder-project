@@ -64,133 +64,33 @@ class StackedLSTMDecoder(DecoderInterface):
     The decoder consists of four LSTM layers, each followed by a dropout layer to enhance generalization.
     The attention mechanism helps the decoder focus on relevant encoder outputs during each timestep of decoding.
     """
-    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2,
-                 **kwargs) -> None:
-        super(StackedLSTMDecoder, self).__init__(vocab_size, decoder_embedding_dim, units, **kwargs)
-        self.units: int = units
-        self.embedding: Embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
-        self.vocab_size: int = vocab_size
-        self.dropout_rate: float = dropout_rate
+    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, num_layers: int,
+                 dropout_rate: float = 0.2, **kwargs) -> None:
+        super(StackedLSTMDecoder, self).__init__(**kwargs)
+        self.vocab_size = vocab_size
+        self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
+        self.units = units
+        self.num_layers = num_layers
+        self.vocab_size = vocab_size
+        self.dropout_rate = dropout_rate
 
         # Decoder: 4-layer LSTM without internal Dropout
-        # Define LSTM and Dropout layers individually
-        self.lstm_decoder_1: LSTM = LSTM(
-            units,
-            return_sequences=True,
-            return_state=True,
-            name='lstm_decoder_1'
-        )
-        self.dropout_1: Dropout = Dropout(dropout_rate, name='decoder_dropout_1')
-
-        self.lstm_decoder_2: LSTM = LSTM(
-            units,
-            return_sequences=True,
-            return_state=True,
-            name='lstm_decoder_2'
-        )
-        self.dropout_2: Dropout = Dropout(dropout_rate, name='decoder_dropout_2')
-
-        self.lstm_decoder_3: LSTM = LSTM(
-            units,
-            return_sequences=True,
-            return_state=True,
-            name='lstm_decoder_3'
-        )
-        self.dropout_3: Dropout = Dropout(dropout_rate, name='decoder_dropout_3')
-
-        self.lstm_decoder_4: LSTM = LSTM(
-            units,
-            return_sequences=True,
-            return_state=True,
-            name='lstm_decoder_4'
-        )
-        self.dropout_4: Dropout = Dropout(dropout_rate, name='decoder_dropout_4')
+        # Define LSTM and Dropout layers separately
+        self.lstm_layers = []
+        self.dropout_layers = []
+        for i in range(num_layers):
+            lstm_layer = LSTM(
+                units=units, return_sequences=True, return_state=True, name=f'lstm_decoder_{i + 1}'
+            )
+            dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
+            self.lstm_layers.append(lstm_layer)
+            self.dropout_layers.append(dropout_layer)
 
         # Attention Mechanism
         self.attention: BahdanauAttention = BahdanauAttention(units=units)
 
         # Output layer
         self.dense: Dense = Dense(vocab_size, activation='softmax')
-
-    def build(self, input_shape):
-        """
-        Build the StackedLSTMDecoder layer by initializing its sublayers.
-
-        Args:
-            input_shape (Tuple[tf.TensorShape, List[tf.TensorShape], tf.TensorShape]):
-                A tuple containing:
-                    - decoder_input_shape
-                    - initial_state_shape (list of TensorShapes)
-                    - encoder_output_shape
-        """
-        if not isinstance(input_shape, (list, tuple)) or len(input_shape) != 3:
-            raise ValueError("Input shape must be a tuple or list of three TensorShape objects.")
-
-        decoder_input_shape, initial_state_shape, encoder_output_shape = input_shape
-
-        # Ensure decoder_input_shape and encoder_output_shape are of type TensorShape
-        if isinstance(decoder_input_shape, tuple):
-            decoder_input_shape = tf.TensorShape(decoder_input_shape)
-        if isinstance(encoder_output_shape, tuple):
-            encoder_output_shape = tf.TensorShape(encoder_output_shape)
-        # Ensure initial_state_shape is of type TensorShape
-        if isinstance(initial_state_shape, list) or isinstance(initial_state_shape, tuple):
-            initial_state_shape = [
-                tf.TensorShape(s) if isinstance(s, tuple) else s for s in initial_state_shape
-            ]
-        else:
-            raise ValueError(f"initial_state_shape must be a list of TensorShape objects. Type {type(initial_state_shape)} found")
-
-        # Build the embedding layer
-        self.embedding.build(decoder_input_shape)
-        embedded_shape = self.embedding.compute_output_shape(decoder_input_shape)
-
-        # Build first LSTM layer with initial state
-        self.lstm_decoder_1.build(embedded_shape)
-        lstm1_output_shape = self.lstm_decoder_1.compute_output_shape(embedded_shape)[0]  # Extract only output shape
-        lstm1_output_shape = tf.TensorShape(lstm1_output_shape) if isinstance(lstm1_output_shape,
-                                                                              tuple) else lstm1_output_shape
-        self.dropout_1.build(lstm1_output_shape)
-
-        # Build second LSTM layer
-        self.lstm_decoder_2.build(lstm1_output_shape)
-        lstm2_output_shape = self.lstm_decoder_2.compute_output_shape(lstm1_output_shape)[0]  # Extract only output shape
-        lstm2_output_shape = tf.TensorShape(lstm2_output_shape) if isinstance(lstm2_output_shape,
-                                                                              tuple) else lstm2_output_shape
-        self.dropout_2.build(lstm2_output_shape)
-
-        # Build third LSTM layer
-        self.lstm_decoder_3.build(lstm2_output_shape)
-        lstm3_output_shape = self.lstm_decoder_3.compute_output_shape(lstm2_output_shape)[0]  # Extract only output shape
-        lstm3_output_shape = tf.TensorShape(lstm3_output_shape) if isinstance(lstm3_output_shape,
-                                                                              tuple) else lstm3_output_shape
-        self.dropout_3.build(lstm3_output_shape)
-
-        # Build fourth LSTM layer
-        self.lstm_decoder_4.build(lstm3_output_shape)
-        lstm4_output_shape = self.lstm_decoder_4.compute_output_shape(lstm3_output_shape)[0]  # Extract only output shape
-        lstm4_output_shape = tf.TensorShape(lstm4_output_shape) if isinstance(lstm4_output_shape,
-                                                                              tuple) else lstm4_output_shape
-        self.dropout_4.build(lstm4_output_shape)
-
-        # Build the attention layer
-        # BahdanauAttention expects encoder_output and decoder_output as inputs
-        self.attention.build([encoder_output_shape, lstm4_output_shape])
-
-        # Determine the Correct Input Shape for the Dense Layer
-        # - The Dense layer receives the concatenated output of decoder and context vectors.
-        # - decoder_output_shape: (batch_size, seq_len_dec, units_decoder)
-        # - context_vector_shape: (batch_size, seq_len_dec, units_encoder)
-        # - Thus, concat_output_shape: (batch_size, seq_len_dec, units_decoder + units_encoder)
-        units_decoder = lstm4_output_shape[-1]  # 256
-        units_encoder = encoder_output_shape[-1]  # 512
-        concat_last_dim = units_decoder + units_encoder  # 768
-
-        # Build the Dense Layer with the Correct Input Shape
-        self.dense.build(tf.TensorShape((concat_last_dim,)))  # (768,)
-
-        # Mark the layer as built
-        super(StackedLSTMDecoder, self).build(input_shape)
 
     def call(self, inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor], training: Optional[bool] = None,
              mask: Optional[tf.Tensor] = None) -> tf.Tensor:
