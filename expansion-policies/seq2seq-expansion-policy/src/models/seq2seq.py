@@ -3,14 +3,15 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
 from tensorflow.train import Checkpoint, CheckpointManager
 from tensorflow.keras.callbacks import Callback
-from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder, SimpleEncoder
-from decoders.lstm_decoders import StackedLSTMDecoder, SimpleDecoder
+from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
+from decoders.lstm_decoders import StackedLSTMDecoder
 from typing import Optional, Any, Tuple
 
 
 class RetrosynthesisSeq2SeqModel(Model):
     def __init__(self, input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
-                 decoder_embedding_dim: int, units: int, dropout_rate: float = 0.2, *args, **kwargs):
+                 decoder_embedding_dim: int, units: int, num_encoder_layers = 2, num_decoder_layers: int = 4,
+                 dropout_rate: float = 0.2, *args, **kwargs):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
 
         # Save the number of units (neurons)
@@ -18,7 +19,11 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         # Encoder layer
         self.encoder: StackedBidirectionalLSTMEncoder = StackedBidirectionalLSTMEncoder(
-            input_vocab_size, encoder_embedding_dim, units, dropout_rate
+            vocab_size=input_vocab_size,
+            encoder_embedding_dim=encoder_embedding_dim,
+            units=units,
+            num_layers=num_encoder_layers,
+            dropout_rate=dropout_rate
         )
 
         # Decoder layer

@@ -11,14 +11,14 @@
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed): 0.623
-#   - Train Accuracy (Smoothed): 0.514
+#   - Train Loss (Smoothed): 0.481
+#   - Train Accuracy (Smoothed): 0.554
 #
-#   - Validation Loss (Smoothed): 0.536
-#   - Validation Accuracy (Smoothed): 0.537
+#   - Validation Loss (Smoothed): 0.418
+#   - Validation Accuracy (Smoothed): 0.570
 #
-#   - Test Loss (Smoothed): 0.417
-#   - Test Accuracy (Smoothed): 0.570
+#   - Test Loss (Smoothed): 0.347
+#   - Test Accuracy (Smoothed): 0.591
 
 # Data Configuration and Hyperparameters
 data:
@@ -26,7 +26,7 @@ data:
   reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
   products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
   reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/pande-et-al/model-v6/tokenizer/model_v6_tokenizer.json'
+  tokenizer_save_path: 'data/training/pande-et-al/model-v7/tokenizer/model_v6_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32

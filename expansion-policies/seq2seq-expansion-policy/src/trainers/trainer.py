@@ -280,8 +280,8 @@ class Trainer:
         """
         training_conf: dict[str, Any] = self.config['training']
 
-        train_dataset: dict[str, Any] = self.data_loader.get_train_dataset()
-        valid_dataset: dict[str, Any] = self.data_loader.get_valid_dataset()
+        train_dataset: DatasetV2 = self.data_loader.get_train_dataset()
+        valid_dataset: DatasetV2 = self.data_loader.get_valid_dataset()
 
         self.model.fit(
             train_dataset,
