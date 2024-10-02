@@ -1,33 +1,39 @@
 import os
-import yaml
 import random
-import numpy as np
-import tensorflow as tf
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List, Optional
 
+import yaml
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import Callback, EarlyStopping, TensorBoard, ReduceLROnPlateau
+from tensorflow.keras.callbacks import (Callback, EarlyStopping,
+                                        TensorBoard, ReduceLROnPlateau)
 from tensorflow.train import Checkpoint, CheckpointManager
-from tensorflow.python.types.data import DatasetV2
 
-from models.seq2seq import RetrosynthesisSeq2SeqModel
+from trainers.environment import TrainingEnvironment
 from checkpoints.checkpoints import BestValLossCheckpointCallback
-from models.utils import Seq2SeqModelUtils
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
+from models.seq2seq import RetrosynthesisSeq2SeqModel
+from models.utils import Seq2SeqModelUtils
 
 
 class Trainer:
+    """
+    Trainer class for training and evaluating the Retrosynthesis Seq2Seq model.
+
+    This class handles the setup of the environment, data loading, model
+    initialization, training, evaluation, and saving of the model.
+    """
     def __init__(self, config_path: str):
         """
-        Initialize the Trainer with configurations.
+        Initializes the Trainer with configurations.
 
-        Args:
-            config_path (str): Path to the configuration YAML file.
+        Parameters
+        ----------
+        config_path : str
+            Path to the configuration YAML file.
         """
         self.config:Dict[str, Any] = self.load_config(config_path)
-        self.setup_environment()
 
         self.tokenizer: Optional[SmilesTokenizer] = None
         self.data_loader: Optional[DataLoader] = None
@@ -36,7 +42,7 @@ class Trainer:
         self.decoder_preprocessor: Optional[DataPreprocessor] = None
         self.model: Optional[RetrosynthesisSeq2SeqModel] = None
         self.optimizer: Optional[Adam] = None
-        self.loss_function: Any = None
+        self.loss_function: Optional[Any] = None
         self.metrics: Optional[List[str]] = None
         self.callbacks: Optional[List[Callback]] = None
 
@@ -45,143 +51,102 @@ class Trainer:
     @staticmethod
     def load_config(config_path: str) -> dict:
         """
-        Load configuration from a YAML file.
+        Loads configuration from a YAML file.
 
-        Args:
-            config_path (str): Path to the YAML configuration file.
+        Parameters
+        ----------
+        config_path : str
+            Path to the YAML configuration file.
 
-        Returns:
-            dict: Configuration dictionary.
+        Returns
+        -------
+        Dict[str, Any]
+            Configuration dictionary.
         """
         with open(config_path, 'r') as file:
             config = yaml.safe_load(file)
         return config
 
-    def setup_environment(self) -> None:
+    def initialize_components(self) -> None:
         """
-        Set up the environment for deterministic (reproducible) training.
-
-        This method ensures that the training environment is configured to be deterministic, enabling reproducibility
-        across runs. It sets seeds for Python, NumPy, and TensorFlow, and configures TensorFlow for deterministic
-        operations.
-
-        The process follows best practices for setting up deterministic environments, including setting the hash seed,
-        configuring random number generators, and enabling deterministic operations in TensorFlow.
-
-        More information on deterministic training and reproducibility can be found at:
-        - NVIDIA Clara Train documentation: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html
-        - NVIDIA Reproducibility Framework GitHub: https://github.com/NVIDIA/framework-reproducibility/tree/master/doc/d9m
-
-        Parameters
-        ----------
-        self
+        Initialize DataLoader, Tokenizer, Preprocessor, and hyperparameters.
 
         Returns
         -------
         None
-
-        Notes
-        -----
-        1. Sets the `PYTHONHASHSEED` environment variable to control the hash seed used by Python.
-        2. Seeds Python's `random` module, NumPy, and TensorFlow's random number generators for consistency.
-        3. Enables deterministic operations in TensorFlow by setting `TF_DETERMINISTIC_OPS=1`.
-        4. Optionally disables GPU and limits TensorFlow to single-threaded execution.
-            - This is because modern GPUs and CPUs are designed to execute computations in parallel across many cores.
-            - This parallelism is typically managed asynchronously, meaning that the order of operations or the
-            availability of computing resources can vary slightly from one run to another
-            - It is this asynchronous parallelism that can introduce random noise, and hence, non-deterministic
-            behaviour.
-            - However, configuring TensorFlow to use the CPU (`os.environ['CUDA_VISIBLE_DEVICES'] = ''`) and configuring
-            Tensorflow to use single-threaded execution severely impacts performance.
         """
-        determinism_conf: dict[str, Any] = self.config['env']['determinism']
+        # Retrieve configurations
+        data_conf: Dict[str, Any] = self.config.get('data', {})
+        train_conf: Dict[str, Any] = self.config.get('training', {})
 
-        # 1. Set Python's built-in hash seed
-        os.environ['PYTHONHASHSEED'] = str(determinism_conf['python_seed'])
-
-        # 2. Set Python's random module seed
-        random.seed(determinism_conf['random_seed'])
-
-        # 3. Set NumPy's random seed
-        np.random.seed(determinism_conf['numpy_seed'])
-
-        # 4. Set TensorFlow's random seed
-        tf.random.set_seed(determinism_conf['tf_seed'])
-
-        # 5. Configure TensorFlow for deterministic operations
-        os.environ['TF_DETERMINISTIC_OPS'] = '1'
-
-        # Configure (optional, heavily impacts performance)
-        os.environ['CUDA_VISIBLE_DEVICES'] = ''
-
-        # Configure TensorFlow session for single-threaded execution (optional, heavily impacts performance)
-        # tf.config.threading.set_intra_op_parallelism_threads(1)
-        # tf.config.threading.set_inter_op_parallelism_threads(1)
-
-        print("Environment setup for deterministic (reproducible) training complete.")
-
-
-    def initialize_components(self):
-        """
-        Initialize DataLoader, Tokenizer, Preprocessor, and hyperparameters.
-        """
-        # Initialize SmilesTokenizer
-        self.tokenizer: SmilesTokenizer = SmilesTokenizer()
-
-        # Initialize DataLoader with paths and parameters from 'data' config
-        data_conf: dict[str, Any] = self.config['data']
-        model_conf: dict[str, Any] = self.config['model']
-        train_conf: dict[str, Any] = self.config['training']
-
+        # Initialize DataLoader
         self.data_loader = DataLoader(
-            products_file=data_conf['products_file'],
-            reactants_file=data_conf['reactants_file'],
-            products_valid_file=data_conf['products_valid_file'],
-            reactants_valid_file=data_conf['reactants_valid_file'],
-            num_samples=train_conf.get('num_samples', None),
-            max_encoder_seq_length=data_conf['max_encoder_seq_length'],
-            max_decoder_seq_length=data_conf['max_decoder_seq_length'],
-            batch_size=data_conf['batch_size'],
-            test_size=data_conf['test_size'],
-            random_state=data_conf['random_state']
+            products_file=data_conf.get('products_file', ''),
+            reactants_file=data_conf.get('reactants_file', ''),
+            products_valid_file=data_conf.get('products_valid_file', ''),
+            reactants_valid_file=data_conf.get('reactants_valid_file', ''),
+            num_samples=train_conf.get('num_samples'),
+            max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 150),
+            max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 150),
+            batch_size=data_conf.get('batch_size', 16),
+            test_size=data_conf.get('test_size', 0.3),
+            random_state=data_conf.get('random_state', 42)
         )
 
         # Load and prepare data
         self.data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokenizer: SmilesTokenizer = self.data_loader.tokenizer
-        self.vocab_size: int = self.data_loader.vocab_size
+        self.tokenizer = self.data_loader.tokenizer
+        self.vocab_size = self.data_loader.vocab_size
 
         # Save the tokenizer
-        tokenizer_path: str = data_conf['tokenizer_save_path']
+        self.save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
+
+        # Initialize Preprocessors
+        self.encoder_preprocessor = DataPreprocessor(
+            tokenizer=self.tokenizer,
+            max_seq_length=data_conf.get('max_encoder_seq_length', 150)
+        )
+        self.decoder_preprocessor = DataPreprocessor(
+            tokenizer=self.tokenizer,
+            max_seq_length=data_conf.get('max_decoder_seq_length', 150)
+        )
+
+    def save_tokenizer(self, tokenizer_path: str) -> None:
+        """
+        Saves the tokenizer to the specified path.
+
+        Parameters
+        ----------
+        tokenizer_path : str
+            Path where the tokenizer JSON will be saved.
+
+        Returns
+        -------
+        None
+        """
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
         with open(tokenizer_path, 'w') as f:
             f.write(self.tokenizer.to_json())
+        print(f"Tokenizer saved to {tokenizer_path}")
 
-        # Update model configuration with vocab sizes
-        model_conf['input_vocab_size'] = self.vocab_size
-        model_conf['output_vocab_size'] = self.vocab_size
-
-        # Initialize Preprocessors
-        self.encoder_preprocessor: DataPreprocessor = DataPreprocessor(
-            tokenizer=self.tokenizer,
-            max_seq_length=data_conf['max_encoder_seq_length']
-        )
-        self.decoder_preprocessor: DataPreprocessor = DataPreprocessor(
-            tokenizer=self.tokenizer,
-            max_seq_length=data_conf['max_decoder_seq_length']
-        )
-
-    def setup_model(self):
+    def setup_model(self) -> None:
         """
-        Initialize and compile the model.
+        Initializes and compiles the Seq2Seq model.
+
+        Returns
+        -------
+        None
         """
-        model_conf: dict[str, Any] = self.config['model']
+        model_conf: dict[str, Any] = self.config.get('model', {})
+
+        # Retrieve model parameters with defaults
         encoder_embedding_dim: int = model_conf.get('encoder_embedding_dim', 256)
         decoder_embedding_dim: int = model_conf.get('decoder_embedding_dim', 256)
         units: int = model_conf.get('units', 256)
         dropout_rate: float = model_conf.get('dropout_rate', 0.2)
+        learning_rate: float = model_conf.get('learning_rate', 0.0001)
 
         # Initialize the model
         self.model: RetrosynthesisSeq2SeqModel = RetrosynthesisSeq2SeqModel(
@@ -198,7 +163,6 @@ class Trainer:
         self.model.decoder_data_processor = self.decoder_preprocessor
 
         # Set up the optimizer
-        learning_rate: float = model_conf.get('learning_rate', 0.0001)
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
@@ -208,26 +172,36 @@ class Trainer:
         # Compile the model
         self.model.compile(optimizer=self.optimizer, loss=self.loss_function, metrics=self.metrics)
 
-    def build_model(self):
+    def build_model(self) -> None:
         """
-        Build the model by running a sample input through it.
+        Builds the model by running a sample input through it to initialize weights.
+
+        Returns
+        -------
+        None
         """
         print("Building the model with sample data to initialize variables...")
 
         # Get a batch from the training dataset
-        for batch in self.data_loader.get_train_dataset().take(1):
-            (sample_encoder_input, sample_decoder_input), _ = batch
-            self.model([sample_encoder_input, sample_decoder_input])
-            break
+        train_dataset = self.data_loader.get_train_dataset()
+        sample_batch = next(iter(train_dataset))
+        (sample_encoder_input, sample_decoder_input), _ = sample_batch
+
+        # Run the model on sample data
+        self.model([sample_encoder_input, sample_decoder_input])
 
         print("Model built successfully.\n")
 
 
-    def setup_callbacks(self):
+    def setup_callbacks(self) -> None:
         """
-        Set up training callbacks: EarlyStopping, TensorBoard, and CustomCheckpointCallback.
+        Sets up training callbacks including EarlyStopping, TensorBoard, Checkpointing, and Learning Rate Scheduler.
+
+        Returns
+        -------
+        None
         """
-        training_conf: dict[str, Any] = self.config['training']
+        training_conf: dict[str, Any] = self.config.get('training', {})
 
         # Early Stopping
         early_stopping: EarlyStopping = EarlyStopping(
@@ -238,17 +212,17 @@ class Trainer:
 
         # TensorBoard
         tensorboard_callback: EarlyStopping = TensorBoard(
-            log_dir=training_conf['log_dir']
+            log_dir=training_conf.get('log_dir', './logs')
         )
 
         # Custom Checkpoint Callback
-        checkpoint_dir: str = training_conf['checkpoint_dir']
+        checkpoint_dir = training_conf.get('checkpoint_dir', './checkpoints')
         os.makedirs(checkpoint_dir, exist_ok=True)
         checkpoint: Checkpoint = Checkpoint(model=self.model, optimizer=self.optimizer)
         checkpoint_manager: CheckpointManager = CheckpointManager(
             checkpoint,
             directory=checkpoint_dir,
-            max_to_keep=5  # Keeps the latest 5 checkpoints
+            max_to_keep=5
         )
 
         # Restore from latest checkpoint if exists
@@ -258,12 +232,12 @@ class Trainer:
         else:
             print("Initializing from scratch.")
 
-        # Initialize CustomCheckpointCallback
+        # Custom Checkpoint Callback
         best_val_loss_checkpoint_callback: BestValLossCheckpointCallback = BestValLossCheckpointCallback(
             checkpoint_manager
         )
 
-        # Initialize a learning rate scheduler
+        # Learning Rate Scheduler
         lr_scheduler: ReduceLROnPlateau = ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.1,
@@ -277,39 +251,51 @@ class Trainer:
             tensorboard_callback
         ]
 
-    def train(self):
+    def train(self) -> None:
         """
-        Train the Seq2Seq model using the training and validation datasets.
-        """
-        training_conf: dict[str, Any] = self.config['training']
+        Trains the Seq2Seq model using the training and validation datasets.
 
-        train_dataset: DatasetV2 = self.data_loader.get_train_dataset()
-        valid_dataset: DatasetV2 = self.data_loader.get_valid_dataset()
+        Returns
+        -------
+        None
+        """
+        training_conf: Dict[str, Any] = self.config.get('training', {})
+
+        train_dataset = self.data_loader.get_train_dataset()
+        valid_dataset = self.data_loader.get_valid_dataset()
 
         self.model.fit(
             train_dataset,
-            epochs=training_conf.get('epochs', 50),
+            epochs=training_conf.get('epochs', 10),
             validation_data=valid_dataset,
             callbacks=self.callbacks
         )
 
-    def evaluate(self):
+    def evaluate(self) -> None:
         """
-        Evaluate the trained model on the test dataset.
+        Evaluates the trained model on the test dataset.
+
+        Returns
+        -------
+        None
         """
-        test_dataset: DatasetV2 = self.data_loader.get_test_dataset()
+        test_dataset = self.data_loader.get_test_dataset()
 
         test_loss, test_accuracy = self.model.evaluate(test_dataset)
         print(f"Test Loss: {test_loss}")
         print(f"Test Accuracy: {test_accuracy}")
 
-    def save_model(self):
+    def save_model(self) -> None:
         """
-        Save the trained model in TensorFlow SavedModel format.
+        Saves the trained model in TensorFlow SavedModel format.
+
+        Returns
+        -------
+        None
         """
         Seq2SeqModelUtils.inspect_model_layers(self.model)
-        training_conf: dict[str, Any] = self.config['training']
-        model_save_path: str = training_conf['model_save_path']
+        training_conf: Dict[str, Any] = self.config.get('training', {})
+        model_save_path = training_conf.get('model_save_path', './saved_model')
         os.makedirs(model_save_path, exist_ok=True)
 
         self.model.export(model_save_path)
@@ -317,8 +303,13 @@ class Trainer:
 
     def run(self):
         """
-        Execute the full training pipeline.
+        Executes the full training pipeline.
+
+        Returns
+        -------
+        None
         """
+        TrainingEnvironment.setup_environment(self.config)
         self.setup_model()
         self.build_model()
         self.setup_callbacks()

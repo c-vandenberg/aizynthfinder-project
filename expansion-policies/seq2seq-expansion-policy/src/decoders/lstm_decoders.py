@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Any
 
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense, Layer
@@ -225,7 +225,7 @@ class StackedLSTMDecoder(DecoderInterface):
 
         return decoder_output, new_states
 
-    def compute_mask(self, inputs: Union[tf.Tensor, List[tf.Tensor]]) -> None:
+    def compute_mask(self, inputs: Union[tf.Tensor, List[tf.Tensor]], mask: Optional[Any] = None) -> None:
         """
         Propagates the mask forward by computing an output mask tensor for the layer.
 
