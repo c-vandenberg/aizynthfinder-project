@@ -28,7 +28,7 @@ class DataLoader:
         buffer_size: int = DEFAULT_BUFFER_SIZE,
         test_size: float = DEFAULT_TEST_SIZE,
         random_state: int = DEFAULT_RANDOM_STATE,
-    ):
+    ) -> None:
         self.products_file = products_file
         self.reactants_file = reactants_file
         self.products_valid_file = products_valid_file

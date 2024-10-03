@@ -3,11 +3,16 @@ import tensorflow as tf
 from inference.beam_search_decoder import BeamSearchDecoder
 
 class InferenceModel:
-    def __init__(self, model, tokenizer):
+    def __init__(self, model, tokenizer) -> None:
         self.model = model
         self.tokenizer = tokenizer
 
-    def predict_with_beam_search(self, input_smiles, beam_width=5, max_seq_len=100):
+    def predict_with_beam_search(
+        self,
+        input_smiles,
+        beam_width=5,
+        max_seq_len=100
+    ):
         """
         Predicts the reactant SMILES given a product SMILES using beam search.
 

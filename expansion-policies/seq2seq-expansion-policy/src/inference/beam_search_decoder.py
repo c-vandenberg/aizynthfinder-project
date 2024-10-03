@@ -4,7 +4,13 @@ import tensorflow as tf
 from inference.inference_decoder_interface import InferenceDecoderInterface
 
 class BeamSearchDecoder(InferenceDecoderInterface):
-    def __init__(self, model, tokenizer, beam_width=5, max_seq_len=100):
+    def __init__(
+        self,
+        model,
+        tokenizer,
+        beam_width=5,
+        max_seq_len=100
+    ) -> None:
         """
         Initializes the BeamSearchDecoder.
 

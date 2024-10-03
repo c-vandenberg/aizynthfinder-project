@@ -2,7 +2,7 @@ from tensorflow.keras.callbacks import Callback
 from tensorflow.train import CheckpointManager
 
 class BestValLossCheckpointCallback(Callback):
-    def __init__(self, checkpoint_manager: CheckpointManager):
+    def __init__(self, checkpoint_manager: CheckpointManager) -> None:
         super(BestValLossCheckpointCallback, self).__init__()
         self.checkpoint_manager: CheckpointManager = checkpoint_manager
         self.best_val_loss: float = float('inf')  # Initialize with infinity

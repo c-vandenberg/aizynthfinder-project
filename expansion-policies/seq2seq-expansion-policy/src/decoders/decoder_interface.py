@@ -6,7 +6,7 @@ from tensorflow.keras.layers import Layer, Embedding
 
 
 class DecoderInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(DecoderInterface, self).__init__(**kwargs)
 
     @abstractmethod

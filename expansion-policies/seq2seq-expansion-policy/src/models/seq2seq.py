@@ -75,12 +75,10 @@ class RetrosynthesisSeq2SeqModel(Model):
         num_encoder_layers = 2,
         num_decoder_layers: int = 4,
         dropout_rate: float = 0.2,
-        *args,
         **kwargs
     ):
-        super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
+        super(RetrosynthesisSeq2SeqModel, self).__init__(**kwargs)
 
-        # Save the number of units (neurons)
         self.units: int = units
 
         # Encoder layer
@@ -101,7 +99,6 @@ class RetrosynthesisSeq2SeqModel(Model):
             dropout_rate=dropout_rate
         )
 
-        # Save the vocabulary sizes
         self.input_vocab_size: int = input_vocab_size
         self.output_vocab_size: int = output_vocab_size
 
@@ -109,50 +106,53 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.enc_state_h: Dense = Dense(units, name='enc_state_h')
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
-        # Store the data processors (to be set externally)
+        # Data processors to be set externally
         self.encoder_data_processor: Optional[Any] = None
         self.decoder_data_processor: Optional[Any] = None
 
         # Save the dropout rate
         self.dropout_rate: float = dropout_rate
 
-    def build(self, input_shape):
-        # Define the input shapes for encoder and decoder
-        encoder_input_shape, decoder_input_shape = input_shape
-
-        # Pass a dummy input through encoder and decoder to initialize weights
-        encoder_dummy = tf.zeros(encoder_input_shape)
-        decoder_dummy = tf.zeros(decoder_input_shape)
-
-        # Forward pass to build the model
-        self.call((encoder_dummy, decoder_dummy), training=False)
-
-        # Mark the model as built
-        super(RetrosynthesisSeq2SeqModel, self).build(input_shape)
-
-    def call(self, inputs: Tuple[tf.Tensor, tf.Tensor], training: Optional[bool] = None) -> tf.Tensor:
+    def call(
+        self,
+        inputs: Tuple[tf.Tensor, tf.Tensor],
+        training: Optional[bool] = None
+    ) -> tf.Tensor:
         """
         Forward pass of the Seq2Seq model.
 
-        Args:
-            inputs (Tuple[tf.Tensor, tf.Tensor]): Tuple containing encoder and decoder inputs.
-            training (Optional[bool], optional): Training flag. Defaults to None.
+        Parameters
+        ----------
+        inputs : tuple of tf.Tensor
+            Tuple containing encoder_input and decoder_input:
+            - encoder_input : tf.Tensor of shape (batch_size, seq_len_enc)
+            - decoder_input : tf.Tensor of shape (batch_size, seq_len_dec)
+        training : bool, optional
+            Indicates whether the model is in training mode.
 
-        Returns:
-            tf.Tensor: The output predictions from the decoder.
+        Returns
+        -------
+        tf.Tensor
+            Output predictions from the decoder.
+            Shape: (batch_size, seq_len_dec, vocab_size)
         """
-        # Extract encoder and decoder inputs
+        # Unpack inputs
+        encoder_input: tf.Tensor
+        decoder_input: tf.Tensor
         encoder_input, decoder_input = inputs
 
-        # Encoder
+        # Encoder input sequence processing
+        encoder_output: tf.Tensor
+        state_h: tf.Tensor
+        state_c: tf.Tensor
         encoder_output, state_h, state_c = self.encoder(encoder_input, training=training)
 
         # Map encoder final states to decoder initial states
-        decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # (batch_size, units)
-        decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # (batch_size, units)
+        decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
+        decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
         decoder_initial_state: Tuple[tf.Tensor, tf.Tensor] = (decoder_initial_state_h, decoder_initial_state_c)
 
-        # Prepare decoder inputs as a tuple
+        # Prepare decoder inputs
         decoder_inputs = (
             decoder_input,
             decoder_initial_state,
@@ -162,7 +162,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         # Extract encoder mask
         encoder_mask: Optional[tf.Tensor] = self.encoder.compute_mask(encoder_input)
 
-        # Decoder
+        # Decoder input sequence processing
         output: tf.Tensor = self.decoder(
             decoder_inputs,
             training=training,
@@ -172,12 +172,22 @@ class RetrosynthesisSeq2SeqModel(Model):
         return output
 
     def get_config(self) -> dict:
+        """
+        Returns the configuration of the model for serialization.
+
+        Returns
+        -------
+        dict
+            Configuration dictionary.
+        """
         config = {
             'input_vocab_size': self.input_vocab_size,
             'output_vocab_size': self.output_vocab_size,
             'encoder_embedding_dim': self.encoder.embedding.output_dim,
             'decoder_embedding_dim': self.decoder.embedding.output_dim,
             'units': self.units,
+            'num_encoder_layers': self.encoder.num_layers,
+            'num_decoder_layers': self.decoder.num_layers,
             'dropout_rate': self.dropout_rate,
             'name': self.name,
         }
@@ -185,4 +195,17 @@ class RetrosynthesisSeq2SeqModel(Model):
 
     @classmethod
     def from_config(cls, config: dict) -> 'RetrosynthesisSeq2SeqModel':
+        """
+        Creates an instance of the model from its configuration.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration dictionary.
+
+        Returns
+        -------
+        RetrosynthesisSeq2SeqModel
+            An instance of the model.
+        """
         return cls(**config)

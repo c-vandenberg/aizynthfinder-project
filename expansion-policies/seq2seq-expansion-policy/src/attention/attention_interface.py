@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Layer, Embedding
 from typing import List, Tuple
 
 class AttentionInterface(Layer, metaclass=ABCMeta):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(AttentionInterface, self).__init__(**kwargs)
 
     @abstractmethod

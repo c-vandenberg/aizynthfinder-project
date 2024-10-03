@@ -24,7 +24,7 @@ class Trainer:
     This class handles the setup of the environment, data loading, model
     initialization, training, evaluation, and saving of the model.
     """
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str) -> None:
         """
         Initializes the Trainer with configurations.
 

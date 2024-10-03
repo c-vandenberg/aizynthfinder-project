@@ -2,7 +2,11 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 
 
 class SmilesTokenizer(Tokenizer):
-    def __init__(self, start_token='<START>', end_token='<END>'):
+    def __init__(
+        self,
+        start_token='<START>',
+        end_token='<END>'
+    ) -> None:
         self.start_token = start_token
         self.end_token = end_token
         self.tokenizer = None  # Will be initialized later if needed

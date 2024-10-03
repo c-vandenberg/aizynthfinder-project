@@ -21,7 +21,7 @@ class BahdanauAttention(AttentionInterface):
     call(inputs, mask=None, training=None)
         Computes the context vector and attention weights.
     """
-    def __init__(self, units: int, **kwargs):
+    def __init__(self, units: int, **kwargs) -> None:
         super(BahdanauAttention, self).__init__(**kwargs)
         self.units = units
         self.attention_dense1 = Dense(units, name='attention_dense1')

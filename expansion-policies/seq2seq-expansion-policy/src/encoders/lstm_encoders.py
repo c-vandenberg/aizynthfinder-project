@@ -56,7 +56,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         num_layers: int,
         dropout_rate: float = 0.2,
         **kwargs
-    ):
+    ) -> None:
         super(StackedBidirectionalLSTMEncoder, self).__init__(**kwargs)
         self.vocab_size = vocab_size
         self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)

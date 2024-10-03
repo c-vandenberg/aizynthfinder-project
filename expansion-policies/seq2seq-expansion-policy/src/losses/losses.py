@@ -3,35 +3,69 @@ from tensorflow.keras.losses import Loss
 
 @tf.keras.utils.register_keras_serializable()
 class MaskedSparseCategoricalCrossentropy(Loss):
+    """
+    Masked Sparse Categorical Crossentropy Loss Function.
+
+    Computes the sparse categorical cross-entropy loss while ignoring padding tokens.
+
+    Parameters
+    ----------
+    padding_idx : int, optional
+        The index used for padding tokens (default is 0).
+    name : str, optional
+        Name for the loss function (default is 'masked_sparse_categorical_crossentropy').
+    **kwargs
+        Additional keyword arguments for the base Loss class.
+
+    Attributes
+    ----------
+    padding_idx : int
+        The index used for padding tokens.
+    loss_object : tf.keras.losses.Loss
+        The underlying loss function used to compute the loss.
+
+    Methods
+    -------
+    call(y_true, y_pred)
+        Computes the masked sparse categorical cross-entropy loss.
+    get_config()
+        Returns the configuration of the loss function.
+    """
     def __init__(
         self,
         padding_idx: int = 0,
         name: str = "masked_sparse_categorical_crossentropy",
         **kwargs
-    ):
+    ) -> None:
         super(MaskedSparseCategoricalCrossentropy, self).__init__(name=name, **kwargs)
         self.padding_idx = padding_idx
         self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
-            from_logits=False, reduction=tf.keras.losses.Reduction.NONE
+            from_logits=False,
+            reduction=tf.keras.losses.Reduction.NONE
         )
 
     def call(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         """
         Computes the masked sparse categorical cross-entropy loss.
 
-        Args:
-            y_true (tf.Tensor): Ground truth tensor of shape (batch_size, sequence_length).
-            y_pred (tf.Tensor): Predicted tensor of shape (batch_size, sequence_length, vocab_size).
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth tensor of shape (batch_size, sequence_length).
+        y_pred : tf.Tensor
+            Predicted tensor of shape (batch_size, sequence_length, vocab_size).
 
-        Returns:
-            tf.Tensor: Scalar tensor representing the mean loss over non-padding tokens.
+        Returns
+        -------
+        tf.Tensor
+            Scalar tensor representing the mean loss over non-padding tokens.
         """
         # Create a mask to ignore padding tokens
-        mask = tf.not_equal(y_true, self.padding_idx)  # Shape: (batch_size, sequence_length)
-        mask = tf.cast(mask, dtype=y_pred.dtype)       # Cast mask to match y_pred's dtype
+        mask = tf.not_equal(y_true, self.padding_idx) # Shape: (batch_size, sequence_length)
+        mask = tf.cast(mask, dtype=y_pred.dtype) # Cast mask to match y_pred's dtype
 
         # Compute the loss for each token
-        loss = self.loss_object(y_true, y_pred)       # Shape: (batch_size, sequence_length)
+        loss = self.loss_object(y_true, y_pred) # Shape: (batch_size, sequence_length)
 
         # Apply the mask to the loss
         loss *= mask
@@ -43,25 +77,30 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         """
         Returns the configuration of the loss function for serialization.
 
-        Returns:
-            dict: Configuration dictionary.
+        Returns
+        -------
+        dict
+            Configuration dictionary.
         """
         config = super(MaskedSparseCategoricalCrossentropy, self).get_config()
         config.update({
             'padding_idx': self.padding_idx,
-            # Note: `from_logits` and `reduction` are fixed in this implementation.
         })
         return config
 
     @classmethod
-    def from_config(cls, config: dict):
+    def from_config(cls, config: dict) -> 'MaskedSparseCategoricalCrossentropy':
         """
-        Creates an instance of the loss function from its config.
+        Creates an instance of the loss function from its configuration.
 
-        Args:
-            config (dict): Configuration dictionary.
+        Parameters
+        ----------
+        config : dict
+            Configuration dictionary.
 
-        Returns:
-            MaskedSparseCategoricalCrossentropy: A new instance of the loss function.
+        Returns
+        -------
+        MaskedSparseCategoricalCrossentropy
+            An instance of the loss function.
         """
         return cls(**config)

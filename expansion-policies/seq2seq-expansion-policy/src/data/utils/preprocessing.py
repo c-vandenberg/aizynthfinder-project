@@ -3,7 +3,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 class DataPreprocessor:
-    def __init__(self, tokenizer, max_seq_length):
+    def __init__(self, tokenizer, max_seq_length) -> None:
         self.tokenizer = tokenizer
         self.max_seq_length = max_seq_length
 

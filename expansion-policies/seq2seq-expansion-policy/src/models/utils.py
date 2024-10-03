@@ -6,8 +6,14 @@ from sklearn.model_selection import ShuffleSplit, cross_validate
 
 class Seq2SeqModelUtils:
     @staticmethod
-    def seq2seq_cross_validator(n_splits: int, test_size: float, random_state: int, seq2seq_model, feature_matrix,
-                                target_matrix):
+    def seq2seq_cross_validator(
+        n_splits: int,
+        test_size: float,
+        random_state: int,
+        seq2seq_model,
+        feature_matrix,
+        target_matrix
+    ):
         cross_validator: ShuffleSplit = ShuffleSplit(
             n_splits=n_splits,
             test_size=test_size,
@@ -53,7 +59,7 @@ class Seq2SeqModelUtils:
         return tf.reduce_mean(loss)
 
     @staticmethod
-    def inspect_model_layers(model):
+    def inspect_model_layers(model) -> None:
         """
         Recursively inspect each layer and sublayer in the model and print their configuration.
         """
@@ -75,7 +81,7 @@ class Seq2SeqModelUtils:
             _inspect_layer(layer)
 
     @staticmethod
-    def convert_to_onnx(saved_model_path, onnx_file_path):
+    def convert_to_onnx(saved_model_path, onnx_file_path) -> None:
         """
         Convert the TensorFlow SavedModel to ONNX format and save it.
         """
