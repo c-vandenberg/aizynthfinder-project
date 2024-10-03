@@ -3,15 +3,12 @@ from tensorflow.keras.losses import Loss
 
 @tf.keras.utils.register_keras_serializable()
 class MaskedSparseCategoricalCrossentropy(Loss):
-    def __init__(self, padding_idx: int = 0, name: str = "masked_sparse_categorical_crossentropy", **kwargs):
-        """
-        Initializes the MaskedSparseCategoricalCrossentropy loss.
-
-        Args:
-            padding_idx (int, optional): The index used for padding tokens. Defaults to 0.
-            name (str, optional): Name for the loss function. Defaults to "masked_sparse_categorical_crossentropy".
-            **kwargs: Additional keyword arguments for the base class.
-        """
+    def __init__(
+        self,
+        padding_idx: int = 0,
+        name: str = "masked_sparse_categorical_crossentropy",
+        **kwargs
+    ):
         super(MaskedSparseCategoricalCrossentropy, self).__init__(name=name, **kwargs)
         self.padding_idx = padding_idx
         self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(

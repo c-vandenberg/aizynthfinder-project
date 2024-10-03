@@ -46,8 +46,15 @@ class StackedLSTMDecoder(DecoderInterface):
     decoder_output : tf.Tensor
         Predicted token probabilities for each timestep in the target sequence.
     """
-    def __init__(self, vocab_size: int, decoder_embedding_dim: int, units: int, num_layers: int,
-                 dropout_rate: float = 0.2, **kwargs) -> None:
+    def __init__(
+        self,
+        vocab_size: int,
+        decoder_embedding_dim: int,
+        units: int,
+        num_layers: int,
+        dropout_rate: float = 0.2,
+        **kwargs
+    ) -> None:
         super(StackedLSTMDecoder, self).__init__(**kwargs)
         self.vocab_size = vocab_size
         self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
@@ -79,8 +86,12 @@ class StackedLSTMDecoder(DecoderInterface):
         # Output layer
         self.dense: Dense = Dense(vocab_size, activation='softmax')
 
-    def call(self, inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor], training: Optional[bool] = None,
-             mask: Optional[tf.Tensor] = None) -> tf.Tensor:
+    def call(
+        self,
+        inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor],
+        training: Optional[bool] = None,
+        mask: Optional[tf.Tensor] = None
+    ) -> tf.Tensor:
         """
         Processes the input sequence, applies attention, and generates output probabilities over the target vocabulary.
 
@@ -154,7 +165,12 @@ class StackedLSTMDecoder(DecoderInterface):
 
         return decoder_output
 
-    def single_step(self, decoder_input: tf.Tensor, states: List[tf.Tensor], encoder_output: tf.Tensor):
+    def single_step(
+        self,
+        decoder_input: tf.Tensor,
+        states: List[tf.Tensor],
+        encoder_output: tf.Tensor
+    ) -> Tuple[tf.Tensor]:
         """
         Performs a single decoding step.
 
@@ -225,7 +241,11 @@ class StackedLSTMDecoder(DecoderInterface):
 
         return decoder_output, new_states
 
-    def compute_mask(self, inputs: Union[tf.Tensor, List[tf.Tensor]], mask: Optional[Any] = None) -> None:
+    def compute_mask(
+        self,
+        inputs: Union[tf.Tensor, List[tf.Tensor]],
+        mask: Optional[Any] = None
+    ) -> None:
         """
         Propagates the mask forward by computing an output mask tensor for the layer.
 

@@ -8,9 +8,76 @@ from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 
 class RetrosynthesisSeq2SeqModel(Model):
-    def __init__(self, input_vocab_size: int, output_vocab_size: int, encoder_embedding_dim: int,
-                 decoder_embedding_dim: int, units: int, num_encoder_layers = 2, num_decoder_layers: int = 4,
-                 dropout_rate: float = 0.2, *args, **kwargs):
+    """
+    Retrosynthesis Seq2Seq Model using LSTM layers.
+
+    Model consists of an encoder and a decoder with attention mechanism for predicting reaction precursors
+    for a target molecule.
+
+    Parameters
+    ----------
+    input_vocab_size : int
+        Size of the input vocabulary.
+    output_vocab_size : int
+        Size of the output vocabulary.
+    encoder_embedding_dim : int
+        Dimension of the embedding space for the encoder.
+    decoder_embedding_dim : int
+        Dimension of the embedding space for the decoder.
+    units : int
+        Number of units in LSTM layers.
+    num_encoder_layers : int, optional
+        Number of stacked layers in the encoder (default is 2).
+    num_decoder_layers : int, optional
+        Number of stacked layers in the decoder (default is 4).
+    dropout_rate : float, optional
+        Dropout rate for regularization (default is 0.2).
+    **kwargs
+        Additional keyword arguments for the Model superclass.
+
+    Attributes
+    ----------
+    units : int
+        Number of units in LSTM layers.
+    encoder : StackedBidirectionalLSTMEncoder
+        The encoder part of the Seq2Seq model.
+    decoder : StackedLSTMDecoder
+        The decoder part of the Seq2Seq model.
+    input_vocab_size : int
+        Size of the input vocabulary.
+    output_vocab_size : int
+        Size of the output vocabulary.
+    enc_state_h : Dense
+        Dense layer to map encoder hidden state to decoder initial hidden state.
+    enc_state_c : Dense
+        Dense layer to map encoder cell state to decoder initial cell state.
+    encoder_data_processor : Any
+        Data preprocessor for the encoder inputs (to be set externally).
+    decoder_data_processor : Any
+        Data preprocessor for the decoder inputs (to be set externally).
+    dropout_rate : float
+        Dropout rate for regularization.
+
+    Methods
+    -------
+    call(inputs, training=None)
+        Forward pass of the Seq2Seq model.
+    get_config()
+        Returns the configuration of the model.
+    """
+    def __init__(
+        self,
+        input_vocab_size: int,
+        output_vocab_size: int,
+        encoder_embedding_dim: int,
+        decoder_embedding_dim: int,
+        units: int,
+        num_encoder_layers = 2,
+        num_decoder_layers: int = 4,
+        dropout_rate: float = 0.2,
+        *args,
+        **kwargs
+    ):
         super(RetrosynthesisSeq2SeqModel, self).__init__(*args, **kwargs)
 
         # Save the number of units (neurons)

@@ -29,8 +29,12 @@ class BahdanauAttention(AttentionInterface):
         self.attention_v = Dense(1, name='attention_v')
         self.supports_masking = True
 
-    def call(self, inputs: List[tf.Tensor], mask: Optional[tf.Tensor] = None,
-             training: Union[None, bool] = None) -> Tuple[tf.Tensor, tf.Tensor]:
+    def call(
+        self,
+        inputs: List[tf.Tensor],
+        mask: Optional[tf.Tensor] = None,
+        training: Union[None, bool] = None
+    ) -> Tuple[tf.Tensor, tf.Tensor]:
         """
         Computes the context vector and attention weights using the Bahdanau attention mechanism.
 

@@ -140,8 +140,10 @@ class DataLoader:
             self.tokenized_reactants_y_valid_dataset
         )
 
-    def _preprocess_data_pair(self,encoder_data: List[str],
-                              decoder_data: List[str]) -> Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]:
+    def _preprocess_data_pair(
+        self,encoder_data: List[str],
+        decoder_data: List[str]
+    ) -> Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]:
         """Preprocesses a pair of encoder and decoder data.
 
         Parameters
@@ -164,8 +166,11 @@ class DataLoader:
         decoder_target = decoder_full[:, 1:]
         return (encoder_input, decoder_input), decoder_target
 
-    def get_dataset(self, data: Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor],
-                    training: bool =True) -> tf.data.Dataset:
+    def get_dataset(
+        self,
+        data: Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor],
+        training: bool =True
+    ) -> tf.data.Dataset:
         """
         Creates a tf.data.Dataset from the given data.
 

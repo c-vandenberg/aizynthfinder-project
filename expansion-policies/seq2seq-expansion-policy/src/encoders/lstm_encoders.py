@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import tensorflow as tf
 from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout, Dense, Layer
@@ -48,8 +48,15 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
     final_state_c : tf.Tensor
         Concatenated cell state from the last Bidirectional LSTM layer.
     """
-    def __init__(self, vocab_size: int, encoder_embedding_dim: int, units: int, num_layers: int,
-                 dropout_rate: float = 0.2, **kwargs):
+    def __init__(
+        self,
+        vocab_size: int,
+        encoder_embedding_dim: int,
+        units: int,
+        num_layers: int,
+        dropout_rate: float = 0.2,
+        **kwargs
+    ):
         super(StackedBidirectionalLSTMEncoder, self).__init__(**kwargs)
         self.vocab_size = vocab_size
         self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
@@ -72,7 +79,11 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             self.dropout_layers.append(dropout_layer)
 
 
-    def call(self, encoder_input: tf.Tensor, training: Optional[bool] = None):
+    def call(
+        self,
+        encoder_input: tf.Tensor,
+        training: Optional[bool] = None
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         """
         Encodes the input sequence and returns the encoder outputs and final states.
 
@@ -121,7 +132,11 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
         return encoder_output, final_state_h, final_state_c
 
-    def compute_mask(self, inputs: tf.Tensor, mask: Optional[tf.Tensor] = None) -> Optional[tf.Tensor]:
+    def compute_mask(
+        self,
+        inputs: tf.Tensor,
+        mask: Optional[tf.Tensor] = None
+    ) -> Optional[tf.Tensor]:
         """
         Propagates the mask forward by computing an output mask tensor for the layer.
 
