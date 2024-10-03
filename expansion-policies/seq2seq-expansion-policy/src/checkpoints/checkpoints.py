@@ -1,13 +1,46 @@
+from typing import Optional
+
 from tensorflow.keras.callbacks import Callback
 from tensorflow.train import CheckpointManager
 
 class BestValLossCheckpointCallback(Callback):
+    """
+    Custom callback to save the model when there is an improvement in validation loss.
+
+    Parameters
+    ----------
+    checkpoint_manager : tf.train.CheckpointManager
+        The checkpoint manager to handle saving checkpoints.
+
+    Attributes
+    ----------
+    checkpoint_manager : tf.train.CheckpointManager
+        Manages the saving of checkpoints.
+    best_val_loss : float
+        Tracks the best validation loss observed so far.
+
+    Methods
+    -------
+    on_epoch_end(epoch, logs=None)
+        Called at the end of each epoch to check for improvement in validation loss.
+    """
     def __init__(self, checkpoint_manager: CheckpointManager) -> None:
         super(BestValLossCheckpointCallback, self).__init__()
         self.checkpoint_manager: CheckpointManager = checkpoint_manager
-        self.best_val_loss: float = float('inf')  # Initialize with infinity
+        self.best_val_loss: float = float('inf')  # Initialize as infinity
 
-    def on_epoch_end(self, epoch, logs=None):
+    def on_epoch_end(self, epoch: int, logs: Optional[dict] = None) -> None:
+        """
+        Checks validation loss at the end of an epoch and saves the model if it improves.
+
+        Parameters
+        ----------
+        epoch : int
+            The index of the epoch.
+        logs : dict, optional
+            Dictionary of logs from the training process.
+        """
+        logs = logs or {}
         current_val_loss: float = logs.get('val_loss')
         if current_val_loss is not None:
             if current_val_loss < self.best_val_loss:
