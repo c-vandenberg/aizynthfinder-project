@@ -12,10 +12,6 @@
 #   - Test Loss (Smoothed):
 #   - Test Accuracy (Smoothed):
 
-Test Loss: 0.43078896403312683
-Test Accuracy: 0.6022447347640991
-
-
 # Data Configuration and Hyperparameters
 data:
   products_file: 'data/preprocessed/pande-et-al/products_smiles'
@@ -43,12 +39,12 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 1
+  epochs: 5
   patience: 5
   model_save_path: 'data/training/pande-et-al/model-v10/model'
   log_dir: 'logs/pande-et-al/model-v10'
   checkpoint_dir: 'data/training/pande-et-al/model-v10/checkpoints'
-  num_samples: 100 # Number of samples to use for debugging model
+  num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
 env:
