@@ -22,7 +22,7 @@ data:
   reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
   products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
   reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/pande-et-al/model-v9/tokenizer/model_v9_tokenizer.json'
+  tokenizer_save_path: 'data/training/pande-et-al/model-v10/tokenizer/model_v10_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -43,12 +43,12 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 5
+  epochs: 1
   patience: 5
-  model_save_path: 'data/training/pande-et-al/model-v9/model'
-  log_dir: 'logs/pande-et-al/model-v9'
-  checkpoint_dir: 'data/training/pande-et-al/model-v9/checkpoints'
-  num_samples: null # Number of samples to use for debugging model
+  model_save_path: 'data/training/pande-et-al/model-v10/model'
+  log_dir: 'logs/pande-et-al/model-v10'
+  checkpoint_dir: 'data/training/pande-et-al/model-v10/checkpoints'
+  num_samples: 100 # Number of samples to use for debugging model
 
 # Environment Configuration
 env:

@@ -123,6 +123,9 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_output: tf.Tensor = self.embedding(decoder_input) # Shape: (batch_size, seq_len_dec, decoder_embedding_dim)
         decoder_mask: Optional[tf.Tensor] = self.embedding.compute_mask(decoder_input) # Shape: (batch_size, seq_len_dec)
 
+        # Initialize previous_output with the embeddings
+        previous_output = decoder_output
+
         # Process through decoder layers
         for i, (lstm_layer, dropout_layer) in enumerate(zip(self.lstm_layers, self.dropout_layers)):
             if i == 0:
@@ -139,6 +142,15 @@ class StackedLSTMDecoder(DecoderInterface):
                     mask=decoder_mask,
                     training=training
                 )
+
+            # Apply residual connection from the second layer onwards
+            if i > 0:
+                decoder_output += previous_output  # Residual connection
+
+            # Update previous_output
+            previous_output = decoder_output
+
+            # Apply dropout
             decoder_output = dropout_layer(decoder_output, training=training) # Shape: (batch_size, seq_len_dec, units)
 
         # Extract only the encoder_mask if passed mask list of tuple

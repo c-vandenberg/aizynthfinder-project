@@ -105,7 +105,10 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         final_state_h: Union[None, tf.Tensor] = None
         final_state_c: Union[None, tf.Tensor] = None
 
-        for lstm_layer, dropout_layer in zip(self.bidirectional_lstm_layers, self.dropout_layers):
+        # Initialize previous_output with the embeddings
+        previous_output: tf.Tensor = encoder_output
+
+        for i, (lstm_layer, dropout_layer) in enumerate(zip(self.bidirectional_lstm_layers, self.dropout_layers)):
             # Pass through the Bidirectional LSTM layer
             # encoder_output shape: (batch_size, seq_len, units * 2)
             # forward_h shape: (batch_size, units)
@@ -121,6 +124,13 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
             # Concatenate the final forward and backward cell states
             final_state_c = tf.concat([forward_c, backward_c], axis=-1) # Shape: (batch_size, units * 2)
+
+            # Apply residual connection from the second layer onwards
+            if i > 0:
+                encoder_output += previous_output  # Residual connection
+
+            # Update previous_output
+            previous_output = encoder_output
 
             # Apply dropout to the encoder output
             encoder_output: tf.Tensor = dropout_layer(
