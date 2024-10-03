@@ -145,7 +145,7 @@ class StackedLSTMDecoder(DecoderInterface):
 
             # Apply residual connection from the second layer onwards
             if i > 0:
-                decoder_output += previous_output  # Residual connection
+                decoder_output += previous_output
 
             # Update previous_output
             previous_output = decoder_output

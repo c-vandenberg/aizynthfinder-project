@@ -1,16 +1,24 @@
 # Seq2Seq Model Architecture
+# - Use Residual Connections:
+#	- Add residual (skip) connections between the LSTM layers in both the encoder and decoder to facilitate gradient
+#     flow and allow the model to learn identity mappings more easily.
+#	- In theory this helps in training deeper networks by mitigating vanishing gradient problems.
+# - Improvement in both accuracy and loss in train, validation and test.
 #
 # Training run metrics:
-#   - Epochs:
+#   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.445
+#   - Train Accuracy (Smoothed): 0.600
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.365
+#   - Validation Accuracy (Smoothed): 0.617
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.300
+#   - Test Accuracy (Smoothed): 0.634
+
+Test Loss: 0.2996947169303894
+Test Accuracy: 0.6341190934181213
 
 # Data Configuration and Hyperparameters
 data:

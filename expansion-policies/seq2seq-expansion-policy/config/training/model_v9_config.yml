@@ -8,7 +8,7 @@
 # - Keep 4 layers for future iterations.
 #
 # Training run metrics:
-#   - Epochs:
+#   - Epochs: 5
 #
 #   - Train Loss (Smoothed): 0.581
 #   - Train Accuracy (Smoothed): 0.572
