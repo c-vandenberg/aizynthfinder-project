@@ -39,7 +39,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
     ) -> None:
         super(MaskedSparseCategoricalCrossentropy, self).__init__(name=name, **kwargs)
         self.padding_idx = padding_idx
-        self.loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
+        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits=False,
             reduction=tf.keras.losses.Reduction.NONE
         )
@@ -60,12 +60,12 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         tf.Tensor
             Scalar tensor representing the mean loss over non-padding tokens.
         """
+        # Compute the loss for each token
+        loss = self.loss_function(y_true, y_pred)  # Shape: (batch_size, sequence_length)
+
         # Create a mask to ignore padding tokens
         mask = tf.not_equal(y_true, self.padding_idx) # Shape: (batch_size, sequence_length)
-        mask = tf.cast(mask, dtype=y_pred.dtype) # Cast mask to match y_pred's dtype
-
-        # Compute the loss for each token
-        loss = self.loss_object(y_true, y_pred) # Shape: (batch_size, sequence_length)
+        mask = tf.cast(mask, dtype=loss.dtype) # Cast mask to match y_pred's dtype
 
         # Apply the mask to the loss
         loss *= mask

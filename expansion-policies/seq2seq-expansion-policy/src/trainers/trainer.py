@@ -10,6 +10,7 @@ from tensorflow.train import Checkpoint, CheckpointManager
 
 from trainers.environment import TrainingEnvironment
 from checkpoints.checkpoints import BestValLossCheckpointCallback
+from losses.losses import MaskedSparseCategoricalCrossentropy
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
@@ -166,7 +167,7 @@ class Trainer:
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
-        self.loss_function = Seq2SeqModelUtils.masked_sparse_categorical_crossentropy
+        self.loss_function = MaskedSparseCategoricalCrossentropy
         self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
 
         # Compile the model
