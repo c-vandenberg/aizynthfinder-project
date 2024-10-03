@@ -31,34 +31,6 @@ class Seq2SeqModelUtils:
         )
 
     @staticmethod
-    def masked_sparse_categorical_crossentropy(real: tf.Tensor, pred: tf.Tensor) -> tf.Tensor:
-        """
-        Computes the sparse categorical cross-entropy loss while masking out padding tokens.
-
-        Args:
-            real (tf.Tensor): The ground truth tensor.
-            pred (tf.Tensor): The predicted tensor.
-
-        Returns:
-            tf.Tensor: The computed loss.
-        """
-        # Create a mask to ignore padding tokens (assumed to be 0)
-        mask = tf.math.logical_not(tf.math.equal(real, 0))
-
-        # Define and instantiate the loss object
-        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, reduction='none')
-
-        # Compute the loss for each token
-        loss = loss_object(real, pred)
-
-        # Cast mask to the same dtype as loss and apply it
-        mask = tf.cast(mask, dtype=loss.dtype)
-        loss *= mask
-
-        # Return the mean loss over non-padding tokens
-        return tf.reduce_mean(loss)
-
-    @staticmethod
     def inspect_model_layers(model) -> None:
         """
         Recursively inspect each layer and sublayer in the model and print their configuration.

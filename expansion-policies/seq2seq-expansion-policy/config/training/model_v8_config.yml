@@ -1,16 +1,26 @@
 # Seq2Seq Model Architecture
+# - Changed loss function to `losses.losses.MaskedSparseCategoricalCrossentropy`
+# - This has resulted in an increase in loss function for the following reasons:
+#   1. Previous loss function (`models.utils.Seq2SeqModelUtils.masked_sparse_categorical_crossentropy) was computing
+#      the loss for each token in the batch, and masking the loss for padding tokens by setting them to zero.
+#   2. As a result, it was computing a mean loss over all tokens, **including zeros from padding tokens**.
+#   3. By averaging over the entire sequence length (including the zeros from padding tokens), the **overall loss
+#      was artificially reduced**.
+#   4. The new `losses.losses.MaskedSparseCategoricalCrossentropy` loss function only calculates the mean loss over
+#      non-padding tokens, resulting in a worse, but more accurate, loss function value.
 #
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.640
+#   - Train Accuracy (Smoothed): 0.561
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.551
+#   - Validation Accuracy (Smoothed): 0.577
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.444
+#   - Test Accuracy (Smoothed): 0.600
+
 
 
 

@@ -21,7 +21,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
     ----------
     padding_idx : int
         The index used for padding tokens.
-    loss_object : tf.keras.losses.Loss
+    loss_function : tf.keras.losses.Loss
         The underlying loss function used to compute the loss.
 
     Methods
