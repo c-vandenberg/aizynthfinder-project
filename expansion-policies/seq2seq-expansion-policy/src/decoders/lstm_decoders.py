@@ -1,7 +1,8 @@
 from typing import List, Optional, Tuple, Union, Any
 
 import tensorflow as tf
-from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense, Layer
+from tensorflow.keras.layers import (Embedding, LSTM, Dropout,
+                                     Dense, Layer, LayerNormalization)
 
 from decoders.decoder_interface import DecoderInterface
 from attention.attention import BahdanauAttention
@@ -66,10 +67,10 @@ class StackedLSTMDecoder(DecoderInterface):
 
         self.supports_masking = True
 
-        # Decoder: 4-layer LSTM without internal Dropout
-        # Define LSTM and Dropout layers separately
+        # Build LSTM, Dropout, and LayerNormalization layers
         self.lstm_layers = []
         self.dropout_layers = []
+        self.layer_norm_layers = []
         for i in range(num_layers):
             lstm_layer = LSTM(
                 units=units,
@@ -77,9 +78,13 @@ class StackedLSTMDecoder(DecoderInterface):
                 return_state=True,
                 name=f'lstm_decoder_{i + 1}'
             )
-            dropout_layer = Dropout(dropout_rate, name=f'decoder_dropout_{i + 1}')
             self.lstm_layers.append(lstm_layer)
+
+            dropout_layer = Dropout(dropout_rate, name=f'decoder_dropout_{i + 1}')
             self.dropout_layers.append(dropout_layer)
+
+            layer_norm_layer = LayerNormalization(name=f'decoder_layer_norm_{i + 1}')
+            self.layer_norm_layers.append(layer_norm_layer)
 
         # Attention Mechanism
         self.attention: BahdanauAttention = BahdanauAttention(units=units)
@@ -124,7 +129,9 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_mask: Optional[tf.Tensor] = self.embedding.compute_mask(decoder_input) # Shape: (batch_size, seq_len_dec)
 
         # Process through decoder layers
-        for i, (lstm_layer, dropout_layer) in enumerate(zip(self.lstm_layers, self.dropout_layers)):
+        for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
+                zip(self.lstm_layers, self.dropout_layers, self.layer_norm_layers)
+        ):
             if i == 0:
                 # Use initial_state (encoder final state) for the first LSTM layer
                 decoder_output, state_h, state_c = lstm_layer(
@@ -139,6 +146,10 @@ class StackedLSTMDecoder(DecoderInterface):
                     mask=decoder_mask,
                     training=training
                 )
+            # Apply Layer Normalization
+            decoder_output = layer_norm_layer(decoder_output)
+
+            # Apply Dropout
             decoder_output = dropout_layer(decoder_output, training=training) # Shape: (batch_size, seq_len_dec, units)
 
         # Extract only the encoder_mask if passed mask list of tuple
