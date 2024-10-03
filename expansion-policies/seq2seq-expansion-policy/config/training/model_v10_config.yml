@@ -1,20 +1,24 @@
 # Seq2Seq Model Architecture
+# - Use Residual Connections:
+#	- Add residual (skip) connections between the LSTM layers in both the encoder and decoder to facilitate gradient
+#     flow and allow the model to learn identity mappings more easily.
+#	- In theory this helps in training deeper networks by mitigating vanishing gradient problems.
+# - Improvement in both accuracy and loss in train, validation and test.
 #
 # Training run metrics:
-#   - Epochs:
+#   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.445
+#   - Train Accuracy (Smoothed): 0.600
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.365
+#   - Validation Accuracy (Smoothed): 0.617
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.300
+#   - Test Accuracy (Smoothed): 0.634
 
-Test Loss: 0.43078896403312683
-Test Accuracy: 0.6022447347640991
-
+Test Loss: 0.2996947169303894
+Test Accuracy: 0.6341190934181213
 
 # Data Configuration and Hyperparameters
 data:
@@ -22,7 +26,7 @@ data:
   reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
   products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
   reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/pande-et-al/model-v9/tokenizer/model_v9_tokenizer.json'
+  tokenizer_save_path: 'data/training/pande-et-al/model-v10/tokenizer/model_v10_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -45,9 +49,9 @@ model:
 training:
   epochs: 5
   patience: 5
-  model_save_path: 'data/training/pande-et-al/model-v9/model'
-  log_dir: 'logs/pande-et-al/model-v9'
-  checkpoint_dir: 'data/training/pande-et-al/model-v9/checkpoints'
+  model_save_path: 'data/training/pande-et-al/model-v10/model'
+  log_dir: 'logs/pande-et-al/model-v10'
+  checkpoint_dir: 'data/training/pande-et-al/model-v10/checkpoints'
   num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration

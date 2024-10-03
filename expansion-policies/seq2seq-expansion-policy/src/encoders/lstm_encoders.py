@@ -68,22 +68,18 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
         self.supports_masking = True
 
-        # Build Bidirectional LSTM, Dropout, and LayerNormalization layers
+        # Build first Bidirectional LSTM layer
         self.bidirectional_lstm_layers = []
         self.dropout_layers = []
-        self.layer_norm_layers = []
         for i in range(num_layers):
             lstm_layer = Bidirectional(
                 LSTM(units, return_sequences=True, return_state=True),
                 name=f'bidirectional_lstm_encoder_{i + 1}'
             )
-            self.bidirectional_lstm_layers.append(lstm_layer)
-
             dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
+            self.bidirectional_lstm_layers.append(lstm_layer)
             self.dropout_layers.append(dropout_layer)
 
-            layer_norm_layer = LayerNormalization(name=f'encoder_layer_norm_{i + 1}')
-            self.layer_norm_layers.append(layer_norm_layer)
 
     def call(
         self,
@@ -110,9 +106,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         final_state_h: Union[None, tf.Tensor] = None
         final_state_c: Union[None, tf.Tensor] = None
 
-        for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
-                zip(self.bidirectional_lstm_layers, self.dropout_layers, self.layer_norm_layers)
-        ):
+        for lstm_layer, dropout_layer in zip(self.bidirectional_lstm_layers, self.dropout_layers):
             # Pass through the Bidirectional LSTM layer
             # encoder_output shape: (batch_size, seq_len, units * 2)
             # forward_h shape: (batch_size, units)
@@ -122,9 +116,6 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             encoder_output, forward_h, forward_c, backward_h, backward_c = lstm_layer(
                 encoder_output, training=training
             )
-
-            # Apply Layer Normalization
-            encoder_output = layer_norm_layer(encoder_output)
 
             # Concatenate the final forward and backward hidden states
             final_state_h = tf.concat([forward_h, backward_h], axis=-1) # Shape: (batch_size, units * 2)
