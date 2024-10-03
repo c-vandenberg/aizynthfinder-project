@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Embedding, LSTM, Dropout, Dense, Layer
 from decoders.decoder_interface import DecoderInterface
 from attention.attention import BahdanauAttention
 
+
 @tf.keras.utils.register_keras_serializable()
 class StackedLSTMDecoder(DecoderInterface):
     """

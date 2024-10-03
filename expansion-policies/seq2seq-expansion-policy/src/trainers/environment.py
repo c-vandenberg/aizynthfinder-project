@@ -5,9 +5,10 @@ from typing import Dict, Any
 import numpy as np
 import tensorflow as tf
 
+
 class TrainingEnvironment:
     @staticmethod
-    def setup_environment(config: dict[str, Any]) -> None:
+    def setup_environment(config: Dict[str, Any]) -> None:
         """
         Set up the environment for deterministic (reproducible) training.
 
@@ -40,7 +41,7 @@ class TrainingEnvironment:
             - However, configuring TensorFlow to use the CPU (`os.environ['CUDA_VISIBLE_DEVICES'] = ''`) and configuring
             Tensorflow to use single-threaded execution severely impacts performance.
         """
-        determinism_conf: dict[str, Any] = config['env']['determinism']
+        determinism_conf: Dict[str, Any] = config['env']['determinism']
 
         # Set Python's built-in hash seed
         os.environ['PYTHONHASHSEED'] = str(determinism_conf['python_seed'])

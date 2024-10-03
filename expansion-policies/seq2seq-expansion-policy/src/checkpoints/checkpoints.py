@@ -3,6 +3,7 @@ from typing import Optional
 from tensorflow.keras.callbacks import Callback
 from tensorflow.train import CheckpointManager
 
+
 class BestValLossCheckpointCallback(Callback):
     """
     Custom callback to save the model when there is an improvement in validation loss.

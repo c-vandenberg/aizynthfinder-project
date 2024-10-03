@@ -4,6 +4,7 @@ import tf2onnx
 import tensorflow as tf
 from sklearn.model_selection import ShuffleSplit, cross_validate
 
+
 class Seq2SeqModelUtils:
     @staticmethod
     def seq2seq_cross_validator(

@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABCMeta
 
+
 class InferenceDecoderInterface(metaclass=ABCMeta):
     @abstractmethod
     def decode(self, encoder_output):

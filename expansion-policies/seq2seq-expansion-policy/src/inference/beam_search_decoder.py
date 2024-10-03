@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from inference.inference_decoder_interface import InferenceDecoderInterface
 
+
 class BeamSearchDecoder(InferenceDecoderInterface):
     def __init__(
         self,

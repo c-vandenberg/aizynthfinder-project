@@ -3,10 +3,10 @@ from typing import List, Tuple, Optional
 
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from tensorflow.python.types.data import DatasetV2
 
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
+
 
 class DataLoader:
     DEFAULT_MAX_SEQ_LENGTH = 150

@@ -7,6 +7,7 @@ from tensorflow.keras.layers import Dense
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 
+
 class RetrosynthesisSeq2SeqModel(Model):
     """
     Retrosynthesis Seq2Seq Model using LSTM layers.

@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.losses import Loss
 
+
 @tf.keras.utils.register_keras_serializable()
 class MaskedSparseCategoricalCrossentropy(Loss):
     """

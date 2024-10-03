@@ -3,6 +3,7 @@ from tensorflow.keras.layers import Layer, Dense
 from attention.attention_interface import AttentionInterface
 from typing import List, Optional, Tuple, Union
 
+
 @tf.keras.utils.register_keras_serializable()
 class BahdanauAttention(AttentionInterface):
     """

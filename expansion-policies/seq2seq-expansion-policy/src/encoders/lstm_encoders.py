@@ -5,6 +5,7 @@ from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dropout, Den
 
 from encoders.encoder_interface import EncoderInterface
 
+
 @tf.keras.utils.register_keras_serializable()
 class StackedBidirectionalLSTMEncoder(EncoderInterface):
     """
