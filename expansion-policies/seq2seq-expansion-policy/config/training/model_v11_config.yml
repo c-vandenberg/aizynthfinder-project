@@ -5,7 +5,7 @@
 #       to exploding or vanishing gradients.
 #
 # Training run metrics:
-#   - Epochs:
+#   - Epochs: 5
 #
 #   - Train Loss (Smoothed):
 #   - Train Accuracy (Smoothed):
