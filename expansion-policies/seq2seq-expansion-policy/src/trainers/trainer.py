@@ -155,6 +155,7 @@ class Trainer:
             encoder_embedding_dim=encoder_embedding_dim,
             decoder_embedding_dim=decoder_embedding_dim,
             units=units,
+            num_encoder_layers=4,
             dropout_rate=dropout_rate
         )
 

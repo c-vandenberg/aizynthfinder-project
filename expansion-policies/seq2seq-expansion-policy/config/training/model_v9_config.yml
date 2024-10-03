@@ -1,0 +1,66 @@
+# Seq2Seq Model Architecture
+# - Increase number of encoder layers from 2 to 4 to match decoder's depth
+#   * In theory this may allow the encoder to capture more complex patterns from input sequences
+#
+# - Significant improvement in training and validation loss compared to V8, small improvement in train and validation
+#   accuracy.
+# - Test loss and accuracy mostly the same.
+# - Keep 4 layers for future iterations.
+#
+# Training run metrics:
+#   - Epochs:
+#
+#   - Train Loss (Smoothed): 0.581
+#   - Train Accuracy (Smoothed): 0.572
+#
+#   - Validation Loss (Smoothed): 0.484
+#   - Validation Accuracy (Smoothed): 0.591
+#
+#   - Test Loss (Smoothed): 0.431
+#   - Test Accuracy (Smoothed): 0.602
+
+Test Loss: 0.43078896403312683
+Test Accuracy: 0.6022447347640991
+
+
+# Data Configuration and Hyperparameters
+data:
+  products_file: 'data/preprocessed/pande-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
+  tokenizer_save_path: 'data/training/pande-et-al/model-v9/tokenizer/model_v9_tokenizer.json'
+  max_encoder_seq_length: 140
+  max_decoder_seq_length: 140
+  batch_size: 32
+  test_size: 0.3
+  random_state: 4
+
+# Model Configuration and Hyperparameters
+model:
+  input_vocab_size: null  # To be set dynamically based on tokenizer
+  output_vocab_size: null  # To be set dynamically based on tokenizer
+  attention_dim: 256
+  encoder_embedding_dim: 128
+  decoder_embedding_dim: 256
+  units: 256
+  dropout_rate: 0.2
+  learning_rate: 0.0001
+  metrics: ['accuracy']
+
+# Training Configuration and Hyperparameters
+training:
+  epochs: 5
+  patience: 5
+  model_save_path: 'data/training/pande-et-al/model-v9/model'
+  log_dir: 'logs/pande-et-al/model-v9'
+  checkpoint_dir: 'data/training/pande-et-al/model-v9/checkpoints'
+  num_samples: null # Number of samples to use for debugging model
+
+# Environment Configuration
+env:
+  determinism:
+    python_seed: "44478977"
+    random_seed: 440651
+    numpy_seed: 110789
+    tf_seed: 61592
