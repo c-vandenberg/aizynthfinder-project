@@ -281,8 +281,16 @@ class Trainer:
         None
         """
         test_dataset = self.data_loader.get_test_dataset()
+        training_conf: Dict[str, Any] = self.config.get('training', {})
+        test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
+        os.makedirs(test_metrics_dir, exist_ok=True)
 
         test_loss, test_accuracy = self.model.evaluate(test_dataset)
+
+        with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
+            f.write(f"Test Loss: {test_loss}\n")
+            f.write(f"Test Accuracy: {test_accuracy}\n")
+
         print(f"Test Loss: {test_loss}")
         print(f"Test Accuracy: {test_accuracy}")
 
@@ -296,7 +304,7 @@ class Trainer:
         """
         Seq2SeqModelUtils.inspect_model_layers(self.model)
         training_conf: Dict[str, Any] = self.config.get('training', {})
-        model_save_path = training_conf.get('model_save_path', './saved_model')
+        model_save_path: str = training_conf.get('model_save_path', './saved_model')
         os.makedirs(model_save_path, exist_ok=True)
 
         self.model.export(model_save_path)

@@ -46,6 +46,7 @@ training:
   epochs: 5
   patience: 5
   model_save_path: 'data/training/pande-et-al/model-v11/model'
+  test_metrics_dir: 'data/training/pande-et-al/model-v11/evaluate'
   log_dir: 'logs/pande-et-al/model-v11'
   checkpoint_dir: 'data/training/pande-et-al/model-v11/checkpoints'
   num_samples: null # Number of samples to use for debugging model

@@ -94,6 +94,9 @@ cython_debug/
 # TensorFlow Saved Models
 /data/training/pande-et-al/**/model/
 
+# Model Evaluation Metrics
+/data/training/pande-et-al/**/evaluate/
+
 # Tokenizer Files
 /data/training/pande-et-al/**/tokenizer/
 
