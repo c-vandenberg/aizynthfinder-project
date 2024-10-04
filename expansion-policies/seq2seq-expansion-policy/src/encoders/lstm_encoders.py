@@ -1,6 +1,7 @@
 from typing import Optional, Union, Tuple
 
 import tensorflow as tf
+from tensorflow.keras.regularizers import l2
 from tensorflow.keras.layers import (Embedding, Bidirectional, LSTM,
                                      Dropout, Dense, Layer, LayerNormalization)
 
@@ -57,6 +58,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         units: int,
         num_layers: int,
         dropout_rate: float = 0.2,
+        weight_decay: float = 1e-4,
         **kwargs
     ) -> None:
         super(StackedBidirectionalLSTMEncoder, self).__init__(**kwargs)
@@ -65,6 +67,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         self.units= units
         self.num_layers = num_layers
         self.dropout_rate= dropout_rate
+        self.weight_decay = weight_decay
 
         self.supports_masking = True
 
@@ -73,7 +76,14 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         self.dropout_layers = []
         for i in range(num_layers):
             lstm_layer = Bidirectional(
-                LSTM(units, return_sequences=True, return_state=True),
+                LSTM(
+                    units,
+                    return_sequences=True,
+                    return_state=True,
+                    kernel_regularizer=l2(weight_decay),
+                    recurrent_regularizer=l2(weight_decay),
+                    bias_regularizer=l2(weight_decay)
+                ),
                 name=f'bidirectional_lstm_encoder_{i + 1}'
             )
             dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
@@ -171,6 +181,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             'units': self.units,
             'num_layers': self.num_layers,
             'dropout_rate': self.dropout_rate,
+            'weight_decay': self.weight_decay
         })
         return config
 

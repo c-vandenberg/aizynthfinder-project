@@ -73,14 +73,17 @@ class RetrosynthesisSeq2SeqModel(Model):
         encoder_embedding_dim: int,
         decoder_embedding_dim: int,
         units: int,
+        attention_dim: int,
         num_encoder_layers = 2,
         num_decoder_layers: int = 4,
         dropout_rate: float = 0.2,
+        weight_decay: float = 1e-4,
         **kwargs
     ):
         super(RetrosynthesisSeq2SeqModel, self).__init__(**kwargs)
 
         self.units: int = units
+        self.attention_dim: int = attention_dim
 
         # Encoder layer
         self.encoder: StackedBidirectionalLSTMEncoder = StackedBidirectionalLSTMEncoder(
@@ -88,16 +91,19 @@ class RetrosynthesisSeq2SeqModel(Model):
             encoder_embedding_dim=encoder_embedding_dim,
             units=units,
             num_layers=num_encoder_layers,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
+            weight_decay=weight_decay
         )
 
         # Decoder layer
         self.decoder: StackedLSTMDecoder = StackedLSTMDecoder(
             vocab_size=output_vocab_size,
             decoder_embedding_dim=decoder_embedding_dim,
+            attention_dim=attention_dim,
             units=units,
             num_layers=num_decoder_layers,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
+            weight_decay=weight_decay
         )
 
         self.input_vocab_size: int = input_vocab_size
@@ -111,8 +117,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.encoder_data_processor: Optional[Any] = None
         self.decoder_data_processor: Optional[Any] = None
 
-        # Save the dropout rate
         self.dropout_rate: float = dropout_rate
+        self.weight_decay: float = weight_decay
 
     def call(
         self,
@@ -187,9 +193,11 @@ class RetrosynthesisSeq2SeqModel(Model):
             'encoder_embedding_dim': self.encoder.embedding.output_dim,
             'decoder_embedding_dim': self.decoder.embedding.output_dim,
             'units': self.units,
+            'attention_dim': self.attention_dim,
             'num_encoder_layers': self.encoder.num_layers,
             'num_decoder_layers': self.decoder.num_layers,
             'dropout_rate': self.dropout_rate,
+            'weight_decay': self.weight_decay,
             'name': self.name,
         }
         return config

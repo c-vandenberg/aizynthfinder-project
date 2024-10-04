@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple, Union, Any
 
 import tensorflow as tf
+from tensorflow.keras.regularizers import l2
 from tensorflow.keras.layers import (Embedding, LSTM, Dropout,
                                      Dense, Layer, LayerNormalization)
 
@@ -54,7 +55,9 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_embedding_dim: int,
         units: int,
         num_layers: int,
+        attention_dim: int,
         dropout_rate: float = 0.2,
+        weight_decay: float = 1e-4,
         **kwargs
     ) -> None:
         super(StackedLSTMDecoder, self).__init__(**kwargs)
@@ -63,7 +66,9 @@ class StackedLSTMDecoder(DecoderInterface):
         self.units = units
         self.num_layers = num_layers
         self.vocab_size = vocab_size
+        self.attention_dim = attention_dim
         self.dropout_rate = dropout_rate
+        self.weight_decay = weight_decay
 
         self.supports_masking = True
 
@@ -76,6 +81,9 @@ class StackedLSTMDecoder(DecoderInterface):
                 units=units,
                 return_sequences=True,
                 return_state=True,
+                kernel_regularizer=l2(weight_decay),
+                recurrent_regularizer=l2(weight_decay),
+                bias_regularizer=l2(weight_decay),
                 name=f'lstm_decoder_{i + 1}'
             )
             self.lstm_layers.append(lstm_layer)
@@ -87,10 +95,17 @@ class StackedLSTMDecoder(DecoderInterface):
             self.layer_norm_layers.append(layer_norm_layer)
 
         # Attention Mechanism
-        self.attention: BahdanauAttention = BahdanauAttention(units=units)
+        self.attention: BahdanauAttention = BahdanauAttention(
+            units=attention_dim
+        )
 
         # Output layer
-        self.dense: Dense = Dense(vocab_size, activation='softmax')
+        self.dense: Dense = Dense(
+            vocab_size,
+            activation='softmax',
+            kernel_regularizer=l2(weight_decay),
+            bias_regularizer=l2(weight_decay)
+        )
 
     def call(
         self,
@@ -300,8 +315,10 @@ class StackedLSTMDecoder(DecoderInterface):
             'vocab_size': self.vocab_size,
             'decoder_embedding_dim': self.embedding.output_dim,
             'units': self.units,
-            'dropout_rate': self.dropout_rate,
             'num_layers': self.num_layers,
+            'attention_dim': self.attention_dim,
+            'dropout_rate': self.dropout_rate,
+            'weight_decay': self.weight_decay
         })
         return config
 

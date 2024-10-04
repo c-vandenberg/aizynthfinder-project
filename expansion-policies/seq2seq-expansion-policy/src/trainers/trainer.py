@@ -145,7 +145,9 @@ class Trainer:
         encoder_embedding_dim: int = model_conf.get('encoder_embedding_dim', 256)
         decoder_embedding_dim: int = model_conf.get('decoder_embedding_dim', 256)
         units: int = model_conf.get('units', 256)
+        attention_dim: int = model_conf.get('attention_dim', 256)
         dropout_rate: float = model_conf.get('dropout_rate', 0.2)
+        weight_decay: float = model_conf.get('weight_decay', 1e-4)
         learning_rate: float = model_conf.get('learning_rate', 0.0001)
 
         # Initialize the model
@@ -154,6 +156,7 @@ class Trainer:
             output_vocab_size=self.vocab_size,
             encoder_embedding_dim=encoder_embedding_dim,
             decoder_embedding_dim=decoder_embedding_dim,
+            attention_dim=attention_dim,
             units=units,
             num_encoder_layers=4,
             dropout_rate=dropout_rate
