@@ -3,18 +3,19 @@
 #     - Layer normalisation helps stabilize and accelerate training by normalizing the inputs across the features.
 #       This is particularly beneficial in recurrent neural networks like LSTMs, where it can mitigate issues related
 #       to exploding or vanishing gradients.
+# - Significant improvement in training, validation and test accuracy and loss metrics.
 #
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.332
+#   - Train Accuracy (Smoothed): 0.627
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.260
+#   - Validation Accuracy (Smoothed): 0.644
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.216
+#   - Test Accuracy (Smoothed): 0.656
 
 # Data Configuration and Hyperparameters
 data:
