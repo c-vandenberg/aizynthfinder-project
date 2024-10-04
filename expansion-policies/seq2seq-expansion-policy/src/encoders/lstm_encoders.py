@@ -80,7 +80,6 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             self.bidirectional_lstm_layers.append(lstm_layer)
             self.dropout_layers.append(dropout_layer)
 
-
     def call(
         self,
         encoder_input: tf.Tensor,
