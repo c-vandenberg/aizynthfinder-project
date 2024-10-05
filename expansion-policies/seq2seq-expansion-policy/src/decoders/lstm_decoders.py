@@ -81,9 +81,7 @@ class StackedLSTMDecoder(DecoderInterface):
                 units=units,
                 return_sequences=True,
                 return_state=True,
-                kernel_regularizer=l2(weight_decay),
-                recurrent_regularizer=l2(weight_decay),
-                bias_regularizer=l2(weight_decay),
+                kernel_regularizer=l2(weight_decay) if weight_decay is not None else None,
                 name=f'lstm_decoder_{i + 1}'
             )
             self.lstm_layers.append(lstm_layer)
@@ -103,8 +101,7 @@ class StackedLSTMDecoder(DecoderInterface):
         self.dense: Dense = Dense(
             vocab_size,
             activation='softmax',
-            kernel_regularizer=l2(weight_decay),
-            bias_regularizer=l2(weight_decay)
+            kernel_regularizer=l2(weight_decay) if weight_decay is not None else None
         )
 
     def call(

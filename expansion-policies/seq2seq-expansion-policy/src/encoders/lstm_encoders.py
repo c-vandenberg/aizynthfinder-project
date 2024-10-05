@@ -80,9 +80,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
                     units,
                     return_sequences=True,
                     return_state=True,
-                    kernel_regularizer=l2(weight_decay),
-                    recurrent_regularizer=l2(weight_decay),
-                    bias_regularizer=l2(weight_decay)
+                    kernel_regularizer=l2(weight_decay) if weight_decay is not None else None
                 ),
                 name=f'bidirectional_lstm_encoder_{i + 1}'
             )

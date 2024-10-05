@@ -10,14 +10,14 @@
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed)
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.369
+#   - Train Accuracy (Smoothed): 0.625
 #
-#   - Validation Loss (Smoothed)
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.296
+#   - Validation Accuracy (Smoothed): 0.642
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.244
+#   - Test Accuracy (Smoothed): 0.655
 
 # Data Configuration and Hyperparameters
 data:
@@ -40,7 +40,7 @@ model:
   encoder_embedding_dim: 128
   decoder_embedding_dim: 256
   units: 256
-  weight_decay: 1e-4
+  weight_decay: 1.0e-5
   dropout_rate: 0.2
   learning_rate: 0.0001
   metrics: ['accuracy']
