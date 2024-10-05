@@ -19,10 +19,6 @@
 #   - Test Loss (Smoothed): 0.431
 #   - Test Accuracy (Smoothed): 0.602
 
-Test Loss: 0.43078896403312683
-Test Accuracy: 0.6022447347640991
-
-
 # Data Configuration and Hyperparameters
 data:
   products_file: 'data/preprocessed/pande-et-al/products_smiles'
