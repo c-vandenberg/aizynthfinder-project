@@ -4,16 +4,18 @@
 #   test performance metrics.
 #
 # Training run metrics:
-#   - Epochs: 50
+#   - Epochs: 50 (26 run as EarlyStopping callback triggered)
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.036
+#   - Train Accuracy (Smoothed): 0.694
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.104
+#   - Validation Accuracy (Smoothed): 0.683
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.106
+#   - Test Accuracy (Smoothed): 0.682
+#
+# Training Performance Evaluation
 
 # Data Configuration and Hyperparameters
 data:
