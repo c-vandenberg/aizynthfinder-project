@@ -4,7 +4,7 @@ As stated in **Section 2**, for **neural network-guided one-step retrosynthesis*
 1. **Template-Based Methods**
 2. **SMILES-Based (Template-Free) Methods**
 
-This project aims to implement a SMILES-based (template-free) retrosynthetic method, and incorporate it into a **customised instance of AiZynthFinder**. The neural network architecture used is a **sequence-to-sequence (Seq2Seq)** model based on the work by *Pande et al.* **<sup>2</sup>**
+This project aims to implement a SMILES-based (template-free) retrosynthetic method, and incorporate it into a **customised instance of AiZynthFinder**. The neural network architecture used is a **sequence-to-sequence (Seq2Seq)** model based on the work by *Liu et al.* **<sup>2</sup>**
 
 ## 3.1 Limitations of Template-Based Retrosynthetic Methods
 
@@ -21,9 +21,9 @@ A template-based retrosynthetic method is based on a predefined set of rules, an
 
 A deep learning approach that **avoids a template-based/rule-based approach** could **avoid the above limitations**.
 
-*Pande et al.* appraoched the problem as a **sequence-to-sequence prediction task**, **mapping a text-based linear notation of the reactants to that of the product, or vice versa**. **<sup>2</sup>** 
+*Liu et al.* appraoched the problem as a **sequence-to-sequence prediction task**, **mapping a text-based linear notation of the reactants to that of the product, or vice versa**. **<sup>2</sup>** 
 
-In their paper, *Pande et al.* reference the work of **Nam and Kim**, where a **neural Seq2Seq model** was employed for **forward reaction prediction**, using the **SMILES representation** of reactants as input to predict the SMILES of the product. **<sup>3</sup>** *Pande et al.* aimed to extend this approach to **retrosynthetic (backward) reaction prediction**.
+In their paper, *Liu et al.* reference the work of **Nam and Kim**, where a **neural Seq2Seq model** was employed for **forward reaction prediction**, using the **SMILES representation** of reactants as input to predict the SMILES of the product. **<sup>3</sup>** *Liu et al.* aimed to extend this approach to **retrosynthetic (backward) reaction prediction**.
 
 ## 3.2 Seq2Seq Model
 
