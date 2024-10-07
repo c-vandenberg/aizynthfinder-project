@@ -190,9 +190,7 @@ At a high-level, the **attention mechanism's role within the decoder** is as fol
 3. **Iterative Process**:
    * Step 2 is **repeated iteratively** for **each token in the output sequence**, allowing the decoder to **focus on different parts of the input as needed**.
        
-
-
-## References
+## 3.4 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
 **[3]** Nam, J., Kim, J. (2016) ‘Linking the Neural Machine Translation and the Prediction of Organic Chemistry Reactions’. 1612.09529. <br><br>
