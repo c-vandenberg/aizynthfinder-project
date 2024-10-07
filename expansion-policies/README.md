@@ -1,4 +1,4 @@
-# 2 AiZynthFinder's Expansion Policy Neural Network
+# 2. AiZynthFinder's Expansion Policy Neural Network
 
 For **neural network-guided one-step retrosynthesis**, there are two primary methodologies used to **define the disconnection rules** and so **model the reverse reaction**: **<sup>1</sup>**
 1. **Template-Based Methods**
