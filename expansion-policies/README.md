@@ -122,7 +122,6 @@ This is an **iterative process** where the training dataset is **passed through 
   </div>
 <br>
 
-
 ## 2.4 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Fortunato, M.E. et al. (2020) ‘Data augmentation and pretraining for template-based retrosynthetic prediction in computer-aided synthesis planning’, Journal of Chemical Information and Modeling, 60(7), pp. 3398–3407. <br><br>
