@@ -1,6 +1,6 @@
 # Seq2Seq Model Architecture
 # - No architectural changes were made to model V3; only configuration and hyperparameter adjustments were applied:
-#   * Split encoder and decoder embedding dim to match the paper by Pande et al.
+#   * Split encoder and decoder embedding dim to match the paper by Liu et al.
 #   * They have both the encoder and decoder embedding dimensions at 512, however because the encoder is bidirectional,
 #     each direction (forward and backward) has its own LSTM units.
 #   * Therefore, we need to set the number of units per direction to 256, so the concatenated output will have a
@@ -22,11 +22,11 @@
 
 # Data Configuration and Hyperparameters
 data:
-  products_file: 'data/preprocessed/pande-et-al/products_smiles'
-  reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
-  products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
-  reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/pande-et-al/model-v5/tokenizer/model_v5_tokenizer.json'
+  products_file: 'data/preprocessed/liu-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/liu-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/liu-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/liu-et-al/validation_reactants_smiles'
+  tokenizer_save_path: 'data/training/liu-et-al/model-v5/tokenizer/model_v5_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -49,9 +49,9 @@ model:
 training:
   epochs: 5
   patience: 5
-  model_save_path: 'data/training/pande-et-al/model-v5/model'
-  log_dir: 'logs/pande-et-al/model-v5'
-  checkpoint_dir: 'data/training/pande-et-al/model-v5/checkpoints'
+  model_save_path: 'data/training/liu-et-al/model-v5/model'
+  log_dir: 'logs/liu-et-al/model-v5'
+  checkpoint_dir: 'data/training/liu-et-al/model-v5/checkpoints'
   num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration

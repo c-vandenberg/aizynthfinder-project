@@ -89,16 +89,16 @@ cython_debug/
 # ------------------------------
 
 # TensorFlow Checkpoints
-/data/training/pande-et-al/**/checkpoints/
+/data/training/liu-et-al/**/checkpoints/
 
 # TensorFlow Saved Models
-/data/training/pande-et-al/**/model/
+/data/training/liu-et-al/**/model/
 
 # Model Evaluation Metrics
-/data/training/pande-et-al/**/evaluate/
+/data/training/liu-et-al/**/evaluate/
 
 # Tokenizer Files
-/data/training/pande-et-al/**/tokenizer/
+/data/training/liu-et-al/**/tokenizer/
 
 # Logs Directory
 /logs/

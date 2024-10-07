@@ -19,11 +19,11 @@
 
 # Data Configuration and Hyperparameters
 data:
-  products_file: 'data/preprocessed/pande-et-al/products_smiles'
-  reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
-  products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
-  reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/pande-et-al/model-v10/tokenizer/model_v10_tokenizer.json'
+  products_file: 'data/preprocessed/liu-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/liu-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/liu-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/liu-et-al/validation_reactants_smiles'
+  tokenizer_save_path: 'data/training/liu-et-al/model-v10/tokenizer/model_v10_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -46,9 +46,9 @@ model:
 training:
   epochs: 5
   patience: 5
-  model_save_path: 'data/training/pande-et-al/model-v10/model'
-  log_dir: 'logs/pande-et-al/model-v10'
-  checkpoint_dir: 'data/training/pande-et-al/model-v10/checkpoints'
+  model_save_path: 'data/training/liu-et-al/model-v10/model'
+  log_dir: 'logs/liu-et-al/model-v10'
+  checkpoint_dir: 'data/training/liu-et-al/model-v10/checkpoints'
   num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
