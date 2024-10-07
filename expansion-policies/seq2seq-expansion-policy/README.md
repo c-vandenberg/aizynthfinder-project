@@ -1,4 +1,4 @@
-# 3 Sequence-to-Sequence (Seq2Seq) Expansion Policy
+# 3 Sequence-to-Sequence Expansion Policy
 
 As stated in **Section 2**, for **neural network-guided one-step retrosynthesis**, there are two primary methodologies used to **define the disconnection rules** and so **model the reverse reaction**: **<sup>1</sup>**
 1. **Template-Based Methods**
@@ -25,9 +25,9 @@ A deep learning approach that **avoids a template-based/rule-based approach** co
 
 In their paper, *Liu et al.* reference the work of **Nam and Kim**, where a **neural Seq2Seq model** was employed for **forward reaction prediction**, using the **SMILES representation** of reactants as input to predict the SMILES of the product. **<sup>3</sup>** *Liu et al.* aimed to extend this approach to **retrosynthetic (backward) reaction prediction**.
 
-## 3.2 Seq2Seq Model
+## 3.2 Sequence-to-Sequence Model
 
-A seq2seq model is a type ofg neural network architecture desgined **convert sequences from one domain** (e.g. sentences in English) to **sequences in another domain** (e.g. thew same sentences translated to French). 
+A Seq2Seq model is a type of neural network architecture desgined **convert sequences from one domain** (e.g. sentences in English) to **sequences in another domain** (e.g. thew same sentences translated to French). 
 
 Seq2seq models are especially useful for tasks where the **input and output are sequences of varying length**, which traditional neural networks struggle to handle. As such, they are widely used in the field of **natural langauge processing (NLP)**, such as machine translation, text summarisation and conversational modeling.
 
