@@ -11,22 +11,22 @@
   1.5 [AiZynthFinder Post-Processing Tools - Route Scoring](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#15-aizynthfinder-post-processing-tools---route-scoring)<br>
   1.6 [Route Clustering](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#16-route-clustering)<br>
   1.7 [References](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#17-references)<br>
-2. []()<br>
-  2.1 []()<br>
-  2.2 []()<br>
-  2.3 []()<br>
-3. []()<br>
-  3.1 []()<br>
-  3.2 []()<br>
-  3.3 []()<br>
-  3.4 []()<br>
-4. []()
-5. []()<br>
-  5.1 []()<br>
-  5.2 []()<br>
-  5.3 []()<br>
-  5.4 []()<br>
-6. []()
+2. [AiZynthFinder's Expansion Policy Neural Network](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#2-aizynthfinders-expansion-policy-neural-network)<br>
+  2.1 [What is AiZynthFinder's Expansion Policy Neural Network?](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#21-what-is-aizynthfinders-expansion-policy-neural-network)<br>
+  2.2 [Neural Networks Overview](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#22-neural-networks-overview)<br>
+  2.3 [Feedforward Neural Networks (FNNs)](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#23-feedforward-neural-networks-fnns)<br>
+  2.4 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
+3. [Sequence-to-Sequence Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#3-sequence-to-sequence-expansion-policy)<br>
+  3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
+  3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
+  3.3 [Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-sequence-to-sequence-model)<br>
+  3.4 [Architecture of Sequence-to-Sequence Models](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#34-architecture-of-sequence-to-sequence-models)<br>
+    3.4.1 [Encoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#341-encoder)<br>
+    3.4.2 [Decoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#342-decoder)<br>
+    3.4.3 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism)<br>
+  3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#35-references)<br>
+4. [Retrosynthesis Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#4-retrosynthesis-sequence-to-sequence-model)<br>
+   4.1 [Liu et al. Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#41-liu-et-al-sequence-to-sequence-model)<br>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
 
