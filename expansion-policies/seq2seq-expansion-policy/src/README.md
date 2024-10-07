@@ -1,4 +1,4 @@
-# 4 Retrosynthesis Sequence-to-Sequence Model
+# 4. Retrosynthesis Sequence-to-Sequence Model
 
 ## 4.1 *Liu et al.* Sequence-to-Sequence Model
 
