@@ -1,0 +1,62 @@
+# Seq2Seq Model Architecture
+#
+# - Run full model training run with Pande et al. hyperparameters to test EarlyStop callback and monitor unthrottled
+#   test performance metrics.
+#
+# Training run metrics:
+#   - Epochs: 50 (26 run as EarlyStopping callback triggered)
+#
+#   - Train Loss (Smoothed): 0.036
+#   - Train Accuracy (Smoothed): 0.694
+#
+#   - Validation Loss (Smoothed): 0.104
+#   - Validation Accuracy (Smoothed): 0.683
+#
+#   - Test Loss (Smoothed): 0.106
+#   - Test Accuracy (Smoothed): 0.682
+#
+# Training Performance Evaluation
+
+# Data Configuration and Hyperparameters
+data:
+  products_file: 'data/preprocessed/pande-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/pande-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/pande-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/pande-et-al/validation_reactants_smiles'
+  tokenizer_save_path: 'data/training/pande-et-al/model-v14/tokenizer/model_v14_tokenizer.json'
+  max_encoder_seq_length: 140
+  max_decoder_seq_length: 140
+  batch_size: 32
+  test_size: 0.3
+  random_state: 4
+
+# Model Configuration and Hyperparameters
+model:
+  input_vocab_size: null  # To be set dynamically based on tokenizer
+  output_vocab_size: null  # To be set dynamically based on tokenizer
+  attention_dim: 512
+  encoder_embedding_dim: 256
+  decoder_embedding_dim: 512
+  units: 512
+  weight_decay: null
+  dropout_rate: 0.2
+  learning_rate: 0.0001
+  metrics: ['accuracy']
+
+# Training Configuration and Hyperparameters
+training:
+  epochs: 50
+  patience: 5
+  model_save_path: 'data/training/pande-et-al/model-v14/model'
+  test_metrics_dir: 'data/training/pande-et-al/model-v14/evaluate'
+  log_dir: 'logs/pande-et-al/model-v14'
+  checkpoint_dir: 'data/training/pande-et-al/model-v14/checkpoints'
+  num_samples: null # Number of samples to use for debugging model
+
+# Environment Configuration
+env:
+  determinism:
+    python_seed: "44478977"
+    random_seed: 440651
+    numpy_seed: 110789
+    tf_seed: 61592
