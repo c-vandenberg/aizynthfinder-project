@@ -1,5 +1,33 @@
 # AiZynthFinder Project
 
+## Contents
+1. [Retrosynthesis with AiZynthFinder - Overview](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#1-retrosynthesis-with-aizynthfinder---overview)<br>
+  1.1 [Basics of Retrosynthesis](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#11-basics-of-retrosynthesis)<br>
+  1.2 [Retrosynthetic Search Tree](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#12-retrosynthetic-search-tree)<br>
+  1.3 [AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#13-aizynthfinder-template-based-retrosynthesis-model-define-disconnection-rules)<br>
+  1.4 [Monte Carlo Tree Search: Finding the Best Routes (Traverse the Retrosynthesis Search Tree Efficiently)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#14-monte-carlo-tree-search-finding-the-best-routes-traverse-the-retrosynthesis-search-tree-efficiently)<br>
+    1.4.1 [Heuristic Search Algorithms](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#141-heuristic-search-algorithms)<br>
+    1.4.2 [Monte Carlo Tree Search in AiZynthFinder](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#142-monte-carlo-tree-search-in-aizynthfinder)<br>
+  1.5 [AiZynthFinder Post-Processing Tools - Route Scoring](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#15-aizynthfinder-post-processing-tools---route-scoring)<br>
+  1.6 [Route Clustering](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#16-route-clustering)<br>
+  1.7 [References](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#17-references)<br>
+2. []()<br>
+  2.1 []()<br>
+  2.2 []()<br>
+  2.3 []()<br>
+3. []()<br>
+  3.1 []()<br>
+  3.2 []()<br>
+  3.3 []()<br>
+  3.4 []()<br>
+4. []()
+5. []()<br>
+  5.1 []()<br>
+  5.2 []()<br>
+  5.3 []()<br>
+  5.4 []()<br>
+6. []()
+
 # 1. Retrosynthesis with AiZynthFinder - Overview
 
 **AiZynthFinder** is a **computer-aided synthesis planning (CASP)** tool developed by **AstraZeneca's MolecularAI department**. Specifically, it is a **computer-assisted synthesis prediction tool** that seeks to identify the **optimal sequence of chemical reaction steps** capable of transforming a set of **commercially available starting materials** into a **desired chemical compound**. **<sup>1</sup>**  **<sup>2</sup>**
