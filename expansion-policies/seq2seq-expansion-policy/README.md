@@ -31,7 +31,7 @@ A Seq2Seq model is a type of neural network architecture desgined **convert sequ
 
 Seq2seq models are especially useful for tasks where the **input and output are sequences of varying length**, which traditional neural networks struggle to handle. As such, they are widely used in the field of **natural langauge processing (NLP)**, such as machine translation, text summarisation and conversational modeling.
 
-## 3.3 Architecture of Seq2Seq Models
+## 3.3 Architecture of Sequence-to-Sequence Models
 
 At its core, a Seq2Seq model consists of two main components: an **encoder** and a **decoder**. These components **work in tandem** to **process input sequences** and **generate corresponding output sequences**.
 
