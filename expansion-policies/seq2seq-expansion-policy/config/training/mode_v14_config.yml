@@ -1,0 +1,18 @@
+# Seq2Seq Model Architecture
+#
+# - Run full model training run with Pande et al. hyperparameters to test EarlyStop callback and monitor unthrottled
+#   test performance metrics.
+#
+# Training run metrics:
+#   - Epochs: 50 (26 run as EarlyStopping callback triggered)
+#
+#   - Train Loss (Smoothed): 0.036
+#   - Train Accuracy (Smoothed): 0.694
+#
+#   - Validation Loss (Smoothed): 0.104
+#   - Validation Accuracy (Smoothed): 0.683
+#
+#   - Test Loss (Smoothed): 0.106
+#   - Test Accuracy (Smoothed): 0.682
+#
+# Training Performance Evaluation
