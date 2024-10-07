@@ -1,4 +1,4 @@
-# 3 Sequence-to-Sequence Expansion Policy
+# 3. Sequence-to-Sequence Expansion Policy
 
 As stated in **Section 2**, for **neural network-guided one-step retrosynthesis**, there are two primary methodologies used to **define the disconnection rules** and so **model the reverse reaction**: **<sup>1</sup>**
 1. **Template-Based Methods**
