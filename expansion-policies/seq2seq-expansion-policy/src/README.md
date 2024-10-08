@@ -19,7 +19,7 @@ The sequence-to-sequence (Seq2Seq) model implementation in this project was base
 
 Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
 
-### 4.1.2 *Britz et al.* Open Source Seq2Seq Libary
+### 4.1.2 *Britz et al.* Analysis of NMT Arcitecture Parameters
 
 *Liu at al.* adapted the **open source seq2seq library** from *Britz et al.*. **<sup>4</sup>** This aim of this open source Seq2Seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**.
 
