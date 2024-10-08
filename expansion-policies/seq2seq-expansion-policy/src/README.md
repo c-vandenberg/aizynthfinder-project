@@ -19,7 +19,7 @@ The sequence-to-sequence (Seq2Seq) model implementation in this project was base
 
 Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
 
-### 4.1.2 Model Architecture
+### 4.1.2 *Brtiz et al.* Open Source Seq2Seq Libary
 
 *Liu at al.* adapted the **open source seq2seq library** from *Brtiz et al.*. **<sup>4</sup>** This aim of this open source Seq2Seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**.
 
@@ -67,12 +67,25 @@ Using a valiation data set (**newtest2013**) *Brtiz et al.* evaluated the effect
   </p>
 </div>
 
-For **small embedding sizes (128 & 256)**, the analysis shows a **surprisingly robust performance** even for the **relatively small number of parameters** afforded by these small embedding sizes, with their BLEU scores being only **-0.36** and **-0.12** less than the highest performing embedding dimension (**2048**). Additionally, it was found that models with these lower embeddings **converge almost twice as quickly** compared to larger embeddings.
+**Small Embedding Sizes (128 & 256)**
+* Models employing smaller embedding dimensions of **128** and **256** demonstrate surprisingly robust performance despite their relatively modest number of parameters. Specifically, the BLEU scores for these embeddings are only **0.36** and **0.12** lower than the highest performing embedding dimension of **2048** respectively.
+* Additionally, it was found that models with these lower embeddings **converge almost twice as quickly** compared to larger embeddings.
+* While not included in **Table 2**, *Brtiz et al.* also found that the **gradient updates and their norms** remained **approximately constant across these embedding sizes**. This indicates that the **optimisation process is similarly effective regardless of embedding dimensionality**.
+* Finally, *Brtiz et al.* **did not observe any signs of overfitting** with these smaller embeddings and observed **consistent training log perplexity**.
 
-For **medium sized embeddings (512 & 1024)**, there is a continuing **upward trend in BLEU scores**, however with signs of **dimenishing returns**. Additionally, there is an **increase in variability** illustrated by the **increase standard deviation (SD)** of 1024 dimensions.
+**Medium Embedding Sizes (512 & 1024)**
+* Transitioning to medium embedding dimensions, specifically **512** and **1024**, *Brtiz et al.* observed a **continued upward trend** in BLEU scores, albeit with **diminishing returns**.
+* The 512-dimensional embeddings achieve a BLEU score of **21.78**, showing **improvement over smaller sizes**.
+* However, at 1024 dimensions, the BLEU score **slightly decreases to 21.36**, accompanied by an **increased standard deviation of 0.27**. This **rise in variability** suggests that while **some models benefit from larger embeddings, others may not**, leading to **less consistent performance**.
+* Additionally, the **substantial increase in model parameters** at 1024 dimensions (**106.58M**) raises concerns about **computational efficiency** and **potential overfitting**.
+* Like with small embedding sizes, *Brtiz et al.* found that the **gradient updates and their norms remained constant**, implying that the **optimisation process does not inherently favour larger embeddings**. This potentially **limits the effective utilisation of the additional parameters**.
+
+**Large Embedding Sizes (2048)**
+* At the largest embedding dimension of 2048, the model achieves the highest BLEU score of 21.86, marginally outperforming the 512-dimensional embeddings by 0.08 points
 
 For **large embedding sizes (2048)**, although this **achieves the highest BLEU score**, the score is only **marginally better than 512 dimensions** but with a **substantial increase in model parameters**. This drastic increase in parameters would raise concerns about **computational efficiency/overhead** and **potential overfitting**.
 
+### 4.1.3 *Liu at al.* Model Architecture
 
 ## References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
