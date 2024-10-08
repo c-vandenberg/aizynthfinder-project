@@ -27,7 +27,7 @@ In their seminal paper, *Britz et al.* conducted a large-scale analysis of **Neu
 
 ### Embedding Dimensionality
 
-Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**).
+Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**). *N.B* The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -63,7 +63,7 @@ Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect
     </tr>
   </table>
   <p>
-    <b>Table 2</b> <i>Britz et al.</i> newtest2013 BLEU score trends relative to embedding dimensionality. <b><sup>4</sup></b> <i>N.B. The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.</i>
+    <b>Table 2</b> <i>Britz et al.</i> BLEU score trends on variation of embedding dimensionality. <b><sup>4</sup></b>
   </p>
 </div>
 
@@ -129,7 +129,7 @@ To test this hyporthesis they added a **vanilla RNN cell in the decoder only** i
     </tbody>
   </table>
   <p>
-    <b>Table 3</b> <i>Britz et al.</i> newtest2013 BLEU score trends relative to RNN cell variant. <b><sup>4</sup></b> <i>N.B. The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.</i>
+    <b>Table 3</b> <i>Britz et al.</i> BLEU score trends on variation of RNN cell variant. <b><sup>4</sup></b>
   </p>
 </div>
 
@@ -141,6 +141,107 @@ Additionally, the vanilla decoder **performed significantly worse than both the 
 
 ### Encoder and Decoder Depth
 
+*Britz et al.* generally expected **deeper networks to converge to better solutions than shallower ones**. However, the **importance of network depth is unclear**, and so they explored the effect of both encoder and decoder depth **up to 8 layers**. 
+
+Additionally, for deeper networks, they experimented with **two variants of residual connections** (**Res** and **ResD**) to **encourage gradient flow**.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Depth</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Enc-2</strong></td>
+        <td>21.78 ± 0.05 (21.83)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>Enc-4</strong></td>
+        <td>21.85 ± 0.32 (22.23)</td>
+        <td>69.47M</td>
+      </tr>
+      <tr>
+        <td><strong>Enc-8</strong></td>
+        <td>21.32 ± 0.14 (21.51)</td>
+        <td>75.77M</td>
+      </tr>
+      <tr>
+        <td><strong>Enc-8-Res</strong></td>
+        <td>19.23 ± 1.96 (21.97)</td>
+        <td>75.77M</td>
+      </tr>
+      <tr>
+        <td><strong>Enc-8-ResD</strong></td>
+        <td>17.30 ± 2.64 (21.03)</td>
+        <td>75.77M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-1</strong></td>
+        <td>21.76 ± 0.12 (21.93)</td>
+        <td>64.75M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-2</strong></td>
+        <td>21.78 ± 0.05 (21.83)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-4</strong></td>
+        <td>22.37 ± 0.10 (22.51)</td>
+        <td>69.47M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-4-Res</strong></td>
+        <td>17.48 ± 0.25 (17.82)</td>
+        <td>68.69M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-4-ResD</strong></td>
+        <td>21.10 ± 0.24 (21.43)</td>
+        <td>68.69M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-8</strong></td>
+        <td>01.42 ± 0.23 (1.66)</td>
+        <td>75.77M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-8-Res</strong></td>
+        <td>16.99 ± 0.42 (17.47)</td>
+        <td>75.77M</td>
+      </tr>
+      <tr>
+        <td><strong>Dec-8-ResD</strong></td>
+        <td>20.97 ± 0.34 (21.42)</td>
+        <td>75.77M</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 4</b> <i>Britz et al.</i> BLEU score trends on variation of encoder and decoder depth, and type of residual connection. <b><sup>4</sup></b>
+  </p>
+</div>
+
+**Encoder Depth**
+* The **Enc-2** model achieved a BLEU score of **21.78 ± 0.05**, while increasing the depth to **Enc-4** slightly improved the BLEU score to **21.85 ± 0.32**.
+* However, further increasing the encoder depth to **Enc-8** resulted in a **decrease in BLEU score to 21.32 ± 0.14**, despite a **rise in model parameters from 66.32M to 75.77M**.
+* This decline was further pronounced when **residual connections were introduced**, with **residually connected deeper encoders significantly more likely to diverge during training**.
+* Therefore, contrary to their hypothesis, **deeper encoder networks did not consistently outperform their shallower counterparts**. In fact, deeper encoders **with residual connections** often **exhibited reduced performance** and **increased training instability**, as evidenced by their **larger SD**.
+
+**Decoder Depth**
+* Models with deeper decoder outperformed shallower ones by a small margin, with a **general increase in BLEU score from Dec-1 to Dec-4** (**21.76 ± 0.12** to **22.37 ± 0.10**).
+* However, without residual connections, *Britz et al.* found it **impossible to train decoders with 8 or more layers** as evidenced by the BLEU score of **Dec-8** (**01.42 ± 0.23**)
+* Additionally, for residual connections, **dense residual connections consistently outperformed regular residual connections** and **converged much faster** in terms of step count.
+
+Contrary to their initial hypothesis, **deeper encoders and decoders did not consistently outperform their shallower counterparts**. These findings suggest that, while network depth is a **critical factor in model performance**, its **benefits are not linear** and are **highly contingent on the architectural strategies employed**, such as the **type and implementation of residual connections**. 
+
+Additionally, the **lack of clear performance improvements with incresed depth**, coupled with **training instabilities in deeper configurations**, indicates a need for **more robust optimisation techniques** and **architectural innovations** to **fully harness the potential** of **deep sequential models** in NMT.
+
 ### 4.1.3 *Liu at al.* Model Architecture
 
 ## References
@@ -148,3 +249,4 @@ Additionally, the vanilla decoder **performed significantly worse than both the 
 **[2]** Lowe, D. M. (2012) ‘Extraction of Chemical Structures and Reactions from the Literature’; University of Cambridge. <br><br>
 **[3]** Schneider, N., Stiefl, N. and Landrum, G.A. (2016) ‘What’s what: The (nearly) definitive guide to reaction role assignment’, Journal of Chemical Information and Modeling, 56(12), pp. 2336–2346. <br><br>
 **[4]** Britz, D. et al. (2017) ‘Massive exploration of neural machine translation architectures’, Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing. <br><br>
+**[5]** He, K. et al. (2016) ‘Deep residual learning for image recognition’, 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR). <br><br>
