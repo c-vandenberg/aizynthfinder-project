@@ -302,9 +302,88 @@ A well as investigating encoder directionality, *Britz et al.* also investigated
   </p>
 </div>
 
-The investigation shows that, in genereal, **bidirectional encoders marginally outperform unidirectional encoders**, and that encoders **with reversed source inputs consistently outperform their non-reversed counterparts**. Noteably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
+The investigation shows that, in genereal, **bidirectional encoders marginally outperform unidirectional encoders**, and the **introduction of reversed source inputs significantly boosts the performance of unidirectional encoders**. However, even with reversed inputs, **shallower bidirectional encoders remain competitive**, suggesting that bidirectionality provides **inherent advantages in capturing contextual information**.
+
+Noteably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
 
 ### v. Attention Mechanism
+
+*Britz et al.* compared the performance of **additive and multiplicative attention variants** across **varying attention dimensionalities** (**Table 6**).
+1. **Additive Attention**:
+   * The **additive mechanism**, introduced by *Bahdanau et al.*, **<sup>6</sup>** involves **combining the encoder states and decoder states** through a **feedforward network** before computing the attention scores.
+2. **Multiplicative Attention**:
+   * The **multiplicative mechanism**, introduced by *Luond et al.*, **<sup>7</sup>** **computes attention scores using a dot product** between the **transformed encoder and decoder states**, making it less computationally expensive.
+
+They also experimented with using **no attention mechanism** by:
+1. **Initializing the decoder state with the last encoder state (None-State)**.
+2. **Concatenating the last decoder state to each decoder input (None-Input)**.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Attention Type</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Mul-128</strong></td>
+        <td>22.03 ± 0.08 (22.14)</td>
+        <td>65.73M</td>
+      </tr>
+      <tr>
+        <td><strong>Mul-256</strong></td>
+        <td>22.33 ± 0.28 (22.64)</td>
+        <td>65.93M</td>
+      </tr>
+      <tr>
+        <td><strong>Mul-512</strong></td>
+        <td>21.78 ± 0.05 (21.83)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>Mul-1024</strong></td>
+        <td>18.22 ± 0.03 (18.26)</td>
+        <td>67.11M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-128</strong></td>
+        <td>22.23 ± 0.11 (22.38)</td>
+        <td>65.73M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-256</strong></td>
+        <td>22.33 ± 0.04 (22.39)</td>
+        <td>65.93M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-512</strong></td>
+        <td>22.47 ± 0.27 (22.79)</td>
+        <td>66.33M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-1024</strong></td>
+        <td>22.10 ± 0.18 (22.36)</td>
+        <td>67.11M</td>
+      </tr>
+      <tr>
+        <td><strong>None-State</strong></td>
+        <td>9.98 ± 0.28 (10.25)</td>
+        <td>64.23M</td>
+      </tr>
+      <tr>
+        <td><strong>None-Input</strong></td>
+        <td>11.57 ± 0.30 (11.85)</td>
+        <td>64.49M</td>
+      </tr>
+    </tbody>
+  </table>
+  <b>Table 6</b> <i>Britz et al.</i> BLEU score trends on variation of attention mechanism variants, and attention dimensionality. <b><sup>4</sup></b>
+</div>
+
+The investigation showed that **additive attention slightly but consistently outperformed multiplicative attention**, with attention dimensionality **having minimal effect on additive attention performance**. Additionally, the **abysmal performance of non-attention models** further emphasizes the **necessity of incorporating attention mechanisms in NMT models**.
 
 ### vi. Beam Search Strategies
 
