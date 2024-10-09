@@ -4,18 +4,54 @@
 #   test performance metrics.
 #
 # Training run metrics:
-#   - Epochs: 50 (26 run as EarlyStopping callback triggered)
+#   - Epochs: 50 (28 run as EarlyStopping callback triggered)
 #
-#   - Train Loss (Smoothed): 0.036
-#   - Train Accuracy (Smoothed): 0.694
+#   - Train Loss (Smoothed): 0.043
+#   - Train Accuracy (Smoothed): 0.692
 #
-#   - Validation Loss (Smoothed): 0.104
-#   - Validation Accuracy (Smoothed): 0.683
+#   - Validation Loss (Smoothed): 0.101
+#   - Validation Accuracy (Smoothed): 0.682
 #
-#   - Test Loss (Smoothed): 0.106
+#   - Test Loss (Smoothed): 0.103
 #   - Test Accuracy (Smoothed): 0.682
 #
 # Training Performance Evaluation
+# 1. Training vs Validation Accuracy:
+#     - Train Accuracy: 0.692
+#     - Validation Accuracy: 0.682
+#     - Difference: -0.010 (-1.44%)
+#
+#   A small gap of 1.44% between training and validation accuracy suggests the model's ability to correctly classify
+#   samples is consistent across both datasets. This indicates good generalization, with no significant overfitting.
+#
+# 2. Training vs Validation Loss:
+#     - Train Loss: 0.043
+#     - Validation Loss: 0.101
+#     - Difference: +0.058 (+134.88%)
+#
+#   A larger gap of 134.88% between training and validation loss is less ideal, but doesn't necessarily indicate
+#   overfitting as accuracy metrics are tightly aligned. Further investigation is needed to ascertain the reason for
+#   this loss discrepancy.
+#   The discrepancy between training and validation loss is smaller than model V13, indicating that the current
+#   model architecture isn't able to fully harness the potential of a deeper sequential model.
+#
+# 3. Validation vs Testing Accuracy and Loss:
+#   - Validation Accuracy: 0.682
+#   - Testing Accuracy: 0.682
+#   - Difference: 0.00 (0.00%)
+#
+#   - Validation Loss: 0.101
+#   - Testing Loss: 0.103
+#   - Difference: +0.002 (+1.98%)
+#
+# Consistent test performance compared to validation indicates good generalization and low overfitting.
+#
+# Compared to model V13:
+#   - Both loss and accuracy for training, testing and validation are comparable, with model V14 showing marginal
+#     improvement in training vs validation metrics, and validation vs testing metrics.
+#   - Convergence is similar for both models, however the reduced number of layers for model V14 resulted in a reduction
+#     in epoch time length of 1/2 (~1 h vs ~2h for model V131).
+#   - Conclusion: Maintain encoder number of layers at 2 as per Liu et al. model.
 
 # Data Configuration and Hyperparameters
 data:
