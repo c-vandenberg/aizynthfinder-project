@@ -387,6 +387,65 @@ The investigation showed that **additive attention slightly but consistently out
 
 ### vi. Beam Search Strategies
 
+**Beam Search** is a commonly used technique aimed at **identifying the most probable target sequences** by **exploring multiple translations through tree search**. In their study, *Britz et al.* evaluated the impact of **varying beam widths**, ranging from **1 (greedy search) to 100**, and the **incorporation of length normalisation penalities** of **0.5 and 1.0** on BLEU scores (**Table 7**).
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Beam Width</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>B1</strong></td>
+        <td>20.66 ± 0.31 (21.08)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B3</strong></td>
+        <td>21.55 ± 0.26 (21.94)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B5</strong></td>
+        <td>21.60 ± 0.28 (22.03)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B10</strong></td>
+        <td>21.57 ± 0.26 (21.91)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B25</strong></td>
+        <td>21.47 ± 0.30 (21.77)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B100</strong></td>
+        <td>21.10 ± 0.31 (21.39)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B10-LP-0.5</strong></td>
+        <td>21.71 ± 0.25 (22.04)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B10-LP-1.0</strong></td>
+        <td>21.80 ± 0.25 (22.16)</td>
+        <td>66.32M</td>
+      </tr>
+    </tbody>
+  </table>
+  <b>Table 7</b> <i>Britz et al.</i> BLEU score trends on variation of beam width, and aaddition of length penalities (LP). <b><sup>4</sup></b>
+</div>
+
+The investigation shows that the **optimal beam width** appears to reside around **5 to 10**, where **significant improvements** in BLEU score are observed **without incurring the diminishing returns associated with larger beams**. Additionally, the **introduction of length penalities enhances performance within this beam width range**.
+
 ### 4.1.3 *Liu at al.* Model Architecture
 
 ## 4.2 Project Sequence-to-Sequence Model
