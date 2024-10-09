@@ -1,31 +1,12 @@
 # 4. Retrosynthesis Sequence-to-Sequence Model
 
-## 4.1 *Liu et al.* Sequence-to-Sequence Model
+## 4.1 *Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters
 
-The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the prediced molecular precursors in the same notation.
+*Liu et al.* derived their seq2seq model architecture from the large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters** by *Britz et al.*.
 
-### 4.1.1 Data Preparation
+In their seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
 
-*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 1.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
-
-<br>
-  <div align="center">
-    <img src="https://github.com/user-attachments/assets/b4b11d31-9b6b-4527-ae15-ccd9b3abf921", alt="liu-et-al-reaction-types"/>
-    <p>
-      <b>Table 1</b> <i>Liu at al.</i> training data set reaction class distribution. <b><sup>1</sup></b>
-    </p>
-  </div>
-<br>
-
-Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
-
-### 4.1.2 *Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters
-
-*Liu at al.* adapted the **open source seq2seq library** from *Britz et al.*. **<sup>4</sup>** This aim of this open source Seq2Seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**.
-
-In their seminal paper, *Britz et al.* conducted a large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters**. This provides insights into the **optimisation of NMT models** (such as seq2seq models), and establishing the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
-
-### i. Embedding Dimensionality
+### 4.1.1 Embedding Dimensionality
 
 Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**). *N.B* The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.
 
@@ -85,7 +66,7 @@ Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect
 * Despite this improvement, the **drastic increase in model parameters to 187.09M** introduces **significant computational overhead**, raising practical concerns regarding **training time, memory consumption**, and **scalability**.
 * Moreover, the **minimal gain in BLEU score** suggests that the model **may not be making efficient use of the extra parameters**, as indicated by the **consistent training log perplexity across all embedding sizes**. As a result, the model is **not fully leveraging the capacity offered by such large embeddings**.
 
-### ii. Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant
+### 4.1.2 Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant
 
 To evaluate the effect of encoder and decoder RNN cell variant on model performance, *Britz et al.* **compared three cell variants**:
 1. **Long Short-Term Memory (LSTM) Cells**
@@ -139,7 +120,7 @@ Additionally, the vanilla decoder **performed significantly worse than both the 
 1. That the decoder **indeed passes information in its own state throughout multiple time steps** instead of **relying solely on the attention mechanism and current input**.
 2. That the gating mechanism is **necessary to mask out irrelevant parts of the inputs**.
 
-### iii. Encoder and Decoder Depth
+### 4.1.3 Encoder and Decoder Depth
 
 *Britz et al.* generally expected **deeper networks to converge to better solutions than shallower ones**. However, the **importance of network depth is unclear**, and so they explored the effect of both encoder and decoder depth **up to 8 layers**. 
 
@@ -242,15 +223,282 @@ Contrary to their initial hypothesis, **deeper encoders and decoders did not con
 
 Additionally, the **lack of clear performance improvements with incresed depth**, coupled with **training instabilities in deeper configurations**, indicates a need for **more robust optimisation techniques** and **architectural innovations** to **fully harness the potential** of **deep sequential models** in NMT.
 
-### iv. Unidirectional vs. Bidirectional Encoder
+### 4.1.4 Unidirectional vs. Bidirectional Encoder
 
-### v. Attention Mechanism
+For **encoder directionality**, *Britz et al.* cited literature sources where **bidirectional encoders**, **<sup>6</sup>** **unidirectional encoders**, **<sup>7</sup>** and a **mix of both** **<sup>8</sup>** were employed.
 
-### vi. Beam Search Strategies
+Bidirectional encoders are able to create representations that **take into account both past and future inputs**, whereas unidirectional encoders can **only take past inputs into account**. However, the benefit of unidirectional encoders is that they can be **easily parallelized on GPUs**, allowing them to run faster than bidirectional encoders. **<sup>4</sup>**
 
-### 4.1.3 *Liu at al.* Model Architecture
+A well as investigating encoder directionality, *Britz et al.* also investigated **source input reversal**. Reversing source inputs is a **commonly used technique** that allows the encoder to **create richer representations for earlier words**. Given that **errors can on the decoder side can easily cascade**, the **correctness of early words has a disproportionate impact**. **<sup>4</sup>**
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Cell Variant</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Bidi-2</strong></td>
+        <td>21.78 ± 0.05 (21.83)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-1</strong></td>
+        <td>20.54 ± 0.16 (20.73)</td>
+        <td>63.44M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-1R</strong></td>
+        <td>21.16 ± 0.35 (21.64)</td>
+        <td>63.44M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-2</strong></td>
+        <td>20.98 ± 0.10 (21.07)</td>
+        <td>65.01M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-2R</strong></td>
+        <td>21.76 ± 0.21 (21.93)</td>
+        <td>65.01M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-4</strong></td>
+        <td>21.47 ± 0.22 (21.70)</td>
+        <td>68.16M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-4R</strong></td>
+        <td>21.32 ± 0.42 (21.89)</td>
+        <td>68.16M</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 5</b> <i>Britz et al.</i> BLEU score trends on variation of encoder directionality, and source input reversal. <b><sup>4</sup></b>
+  </p>
+</div>
+
+The investigation shows that, in genereal, **bidirectional encoders marginally outperform unidirectional encoders**, and the **introduction of reversed source inputs significantly boosts the performance of unidirectional encoders**. However, even with reversed inputs, **shallower bidirectional encoders remain competitive**, suggesting that bidirectionality provides **inherent advantages in capturing contextual information**.
+
+Noteably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
+
+### 4.1.5 Attention Mechanism
+
+*Britz et al.* compared the performance of **additive and multiplicative attention variants** across **varying attention dimensionalities** (**Table 6**).
+1. **Additive Attention**:
+   * The **additive mechanism**, introduced by *Bahdanau et al.*, **<sup>6</sup>** involves **combining the encoder states and decoder states** through a **feedforward network** before computing the attention scores.
+2. **Multiplicative Attention**:
+   * The **multiplicative mechanism**, introduced by *Luond et al.*, **<sup>7</sup>** **computes attention scores using a dot product** between the **transformed encoder and decoder states**, making it less computationally expensive.
+
+They also experimented with using **no attention mechanism** by:
+1. **Initializing the decoder state with the last encoder state (None-State)**.
+2. **Concatenating the last decoder state to each decoder input (None-Input)**.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Attention Type</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Mul-128</strong></td>
+        <td>22.03 ± 0.08 (22.14)</td>
+        <td>65.73M</td>
+      </tr>
+      <tr>
+        <td><strong>Mul-256</strong></td>
+        <td>22.33 ± 0.28 (22.64)</td>
+        <td>65.93M</td>
+      </tr>
+      <tr>
+        <td><strong>Mul-512</strong></td>
+        <td>21.78 ± 0.05 (21.83)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>Mul-1024</strong></td>
+        <td>18.22 ± 0.03 (18.26)</td>
+        <td>67.11M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-128</strong></td>
+        <td>22.23 ± 0.11 (22.38)</td>
+        <td>65.73M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-256</strong></td>
+        <td>22.33 ± 0.04 (22.39)</td>
+        <td>65.93M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-512</strong></td>
+        <td>22.47 ± 0.27 (22.79)</td>
+        <td>66.33M</td>
+      </tr>
+      <tr>
+        <td><strong>Add-1024</strong></td>
+        <td>22.10 ± 0.18 (22.36)</td>
+        <td>67.11M</td>
+      </tr>
+      <tr>
+        <td><strong>None-State</strong></td>
+        <td>9.98 ± 0.28 (10.25)</td>
+        <td>64.23M</td>
+      </tr>
+      <tr>
+        <td><strong>None-Input</strong></td>
+        <td>11.57 ± 0.30 (11.85)</td>
+        <td>64.49M</td>
+      </tr>
+    </tbody>
+  </table>
+  <b>Table 6</b> <i>Britz et al.</i> BLEU score trends on variation of attention mechanism variants, and attention dimensionality. <b><sup>4</sup></b>
+</div>
+
+The investigation showed that **additive attention slightly but consistently outperformed multiplicative attention**, with attention dimensionality **having minimal effect on additive attention performance**. Additionally, the **abysmal performance of non-attention models** further emphasizes the **necessity of incorporating attention mechanisms in NMT models**.
+
+### 4.1.6 Beam Search Strategies
+
+**Beam Search** is a commonly used technique aimed at **identifying the most probable target sequences** by **exploring multiple translations through tree search**. In their study, *Britz et al.* evaluated the impact of **varying beam widths**, ranging from **1 (greedy search) to 100**, and the **incorporation of length normalisation penalities** of **0.5 and 1.0** on BLEU scores (**Table 7**).
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Beam Width</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>B1</strong></td>
+        <td>20.66 ± 0.31 (21.08)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B3</strong></td>
+        <td>21.55 ± 0.26 (21.94)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B5</strong></td>
+        <td>21.60 ± 0.28 (22.03)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B10</strong></td>
+        <td>21.57 ± 0.26 (21.91)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B25</strong></td>
+        <td>21.47 ± 0.30 (21.77)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B100</strong></td>
+        <td>21.10 ± 0.31 (21.39)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B10-LP-0.5</strong></td>
+        <td>21.71 ± 0.25 (22.04)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>B10-LP-1.0</strong></td>
+        <td>21.80 ± 0.25 (22.16)</td>
+        <td>66.32M</td>
+      </tr>
+    </tbody>
+  </table>
+  <b>Table 7</b> <i>Britz et al.</i> BLEU score trends on variation of beam width, and aaddition of length penalities (LP). <b><sup>4</sup></b>
+</div>
+
+The investigation shows that the **optimal beam width** appears to reside around **5 to 10**, where **significant improvements** in BLEU score are observed **without incurring the diminishing returns associated with larger beams**. Additionally, the **introduction of length penalities enhances performance within this beam width range**.
+
+## 4.2 *Liu et al.* Sequence-to-Sequence Model
+
+The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the prediced molecular precursors in the same notation.
+
+### 4.1.1 Data Preparation
+
+*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 1.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/b4b11d31-9b6b-4527-ae15-ccd9b3abf921", alt="liu-et-al-reaction-types"/>
+    <p>
+      <b>Table 1</b> <i>Liu at al.</i> training data set reaction class distribution. <b><sup>1</sup></b>
+    </p>
+  </div>
+<br>
+
+Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
+
+### i. Training
+For model training, the training data **has reaction atom-mapping removed**, and each reaction example is **split into a source sequence** and a **target sequence**.
+  * The source sequence is the **product SMILES sequence split into characters**, with a **reaction type token prepended to the sequence**.
+  * Additionally, the source sequence is **reversed before being fed into the encoder**.
+  * The target sequence is the **reactants SMILES split into characters**.
+
+The seq2seq model is **evaluated on the validation data set every 4000 training steps**, and the model training is stopped **once the evaluation log perplexity starts to increase**.
+
+### ii. Testing
+The trained seq2seq model is **evaluated on the test data set with atom-mapping removed**. Each target molecule SMILES in the test data set is **split into characters**, a **reaction type token prepended to the sequence**, and is **reversed** before being fed into the trained model encoder.
+
+Additionally, a **beam search procedure is used for model inference**: **<sup>1</sup>**
+1. For each target molecule source sequence input, the **top N candidate output sequences** ranked by **overall sequence log probability at each time step during decoding are retained**,  where *N is the width of the beam**.
+2. The decoding is stopped **once the lengths of the candidate sequences reach the maximum decode length of 140 characters**
+3. The candidate sequences that contain an **end of sequence character are considered to be complete**. This was on average about **97% of all beam search predicted candidate sequences**.
+4. These complete candidate sequences represent the **reactant sets predicted by the seq2seq model** for a particular target molecule, and they are **ranked by the overall sequence log probabilities**. The overall sequence log probability for a candidate sequence consists of the **log probabilities of the individual characters** in that candidate sequence.
+
+### 4.1.2 Model Architecture
+
+From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>*
+
+*Liu et al.* adapted this open source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 8**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/999ae54c-1d80-4f0a-8411-cb5d9391766e", alt="liu-et-al-model-hyperparameters"/>
+    <p>
+      <b>Table 8</b> Key hyperparameters of the seq2seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
+    </p>
+  </div>
+<br>
 
 ## 4.2 Project Sequence-to-Sequence Model
+
+### 4.2.1 Data Preparation
+
+The training, validation, and testing data for developing the seq2seq model in this project were derived from the *Liu et al.* model codebase. **<sup>9</sup>**
+
+These data sets had already been processed as per the process described in **4.1.1**, and split into:
+1. **Train sources** (products)
+2. **Train targets** (reactants)
+3. **Validation sources** (products)
+4. **Validation targets** (reactants)
+5. **Test sources** (products)
+6. **Test targets** (reactants)
+
+As the ultimate goal of this project is to **incorporate this model into AiZynthFinder**, the **prepended reaction type token** in the source sequences **was removed** to leave just the split target molecule SMILES sequence.
+
+Additionally, the sources and target datasets were **combined** so that they could be **split before each training run**. This would allow us to **control the split ratio** during the model development process.
+
+### 4.2.2 Model Architecture
+
+As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture described by *Liu et al.*, to act as a **baseline** for future model iterations.
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
@@ -258,3 +506,7 @@ Additionally, the **lack of clear performance improvements with incresed depth**
 **[3]** Schneider, N., Stiefl, N. and Landrum, G.A. (2016) ‘What’s what: The (nearly) definitive guide to reaction role assignment’, Journal of Chemical Information and Modeling, 56(12), pp. 2336–2346. <br><br>
 **[4]** Britz, D. et al. (2017) ‘Massive exploration of neural machine translation architectures’, Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing. <br><br>
 **[5]** He, K. et al. (2016) ‘Deep residual learning for image recognition’, 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR). <br><br>
+**[6]** Bahdanau, D. et al. (2015) ‘Neural machine translation by jointly learning to align and translate’, Proceedings of the 2015 International Conference on Learning Representations (ICLR). <br><br>
+**[7]** Luong, M. et al. (2016) ‘Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models’, Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics. <br><br>
+**[8]** Wu, Y. et al. (2016) ‘Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation’. <br><br>
+**[9]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
