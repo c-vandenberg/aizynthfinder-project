@@ -1,29 +1,10 @@
 # 4. Retrosynthesis Sequence-to-Sequence Model
 
-## 4.1 *Liu et al.* Sequence-to-Sequence Model
+## 4.1 *Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters
 
-The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the prediced molecular precursors in the same notation.
+*Liu et al.* derived their seq2seq model architecture from the large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters** by *Britz et al.*.
 
-### 4.1.1 Data Preparation
-
-*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 1.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
-
-<br>
-  <div align="center">
-    <img src="https://github.com/user-attachments/assets/b4b11d31-9b6b-4527-ae15-ccd9b3abf921", alt="liu-et-al-reaction-types"/>
-    <p>
-      <b>Table 1</b> <i>Liu at al.</i> training data set reaction class distribution. <b><sup>1</sup></b>
-    </p>
-  </div>
-<br>
-
-Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
-
-### 4.1.2 *Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters
-
-*Liu at al.* adapted the **open source seq2seq library** from *Britz et al.*. **<sup>4</sup>** This aim of this open source Seq2Seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**.
-
-In their seminal paper, *Britz et al.* conducted a large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters**. This provides insights into the **optimisation of NMT models** (such as seq2seq models), and establishing the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
+In their seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
 
 ### i. Embedding Dimensionality
 
@@ -446,7 +427,41 @@ The investigation showed that **additive attention slightly but consistently out
 
 The investigation shows that the **optimal beam width** appears to reside around **5 to 10**, where **significant improvements** in BLEU score are observed **without incurring the diminishing returns associated with larger beams**. Additionally, the **introduction of length penalities enhances performance within this beam width range**.
 
-### 4.1.3 *Liu at al.* Model Architecture
+## 4.2 *Liu et al.* Sequence-to-Sequence Model
+
+The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the prediced molecular precursors in the same notation.
+
+### 4.1.1 Data Preparation
+
+*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 1.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/b4b11d31-9b6b-4527-ae15-ccd9b3abf921", alt="liu-et-al-reaction-types"/>
+    <p>
+      <b>Table 1</b> <i>Liu at al.</i> training data set reaction class distribution. <b><sup>1</sup></b>
+    </p>
+  </div>
+<br>
+
+Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
+
+### 4.1.2 Model Architecture
+
+From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>*
+
+*Liu et al.* adapted this open source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 8**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/999ae54c-1d80-4f0a-8411-cb5d9391766e", alt="liu-et-al-model-hyperparameters"/>
+    <p>
+      <b>Table 8</b> Key hyperparameters of the seq2seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
+    </p>
+  </div>
+<br>
+
+For model training, they **reverse
 
 ## 4.2 Project Sequence-to-Sequence Model
 
