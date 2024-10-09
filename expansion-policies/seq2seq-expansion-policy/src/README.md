@@ -500,6 +500,16 @@ Additionally, the sources and target datasets were **combined** so that they cou
 
 As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture described by *Liu et al.*, to act as a **baseline** for future model iterations.
 
+### 4.1.3 Model Optimization
+
+### i. Deterministic Training Environment
+
+### ii. Encoder Optimization
+
+### iii. Decoder Optimization
+
+### iv. Attention Mechanism Optimization
+
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
 **[2]** Lowe, D. M. (2012) ‘Extraction of Chemical Structures and Reactions from the Literature’; University of Cambridge. <br><br>
