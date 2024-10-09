@@ -178,6 +178,55 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         return output
 
+    def predict_sequence(self, encoder_input, max_length=100, start_token_id=None, end_token_id=None):
+        batch_size = tf.shape(encoder_input)[0]
+
+        # Encode the input sequence
+        encoder_output, state_h, state_c = self.encoder(encoder_input, training=False)
+
+        # Map encoder final states to decoder initial states
+        decoder_state_h = self.enc_state_h(state_h)
+        decoder_state_c = self.enc_state_c(state_c)
+        decoder_states = [decoder_state_h, decoder_state_c]
+
+        # Prepare initial decoder input (start tokens)
+        if start_token_id is None:
+            start_token = self.decoder_data_processor.smiles_tokenizer.start_token
+            start_token_id = self.decoder_data_processor.tokenizer.word_index[start_token]
+        if end_token_id is None:
+            end_token = self.decoder_data_processor.smiles_tokenizer.end_token
+            end_token_id = self.decoder_data_processor.tokenizer.word_index[end_token]
+
+        decoder_input = tf.fill([batch_size, 1], start_token_id)
+        sequences = tf.TensorArray(tf.int32, size=0, dynamic_size=True)
+        finished = tf.zeros([batch_size], dtype=tf.bool)
+
+        for t in range(max_length):
+            # Run decoder for one time step
+            decoder_output, decoder_states = self.decoder.single_step(
+                decoder_input,
+                decoder_states,
+                encoder_output
+            )
+            # Get the predicted token id
+            predicted_id = tf.argmax(decoder_output, axis=-1, output_type=tf.int32)
+            # Append to sequences
+            sequences = sequences.write(t, predicted_id[:, 0])
+
+            # Update finished status
+            finished = tf.logical_or(finished, tf.equal(predicted_id[:, 0], end_token_id))
+
+            # Break if all sequences are finished
+            if tf.reduce_all(finished):
+                break
+
+            # Prepare next decoder input
+            decoder_input = predicted_id
+
+        sequences = sequences.stack()
+        sequences = tf.transpose(sequences, [1, 0])  # shape (batch_size, seq_len)
+        return sequences
+
     def get_config(self) -> dict:
         """
         Returns the configuration of the model for serialization.

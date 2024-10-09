@@ -6,9 +6,11 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
 from tensorflow.train import Checkpoint, CheckpointManager
+from nltk.translate.bleu_score import corpus_bleu
 
 from trainers.environment import TrainingEnvironment
-from checkpoints.checkpoints import BestValLossCheckpointCallback
+from callbacks.checkpoints import BestValLossCallback
+from callbacks.bleu_score import BLEUScoreCallback
 from losses.losses import MaskedSparseCategoricalCrossentropy
 from metrics.metrics import Perplexity
 from data.utils.data_loader import DataLoader
@@ -106,10 +108,12 @@ class Trainer:
 
         # Initialize Preprocessors
         self.encoder_preprocessor = DataPreprocessor(
+            smiles_tokenizer=self.data_loader.smiles_tokenizer,
             tokenizer=self.tokenizer,
             max_seq_length=data_conf.get('max_encoder_seq_length', 150)
         )
         self.decoder_preprocessor = DataPreprocessor(
+            smiles_tokenizer=self.data_loader.smiles_tokenizer,
             tokenizer=self.tokenizer,
             max_seq_length=data_conf.get('max_decoder_seq_length', 150)
         )
@@ -220,12 +224,7 @@ class Trainer:
             restore_best_weights=True
         )
 
-        # TensorBoard
-        tensorboard_callback: EarlyStopping = TensorBoard(
-            log_dir=training_conf.get('log_dir', './logs')
-        )
-
-        # Custom Checkpoint Callback
+        # Checkpoint manager
         checkpoint_dir = training_conf.get('checkpoint_dir', './checkpoints')
         os.makedirs(checkpoint_dir, exist_ok=True)
         checkpoint: Checkpoint = Checkpoint(model=self.model, optimizer=self.optimizer)
@@ -242,8 +241,8 @@ class Trainer:
         else:
             print("Initializing from scratch.")
 
-        # Custom Checkpoint Callback
-        best_val_loss_checkpoint_callback: BestValLossCheckpointCallback = BestValLossCheckpointCallback(
+        # Checkpoint Callback
+        best_val_loss_checkpoint_callback: BestValLossCallback = BestValLossCallback(
             checkpoint_manager
         )
 
@@ -254,10 +253,23 @@ class Trainer:
             patience=3
         )
 
+        # BLEU score callback
+        bleu_callback: BLEUScoreCallback = BLEUScoreCallback(
+            tokenizer=self.tokenizer,
+            validation_data=self.data_loader.get_valid_dataset(),
+            log_dir=training_conf.get('log_dir', './logs')
+        )
+
+        # TensorBoard
+        tensorboard_callback: EarlyStopping = TensorBoard(
+            log_dir=training_conf.get('log_dir', './logs')
+        )
+
         self.callbacks = [
             early_stopping,
             best_val_loss_checkpoint_callback,
             lr_scheduler,
+            bleu_callback,
             tensorboard_callback
         ]
 
@@ -296,14 +308,31 @@ class Trainer:
 
         test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
 
+        references = []
+        hypotheses = []
+        for (encoder_input, decoder_input), target_output in test_dataset:
+            predicted_sequences = self.model.predict_sequence(encoder_input)
+            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences.numpy())
+            target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
+
+            for ref, hyp in zip(target_texts, predicted_texts):
+                ref_tokens = ref.split()
+                hyp_tokens = hyp.split()
+                references.append([ref_tokens])
+                hypotheses.append(hyp_tokens)
+
+        bleu_score = corpus_bleu(references, hypotheses)
+
         with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
             f.write(f"Test Loss: {test_loss}\n")
             f.write(f"Test Accuracy: {test_accuracy}\n")
             f.write(f"Test Perplexity: {test_perplexity}\n")
+            f.write(f"Test BLEU Score: {bleu_score}\n")
 
         print(f"Test Loss: {test_loss}")
         print(f"Test Accuracy: {test_accuracy}")
         print(f"Test Perplexity: {test_perplexity}")
+        print(f"Test BLEU Score: {bleu_score}")
 
     def save_model(self) -> None:
         """

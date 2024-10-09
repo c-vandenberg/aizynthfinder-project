@@ -4,9 +4,9 @@ from tensorflow.keras.callbacks import Callback
 from tensorflow.train import CheckpointManager
 
 
-class BestValLossCheckpointCallback(Callback):
+class BestValLossCallback(Callback):
     """
-    Custom callback to save the model when there is an improvement in validation loss.
+    Checkpoint callback save the model when there is an improvement in validation loss.
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ class BestValLossCheckpointCallback(Callback):
         Called at the end of each epoch to check for improvement in validation loss.
     """
     def __init__(self, checkpoint_manager: CheckpointManager) -> None:
-        super(BestValLossCheckpointCallback, self).__init__()
+        super(BestValLossCallback, self).__init__()
         self.checkpoint_manager: CheckpointManager = checkpoint_manager
         self.best_val_loss: float = float('inf')  # Initialize as infinity
 

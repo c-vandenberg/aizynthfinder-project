@@ -50,10 +50,18 @@ class SmilesTokenizer:
         end_token: str = '<END>',
         oov_token: str = '<OOV>'
     ) -> None:
-        self.start_token = start_token
-        self.end_token = end_token
+        self._start_token = start_token
+        self._end_token = end_token
         self.oov_token = oov_token
         self.tokenizer: Optional[Tokenizer] = None
+
+    @property
+    def start_token(self):
+        return self._start_token
+
+    @property
+    def end_token(self):
+        return self._end_token
 
     def tokenize(self, smiles: str) -> List[str]:
         """

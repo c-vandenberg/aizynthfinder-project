@@ -41,7 +41,7 @@ class DataLoader:
         self.test_size = test_size
         self.random_state = random_state
 
-        self.smiles_tokenizer = SmilesTokenizer()
+        self._smiles_tokenizer = SmilesTokenizer()
         self._tokenizer = None
 
         self.encoder_data_processor = None
@@ -61,6 +61,10 @@ class DataLoader:
         if self._tokenizer is None:
             raise ValueError("Tokenizer has not been created yet.")
         return self._tokenizer
+
+    @property
+    def smiles_tokenizer(self):
+        return self._smiles_tokenizer
 
     def load_and_prepare_data(self) -> None:
         """Loads and preprocesses the datasets."""
@@ -117,8 +121,16 @@ class DataLoader:
         self._tokenizer = self.smiles_tokenizer.create_tokenizer(train_tokenized_smiles)
 
         # Initialize DataPreprocessors
-        self.encoder_data_processor = DataPreprocessor(self.tokenizer, self.max_encoder_seq_length)
-        self.decoder_data_processor = DataPreprocessor(self.tokenizer, self.max_decoder_seq_length)
+        self.encoder_data_processor = DataPreprocessor(
+            self.smiles_tokenizer,
+            self.tokenizer,
+            self.max_encoder_seq_length
+        )
+        self.decoder_data_processor = DataPreprocessor(
+            self.smiles_tokenizer,
+            self.tokenizer,
+            self.max_decoder_seq_length
+        )
 
     def _preprocess_datasets(self) -> None:
         """Preprocesses the training, validation, and test datasets."""

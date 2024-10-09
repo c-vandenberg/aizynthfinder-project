@@ -228,13 +228,12 @@ class StackedLSTMDecoder(DecoderInterface):
         # Prepare the initial states
         num_states = len(states)
         expected_states = self.num_layers * 2  # hidden (h) and cell (c) states for each layer
-        states_list: List = []
 
         if num_states == 2:
             # Only initial state for the first layer is provided
             state_h: tf.Tensor = states[0]  # Shape: (batch_size, units)
             state_c: tf.Tensor = states[1]
-            states: List[Tuple[tf.Tensor, tf.Tensor]] = [(state_h, state_c)] + [(None, None)] * (self.num_layers - 1)
+            states_list: List[Tuple[tf.Tensor, tf.Tensor]] = [(state_h, state_c)] + [(None, None)] * (self.num_layers - 1)
         elif num_states == expected_states:
             # States for all layers are provided
             states_list: List[Tuple[tf.Tensor, tf.Tensor]] = [
