@@ -478,9 +478,27 @@ From their analysis, *Britz et al.* released an **open source, TensorFlow-based 
   </div>
 <br>
 
-For model training, they **reverse
-
 ## 4.2 Project Sequence-to-Sequence Model
+
+### 4.2.1 Data Preparation
+
+The training, validation, and testing data for developing the seq2seq model in this project were derived from the *Liu et al.* model codebase. **<sup>9</sup>**
+
+These data sets had already been processed as per the process described in **4.1.1**, and split into:
+1. **Train sources** (products)
+2. **Train targets** (reactants)
+3. **Validation sources** (products)
+4. **Validation targets** (reactants)
+5. **Test sources** (products)
+6. **Test targets** (reactants)
+
+As the ultimate goal of this project is to **incorporate this model into AiZynthFinder**, the **prepended reaction type token** in the source sequences **was removed** to leave just the split target molecule SMILES sequence.
+
+Additionally, the sources and target datasets were **combined** so that they could be **split before each training run**. This would allow us to **control the split ratio** during the model development process.
+
+### 4.2.2 Model Architecture
+
+As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture described by *Liu et al.*, to act as a **baseline** for future model iterations.
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
@@ -491,3 +509,4 @@ For model training, they **reverse
 **[6]** Bahdanau, D. et al. (2015) ‘Neural machine translation by jointly learning to align and translate’, Proceedings of the 2015 International Conference on Learning Representations (ICLR). <br><br>
 **[7]** Luong, M. et al. (2016) ‘Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models’, Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics. <br><br>
 **[8]** Wu, Y. et al. (2016) ‘Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation’. <br><br>
+**[9]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
