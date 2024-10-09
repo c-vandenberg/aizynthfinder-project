@@ -158,7 +158,7 @@ class Trainer:
             decoder_embedding_dim=decoder_embedding_dim,
             attention_dim=attention_dim,
             units=units,
-            num_encoder_layers=4,
+            num_encoder_layers=2,
             dropout_rate=dropout_rate,
             weight_decay=weight_decay
         )

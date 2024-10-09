@@ -19,7 +19,7 @@
 # 1. Training vs Validation Accuracy:
 #     - Train Accuracy: 0.694
 #     - Validation Accuracy: 0.683
-#     - Difference: -0.011 (-1.1%)
+#     - Difference: -0.011 (-1.59%)
 #
 #   A small gap of ~1.1% between training and validation accuracy suggests the model's ability to correctly classify
 #   samples is consistent across both datasets. This indicates good generalization, with no significant overfitting.
@@ -27,7 +27,7 @@
 # 2. Training vs Validation Loss:
 #     - Train Loss: 0.036
 #     - Validation Loss: 0.104
-#     - Difference: +0.068 (+189%)
+#     - Difference: +0.068 (+188.89%)
 #
 #   A larger gap of ~189% between training and validation loss is less ideal, but doesn't necessarily indicate
 #   overfitting as accuracy metrics are tightly aligned. Further investigation is needed to ascertain the reason for
@@ -42,7 +42,7 @@
 #   - Testing Loss: 0.106
 #   - Difference: +0.002 (+1.92%)
 #
-# Consistent test performance compared to validation indicates good generalisation and low overfitting.
+# Consistent test performance compared to validation indicates good generalization and low overfitting.
 
 # Data Configuration and Hyperparameters
 data:
