@@ -26,7 +26,18 @@
   &nbsp; &nbsp; 3.4.3 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism)<br>
   3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#35-references)<br>
 4. [Retrosynthesis Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#4-retrosynthesis-sequence-to-sequence-model)<br>
-   4.1 [Liu et al. Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#41-liu-et-al-sequence-to-sequence-model)<br>
+   4.1 [*Liu et al.* Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#41-liu-et-al-sequence-to-sequence-model)<br>
+   &nbsp; &nbsp; 4.1.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-data-preparation)<br>
+   &nbsp; &nbsp; 4.1.2 [*Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-britz-et-al-open-source-seq2seq-libary)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Embedding Dimensionality](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#embedding-dimensionality)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#encoder-and-decoder-recurrent-neural-network-rnn-cell-variant)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Encoder and Decoder Depth](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#encoder-and-decoder-depth)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Unidirectional vs. Bidirectional Encoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iv-unidirectional-vs-bidirectional-encoder)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#v-attention-mechanism)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vi. [Beam Search Strategies](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vi-beam-search-strategies)<br>
+   &nbsp; &nbsp; 4.1.3 [*Liu at al.* Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-liu-at-al-model-architecture)<br>
+   4.2 [Project Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#42-project-sequence-to-sequence-model)<br>
+   4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#references)<br>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
 
