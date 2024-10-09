@@ -250,7 +250,9 @@ Additionally, the **lack of clear performance improvements with incresed depth**
 
 ### 4.1.3 *Liu at al.* Model Architecture
 
-## References
+## 4.2 Project Sequence-to-Sequence Model
+
+## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
 **[2]** Lowe, D. M. (2012) ‘Extraction of Chemical Structures and Reactions from the Literature’; University of Cambridge. <br><br>
 **[3]** Schneider, N., Stiefl, N. and Landrum, G.A. (2016) ‘What’s what: The (nearly) definitive guide to reaction role assignment’, Journal of Chemical Information and Modeling, 56(12), pp. 2336–2346. <br><br>
