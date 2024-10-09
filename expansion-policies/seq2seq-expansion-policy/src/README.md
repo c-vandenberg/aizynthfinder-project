@@ -244,6 +244,63 @@ Additionally, the **lack of clear performance improvements with incresed depth**
 
 ### iv. Unidirectional vs. Bidirectional Encoder
 
+For **encoder directionality**, *Britz et al.* cited literature sources where **bidirectional encoders**, **<sup>6</sup>** **unidirectional encoders**, **<sup>7</sup>** and a **mix of both** **<sup>8</sup>** were employed.
+
+Bidirectional encoders are able to create representations that **take into account both past and future inputs**, whereas unidirectional encoders can **only take past inputs into account**. However, the benefit of unidirectional encoders is that they can be **easily parallelized on GPUs**, allowing them to run faster than bidirectional encoders. **<sup>4</sup>**
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th><strong>Cell Variant</strong></th>
+        <th><strong>BLEU Score (newstest2013)</strong></th>
+        <th><strong>Model Parameters</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Bidi-2</strong></td>
+        <td>21.78 ± 0.05 (21.83)</td>
+        <td>66.32M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-1</strong></td>
+        <td>20.54 ± 0.16 (20.73)</td>
+        <td>63.44M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-1R</strong></td>
+        <td>21.16 ± 0.35 (21.64)</td>
+        <td>63.44M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-2</strong></td>
+        <td>20.98 ± 0.10 (21.07)</td>
+        <td>65.01M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-2R</strong></td>
+        <td>21.76 ± 0.21 (21.93)</td>
+        <td>65.01M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-4</strong></td>
+        <td>21.47 ± 0.22 (21.70)</td>
+        <td>68.16M</td>
+      </tr>
+      <tr>
+        <td><strong>Uni-4R</strong></td>
+        <td>21.32 ± 0.42 (21.89)</td>
+        <td>68.16M</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 5</b> <i>Britz et al.</i> BLEU score trends on variation of encoder directionality. <b><sup>4</sup></b>
+  </p>
+</div>
+
+
 ### v. Attention Mechanism
 
 ### vi. Beam Search Strategies
@@ -258,3 +315,6 @@ Additionally, the **lack of clear performance improvements with incresed depth**
 **[3]** Schneider, N., Stiefl, N. and Landrum, G.A. (2016) ‘What’s what: The (nearly) definitive guide to reaction role assignment’, Journal of Chemical Information and Modeling, 56(12), pp. 2336–2346. <br><br>
 **[4]** Britz, D. et al. (2017) ‘Massive exploration of neural machine translation architectures’, Proceedings of the 2017 Conference on Empirical Methods in Natural Language Processing. <br><br>
 **[5]** He, K. et al. (2016) ‘Deep residual learning for image recognition’, 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR). <br><br>
+**[6]** Bahdanau, D. et al. (2015) ‘Neural machine translation by jointly learning to align and translate’, Proceedings of the 2015 International Conference on Learning Representations (ICLR). <br><br>
+**[7]** Luong, M. et al. (2016) ‘Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models’, Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics. <br><br>
+**[8]** Wu, Y. et al. (2016) ‘Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation’. <br><br>
