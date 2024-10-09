@@ -1,0 +1,82 @@
+# Seq2Seq Model Architecture
+#
+#
+# Training run metrics:
+#   - Epochs: 5
+#
+#   - Train Loss (Smoothed):
+#   - Train Accuracy (Smoothed):
+#
+#   - Validation Loss (Smoothed):
+#   - Validation Accuracy (Smoothed):
+#
+#   - Test Loss (Smoothed):
+#   - Test Accuracy (Smoothed):
+#
+# Training Performance Evaluation
+# 1. Training vs Validation Accuracy:
+#     - Train Accuracy:
+#     - Validation Accuracy:
+#     - Difference:
+#
+#
+# 2. Training vs Validation Loss:
+#     - Train Loss:
+#     - Validation Loss:
+#     - Difference:
+#
+# 3. Validation vs Testing Accuracy and Loss:
+#   - Validation Accuracy: 0.682
+#   - Testing Accuracy: 0.682
+#   - Difference: 0.00 (0.00%)
+#
+#   - Validation Loss:
+#   - Testing Loss:
+#   - Difference:
+#
+
+# Data Configuration and Hyperparameters
+data:
+  products_file: 'data/preprocessed/liu-et-al/products_smiles'
+  reactants_file: 'data/preprocessed/liu-et-al/reactants_smiles'
+  products_valid_file: 'data/preprocessed/liu-et-al/validation_products_smiles'
+  reactants_valid_file: 'data/preprocessed/liu-et-al/validation_reactants_smiles'
+  tokenizer_save_path: 'data/training/liu-et-al/model-v15/tokenizer/model_v15_tokenizer.json'
+  max_encoder_seq_length: 140
+  max_decoder_seq_length: 140
+  batch_size: 32
+  test_size: 0.3
+  random_state: 4
+
+# Model Configuration and Hyperparameters
+model:
+  input_vocab_size: null  # To be set dynamically based on tokenizer
+  output_vocab_size: null  # To be set dynamically based on tokenizer
+  attention_dim: 256
+  encoder_embedding_dim: 128
+  decoder_embedding_dim: 256
+  units: 256
+  encoder_num_layers: 2
+  decoder_num_layers: 4
+  weight_decay: null
+  dropout_rate: 0.2
+  learning_rate: 0.0001
+  metrics: ['accuracy']
+
+# Training Configuration and Hyperparameters
+training:
+  epochs: 1
+  patience: 5
+  model_save_path: 'data/training/liu-et-al/model-v15/model'
+  test_metrics_dir: 'data/training/liu-et-al/model-v15/evaluate'
+  log_dir: 'logs/liu-et-al/model-v15'
+  checkpoint_dir: 'data/training/liu-et-al/model-v15/checkpoints'
+  num_samples: 100 # Number of samples to use for debugging model
+
+# Environment Configuration
+env:
+  determinism:
+    python_seed: "44478977"
+    random_seed: 440651
+    numpy_seed: 110789
+    tf_seed: 61592

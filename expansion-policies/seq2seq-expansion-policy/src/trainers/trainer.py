@@ -146,6 +146,8 @@ class Trainer:
         decoder_embedding_dim: int = model_conf.get('decoder_embedding_dim', 256)
         units: int = model_conf.get('units', 256)
         attention_dim: int = model_conf.get('attention_dim', 256)
+        encoder_num_layers: int = model_conf.get('encoder_num_layers', 2)
+        decoder_num_layers: int = model_conf.get('decoder_num_layers', 4)
         dropout_rate: float = model_conf.get('dropout_rate', 0.2)
         weight_decay: Union[float, None] = model_conf.get('weight_decay', None)
         learning_rate: float = model_conf.get('learning_rate', 0.0001)
@@ -158,7 +160,8 @@ class Trainer:
             decoder_embedding_dim=decoder_embedding_dim,
             attention_dim=attention_dim,
             units=units,
-            num_encoder_layers=2,
+            num_encoder_layers=encoder_num_layers,
+            num_decoder_layers=decoder_num_layers,
             dropout_rate=dropout_rate,
             weight_decay=weight_decay
         )
