@@ -248,6 +248,8 @@ For **encoder directionality**, *Britz et al.* cited literature sources where **
 
 Bidirectional encoders are able to create representations that **take into account both past and future inputs**, whereas unidirectional encoders can **only take past inputs into account**. However, the benefit of unidirectional encoders is that they can be **easily parallelized on GPUs**, allowing them to run faster than bidirectional encoders. **<sup>4</sup>**
 
+A well as investigating encoder directionality, *Britz et al.* also investigated **source input reversal**. Reversing source inputs is a **commonly used technique** that allows the encoder to **create richer representations for earlier words**. Given that **errors can on the decoder side can easily cascade**, the **correctness of early words has a disproportionate impact**. **<sup>4</sup>**
+
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -296,10 +298,11 @@ Bidirectional encoders are able to create representations that **take into accou
     </tbody>
   </table>
   <p>
-    <b>Table 5</b> <i>Britz et al.</i> BLEU score trends on variation of encoder directionality. <b><sup>4</sup></b>
+    <b>Table 5</b> <i>Britz et al.</i> BLEU score trends on variation of encoder directionality, and source input reversal. <b><sup>4</sup></b>
   </p>
 </div>
 
+The investigation shows that, in genereal, **bidirectional encoders marginally outperform unidirectional encoders**, and that encoders **with reversed source inputs consistently outperform their non-reversed counterparts**. Noteably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
 
 ### v. Attention Mechanism
 
