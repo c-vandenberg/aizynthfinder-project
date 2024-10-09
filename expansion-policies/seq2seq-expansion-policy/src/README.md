@@ -25,7 +25,7 @@ Finally, the data set was split into training, validation and test data sets in 
 
 In their seminal paper, *Britz et al.* conducted a large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters**. This provides insights into the **optimisation of NMT models** (such as seq2seq models), and establishing the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
 
-### Embedding Dimensionality
+### i. Embedding Dimensionality
 
 Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**). *N.B* The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.
 
@@ -85,7 +85,7 @@ Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect
 * Despite this improvement, the **drastic increase in model parameters to 187.09M** introduces **significant computational overhead**, raising practical concerns regarding **training time, memory consumption**, and **scalability**.
 * Moreover, the **minimal gain in BLEU score** suggests that the model **may not be making efficient use of the extra parameters**, as indicated by the **consistent training log perplexity across all embedding sizes**. As a result, the model is **not fully leveraging the capacity offered by such large embeddings**.
 
-### Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant
+### ii. Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant
 
 To evaluate the effect of encoder and decoder RNN cell variant on model performance, *Britz et al.* **compared three cell variants**:
 1. **Long Short-Term Memory (LSTM) Cells**
@@ -139,7 +139,7 @@ Additionally, the vanilla decoder **performed significantly worse than both the 
 1. That the decoder **indeed passes information in its own state throughout multiple time steps** instead of **relying solely on the attention mechanism and current input**.
 2. That the gating mechanism is **necessary to mask out irrelevant parts of the inputs**.
 
-### Encoder and Decoder Depth
+### iii. Encoder and Decoder Depth
 
 *Britz et al.* generally expected **deeper networks to converge to better solutions than shallower ones**. However, the **importance of network depth is unclear**, and so they explored the effect of both encoder and decoder depth **up to 8 layers**. 
 
@@ -241,6 +241,12 @@ Additionally, for deeper networks, they experimented with **two variants of resi
 Contrary to their initial hypothesis, **deeper encoders and decoders did not consistently outperform their shallower counterparts**. These findings suggest that, while network depth is a **critical factor in model performance**, its **benefits are not linear** and are **highly contingent on the architectural strategies employed**, such as the **type and implementation of residual connections**. 
 
 Additionally, the **lack of clear performance improvements with incresed depth**, coupled with **training instabilities in deeper configurations**, indicates a need for **more robust optimisation techniques** and **architectural innovations** to **fully harness the potential** of **deep sequential models** in NMT.
+
+### iv. Unidirectional vs. Bidirectional Encoder
+
+### v. Attention Mechanism
+
+### vi. Beam Search Strategies
 
 ### 4.1.3 *Liu at al.* Model Architecture
 
