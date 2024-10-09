@@ -6,7 +6,7 @@
 
 In their seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
 
-### i. Embedding Dimensionality
+### 4.1.1 Embedding Dimensionality
 
 Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**). *N.B* The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.
 
@@ -66,7 +66,7 @@ Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect
 * Despite this improvement, the **drastic increase in model parameters to 187.09M** introduces **significant computational overhead**, raising practical concerns regarding **training time, memory consumption**, and **scalability**.
 * Moreover, the **minimal gain in BLEU score** suggests that the model **may not be making efficient use of the extra parameters**, as indicated by the **consistent training log perplexity across all embedding sizes**. As a result, the model is **not fully leveraging the capacity offered by such large embeddings**.
 
-### ii. Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant
+### 4.1.2 Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant
 
 To evaluate the effect of encoder and decoder RNN cell variant on model performance, *Britz et al.* **compared three cell variants**:
 1. **Long Short-Term Memory (LSTM) Cells**
@@ -120,7 +120,7 @@ Additionally, the vanilla decoder **performed significantly worse than both the 
 1. That the decoder **indeed passes information in its own state throughout multiple time steps** instead of **relying solely on the attention mechanism and current input**.
 2. That the gating mechanism is **necessary to mask out irrelevant parts of the inputs**.
 
-### iii. Encoder and Decoder Depth
+### 4.1.3 Encoder and Decoder Depth
 
 *Britz et al.* generally expected **deeper networks to converge to better solutions than shallower ones**. However, the **importance of network depth is unclear**, and so they explored the effect of both encoder and decoder depth **up to 8 layers**. 
 
@@ -223,7 +223,7 @@ Contrary to their initial hypothesis, **deeper encoders and decoders did not con
 
 Additionally, the **lack of clear performance improvements with incresed depth**, coupled with **training instabilities in deeper configurations**, indicates a need for **more robust optimisation techniques** and **architectural innovations** to **fully harness the potential** of **deep sequential models** in NMT.
 
-### iv. Unidirectional vs. Bidirectional Encoder
+### 4.1.4 Unidirectional vs. Bidirectional Encoder
 
 For **encoder directionality**, *Britz et al.* cited literature sources where **bidirectional encoders**, **<sup>6</sup>** **unidirectional encoders**, **<sup>7</sup>** and a **mix of both** **<sup>8</sup>** were employed.
 
@@ -287,7 +287,7 @@ The investigation shows that, in genereal, **bidirectional encoders marginally o
 
 Noteably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
 
-### v. Attention Mechanism
+### 4.1.5 Attention Mechanism
 
 *Britz et al.* compared the performance of **additive and multiplicative attention variants** across **varying attention dimensionalities** (**Table 6**).
 1. **Additive Attention**:
@@ -366,7 +366,7 @@ They also experimented with using **no attention mechanism** by:
 
 The investigation showed that **additive attention slightly but consistently outperformed multiplicative attention**, with attention dimensionality **having minimal effect on additive attention performance**. Additionally, the **abysmal performance of non-attention models** further emphasizes the **necessity of incorporating attention mechanisms in NMT models**.
 
-### vi. Beam Search Strategies
+### 4.1.6 Beam Search Strategies
 
 **Beam Search** is a commonly used technique aimed at **identifying the most probable target sequences** by **exploring multiple translations through tree search**. In their study, *Britz et al.* evaluated the impact of **varying beam widths**, ranging from **1 (greedy search) to 100**, and the **incorporation of length normalisation penalities** of **0.5 and 1.0** on BLEU scores (**Table 7**).
 
