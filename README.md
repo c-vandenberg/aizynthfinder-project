@@ -41,6 +41,11 @@
    4.2 [Project Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#42-project-sequence-to-sequence-model)<br>
    &nbsp; &nbsp; 4.1.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#421-data-preparation)<br>
    &nbsp; &nbsp; 4.1.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#422-model-architecture)<br>
+   &nbsp; &nbsp; 4.1.3 [Model Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-model-optimization)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Deterministic Training Environment](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#i-deterministic-training-environment)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Encoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-encoder-optimization)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Decoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iii-decoder-optimization)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Attention Mechanism Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iv-attention-mechanism-optimization)<br>
    4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#references)<br>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
