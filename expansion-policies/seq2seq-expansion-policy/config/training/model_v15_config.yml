@@ -65,7 +65,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 1
+  epochs: 5
   patience: 5
   model_save_path: 'data/training/liu-et-al/model-v15/model'
   test_metrics_dir: 'data/training/liu-et-al/model-v15/evaluate'

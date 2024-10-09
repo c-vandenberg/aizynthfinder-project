@@ -10,6 +10,7 @@ from tensorflow.train import Checkpoint, CheckpointManager
 from trainers.environment import TrainingEnvironment
 from checkpoints.checkpoints import BestValLossCheckpointCallback
 from losses.losses import MaskedSparseCategoricalCrossentropy
+from metrics.metrics import Perplexity
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import DataPreprocessor
@@ -174,8 +175,9 @@ class Trainer:
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
-        self.loss_function = MaskedSparseCategoricalCrossentropy
+        self.loss_function = MaskedSparseCategoricalCrossentropy(padding_idx=0)
         self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
+        self.metrics.append(Perplexity(loss_function=self.loss_function))
 
         # Compile the model
         self.model.compile(optimizer=self.optimizer, loss=self.loss_function, metrics=self.metrics)
@@ -292,14 +294,16 @@ class Trainer:
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
         os.makedirs(test_metrics_dir, exist_ok=True)
 
-        test_loss, test_accuracy = self.model.evaluate(test_dataset)
+        test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
 
         with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
             f.write(f"Test Loss: {test_loss}\n")
             f.write(f"Test Accuracy: {test_accuracy}\n")
+            f.write(f"Test Perplexity: {test_perplexity}\n")
 
         print(f"Test Loss: {test_loss}")
         print(f"Test Accuracy: {test_accuracy}")
+        print(f"Test Perplexity: {test_perplexity}")
 
     def save_model(self) -> None:
         """

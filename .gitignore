@@ -102,3 +102,5 @@ cython_debug/
 *.tmp
 *.temp
 *.bak
+
+expansion-policies/test.py
