@@ -446,6 +446,23 @@ The sequence-to-sequence (Seq2Seq) model implementation in this project was base
 
 Finally, the data set was split into training, validation and test data sets in a ratio of **8:1:1**.
 
+### i. Training
+For model training, the training data **has reaction atom-mapping removed**, and each reaction example is **split into a source sequence** and a **target sequence**.
+  * The source sequence is the **product SMILES sequence split into characters**, with a **reaction type token prepended to the sequence**.
+  * Additionally, the source sequence is **reversed before being fed into the encoder**.
+  * The target sequence is the **reactants SMILES split into characters**.
+
+The seq2seq model is **evaluated on the validation data set every 4000 training steps**, and the model training is stopped **once the evaluation log perplexity starts to increase**.
+
+### ii. Testing
+The trained seq2seq model is **evaluated on the test data set with atom-mapping removed**. Each target molecule SMILES in the test data set is **split into characters**, a **reaction type token prepended to the sequence**, and is **reversed** before being fed into the trained model encoder.
+
+Additionally, a **beam search procedure is used for model inference**: **<sup>1</sup>**
+1. For each target molecule source sequence input, the **top N candidate output sequences** ranked by **overall sequence log probability at each time step during decoding are retained**,  where *N is the width of the beam**.
+2. The decoding is stopped **once the lengths of the candidate sequences reach the maximum decode length of 140 characters**
+3. The candidate sequences that contain an **end of sequence character are considered to be complete**. This was on average about **97% of all beam search predicted candidate sequences**.
+4. These complete candidate sequences represent the **reactant sets predicted by the seq2seq model** for a particular target molecule, and they are **ranked by the overall sequence log probabilities**. The overall sequence log probability for a candidate sequence consists of the **log probabilities of the individual characters** in that candidate sequence.
+
 ### 4.1.2 Model Architecture
 
 From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>*
