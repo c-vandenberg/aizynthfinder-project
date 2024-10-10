@@ -1,5 +1,6 @@
 from typing import Iterable, Optional, Tuple, Any
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
 from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
@@ -39,13 +40,15 @@ class BLEUScoreCallback(Callback):
         tokenizer: Any,
         validation_data: Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]],
         log_dir: Optional[str] = None,
-        max_length: int = 100
+        max_length: int = 100,
+        beam_width: int = 5
     ) -> None:
         super(BLEUScoreCallback, self).__init__()
         self.tokenizer = tokenizer
         self.validation_data = validation_data
         self.log_dir = log_dir
         self.max_length = max_length
+        self.beam_width = beam_width
         self.file_writer: Optional[tf.summary.SummaryWriter] = (
             tf.summary.create_file_writer(log_dir) if log_dir else None
         )
@@ -64,14 +67,19 @@ class BLEUScoreCallback(Callback):
         references = []
         hypotheses = []
         for (encoder_input, decoder_input), target_output in self.validation_data:
-            # Generate sequences
-            predicted_sequences = self.model.predict_sequence(encoder_input, max_length=self.max_length)
+            predicted_sequences = self.model.predict_sequence_beam_search(
+                encoder_input, beam_width=self.beam_width
+            )
 
-            # Convert sequences to text
-            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences.numpy())
+            # Ensure predicted_sequences is a list of lists
+            if isinstance(predicted_sequences, list):
+                predicted_sequences = np.array(predicted_sequences)
+            else:
+                predicted_sequences = predicted_sequences.numpy()
+
+            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences)
             target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
 
-            # Prepare for BLEU computation
             for ref, hyp in zip(target_texts, predicted_texts):
                 ref_tokens = ref.split()
                 hyp_tokens = hyp.split()

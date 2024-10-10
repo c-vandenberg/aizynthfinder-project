@@ -2,6 +2,7 @@ import os
 from typing import Dict, Any, List, Union, Optional
 
 import yaml
+import numpy as np
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
@@ -257,7 +258,7 @@ class Trainer:
         bleu_callback: BLEUScoreCallback = BLEUScoreCallback(
             tokenizer=self.tokenizer,
             validation_data=self.data_loader.get_valid_dataset(),
-            log_dir=training_conf.get('log_dir', './logs')
+            log_dir=os.path.join(training_conf.get('log_dir', './logs'), 'bleu_score')
         )
 
         # TensorBoard
@@ -303,6 +304,7 @@ class Trainer:
         """
         test_dataset = self.data_loader.get_test_dataset()
         training_conf: Dict[str, Any] = self.config.get('training', {})
+        model_conf: Dict[str, Any] = self.config.get('model', {})
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
         os.makedirs(test_metrics_dir, exist_ok=True)
 
@@ -310,9 +312,19 @@ class Trainer:
 
         references = []
         hypotheses = []
+        beam_width = model_conf.get('beam_width', 5)  # Get beam_width from config or use default
+
         for (encoder_input, decoder_input), target_output in test_dataset:
-            predicted_sequences = self.model.predict_sequence(encoder_input)
-            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences.numpy())
+            # Use beam search to predict sequences
+            predicted_sequences = self.model.predict_sequence_beam_search(
+                encoder_input, beam_width=beam_width
+            )
+
+            # Ensure predicted_sequences is a numpy array
+            if isinstance(predicted_sequences, list):
+                predicted_sequences = np.array(predicted_sequences)
+
+            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences)
             target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
 
             for ref, hyp in zip(target_texts, predicted_texts):
