@@ -86,9 +86,8 @@ class BLEUScoreCallback(Callback):
                 references.append([ref_tokens])
                 hypotheses.append(hyp_tokens)
 
-        # Apply smoothing function and compute BLEU score
-        smoothing_function = SmoothingFunction().method1
-        bleu_score = corpus_bleu(references, hypotheses, smoothing_function=smoothing_function)
+        # Compute BLEU score
+        bleu_score = corpus_bleu(references, hypotheses)
 
         print(f'\nEpoch {epoch +1}: Validation BLEU score: {bleu_score:.4f}')
         if self.log_dir:
