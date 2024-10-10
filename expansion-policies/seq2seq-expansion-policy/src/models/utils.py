@@ -3,18 +3,9 @@ import sys
 import subprocess
 from typing import List
 
-import tensorflow as tf
 from tensorflow.keras import Model
 from sklearn.model_selection import ShuffleSplit, cross_validate
 
-from models.seq2seq import RetrosynthesisSeq2SeqModel
-from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
-from decoders.lstm_decoders import StackedLSTMDecoder
-from attention.attention import BahdanauAttention
-from losses.losses import MaskedSparseCategoricalCrossentropy
-from metrics.metrics import Perplexity
-from callbacks.checkpoints import BestValLossCallback
-from callbacks.bleu_score import BLEUScoreCallback
 
 class Seq2SeqModelUtils:
     @staticmethod
