@@ -1,26 +1,37 @@
-import os
+import logging
+import pydevd_pycharm
 
-import yaml
-from trainers.trainer import Trainer
-from models.utils import Seq2SeqModelUtils
+from aizynthfinder.aizynthfinder import AiZynthFinder
+
+# Configure logging to display debug information
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("aizynthfinder")
+logger.setLevel(logging.DEBUG)
+
+pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
 
 def main():
     # Path to the configuration file
-    config_path = 'config/training/model_v15_config.yml'
+    config_file = 'src/config.yml'
 
-    # Initialize the Trainer with the configuration
-    trainer = Trainer(config_path=config_path)
+    finder = AiZynthFinder(configfile=config_file)
+    finder.expansion_policy.select("seq2seq_policy")
+    finder.target_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
 
-    config = trainer.load_config(config_path)
-    model_save_path = config['training']['model_save_path']
-    model_save_dir = config['training']['model_save_dir']
+    # Prepare the search tree
+    finder.prepare_tree()
 
-    Seq2SeqModelUtils.convert_saved_model_to_hdf5(
-        model_save_path,
-        os.path.join(model_save_dir, 'hdf5')
-    )
+    # Run the tree search
+    finder.tree_search()
 
-    test = 'test'
+    # Build the synthesis routes
+    finder.build_routes()
+
+    # Extract statistics if needed
+    stats = finder.extract_statistics()
+
+    # Print the number of routes found
+    print(f"Number of routes found: {len(finder.routes)}")
 
 if __name__ == '__main__':
     main()
