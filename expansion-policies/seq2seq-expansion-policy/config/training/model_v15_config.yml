@@ -1,40 +1,109 @@
 # Seq2Seq Model Architecture
+# - Reduce hyperparameters back down to reduce computational overhead for further iteration:
+#	- Reduce units, attention dimension, decoder embedding dimension to 256, and encoder embedding dimension to 128.
+#	- Reduce epochs to 5.
+# - Update config file to specify number of encoder and decoder layers for greater model architecture flexibility.
+# - Implement BLEU score, training log perplexity, validation log perplexity and testing log perplexity:
+#     - Perplexity:
+#       - Perplexity is a common metric used in natural langauge processing (NPL) to evaluate how well a probabilistic
+#         model predicts a sample. In the context of seq2seq models, perplexity measures the model's ability to predict
+#         the next word (or token) in a sequence given the preceding words (or tokens).
+#       - A lower perplexity indicates  that the model is better at predicting the sample. It means the model assigns
+#         higher probabilities to the actual sequence of words, reflecting better performance.
+#       - A higher perplexity suggests  that the model is less certain about its predictions, assigning lower
+#         probabilities to the correct words. This indicates poorer performance.
+#       - For a uniform probability distribution over a vocabulary of size V, the perplexity would be equal to V.
+#         Thus, any model achieving a perplexity significantly lower than the vocabulary size is considered to be
+#         learning meaningful patterns.
 #
+#     - BLEU Score:
+#       - Accuracy, loss and perplexity are token-level metrics. Accuracy measures the percentage of individual tokens
+#         the model predicts correctly, while loss (and consequently perplexity) reflects how well the model predicts
+#         the next token in the sequence.
+#       - BLEU score on the other hand is a sequence-level metric. It  evaluates the overlap between the entire
+#         predicted sequence and the reference sequence, focusing on n-gram matches (bigrams, trigrams, etc.).
+#       - As a result, a model can have high token-level accuracy, but sill produce sequences that a structurally
+#         incorrect or nonsensical, leading to a low BLEU score
 #
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
+#   - Train Loss (Smoothed): 0.365
+#   - Train Accuracy (Smoothed): 0.618
+#   - Train Perplexity (Smoothed): 1.453
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
+#   - Validation Loss (Smoothed): 0.289
+#   - Validation Accuracy (Smoothed): 0.636
+#   - Validation Perplexity (Smoothed): 1.339
+#   - Validation BLEU Score (Smoothed): 0.0196
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
+#   - Test Loss (Smoothed): 0.230
+#   - Test Accuracy (Smoothed): 0.651
+#   - Test Perplexity (Smoothed): 1.259
+#   - Test BLEU Score (Smoothed): 0.021
+#
+#     - Previous model to be used for comparison is V11, as this had the same number of epochs and hyperparameters.
+#     - Slight reduction in performance for train, validation and test accuracy and loss.
+#     - No model architectural changes have been made that should affect acuracy or loss.
+#     - BLEU score is very low (~2%).
+#
 #
 # Training Performance Evaluation
-# 1. Training vs Validation Accuracy:
-#     - Train Accuracy:
-#     - Validation Accuracy:
-#     - Difference:
+# 1. Training vs Validation Accuracy, Loss, Perplexity and BLEU Score:
+#     - Train Accuracy: 0.618
+#     - Validation Accuracy: 0.636
+#     - Difference: +0.018 (+2.91%)
 #
+#       - An increase of +2.91% from training to validation indicates that the model generalizes well to unseen data
+#         without overfitting.
 #
-# 2. Training vs Validation Loss:
-#     - Train Loss:
-#     - Validation Loss:
-#     - Difference:
+#     - Train Loss: 0.365
+#     - Validation Loss: 0.289
+#     - Difference: -0.076 (-20.82%)
 #
-# 3. Validation vs Testing Accuracy and Loss:
-#   - Validation Accuracy: 0.682
-#   - Testing Accuracy: 0.682
-#   - Difference: 0.00 (0.00%)
+#       - A decrease of -20.64% for loss from training to validation is a significant improvement, suggesting the model
+#         is effectively learning
 #
-#   - Validation Loss:
-#   - Testing Loss:
-#   - Difference:
+#     - Train Perplexity: 1.453
+#     - Validation Perplexity: 1.339
+#     - Difference: -0.114 (-7.85%)
 #
-
+#       - A decrease of -7.85% in validation perplexity compared to training perplexity indicates improved confidence
+#         and better predictive performance on validation data.
+#
+# 2. Validation vs Testing Accuracy, Loss, Perplexity and BLEU Score:
+#   - Validation Accuracy: 0.636
+#   - Testing Accuracy: 0.651
+#   - Difference: +0.015 (+2.36%)
+#
+#     - An increase of +2.36% from validation to testing accuracy demonstrates consistent performance, suggesting that
+#       the model maintains its generalization capabilities on unseen data.
+#
+#   - Validation Loss: 0.289
+#   - Testing Loss: 0.230
+#   - Difference: -0.059 (-20.42%)
+#
+#     - A substantial decrease of -20.48% from validation to testing loss indicates that the model not only maintains
+#       but also slightly improves its performance on unseen data
+#
+#   - Validation Perplexity: 1.339
+#   - Testing Perplexity: 1.259
+#   - Difference: -0.080 (-5.98%)
+#
+#     - A decrease of -5.98% in testing perplexity compared to validation perplexity further confirms the model's strong
+#       performance and confidence in its predictions on unseen data.
+#
+#   - Validation BLEU Score: 0.0196
+#   - Testing BLEU Score: 0.021
+#   - Difference: 0.0014 (+7.14%)
+#
+#     - Despite there being an improvement of +7.14% from validation to testing BLEU score, absolute BLEU score is
+#       very low (~2%).
+#     - This could be because 5 epochs is not sufficient for the model to learn complex sequence patterns for SMILES
+#       translations, or could be due to data diversity, tokenization, non-ideal hyperparameters etc.
+#     - BLEU score could also be improved by applying a smoothing function such as
+#       `corpus_bleu.SmoothingFunction().method1`.
+#
 # Data Configuration and Hyperparameters
 data:
   products_file: 'data/preprocessed/liu-et-al/products_smiles'
@@ -71,7 +140,7 @@ training:
   test_metrics_dir: 'data/training/liu-et-al/model-v15/evaluate'
   log_dir: 'logs/liu-et-al/model-v15'
   checkpoint_dir: 'data/training/liu-et-al/model-v15/checkpoints'
-  num_samples: 100 # Number of samples to use for debugging model
+  num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
 env:

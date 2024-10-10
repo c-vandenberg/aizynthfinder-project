@@ -2,8 +2,7 @@ from typing import Iterable, Optional, Tuple, Any
 
 import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
-from tensorflow.keras import Model
-from nltk.translate.bleu_score import corpus_bleu
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 class BLEUScoreCallback(Callback):
     """
@@ -79,8 +78,10 @@ class BLEUScoreCallback(Callback):
                 references.append([ref_tokens])
                 hypotheses.append(hyp_tokens)
 
-        # Compute BLEU score
-        bleu_score = corpus_bleu(references, hypotheses)
+        # Apply smoothing function and compute BLEU score
+        smoothing_function = SmoothingFunction().method1
+        bleu_score = corpus_bleu(references, hypotheses, smoothing_function=smoothing_function)
+
         print(f'\nEpoch {epoch +1}: Validation BLEU score: {bleu_score:.4f}')
         if self.log_dir:
             with self.file_writer.as_default():
