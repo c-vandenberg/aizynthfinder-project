@@ -348,19 +348,26 @@ class Trainer:
 
     def save_model(self) -> None:
         """
-        Saves the trained model in TensorFlow SavedModel format.
+        Saves the trained model in TensorFlow SavedModel format and Onnx format.
 
         Returns
         -------
         None
         """
-        Seq2SeqModelUtils.inspect_model_layers(self.model)
+        Seq2SeqModelUtils.inspect_model_layers(model=self.model)
         training_conf: Dict[str, Any] = self.config.get('training', {})
-        model_save_path: str = training_conf.get('model_save_path', './saved_model')
-        os.makedirs(model_save_path, exist_ok=True)
+        model_save_dir: str = training_conf.get('model_save_dir', './model')
+        model_save_path: str = training_conf.get('model_save_path', './model/saved_model')
 
-        self.model.export(model_save_path)
-        print(f"Model saved to {model_save_path}")
+        Seq2SeqModelUtils.save_saved_model_format(
+            model_save_path=model_save_path,
+            model=self.model
+        )
+
+        Seq2SeqModelUtils.convert_saved_model_to_onnx_cli(
+            saved_model_path=model_save_path,
+            onnx_output_dir=os.path.join(model_save_dir, 'onnx')
+        )
 
     def run(self):
         """
