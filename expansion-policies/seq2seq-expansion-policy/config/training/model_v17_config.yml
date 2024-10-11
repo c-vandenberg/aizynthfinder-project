@@ -1,8 +1,11 @@
 # Seq2Seq Model Architecture
-# - Applying `corpus_bleu.SmoothingFunction().method1` smoothing function to BLEU score calculation
+# - Apply `corpus_bleu.SmoothingFunction().method1` smoothing function to BLEU score calculation
+# - Beam search is computationally expensive. Therefore, run `predicy_sequence()` method during validation to reduce
+#   computational overhead during training and only use beam search during testing at end of training.
+# - Run full model training run with Liu et al. hyperparameters and monitor unthrottled test performance metrics.
 #
 # Training run metrics:
-#   - Epochs: 5
+#   - Epochs: 50
 #
 #   - Train Loss (Smoothed):
 #   - Train Accuracy (Smoothed):
@@ -86,14 +89,10 @@ model:
 training:
   epochs: 5
   patience: 5
-  model_save_path: 'data/training/liu-et-al/model-v17
-  /model'
-  test_metrics_dir: 'data/training/liu-et-al/model-v17
-  /evaluate'
-  log_dir: 'logs/liu-et-al/model-v17
-  '
-  checkpoint_dir: 'data/training/liu-et-al/model-v17
-  /checkpoints'
+  model_save_path: 'data/training/liu-et-al/model-v17/model'
+  test_metrics_dir: 'data/training/liu-et-al/model-v17/evaluate'
+  log_dir: 'logs/liu-et-al/model-v17'
+  checkpoint_dir: 'data/training/liu-et-al/model-v17/checkpoints'
   num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration

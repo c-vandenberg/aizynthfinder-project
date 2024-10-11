@@ -67,29 +67,25 @@ class BLEUScoreCallback(Callback):
         references = []
         hypotheses = []
         for (encoder_input, decoder_input), target_output in self.validation_data:
-            predicted_sequences = self.model.predict_sequence_beam_search(
-                encoder_input, beam_width=self.beam_width
-            )
+            # Generate sequences
+            predicted_sequences = self.model.predict_sequence(encoder_input, max_length=self.max_length)
 
-            # Ensure predicted_sequences is a list of lists
-            if isinstance(predicted_sequences, list):
-                predicted_sequences = np.array(predicted_sequences)
-            else:
-                predicted_sequences = predicted_sequences.numpy()
-
-            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences)
+            # Convert sequences to text
+            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences.numpy())
             target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
 
+            # Prepare for BLEU computation
             for ref, hyp in zip(target_texts, predicted_texts):
                 ref_tokens = ref.split()
                 hyp_tokens = hyp.split()
                 references.append([ref_tokens])
                 hypotheses.append(hyp_tokens)
 
-        # Compute BLEU score
-        bleu_score = corpus_bleu(references, hypotheses)
+        # Apply smoothing function and compute BLEU score
+        smoothing_function = SmoothingFunction().method1
+        bleu_score = corpus_bleu(references, hypotheses, smoothing_function=smoothing_function)
 
-        print(f'\nEpoch {epoch +1}: Validation BLEU score: {bleu_score:.4f}')
+        print(f'\nEpoch {epoch + 1}: Validation BLEU score: {bleu_score:.4f}')
         if self.log_dir:
             with self.file_writer.as_default():
                 tf.summary.scalar('bleu_score', bleu_score, step=epoch)
