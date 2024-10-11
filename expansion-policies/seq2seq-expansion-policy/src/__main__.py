@@ -1,9 +1,11 @@
+import pydevd_pycharm
+
 from trainers.trainer import Trainer
 
 
 def main():
     # Path to the configuration file
-    config_path = 'config/training/model_v17_config.yml'
+    config_path = 'config/training/model_v18_config.yml'
 
     # Initialize the Trainer with the configuration
     trainer = Trainer(config_path=config_path)
@@ -11,5 +13,5 @@ def main():
     # Run the training pipeline
     trainer.run()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

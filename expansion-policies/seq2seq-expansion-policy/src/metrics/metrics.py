@@ -45,8 +45,14 @@ class Perplexity(Mean):
         sample_weight : tf.Tensor, optional
             Weights for the samples, by default None.
         """
-        loss = self.loss_function(y_true, y_pred)
-        super().update_state(loss)
+        # Compute the loss per sample and per timestep
+        loss = self.loss_function(y_true, y_pred)  # Shape: (batch_size, sequence_length)
+
+        # Reduce the loss to a scalar value
+        loss = tf.reduce_mean(loss)  # Scalar mean loss over batch and sequence
+
+        # Update the state using the base class method
+        super().update_state(loss, sample_weight=sample_weight)
 
     def result(self) -> tf.Tensor:
         """
@@ -60,3 +66,15 @@ class Perplexity(Mean):
         """
         mean_loss = super().result()
         return tf.exp(mean_loss)
+
+    def get_config(self):
+        config = super(Perplexity, self).get_config()
+        config.update({
+            'loss_function': tf.keras.losses.serialize(self.loss_function),
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        loss_function = tf.keras.losses.deserialize(config.pop('loss_function'))
+        return cls(loss_function=loss_function, **config)
