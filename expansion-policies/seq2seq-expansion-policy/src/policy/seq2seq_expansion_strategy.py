@@ -5,6 +5,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, LSTM, Dense, Embedding, Dropout, Attention
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import tokenizer_from_json
 from sklearn.model_selection import train_test_split
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -18,7 +19,16 @@ from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.chem.reaction import RetroReaction
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import Any, Dict, List, Optional, Sequence, StrDict, Tuple
+
 from data.utils.tokenization import SmilesTokenizer
+from models.seq2seq import RetrosynthesisSeq2SeqModel
+from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
+from decoders.lstm_decoders import StackedLSTMDecoder
+from attention.attention import BahdanauAttention
+from losses.losses import MaskedSparseCategoricalCrossentropy
+from metrics.metrics import Perplexity
+from callbacks.checkpoints import BestValLossCallback
+from callbacks.bleu_score import BLEUScoreCallback
 
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
@@ -33,15 +43,40 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
     def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
         super().__init__(key, config, **kwargs)
 
-        model = kwargs["model"]
-        self.use_remote_models: bool = bool(kwargs.get("use_remote_models", False))
-        self._logger.info(
-            f"Loading Seq2Seq expansion policy model from {model} to {self.key}"
-        )
-
-        # Load your Seq2Seq model
-        self.model = load_model(model, self.key, self.use_remote_models)
+        model_path = kwargs["model"]
+        tokenizer_path = kwargs["tokenizer"]
+        self.max_encoder_seq_length = int(kwargs.get("max_encoder_seq_length", 140))
+        self.max_decoder_seq_length = int(kwargs.get("max_decoder_seq_length", 140))
+        self.beam_width = int(kwargs.get("beam_width", 5))
+        self.use_remote_models: bool = bool(kwargs.get("use_remote_models", True))
+        self.model = self.load_model(model_path)
+        self.tokenizer = self.load_tokenizer(tokenizer_path)
         self.smiles_tokenizer = SmilesTokenizer()
+
+        self._logger.info(f"Loaded Seq2Seq model and tokenizers for expansion policy {self.key}")
+
+    def load_model(self, model_path: str):
+        self._logger.info(f"Loading Seq2Seq model from {model_path}")
+
+        custom_objects = {
+            'RetrosynthesisSeq2SeqModel': RetrosynthesisSeq2SeqModel,
+            'StackedBidirectionalLSTMEncoder': StackedBidirectionalLSTMEncoder,
+            'StackedLSTMDecoder': StackedLSTMDecoder,
+            'BahdanauAttention': BahdanauAttention,
+            'MaskedSparseCategoricalCrossentropy': MaskedSparseCategoricalCrossentropy,
+            'Perplexity': Perplexity,
+            'BestValLossCallback': BestValLossCallback,
+            'BLEUScoreCallback': BLEUScoreCallback
+        }
+        model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+        return model
+
+    def load_tokenizer(self, tokenizer_path: str):
+        self._logger.info(f"Loading tokenizer from {tokenizer_path}")
+        with open(tokenizer_path, 'r') as f:
+            tokenizer_json = f.read()
+        tokenizer = tokenizer_from_json(tokenizer_json)
+        return tokenizer
 
     def get_actions(
             self,
@@ -59,29 +94,62 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         possible_actions = []
         priors = []
 
-        for mol in molecules:
-            smiles_representation = mol.smiles
-            tokenized_smiles = self.smiles_tokenizer.tokenize(smiles_representation)
+        smiles_list = [mol.smiles for mol in molecules]
+        predicted_precursors_list, probabilities_list = self.predict_precursors(smiles_list)
 
-            self._logger.debug(f"Generating retrosynthesis for molecules: {smiles_representation}")
-
-            # Use the Seq2Seq model to predict the reactants
-            predicted_reactants, predicted_probabilities = self.model.predict(tokenized_smiles)
-
-            for reactants, prob in zip(predicted_reactants, predicted_probabilities):
-                reactants_str = ".".join(reactants)
-                metadata = {
-                    "policy_probability": float(prob),
-                    "policy_name": self.key,
-                    "reactants": reactants_str,
-                }
-                possible_actions.append(
-                    SmilesBasedRetroReaction(
+        for mol, predicted_precursors, probs in zip(molecules, predicted_precursors_list, probabilities_list):
+            for precursor_smiles, prob in zip(predicted_precursors, probs):
+                # Validate the predicted SMILES
+                if self.is_valid_smiles(precursor_smiles):
+                    metadata = {
+                        "policy_probability": float(prob),
+                        "policy_name": self.key,
+                    }
+                    new_action = SmilesBasedRetroReaction(
                         mol,
                         metadata=metadata,
-                        reactants_str=reactants_str,
+                        reactants_str=precursor_smiles,
                     )
-                )
-                priors.append(prob)
+                    possible_actions.append(new_action)
+                    priors.append(prob)
+                else:
+                    self._logger.warning(f"Invalid SMILES generated: {precursor_smiles}")
 
         return possible_actions, priors
+
+    def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
+        # Tokenize the input SMILES strings
+        encoder_input_seqs = self.tokenizer.texts_to_sequences(smiles_list)
+        encoder_input_seqs = tf.keras.preprocessing.sequence.pad_sequences(
+            encoder_input_seqs, maxlen=self.max_encoder_seq_length, padding='post'
+        )
+
+        # Use beam search to get multiple predictions per molecule
+        predicted_seqs_list = self.model.predict_sequence_beam_search(
+            encoder_input_seqs,
+            beam_width=self.beam_width,
+            max_length=self.max_decoder_seq_length
+        )
+
+        all_predicted_smiles = []
+        all_probabilities = []
+
+        for predicted_seqs in predicted_seqs_list:
+            # Convert token sequences to SMILES strings
+            predicted_smiles = self.tokenizer.sequences_to_texts([predicted_seqs])
+            # For beam search, you can assign probabilities based on beam scores if available
+            # Here, we assign equal probabilities for simplicity
+            num_predictions = len(predicted_smiles)
+            probabilities = [1.0 / num_predictions] * num_predictions
+            all_predicted_smiles.append(predicted_smiles)
+            all_probabilities.append(probabilities)
+
+        return all_predicted_smiles, all_probabilities
+
+    @staticmethod
+    def is_valid_smiles(smiles: str) -> bool:
+        mol = Chem.MolFromSmiles(smiles)
+        return mol is not None
+
+    def reset_cache(self) -> None:
+        pass  # Implement caching if necessary
