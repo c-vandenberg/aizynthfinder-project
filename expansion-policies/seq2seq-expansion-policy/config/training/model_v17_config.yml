@@ -2,8 +2,8 @@
 # - Apply `corpus_bleu.SmoothingFunction().method1` smoothing function to BLEU score calculation
 # - Beam search is computationally expensive. Therefore, run `predict_sequence()` method during validation to reduce
 #   computational overhead during training and only use beam search during testing at end of training.
-# - Run full model training run with Liu et al. hyperparameters and monitor unthrottled test performance metrics with
-#   50 epochs to see if BLEU score improves over more epochs.
+# - Run full model training run with restricted Liu et al. hyperparameters (halved embedding dim and units) over
+#   50 epochs to see if BLEU score improves with increased epochs.
 #
 # Training run metrics:
 #   - Epochs: 50

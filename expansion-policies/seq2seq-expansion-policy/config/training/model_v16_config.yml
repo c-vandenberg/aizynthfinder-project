@@ -16,10 +16,14 @@
 #   - Validation Perplexity (Smoothed):
 #   - Validation BLEU Score (Smoothed):
 #
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
-#   - Test Perplexity (Smoothed):
+#   - Test Loss (Smoothed): 0.230
+#   - Test Accuracy (Smoothed): 0.651
+#   - Test Perplexity (Smoothed): 1.26
 #   - Test BLEU Score (Smoothed):
+Test Loss: 0.23035643994808197
+Test Accuracy: 0.651444673538208
+Test Perplexity: 1.2592099905014038
+Test BLEU Score: 0.018210865776251
 #
 # Training Performance Evaluation
 # 1. Training vs Validation Accuracy, Loss, Perplexity and BLEU Score:

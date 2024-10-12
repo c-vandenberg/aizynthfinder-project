@@ -15,10 +15,10 @@
 # validation metrics were observed):
 #   - Epochs: 10
 #
-#   - Train Loss (Smoothed): 0.047
+#   - Train Loss (Smoothed): 0.0472
 #   - Train Accuracy (Smoothed): 0.341
 #
-#   - Validation Loss (Smoothed): 0.047
+#   - Validation Loss (Smoothed): 0.0467
 #   - Validation Accuracy (Smoothed): 0.342
 #
 #   - Test Loss (Smoothed): N/A

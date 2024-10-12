@@ -6,7 +6,7 @@
 # Training run metrics:
 #   - Epochs: 50 (28 run as EarlyStopping callback triggered)
 #
-#   - Train Loss (Smoothed): 0.043
+#   - Train Loss (Smoothed): 0.0431
 #   - Train Accuracy (Smoothed): 0.692
 #
 #   - Validation Loss (Smoothed): 0.101
@@ -25,11 +25,11 @@
 #   samples is consistent across both datasets. This indicates good generalization, with no significant overfitting.
 #
 # 2. Training vs Validation Loss:
-#     - Train Loss: 0.043
+#     - Train Loss: 0.0431
 #     - Validation Loss: 0.101
-#     - Difference: +0.058 (+134.88%)
+#     - Difference: +0.0579 (+134%)
 #
-#   A larger gap of 134.88% between training and validation loss is less ideal, but doesn't necessarily indicate
+#   A larger gap of ~134% between training and validation loss is less ideal, but doesn't necessarily indicate
 #   overfitting as accuracy metrics are tightly aligned. Further investigation is needed to ascertain the reason for
 #   this loss discrepancy.
 #   The discrepancy between training and validation loss is smaller than model V13, indicating that the current

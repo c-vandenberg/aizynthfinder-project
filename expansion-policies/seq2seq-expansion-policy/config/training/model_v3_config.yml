@@ -7,10 +7,12 @@
 #       dependencies are more at the end of the input sequence. This was originally introduced in neural machine
 #       translations and has shown benefits in sequence-to-sequence tasks.
 #   * Switching to Character-Wise Encoding:
-#       - Analysis of paper by LIu et al shows that they use character-wise encoding of SMILES strings, meaning that
+#       - Analysis of paper by Liu et al shows that they use character-wise encoding of SMILES strings, meaning that
 #         each character in the SMILES notation is treated as a separate token.
 #       - Character-wise encoding captures the fine-grain structure of SMILES strings, allowing the model to learn
 #         detailed patterns and potentially reduce vocabulary size.
+#
+# - Although loss has increased, accuracy has improved significantly.
 #
 # Training run metrics:
 #   - Epochs: 10

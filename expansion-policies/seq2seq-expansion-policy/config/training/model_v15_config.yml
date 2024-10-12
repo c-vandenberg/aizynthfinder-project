@@ -30,17 +30,17 @@
 #
 #   - Train Loss (Smoothed): 0.365
 #   - Train Accuracy (Smoothed): 0.618
-#   - Train Perplexity (Smoothed): 1.453
+#   - Train Perplexity (Smoothed): 1.45
 #
 #   - Validation Loss (Smoothed): 0.289
 #   - Validation Accuracy (Smoothed): 0.636
-#   - Validation Perplexity (Smoothed): 1.339
+#   - Validation Perplexity (Smoothed): 1.34
 #   - Validation BLEU Score (Smoothed): 0.0196
 #
 #   - Test Loss (Smoothed): 0.230
 #   - Test Accuracy (Smoothed): 0.651
-#   - Test Perplexity (Smoothed): 1.259
-#   - Test BLEU Score (Smoothed): 0.021
+#   - Test Perplexity (Smoothed): 1.26
+#   - Test BLEU Score (Smoothed): 0.0210
 #
 #     - Previous model to be used for comparison is V11, as this had the same number of epochs and hyperparameters.
 #     - Slight reduction in performance for train, validation and test accuracy and loss.
@@ -64,11 +64,11 @@
 #       - A decrease of -20.64% for loss from training to validation is a significant improvement, suggesting the model
 #         is effectively learning
 #
-#     - Train Perplexity: 1.453
-#     - Validation Perplexity: 1.339
-#     - Difference: -0.114 (-7.85%)
+#     - Train Perplexity: 1.45
+#     - Validation Perplexity: 1.34
+#     - Difference: -0.110 (-7.75%)
 #
-#       - A decrease of -7.85% in validation perplexity compared to training perplexity indicates improved confidence
+#       - A decrease of -7.75% in validation perplexity compared to training perplexity indicates improved confidence
 #         and better predictive performance on validation data.
 #
 # 2. Validation vs Testing Accuracy, Loss, Perplexity and BLEU Score:
@@ -86,16 +86,16 @@
 #     - A substantial decrease of -20.48% from validation to testing loss indicates that the model not only maintains
 #       but also slightly improves its performance on unseen data
 #
-#   - Validation Perplexity: 1.339
-#   - Testing Perplexity: 1.259
-#   - Difference: -0.080 (-5.98%)
+#   - Validation Perplexity: 1.34
+#   - Testing Perplexity: 1.26
+#   - Difference: -0.0800 (-5.97%)
 #
-#     - A decrease of -5.98% in testing perplexity compared to validation perplexity further confirms the model's strong
+#     - A decrease of -5.97% in testing perplexity compared to validation perplexity further confirms the model's strong
 #       performance and confidence in its predictions on unseen data.
 #
 #   - Validation BLEU Score: 0.0196
-#   - Testing BLEU Score: 0.021
-#   - Difference: 0.0014 (+7.14%)
+#   - Testing BLEU Score: 0.0210
+#   - Difference: 0.00140 (+7.14%)
 #
 #     - Despite there being an improvement of +7.14% from validation to testing BLEU score, absolute BLEU score is
 #       very low (~2%).
