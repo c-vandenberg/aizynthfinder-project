@@ -93,7 +93,7 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
   
 ## 2.3 Feedforward Neural Networks (FNNs)
 
-**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any)), and to the output nodes. There are **no cycles or loops** in the network.
+**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any), and to the output nodes. There are **no cycles or loops** in the network.
 
 The first type of neural network developed was called **single-layer perceptrons**. These consisted of only an **input layer** and an **output layer** and could only recognise/predict **linear patterns** between the input and output data, as there were no hidden layers (and so no associated activation functions) to **introduce non-linearity**.
 
@@ -124,6 +124,50 @@ This is an **iterative process** where the training dataset is **passed through 
 
 ## 2.4 Recurrent Neural Networks (RNNs)
 
+**Recurrent Neural Networks (RNNs)** are a special type of artificial neural network adapted to work for **time series data** (i.e. **data that involves sequences**). The general format of this sequential data is $$x(t) = x(1), . . . , x(\tau)$$, with a **time step index $$t$$** ranging from **$$1 to \tau$$**.
+
+RNNs are trained to process and convert **sequential data input into a specific sequential data output**.
+   * Sequential data is data such as **words, sentences or time-series data** where **sequential components interrelate based on complex semantic and syntax rules**.
+
+**Natural Language Processing (NLP)** is an example of a problem that involves sequential inputs. In an NLP problem, if you want to **predict the next word in a sentence**, it is important to **know the words before it**.
+
+RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **'memory'** which **captures information about what has been calculated so far**.
+
+### 2.4.1 Recurrent Neural Network Architecture
+
+**Computational graphs** are a way to **formalise the structure and set of given computations**, such as those involved in **mapping inputs and parameters** to **outputs and loss**. **<sup>7</sup** 
+
+The **nodes** in the graph represent **variables** which can be a **scalar, vector, matrix, tensor etc**. The **edges** in the graph correspond to **operations** that **transform one variable to another**.
+
+For **recursive or recurrent computation**, such as those in an RNN, the computational graph can be **unfolded** into another computational graph that has a **repetitive structrue**, typically corresponding to a **chain of events**. 
+
+The architectural notation of a basic RNN with **no output** is shown in **Fig 4** has a **feedback loop** (**Fig 4**)
+
+<br>
+  <div align="center">
+    <img src="", alt="basic-rnn-architecture-notation-no-ouput"/>
+    <p>
+      <b>Fig 4</b> . <b><sup>7</sup></b>
+    </p>
+  </div>
+<br>
+
+The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **black square** represents the **delay of a single time step**.
+
+The **right side** of **Fig 4** shows the same RNN but as a **unfolded computational graph**, where **each input ($$x$$) and state ($$h$$) node** is now **associated with one particular time instance**. This unfolding simply means that we **represent the network as its complete sequence**.
+   * For example, if the sequence being processed is a **sentence of 3 words**, the network would be **unfolded into a 3 time step neural network**, with **one time step for each word**.
+
+<br>
+  <div align="center">
+    <img src="", alt="basic-rnn-architecture-notation-full"/>
+    <p>
+      <b>Fig 5</b> . <b><sup>7</sup></b>
+    </p>
+  </div>
+<br>
+
+Expanding this 
+
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Fortunato, M.E. et al. (2020) ‘Data augmentation and pretraining for template-based retrosynthetic prediction in computer-aided synthesis planning’, Journal of Chemical Information and Modeling, 60(7), pp. 3398–3407. <br><br>
@@ -131,3 +175,4 @@ This is an **iterative process** where the training dataset is **passed through 
 **[4]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) 'A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning.' <br><br>
 **[5]** Chen, J. (no date) What is a neural network?, Investopedia. Available at: https://www.investopedia.com/terms/n/neuralnetwork.asp (Accessed: 30 September 2024). <br><br>
 **[6]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024). <br><br>
+**[7]**
