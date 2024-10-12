@@ -193,10 +193,10 @@ As with FNNs, RNNs are trained by **processing input data and refining their per
 The **nodes/neurons** have **weights** which give the **strength and direction** of the **connection between neurons in adjacent layers** when predicting the output. During training **these weights are adjusted to improve prediction accuracy**.
 
 However, how the weights are adjusted **differs in RNNs compated to FNNs**. In FNNs, the weights are adjusted through **backpropagation**. In RNNs, the weights are adjusted through **backpropagation through time (BPTT)**.
-
-With **standard backpropagation**, the **gradients of the loss function are propagated backwards only in the depth dimension (i.e. between layers)**.
-
-In RNNs however, backpropagation is extended to **handle the temporal (sequential/time step) nature of the data** and so the gradients flow **both through the depth dimension (i.e. between layers)** and **through the temporal dimension (i.e. between time steps**).
+   * FNNs use **standard backpropagation**, where the **gradients of the loss function are propagated backwards only in the depth dimension (i.e. between layers)**.
+   * In RNNs however, backpropagation is extended to **handle the temporal (sequential/time step) nature of the data** and so the gradients flow **both through the depth dimension (i.e. between layers)** and **through the temporal dimension (i.e. between time steps**).
+   * In BPTT, the **loss gradients are summed/accumulated at each time step in all layers** because the **hidden states and weight parameter are shared/passed between each time step and each layer of the network**.
+   * With FNNs, because they **don't share parameters across each layer**, they **do not need to sum/accumulate the loss gradients** and so **standard backpropagation** can be used.
 
 BPTT is essential for **learning temporal dependencies and patterns** in sequential data, allowing the network to **adjust its weights** based on **how past inputs influence future outputs**.
 
@@ -212,6 +212,8 @@ BPTT is essential for **learning temporal dependencies and patterns** in sequent
    3. Simultaneously, the **gradients flow backward through the RNN layers** if the RNN has **multiple stacked layers**.
 7. **Update weights and biases**: Following gradient computation, the **weights and biases are updated** based on the **accumulated gradients from all time steps**. The weights and biases are adjusted using **optimisation methods** such as **SGD** or **Adam** to **minimise the loss function**.
 8. **Repeat Steps 3-7**: This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached**.
+
+### 2.4.3 Types of RNNs
 
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
