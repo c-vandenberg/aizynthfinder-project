@@ -181,7 +181,7 @@ At a high-level, the **attention mechanism's role within the decoder** is as fol
      4. **Generate the Output Token**:
         * The decoder then uses the context vector $$c_t$$, along with its **previous hidden state** and the **previous output token**, to generate the current output token:
           
-          $$h_t^{dec} = \text{LSTM}(y_{t-1},h_{t-1}^{dec},c_t$$
+          $$h_t^{dec} = \text{LSTM}(y_{t-1},h_{t-1}^{dec},c_t)$$
 
           $$\hat{y}_t = \text{Softmax}(Wh_t^{dec} + Vc_t)$$
        
