@@ -108,7 +108,7 @@ The training of MLP FNNs involves two main phases:
    3. This process continues **until the output layer is reached**, and a **prediction is made**.
 2. **Backpropagation Phase**:
    1. **Loss Calculation**: Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated using a **loss function**.
-   2. **Backwards Pass**: The **gradients of the loss with respect with weight** is then calculated by **applying the chain rule** and is **propagated back through the network**.
+   2. **Backwards Pass**: The **gradients of the loss with respect with weight** is then calculated by **applying the chain rule** and is **propagated back through the layers of the network**.
    3. **Weights Update**: Using these computed gradients, the **weights are adjusted to minimize the error**, typically using a **gradient descent optimization algorithm** such as **Stochastic Gradient Descent (SGD)** or **Adam**
 
 This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached** (**Fig 3**).
@@ -172,7 +172,7 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 5
   <div align="center">
     <img src="https://github.com/user-attachments/assets/95107859-6976-4957-b0f9-1c9f205053b1", alt="basic-rnn-architecture-notation-loss"/>
     <p>
-      <b>Fig 6</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an **input sequence of $$x$$ values** to a correspondiong **output sequence of $$o$$ values** <b><sup>8</sup></b>
+      <b>Fig 6</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an <b>input sequence of $$x$$ values</b> to a correspondiong <b>output sequence of $$o$$ values</b> <b><sup>8</sup></b>
     </p>
   </div>
 <br>
@@ -194,9 +194,24 @@ The **nodes/neurons** have **weights** which give the **strength and direction**
 
 However, how the weights are adjusted **differs in RNNs compated to FNNs**. In FNNs, the weights are adjusted through **backpropagation**. In RNNs, the weights are adjusted through **backpropagation through time (BPTT)**.
 
-While **standard backpropagation**, in RNNs, backpropagation is extended to **handle the temporal (sequential/time step) nature of the data**
+With **standard backpropagation**, the **gradients of the loss function are propagated backwards only in the depth dimension (i.e. between layers)**.
+
+In RNNs however, backpropagation is extended to **handle the temporal (sequential/time step) nature of the data** and so the gradients flow **both through the depth dimension (i.e. between layers)** and **through the temporal dimension (i.e. between time steps**).
+
+BPTT is essential for **learning temporal dependencies and patterns** in sequential data, allowing the network to **adjust its weights** based on **how past inputs influence future outputs**.
 
 ### 2.4.2 Recurrent Neural Network Training
+
+1. **Initialization**: Initialize the parameters of the RNN; initialize **weight matrices $$U$$, $$V$$ and $$W$$** using **random distribution** and initalize **bias vectors $$b$$ and $$c$$ as zero**.
+2. **Unfolding the RNN**: The RNN is **expanded across all time steps in the input sequence**. This is known as **unfolding** and creates a **computational graph** that **spans both layers and time** (**Fig 6**)
+3. **Forward Pass/Forward Propagation**: The input sequence data is processed sequentially, **maintaining and updating the hidden state at each time step**.
+4. **Compute Loss**: The loss is typically computed **at each time step**, by measuring the **difference between the predicted and actual outputs** at that time step.
+5. **Backpropagation Through Time (BPTT)**:
+   1. Starting from the **final time step** of the **final layer**, the **gradients of the loss** are computed with respect to **outputs, hidden states and weights** at that time step using the **chain rule**.
+   2. The **gradients are propagated backward through all time steps in that layer**, **accumulating the influence of the outputs, hidden states and weights across all time steps**.
+   3. Simultaneously, the **gradients flow backward through the RNN layers** if the RNN has **multiple stacked layers**.
+7. **Update weights and biases**: Following gradient computation, the **weights and biases are updated** based on the **accumulated gradients from all time steps**. The weights and biases are adjusted using **optimisation methods** such as **SGD** or **Adam** to **minimise the loss function**.
+8. **Repeat Steps 3-7**: This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached**.
 
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
