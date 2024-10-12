@@ -132,7 +132,7 @@ RNNs are trained to process and convert **sequential data input into a specific 
 
 **Natural Language Processing (NLP)** is an example of a problem that involves sequential inputs. In an NLP problem, if you want to **predict the next word in a sentence**, it is important to **know the words before it**.
 
-RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **"memory"** which **captures information about what has been calculated so far**.
+RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **"memory"** which **captures information about what has been calculated so far**. This is what **distinguishes it from FNNs**.
 
 ### 2.4.1 Recurrent Neural Network Architecture
 
@@ -142,7 +142,7 @@ The **nodes** in the graph represent **variables** which can be a **scalar, vect
 
 For **recursive or recurrent computation**, such as those in an RNN, the computational graph can be **unfolded** into another computational graph that has a **repetitive structrue**, typically corresponding to a **chain of events**. 
 
-The architectural notation of a basic RNN with **no output** is shown in **Fig 4** has a **feedback loop** (**Fig 4**)
+The architectural notation of a basic RNN with **no output** is shown in **Fig 4**.
 
 <br>
   <div align="center">
@@ -153,7 +153,7 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 4
   </div>
 <br>
 
-1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **black square** represents the **delay of a single time step**.
+1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **loopting arrow** represents the **feedback loop** of the RNN and the **black square** represents the **delay of a single time step**.
 2. The **right side** of **Fig 4** shows the same RNN but as a **unfolded computational graph**, where **each input ($$x$$) and state ($$h$$) node** is now **associated with one particular time instance**. This unfolding simply means that we **represent the network as its complete sequence**.
    * For example, if the sequence being processed is a **sentence of 3 words**, the network would be **unfolded into a 3 time step neural network**, with **one time step for each word**.
 
