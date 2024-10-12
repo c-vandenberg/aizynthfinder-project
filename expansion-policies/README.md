@@ -172,7 +172,7 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 5
   <div align="center">
     <img src="https://github.com/user-attachments/assets/95107859-6976-4957-b0f9-1c9f205053b1", alt="basic-rnn-architecture-notation-loss"/>
     <p>
-      <b>Fig 6</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an <b>input sequence of x values</b> to a correspondiong <b>output sequence of o values</b> <b><sup>8</sup></b>
+      <b>Fig 6</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an <b>input sequence of <i>x</i> values</b> to a corresponding <b>output sequence of <i>o</i> values</b> <b><sup>8</sup></b>
     </p>
   </div>
 <br>
