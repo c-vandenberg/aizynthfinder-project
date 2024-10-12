@@ -203,7 +203,7 @@ BPTT is essential for **learning temporal dependencies and patterns** in sequent
 ### 2.4.2 Recurrent Neural Network Training
 
 1. **Initialization**: Initialize the parameters of the RNN; initialize **weight matrices $$U$$, $$V$$ and $$W$$** using **random distribution** and initalize **bias vectors $$b$$ and $$c$$ as zero**.
-2. **Unfolding the RNN**: The RNN is **expanded across all time steps in the input sequence**. This is known as **unfolding** and creates a **computational graph** that **spans both layers and time** (**Fig 6**)
+2. **Unfolding the RNN**: The RNN is **expanded across all time steps in the input sequence**. This is known as **unfolding** and creates a **computational graph** that **spans both layers and time** (**Fig 6**).
 3. **Forward Pass/Forward Propagation**: The input sequence data is processed sequentially, **maintaining and updating the hidden state at each time step**.
 4. **Compute Loss**: The loss is typically computed **at each time step**, by measuring the **difference between the predicted and actual outputs** at that time step.
 5. **Backpropagation Through Time (BPTT)**:
