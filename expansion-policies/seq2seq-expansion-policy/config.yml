@@ -1,11 +1,12 @@
 expansion:
-  uspto:
-    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_model.onnx
-    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_templates.csv.gz
-  ringbreaker:
-    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_ringbreaker_model.onnx
-    - /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_ringbreaker_templates.csv.gz
+  seq2seq_policy:
+    type: src.policy.seq2seq_expansion_strategy.Seq2SeqExpansionStrategy
+    model: data/training/liu-et-al/model-v18/model/keras/seq2seq_model.keras
+    tokenizer: data/training/liu-et-al/model-v18/tokenizer/model_v18_tokenizer.json
+    max_encoder_seq_length: 140
+    max_decoder_seq_length: 140
+    beam_width: 5
 filter:
-  uspto: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/uspto_filter_model.onnx
+  uspto: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/public-model-data/uspto_filter_model.onnx
 stock:
-  zinc: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/seq2seq-expansion-strategy/data/public-model-data/zinc_stock.hdf5
+  zinc: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/public-model-data/zinc_stock.hdf5

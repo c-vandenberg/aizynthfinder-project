@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Union, Optional
 
 import yaml
 import numpy as np
+import pydevd_pycharm
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
@@ -90,8 +91,8 @@ class Trainer:
             products_valid_file=data_conf.get('products_valid_file', ''),
             reactants_valid_file=data_conf.get('reactants_valid_file', ''),
             num_samples=train_conf.get('num_samples'),
-            max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 150),
-            max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 150),
+            max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
+            max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
             test_size=data_conf.get('test_size', 0.3),
             random_state=data_conf.get('random_state', 42)
@@ -111,12 +112,12 @@ class Trainer:
         self.encoder_preprocessor = DataPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
             tokenizer=self.tokenizer,
-            max_seq_length=data_conf.get('max_encoder_seq_length', 150)
+            max_seq_length=data_conf.get('max_encoder_seq_length', 140)
         )
         self.decoder_preprocessor = DataPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
             tokenizer=self.tokenizer,
-            max_seq_length=data_conf.get('max_decoder_seq_length', 150)
+            max_seq_length=data_conf.get('max_decoder_seq_length', 140)
         )
 
     def save_tokenizer(self, tokenizer_path: str) -> None:
@@ -310,41 +311,14 @@ class Trainer:
 
         test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
 
-        references = []
-        hypotheses = []
-        beam_width = model_conf.get('beam_width', 5)  # Get beam_width from config or use default
-
-        for (encoder_input, decoder_input), target_output in test_dataset:
-            # Use beam search to predict sequences
-            predicted_sequences = self.model.predict_sequence_beam_search(
-                encoder_input, beam_width=beam_width
-            )
-
-            # Ensure predicted_sequences is a numpy array
-            if isinstance(predicted_sequences, list):
-                predicted_sequences = np.array(predicted_sequences)
-
-            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences)
-            target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
-
-            for ref, hyp in zip(target_texts, predicted_texts):
-                ref_tokens = ref.split()
-                hyp_tokens = hyp.split()
-                references.append([ref_tokens])
-                hypotheses.append(hyp_tokens)
-
-        bleu_score = corpus_bleu(references, hypotheses)
-
         with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
             f.write(f"Test Loss: {test_loss}\n")
             f.write(f"Test Accuracy: {test_accuracy}\n")
             f.write(f"Test Perplexity: {test_perplexity}\n")
-            f.write(f"Test BLEU Score: {bleu_score}\n")
 
         print(f"Test Loss: {test_loss}")
         print(f"Test Accuracy: {test_accuracy}")
         print(f"Test Perplexity: {test_perplexity}")
-        print(f"Test BLEU Score: {bleu_score}")
 
     def save_model(self) -> None:
         """
@@ -356,17 +330,33 @@ class Trainer:
         """
         Seq2SeqModelUtils.inspect_model_layers(model=self.model)
         training_conf: Dict[str, Any] = self.config.get('training', {})
+        data_conf: Dict[str, Any] = self.config.get('data', {})
         model_save_dir: str = training_conf.get('model_save_dir', './model')
-        model_save_path: str = training_conf.get('model_save_path', './model/saved_model')
+        keras_save_dir: str = os.path.join(model_save_dir, 'keras')
+        hdf5_save_dir: str = os.path.join(model_save_dir, 'hdf5')
+        onnx_save_dir: str = os.path.join(model_save_dir, 'onnx')
+        saved_model_save_dir: str = os.path.join(model_save_dir, 'saved_model')
 
-        Seq2SeqModelUtils.save_saved_model_format(
-            model_save_path=model_save_path,
+        Seq2SeqModelUtils.model_save_keras_format(
+            keras_save_dir=keras_save_dir,
             model=self.model
         )
 
-        Seq2SeqModelUtils.convert_saved_model_to_onnx_cli(
-            saved_model_path=model_save_path,
-            onnx_output_dir=os.path.join(model_save_dir, 'onnx')
+        Seq2SeqModelUtils.model_save_hdf5_format(
+            hdf5_save_dir=hdf5_save_dir,
+            model=self.model
+        )
+
+        Seq2SeqModelUtils.model_save_onnx_format(
+            onnx_output_dir=onnx_save_dir,
+            model=self.model,
+            max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
+            max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140)
+        )
+
+        Seq2SeqModelUtils.save_saved_model_format(
+            model_save_path=saved_model_save_dir,
+            model=self.model
         )
 
     def run(self):

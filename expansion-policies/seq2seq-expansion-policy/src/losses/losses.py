@@ -40,9 +40,10 @@ class MaskedSparseCategoricalCrossentropy(Loss):
     ) -> None:
         super(MaskedSparseCategoricalCrossentropy, self).__init__(name=name, **kwargs)
         self.padding_idx = padding_idx
+        self.reduction = tf.keras.losses.Reduction.NONE
         self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits=False,
-            reduction=tf.keras.losses.Reduction.NONE
+            reduction=self.reduction
         )
 
     def call(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
