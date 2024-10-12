@@ -147,7 +147,7 @@ This "memory" is what **distinguishes it from FNNs** and is **passed between tim
 
 ### 2.4.1 Recurrent Neural Network Architecture
 
-**Computational graphs** are a way to **formalise the structure and set of given computations**, such as those involved in **mapping inputs and parameters** to **outputs and loss**. **<sup>7</sup** 
+**Computational graphs** are a way to **formalise the structure and set of given computations**, such as those involved in **mapping inputs and parameters** to **outputs and loss**. **<sup>7</sup>** 
 
 The **nodes** in the graph represent **variables** which can be a **scalar, vector, matrix, tensor etc**. The **edges** in the graph correspond to **operations** that **transform one variable to another**.
 
