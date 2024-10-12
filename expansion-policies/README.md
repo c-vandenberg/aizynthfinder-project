@@ -187,6 +187,8 @@ Expanding this unfolded computational graph to represent the **loss calculation 
 4. **Output** - **$$o(t)$$** is the **output of the network at time step $$t$$**
 5. **Loss** - The **loss $$L(t)$$** measures **how far the output at time step $$t$$** is from the **corresponding training target $$y$$ at time step $$t$$**.
 
+### 2.4.2 Recurrent Neural Network Training
+
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Fortunato, M.E. et al. (2020) ‘Data augmentation and pretraining for template-based retrosynthetic prediction in computer-aided synthesis planning’, Journal of Chemical Information and Modeling, 60(7), pp. 3398–3407. <br><br>
