@@ -124,7 +124,8 @@ This is an **iterative process** where the training dataset is **passed through 
 
 ## 2.4 Recurrent Neural Networks (RNNs)
 
-**Recurrent Neural Networks (RNNs)** are a special type of artificial neural network adapted to work for **time series data** (i.e. **data that involves sequences**). The general format of this sequential data is $$x(t) = x(1), . . . , x(\tau)$$, with a **time step index $$t$$** ranging from **$$1 to \tau$$**.
+**Recurrent Neural Networks (RNNs)** are a special type of artificial neural network adapted to work for **time series data** (i.e. **data that involves sequences**). 
+   * The general format of this sequential data is $$x(t) = x(1), . . . , x(\tau)$$, with a **time step index $$t$$** ranging from **$$1$$** to **$$\tau$$**.
 
 RNNs are trained to process and convert **sequential data input into a specific sequential data output**.
    * Sequential data is data such as **words, sentences or time-series data** where **sequential components interrelate based on complex semantic and syntax rules**.
