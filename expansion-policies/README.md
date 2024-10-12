@@ -132,7 +132,18 @@ RNNs are trained to process and convert **sequential data input into a specific 
 
 **Natural Language Processing (NLP)** is an example of a problem that involves sequential inputs. In an NLP problem, if you want to **predict the next word in a sentence**, it is important to **know the words before it**.
 
-RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **"memory"** which **captures information about what has been calculated so far**. This is what **distinguishes it from FNNs**.
+RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **"memory"** which **captures information about what has been calculated so far**. 
+
+This "memory" is what **distinguishes it from FNNs** and is **passed between time steps in the RNN** in a **feedback loop**. This is represented by the **curly arrow** in **Fig 4**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/c1fb910c-81cc-4508-9ec4-ac51cb3cbacd", alt="recurrent-vs-feedforward-neural-networks"/>
+    <p>
+      <b>Fig 4</b> Recurrent Neural Networks (RNNs) vs Feedforward Neural Networks (FNNs). <b><sup>7</sup></b>
+    </p>
+  </div>
+<br>
 
 ### 2.4.1 Recurrent Neural Network Architecture
 
@@ -142,13 +153,13 @@ The **nodes** in the graph represent **variables** which can be a **scalar, vect
 
 For **recursive or recurrent computation**, such as those in an RNN, the computational graph can be **unfolded** into another computational graph that has a **repetitive structrue**, typically corresponding to a **chain of events**. 
 
-The architectural notation of a basic RNN with **no output** is shown in **Fig 4**.
+The architectural notation of a basic RNN with **no output** is shown in **Fig 5**.
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/442cb956-5e82-4eeb-b06d-10db49084939", alt="basic-rnn-architecture-notation-no-ouput"/>
     <p>
-      <b>Fig 4</b> Time-unfolded computational graph representation of a basic RNN with no outputs. <b><sup>7</sup></b>
+      <b>Fig 5</b> Time-unfolded computational graph representation of a basic RNN with no outputs. <b><sup>8</sup></b>
     </p>
   </div>
 <br>
@@ -161,12 +172,12 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 4
   <div align="center">
     <img src="https://github.com/user-attachments/assets/95107859-6976-4957-b0f9-1c9f205053b1", alt="basic-rnn-architecture-notation-loss"/>
     <p>
-      <b>Fig 5</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an **input sequence of $$x$$ values** to a correspondiong **output sequence of $$o$$ values** <b><sup>7</sup></b>
+      <b>Fig 6</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an **input sequence of $$x$$ values** to a correspondiong **output sequence of $$o$$ values** <b><sup>8</sup></b>
     </p>
   </div>
 <br>
 
-Expanding this unfolded computational graph to represent the **loss calculation during training of an RNN** (**Fig 5**), we have:
+Expanding this unfolded computational graph to represent the **loss calculation during training of an RNN** (**Fig 6**), we have:
 1. **Input** - **$$x(t)$$** is the **input to the network at time step $$t$$**. For example, **$$x1$$** could be a **one-hot vector** corresponding to a **word in a sentence**.
 2. **Hidden State** - **$$h(t)$$** represents a **hidden state** at **time $$t$$** and acts as the **"memory" of the network**. **$$h(t)$$** is calculated based on the **current input** and the **previous time steps hidden state** ($$h(t) = f(Ux(t) + Wh(t-1))$$. The **activation function $$f$$** is a **non-linear transformation** such as **tanh**, **ReLU** etc.
 3. **Weights** - The RNN has **weights (U, W, V)** that are **shared across time**:
@@ -183,4 +194,5 @@ Expanding this unfolded computational graph to represent the **loss calculation 
 **[4]** Genheden, S., Engkvist, O. and Bjerrum, E.J. (2020) 'A quick policy to filter reactions based on feasibility in AI-guided retrosynthetic planning.' <br><br>
 **[5]** Chen, J. (no date) What is a neural network?, Investopedia. Available at: https://www.investopedia.com/terms/n/neuralnetwork.asp (Accessed: 30 September 2024). <br><br>
 **[6]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024). <br><br>
-**[7]**
+**[7]** Stryker, C.S. (2024) What is a recurrent neural network (RNN)?, IBM. Available at: https://www.ibm.com/topics/recurrent-neural-networks (Accessed: 12 October 2024). <br><br>
+**[8]** Goodfellow, I., Bendigo, Y. and Courville, A. (2016) Deep learning Ian Goodfellow, Yoshua Bengio, Aaron Courville. Cambridge ; Massachusetts ; London: MIT Press. 
