@@ -132,7 +132,7 @@ RNNs are trained to process and convert **sequential data input into a specific 
 
 **Natural Language Processing (NLP)** is an example of a problem that involves sequential inputs. In an NLP problem, if you want to **predict the next word in a sentence**, it is important to **know the words before it**.
 
-RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **'memory'** which **captures information about what has been calculated so far**.
+RNNs are called **recurrent** because they **perform the same task for every element of a sequence**, with the **output being dependent on the computations of the previous elements**. To put it another way, RNNs have a **"memory"** which **captures information about what has been calculated so far**.
 
 ### 2.4.1 Recurrent Neural Network Architecture
 
@@ -146,28 +146,35 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 4
 
 <br>
   <div align="center">
-    <img src="", alt="basic-rnn-architecture-notation-no-ouput"/>
+    <img src="https://github.com/user-attachments/assets/442cb956-5e82-4eeb-b06d-10db49084939", alt="basic-rnn-architecture-notation-no-ouput"/>
     <p>
-      <b>Fig 4</b> . <b><sup>7</sup></b>
+      <b>Fig 4</b> Time-unfolded computational graph representation of a basic RNN with no outputs. <b><sup>7</sup></b>
     </p>
   </div>
 <br>
 
-The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **black square** represents the **delay of a single time step**.
-
-The **right side** of **Fig 4** shows the same RNN but as a **unfolded computational graph**, where **each input ($$x$$) and state ($$h$$) node** is now **associated with one particular time instance**. This unfolding simply means that we **represent the network as its complete sequence**.
+1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **black square** represents the **delay of a single time step**.
+2. The **right side** of **Fig 4** shows the same RNN but as a **unfolded computational graph**, where **each input ($$x$$) and state ($$h$$) node** is now **associated with one particular time instance**. This unfolding simply means that we **represent the network as its complete sequence**.
    * For example, if the sequence being processed is a **sentence of 3 words**, the network would be **unfolded into a 3 time step neural network**, with **one time step for each word**.
 
 <br>
   <div align="center">
-    <img src="", alt="basic-rnn-architecture-notation-full"/>
+    <img src="https://github.com/user-attachments/assets/95107859-6976-4957-b0f9-1c9f205053b1", alt="basic-rnn-architecture-notation-loss"/>
     <p>
-      <b>Fig 5</b> . <b><sup>7</sup></b>
+      <b>Fig 5</b> Time-unfolded computational graph of a training loss computation in a basic RNN. The RNN maps an **input sequence of $$x$$ values** to a correspondiong **output sequence of $$o$$ values** <b><sup>7</sup></b>
     </p>
   </div>
 <br>
 
-Expanding this 
+Expanding this unfolded computational graph to represent the **loss calculation during training of an RNN** (**Fig 5**), we have:
+1. **Input** - **$$x(t)$$** is the **input to the network at time step $$t$$**. For example, **$$x1$$** could be a **one-hot vector** corresponding to a **word in a sentence**.
+2. **Hidden State** - **$$h(t)$$** represents a **hidden state** at **time $$t$$** and acts as the **"memory" of the network**. **$$h(t)$$** is calculated based on the **current input** and the **previous time steps hidden state** ($$h(t) = f(Ux(t) + Wh(t-1))$$. The **activation function $$f$$** is a **non-linear transformation** such as **tanh**, **ReLU** etc.
+3. **Weights** - The RNN has **weights (U, W, V)** that are **shared across time**:
+   * **Input-to-hidden connections**, parameterized by a **weight matrix $$U$$**
+   * **Hidden-to-hidden connections**, paramaterized by a **weight matric $$W$$**
+   * **Hidden-to-ouput connections**, paramaterized by a **weight matric $$V$$**
+4. **Output** - **$$o(t)$$** is the **output of the network at time step $$t$$**
+5. **Loss** - The **loss $$L(t)$$** measures **how far the output at time step $$t$$** is from the **corresponding training target $$y$$ at time step $$t$$**.
 
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
