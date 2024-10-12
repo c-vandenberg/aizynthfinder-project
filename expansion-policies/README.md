@@ -102,14 +102,14 @@ FNNs were the first type of artificial neural network invented and are simpler t
 Modern FNNs are called **multilayer perceptrons (MLPs)** and consist of **one or more hidden layers** as well as the input and output layer. As a result, they are able to recognise/predict **non-linear patterns** between the input and output data, due to **nonlinear activation functions** present within the hidden layers.
 
 The training of MLP FNNs involves two main phases:
-1. **Feedforward Phase**:
-   * In this phase, the input data is fed into the network, and it **propagates forward through the network.
-   * At each hidden layer, the **weighted sum of the inputs** from the previous layer is calculated and **passed through an activation function**, introducing non-linearity into the model.
-   * This process continues **until the output layer is reached**, and a **prediction is made**.
+1. **Feedforward Phase/Forward Pass**:
+   1. In this phase, the input data is fed into the network, and it **propagates forward through the network**.
+   2. At each hidden layer, the **weighted sum of the inputs** from the previous layer is calculated and **passed through an activation function**, introducing non-linearity into the model.
+   3. This process continues **until the output layer is reached**, and a **prediction is made**.
 2. **Backpropagation Phase**:
-   * Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated using a **loss function** (also known as a **cost function**).
-   * This error is then **propagated back through the network**, and the **weights are adjusted to minimize the error**.
-   * The process of adjusting the weights is typically done using a **gradient descent optimization algorithm**.
+   1. **Loss Calculation**: Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated using a **loss function**.
+   2. **Backwards Pass**: The **gradients of the loss with respect with weight** is then calculated by **applying the chain rule** and is **propagated back through the network**.
+   3. **Weights Update**: Using these computed gradients, the **weights are adjusted to minimize the error**, typically using a **gradient descent optimization algorithm** such as **Stochastic Gradient Descent (SGD)** or **Adam**
 
 This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached** (**Fig 3**).
 
@@ -164,7 +164,7 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 5
   </div>
 <br>
 
-1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **loopting arrow** represents the **feedback loop** of the RNN and the **black square** represents the **delay of a single time step**.
+1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **looping arrow** represents the **feedback loop** of the RNN and the **black square** represents the **delay of a single time step**.
 2. The **right side** of **Fig 4** shows the same RNN but as a **unfolded computational graph**, where **each input ($$x$$) and state ($$h$$) node** is now **associated with one particular time instance**. This unfolding simply means that we **represent the network as its complete sequence**.
    * For example, if the sequence being processed is a **sentence of 3 words**, the network would be **unfolded into a 3 time step neural network**, with **one time step for each word**.
 
@@ -186,6 +186,15 @@ Expanding this unfolded computational graph to represent the **loss calculation 
    * **Hidden-to-ouput connections**, paramaterized by a **weight matric $$V$$**
 4. **Output** - **$$o(t)$$** is the **output of the network at time step $$t$$**
 5. **Loss** - The **loss $$L(t)$$** measures **how far the output at time step $$t$$** is from the **corresponding training target $$y$$ at time step $$t$$**.
+
+### 2.4.2 Backpropagation vs Backpropagation Through Time
+As with FNNs, RNNs are trained by **processing input data and refining their performance**. 
+
+The **nodes/neurons** have **weights** which give the **strength and direction** of the **connection between neurons in adjacent layers** when predicting the output. During training **these weights are adjusted to improve prediction accuracy**.
+
+However, how the weights are adjusted **differs in RNNs compated to FNNs**. In FNNs, the weights are adjusted through **backpropagation**. In RNNs, the weights are adjusted through **backpropagation through time (BPTT)**.
+
+While **standard backpropagation**, in RNNs, backpropagation is extended to **handle the temporal (sequential/time step) nature of the data**
 
 ### 2.4.2 Recurrent Neural Network Training
 
