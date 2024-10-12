@@ -72,10 +72,10 @@ data:
 model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
   output_vocab_size: null  # To be set dynamically based on tokenizer
-  attention_dim: 512
-  encoder_embedding_dim: 256
-  decoder_embedding_dim: 512
-  units: 512
+  attention_dim: 256
+  encoder_embedding_dim: 128
+  decoder_embedding_dim: 256
+  units: 256
   encoder_num_layers: 2
   decoder_num_layers: 4
   beam_width: 5
@@ -88,7 +88,7 @@ model:
 training:
   epochs: 50
   patience: 5
-  model_save_path: 'data/training/liu-et-al/model-v17/model/saved_model'
+  model_save_path: 'data/training/liu-et-al/model-v17/model'
   model_save_dir: 'data/training/liu-et-al/model-v17/model'
   test_metrics_dir: 'data/training/liu-et-al/model-v17/evaluate'
   log_dir: 'logs/liu-et-al/model-v17'

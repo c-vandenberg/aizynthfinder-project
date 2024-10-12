@@ -30,6 +30,7 @@ from metrics.metrics import Perplexity
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.bleu_score import BLEUScoreCallback
 
+import pydevd_pycharm
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
     """
@@ -68,7 +69,14 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             'BestValLossCallback': BestValLossCallback,
             'BLEUScoreCallback': BLEUScoreCallback
         }
-        model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+        try:
+            model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+            self._logger.info("Model loaded successfully.")
+            self._logger.info("Model Summary:")
+            model.summary(print_fn=self._logger.info)
+        except Exception as e:
+            self._logger.error(f"Error loading model: {e}")
+            raise
         return model
 
     def load_tokenizer(self, tokenizer_path: str):
@@ -124,11 +132,18 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             encoder_input_seqs, maxlen=self.max_encoder_seq_length, padding='post'
         )
 
+        start_token = self.smiles_tokenizer.start_token
+        start_token_id = self.tokenizer.word_index[start_token]
+        end_token = self.smiles_tokenizer.end_token
+        end_token_id = self.tokenizer.word_index[end_token]
+
         # Use beam search to get multiple predictions per molecule
         predicted_seqs_list = self.model.predict_sequence_beam_search(
             encoder_input_seqs,
             beam_width=self.beam_width,
-            max_length=self.max_decoder_seq_length
+            max_length=self.max_decoder_seq_length,
+            start_token_id=start_token_id,
+            end_token_id=end_token_id
         )
 
         all_predicted_smiles = []
