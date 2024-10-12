@@ -7,55 +7,68 @@
 # Training run metrics:
 #   - Epochs: 5
 #
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
-#   - Train Perplexity (Smoothed):
+#   - Train Loss (Smoothed): 0.365
+#   - Train Accuracy (Smoothed): 0.618
+#   - Train Perplexity (Smoothed): 1.45
 #
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
-#   - Validation Perplexity (Smoothed):
-#   - Validation BLEU Score (Smoothed):
+#   - Validation Loss (Smoothed): 0.289
+#   - Validation Accuracy (Smoothed): 0.636
+#   - Validation Perplexity (Smoothed): 1.34
+#   - Validation BLEU Score (Smoothed): 0.0177
 #
 #   - Test Loss (Smoothed): 0.230
 #   - Test Accuracy (Smoothed): 0.651
 #   - Test Perplexity (Smoothed): 1.26
-#   - Test BLEU Score (Smoothed):
-Test Loss: 0.23035643994808197
-Test Accuracy: 0.651444673538208
-Test Perplexity: 1.2592099905014038
-Test BLEU Score: 0.018210865776251
+#   - Test BLEU Score (Smoothed): 0.0182
+#
+#     - Slight reduction in BLEU score compared to model V15, all other metrics identical.
 #
 # Training Performance Evaluation
 # 1. Training vs Validation Accuracy, Loss, Perplexity and BLEU Score:
-#     - Train Accuracy:
-#     - Validation Accuracy:
-#     - Difference:
+#     - Train Accuracy: 0.618
+#     - Validation Accuracy: 0.636
+#     - Difference: +0.0180 (+2.91%)
 #
-#     - Train Loss:
-#     - Validation Loss:
-#     - Difference:
+#       - Identical data to model v15.
 #
-#     - Train Perplexity:
-#     - Validation Perplexity:
-#     - Difference:
+#     - Train Loss: 0.365
+#     - Validation Loss: 0.289
+#     - Difference: -0.0760 (-20.8%)
 #
+#       - Identical data to model v15.
+#
+#     - Train Perplexity: 1.45
+#     - Validation Perplexity: 1.34
+#     - Difference: -0.110 (-7.59%)
+#
+#       - Identical data to model v15.
 #
 # 2. Validation vs Testing Accuracy, Loss, Perplexity and BLEU Score:
-#   - Validation Accuracy:
-#   - Testing Accuracy:
-#   - Difference:
+#   - Validation Accuracy:  0.636
+#   - Testing Accuracy: 0.651
+#   - Difference: +0.015 (+2.36%)
 #
-#   - Validation Loss:
-#   - Testing Loss:
-#   - Difference:
+#     - Identical data to model v15.
 #
-#   - Validation Perplexity:
-#   - Testing Perplexity:
-#   - Difference:
+#   - Validation Loss: 0.289
+#   - Testing Loss: 0.230
+#   - Difference: -0.0590 (-20.42%)
 #
-#   - Validation BLEU Score:
-#   - Testing BLEU Score:
-#   - Difference:
+#     - Identical data to model v15.
+#
+#   - Validation Perplexity: 1.34
+#   - Testing Perplexity: 1.26
+#   - Difference: -0.0800 (-5.97%)
+#
+#     - Identical data to model v15.
+#
+#   - Validation BLEU Score: 0.0177
+#   - Testing BLEU Score: 0.0182
+#   - Difference: +0.0005 (+2.82%)
+#
+#     - Despite there being an improvement of +7.14% from validation to testing BLEU score, absolute BLEU score is
+#       very low (~1.8%).
+#     - Slight reduction in BLEU score compared to model V15
 #
 
 # Data Configuration and Hyperparameters
