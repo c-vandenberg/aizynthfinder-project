@@ -247,7 +247,7 @@ where:
    * **$$W_{hy}$$**: **Weight matrix multiplication** that **connects the hidden state at time step $$t$$** to the **output at time step $$t$$**
    * **$$b_y$$**: The **bias vector**
 
-The **stength** of standard/unidirectional RNNs is:
+The **stengths** of standard/unidirectional RNNs are:
 1. **Simplicity**: They are easiest RNN to implement and understand.
 2. **Short-Term Dependencies**: They excel in **simple tasks** with **short-term dependencies**, such as **predicting the next work in a short, simple sentence**, or the **next value in a simple time series**.
 
@@ -256,6 +256,37 @@ However, the **main limitations** of standard/unidirectional RNNs are:
 2. **Directional Limitation**: They can **only utilise past information, not future context**, which may be limiting for certain tasks.
 
 ### ii. Bidirectional Recurrent Neural Networks (BRRNs)
+
+While unidirectional RNNs can only **draw on previous inputs to make predictions about the current state**, **bidirectional RNNs (BRNNs)** enchance the standard RNN by **processing the input sequence in both forward and backward directions simultaneously**. This allows the network to **have access to both past (preceding) and future (succeeding) context at each time step**, which can **improve performance** on tasks where **context from both directions is beneficial**.
+
+The **general architecture** of a bidirectional RNN is as follows:
+1. **Processing Direction**: A BRNN has **dual hidden layers**
+   * **Forward Layer** - Processes the sequence from **left to right**
+   * **Backward Layer** - Processes the sequence from **right to left**
+2. **Hidden State Update**:
+   * **Foward Hidden State Update**:
+     
+     $$h_t^{\text{forward}} = \phi(W_{xh}^{\text{forward}} x_t + W_{hh}^{\text{forward}} h_{t-1}^{\text{forward}} + b_h^{\text{forward}})$$
+     
+   * **Backward Hidden State Update**:
+     
+     $$h_t^{\text{backward}} = \phi(W_{xh}^{\text{backward}} x_t + W_{hh}^{\text{backward}} h_{t+1}^{\text{backward}} + b_h^{\text{backward}})$$
+
+   * **Combining Hidden States ($$;$$ Denotes Concatenation)**:
+     
+     $$h_t = [h_t^{\text{forward}} ; h_t^{\text{backward}}]$$
+
+3. **Output Calculation**:
+
+   $$y_t = \phi(W_{hy} h_t + b_y)$$
+
+The **stengths** of bidirectional RNNs are:
+1. **Enhanced Contextual Understanding**: Access to **future context** can **improve predictions**.
+2. **Improved Performance**: BRNNs generally **achieve bettwe performance** on sequence tasks compared to unidirectional RNNs.
+
+However, the **main limitations** of bidirectional RNNs are:
+1. **Increased Computational Cost**: BRNNs require **processing the sequence twice** (forward and backward), effectively **doubling the computation**.
+2. **Unavailable Future Data**: BRNNs are **not suitable where future data is unavailable**.
 
 ### iii. Long Short-Term Memory (LSTM)
 
