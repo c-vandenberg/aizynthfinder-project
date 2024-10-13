@@ -213,7 +213,17 @@ BPTT is essential for **learning temporal dependencies and patterns** in sequent
 7. **Update weights and biases**: Following gradient computation, the **weights and biases are updated** based on the **accumulated gradients from all time steps**. The weights and biases are adjusted using **optimisation methods** such as **SGD** or **Adam** to **minimise the loss function**.
 8. **Repeat Steps 3-7**: This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached**.
 
-### 2.4.4 Types of RNNs
+### 2.4.4 Types of Recurrent Neural Networks
+
+### i. Standard RNNs
+
+### ii. Bidirectional Recurrent Neural Networks (BRRNs)
+
+### iii. Long Short-Term Memory (LSTM)
+
+### iv. Gated Recurrent Units (GNUs)
+
+### v. Encoder-Decoder RNN
 
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
