@@ -235,7 +235,7 @@ where:
    * **$$W_{xh}x_t$$**: **Weight matrix multiplication** that **connects the input at time step $$t$$, to the hidden state at time step $$t$$**
    * **$$W_{hh}$$**: **Weight matrix multiplication** that **connects the hidden state at the previous time step ($$h_{t-1}$$)** to the **hidden state at the current time step ($$h_t$$)**.
         * Both the $$W_{xh}$$ and $$W_{hh}$$ matrices are crucial for **updating the current time step hidden state based on both the previous time step hidden state** and the **current input**.
-   * **$$b_h****: The **bias vector**
+   * **$$b_h**: The **bias vector**
    * **$$\phi$$**: The **activation function** (e.g. **tanh**, **ReLU** etc)
 
 3. **Output Calculation**:
@@ -289,6 +289,51 @@ However, the **main limitations** of bidirectional RNNs are:
 2. **Unavailable Future Data**: BRNNs are **not suitable where future data is unavailable**.
 
 ### iii. Long Short-Term Memory (LSTM)
+
+**Long Short-Term Memory (LSTM)** is a popular RNN architecture and were designed to **overcome the limitations of standard RNNs**, particularly the problems of **vanishing and exploding gradients**. This was achieved by designing LSTMs to be **capable of learning long-term dependencies in data**.
+* With standard RNNs, if the **previous state that would be influencing the current prediction** is **not in the recent past**, a standard RNN would likely be **unable to accurately predict the current state**.
+* For example, lets sat we wanted to predict the italicized words in, “Alice is allergic to nuts. She can’t eat *peanut butter*.” The **context of a nut allergy** can help the RNN **anticipate that the food that cannot be eaten contains nuts**. However, if that **context was a few sentences prior**, then it would be **difficult or even impossible for the RNN to connect the information**.
+
+To overcome this issue with learning long-term dependencies in sequences, LSTM networks have **cells** in the **hidden layers** which have **3 gates**:
+1. **Forget Gate**
+2. **Input Gate**
+3. **Output Gate**
+
+These gates **control the flow of information that is needed to predict the output in the network**.
+
+The **general architecture** of an LSTM RNN is as follows:
+1. **Processing Direction**: Can be either **unidirectional** or **bidirectional**.
+2. **Core Components**:
+   * **Cell State ($$C_t$$) - This acts as a **conveyor belt**, carrying information **across time steps**.
+   * **Gates** - Structures that **regulate the addition and removal of information from the cell state**
+     1. **Forget Gate ($$f_t$$)**: Decides **what information to discard from the cell state**.
+    
+        $$f_t = \sigma(W_f \cdot [h_{t-1}, x_t] + b_f)$$
+
+     2. **Input Gate ($$i_t$$)**: Determines **what new information to add to the cell state**.
+    
+        $$i_t = \sigma(W_i \cdot [h_{t-1}, x_t] + b_i)$$
+
+     4. **Output Gate ($$o_t$$): Decides **what part of the cell state to output to the next time step**.
+
+        $$o_t = \sigma(W_o \cdot [h_{t-1}, x_t] + b_o)$$
+
+3. **Cell State Update ($$\odot$$ Denotes Element-Wise Multiplication)**:
+   
+   $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
+
+5. **Hidden State Update**:
+
+   $$h_t = o_t \odot \tanh(C_t)$$
+
+The **stengths** of LSTM RNNs are:
+1. **Handling Long-Term Dependencies**: LSTMs can **maintain and utilise information over long sequences effectively**.
+2. **Mitigating Gradient Issues**: LSTM architecture helps **prevent vanishing and exploding gradients** during training.
+3. **Flexibility**: LSTMs are suitable for a **wide range of sequential tasks**.
+
+However, the **main limitations** of LSTM RNNs are:
+1. **Complexity**: LSTMs have **more parameters** (**cell state $$C$$**) and are **more computationally expensive** compared to standard RNNs.
+2. **Training Time**: This increased complexity results in **longer training times**.
 
 ### iv. Gated Recurrent Units (GNUs)
 
