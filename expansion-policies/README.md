@@ -164,7 +164,7 @@ The architectural notation of a basic RNN with **no output** is shown in **Fig 5
   </div>
 <br>
 
-1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data %%x%%** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **looping arrow** represents the **feedback loop** of the RNN and the **black square** represents the **delay of a single time step**.
+1. The **left side** of **Fig 4** shows the **computational graph** of a **RNN with no outputs**. This RNN simply **processes input data $$x$$** by **incorportating it into the state $$h$$**. This state $$h$$ is then $$passed forward through time$$. The **looping arrow** represents the **feedback loop** of the RNN and the **black square** represents the **delay of a single time step**.
 2. The **right side** of **Fig 4** shows the same RNN but as a **unfolded computational graph**, where **each input ($$x$$) and state ($$h$$) node** is now **associated with one particular time instance**. This unfolding simply means that we **represent the network as its complete sequence**.
    * For example, if the sequence being processed is a **sentence of 3 words**, the network would be **unfolded into a 3 time step neural network**, with **one time step for each word**.
 
