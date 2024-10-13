@@ -145,8 +145,8 @@ This "memory" is what **distinguishes it from FNNs** and is **passed between tim
   </div>
 <br>
 
-Another characteristic of RNNs that distinguishes them from FNNs is that they **share parameters across each layer of the network**:
-* While FNNs have **different weights across each node**, RNNs **share the same weight parameter within each layer of the network**.
+Another characteristic of RNNs that distinguishes them from FNNs is that they **share parameters across each time step within a layer, and across each layer of the network**:
+* While FNNs have **different weights across each node**, RNNs **share the same weight parameter within each each time step and layer of the network**.
 * That said, while the weight parameter is shared across layers, the weights are **still adjusted through the processes of backpropagation and gradient descent** to **facilitate reinforcement learning**. Though as we will see later, the **backpropagation strategy employed by RNNs is different** to the standard backpropagation used by FNNs.
 
 ### 2.4.1 Recurrent Neural Network Architecture
@@ -219,7 +219,41 @@ BPTT is essential for **learning temporal dependencies and patterns** in sequent
 
 ### 2.4.4 Types of Recurrent Neural Networks
 
-### i. Standard RNNs
+### i. Standard (Unidirectional) RNNs
+
+The **most basic version** of an RNN, often referred to as **unidirectional RNNs**, process sequences in a **single direction** - typically from the **first element/token to the last (left to right)**. They **maintain a hidden state** that **captures and persists information about previous elements** in the sequence, allowing them to **model temporal dependencies**.
+
+The **general architecture** of a standard/unidirectional RNN is as follows:
+1. **Processing Direction**: Sequences are **process left to right** (also called **forward in time**).
+2. **Hidden State Update**: At **each time step**, the **hidden state is updated** via the equation below, and **passed to the next time step** (and **to the next layer** if there is **more than one layer** in the network):
+
+$$h_t = \phi(W_{xh}x_t + W_{hh}h_{t-1} + b_h)$$
+
+where:
+   * **$$h_t$$**: The **hidden state at time step $$t$$**
+   * **$$x_t$$**: The **input at time $$t$$**
+   * **$$W_{xh}x_t$$**: **Weight matrix multiplication** that **connects the input at time step $$t$$, to the hidden state at time step $$t$$**
+   * **$$W_{hh}$$**: **Weight matrix multiplication** that **connects the hidden state at the previous time step ($$h_{t-1}$$)** to the **hidden state at the current time step ($$h_t$$)**.
+        * Both the $$W_{xh}$$ and $$W_{hh}$$ matrices are crucial for **updating the current time step hidden state based on both the previous time step hidden state** and the **current input**.
+   * **$$b_h****: The **bias vector**
+   * **$$\phi$$**: The **activation function** (e.g. **tanh**, **ReLU** etc)
+
+3. **Output Calculation**:
+
+$$y_t = \phi(W_{hy} h_t + b_y)$$
+
+where: 
+   * **$$y_t$$**: The **output at time $$t$$
+   * **$$W_{hy}$$**: **Weight matrix multiplication** that **connects the hidden state at time step $$t$$** to the **output at time step $$t$$**
+   * **$$b_y$$**: The **bias vector**
+
+The **stength** of standard/unidirectional RNNs is:
+1. **Simplicity**: They are easiest RNN to implement and understand.
+2. **Short-Term Dependencies**: They excel in **simple tasks** with **short-term dependencies**, such as **predicting the next work in a short, simple sentence**, or the **next value in a simple time series**.
+
+However, the **main limitations** of standard/unidirectional RNNs are:
+1. **Long-Term Dependencies**: They **struggle with capturing long-term dependencies** due to issues like **vanishing and exploding gradients**.
+2. **Directional Limitation**: They can **only utilise past information, not future context**, which may be limiting for certain tasks.
 
 ### ii. Bidirectional Recurrent Neural Networks (BRRNs)
 
