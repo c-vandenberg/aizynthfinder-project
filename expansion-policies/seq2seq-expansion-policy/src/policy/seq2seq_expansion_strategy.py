@@ -1,24 +1,13 @@
-import numpy as np
-import pandas as pd
+import pydevd_pycharm
 import tensorflow as tf
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, LSTM, Dense, Embedding, Dropout, Attention
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.text import tokenizer_from_json
-from sklearn.model_selection import train_test_split
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from tensorflow.keras.preprocessing.text import tokenizer_from_json
 from aizynthfinder.context.policy.expansion_strategies import ExpansionStrategy
-from aizynthfinder.chem import SmilesBasedRetroReaction, TemplatedRetroReaction
-from aizynthfinder.context.policy.utils import _make_fingerprint
-from aizynthfinder.utils.exceptions import PolicyException
-from aizynthfinder.utils.logging import logger
-from aizynthfinder.utils.models import load_model
+from aizynthfinder.chem import SmilesBasedRetroReaction
 from aizynthfinder.chem import TreeMolecule
 from aizynthfinder.chem.reaction import RetroReaction
 from aizynthfinder.context.config import Configuration
-from aizynthfinder.utils.type_utils import Any, Dict, List, Optional, Sequence, StrDict, Tuple
+from aizynthfinder.utils.type_utils import List, Optional, Sequence, Tuple
 
 from data.utils.tokenization import SmilesTokenizer
 from models.seq2seq import RetrosynthesisSeq2SeqModel
@@ -30,7 +19,6 @@ from metrics.metrics import Perplexity
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.bleu_score import BLEUScoreCallback
 
-import pydevd_pycharm
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
     """

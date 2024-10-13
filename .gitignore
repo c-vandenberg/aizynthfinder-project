@@ -103,4 +103,6 @@ cython_debug/
 *.temp
 *.bak
 
-expansion-policies/test.py
+expansion-policies/model_code.py
+expansion-policies/training_code.py
+expansion-policies/inference_code.py

@@ -1,8 +1,8 @@
 expansion:
   seq2seq_policy:
     type: policy.seq2seq_expansion_strategy.Seq2SeqExpansionStrategy
-    model: data/training/liu-et-al/model-v18/model/keras/seq2seq_model.keras
-    tokenizer: data/training/liu-et-al/model-v18/tokenizer/model_v18_tokenizer.json
+    model: data/training/liu-et-al/model-v17/model/keras/seq2seq_model.keras
+    tokenizer: data/training/liu-et-al/model-v17/tokenizer/model_v17_tokenizer.json
     max_encoder_seq_length: 140
     max_decoder_seq_length: 140
     beam_width: 5

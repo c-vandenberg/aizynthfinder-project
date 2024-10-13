@@ -3,7 +3,7 @@
 from trainers.trainer import Trainer
 
 # Path to the configuration file
-config_path = 'config/model_v6_config.yml'
+config_path = 'config/training/model_v17_config.yml'
 
 # Initialize the Trainer with the configuration
 trainer = Trainer(config_path=config_path)

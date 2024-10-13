@@ -4,11 +4,12 @@ from typing import Dict, Any, List, Union, Optional
 import yaml
 import numpy as np
 import pydevd_pycharm
+from keras.src.utils.module_utils import tensorflow
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
 from tensorflow.train import Checkpoint, CheckpointManager
-from nltk.translate.bleu_score import corpus_bleu
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
@@ -311,14 +312,47 @@ class Trainer:
 
         test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
 
+        references = []
+        hypotheses = []
+        beam_width = training_conf.get('beam_width', 5)
+        start_token = self.data_loader.smiles_tokenizer.start_token
+        start_token_id = self.tokenizer.word_index[start_token]
+        end_token = self.data_loader.smiles_tokenizer.end_token
+        end_token_id = self.tokenizer.word_index[end_token]
+
+        for (encoder_input, decoder_input), target_output in test_dataset:
+            predicted_sequences = self.model.predict_sequence_beam_search(
+                encoder_input,
+                beam_width=beam_width,
+                start_token_id=start_token_id,
+                end_token_id=end_token_id
+            )
+
+            if isinstance(predicted_sequences, list):
+                predicted_sequences = np.array(predicted_sequences)
+
+            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences)
+            target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
+
+            for ref, hyp in zip(target_texts, predicted_texts):
+                ref_tokens = ref.split()
+                hyp_tokens = hyp.split()
+                references.append([ref_tokens])
+                hypotheses.append(hyp_tokens)
+
+        smoothing_function = SmoothingFunction().method1
+        bleu_score = corpus_bleu(references, hypotheses, smoothing_function=smoothing_function)
+
         with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
             f.write(f"Test Loss: {test_loss}\n")
             f.write(f"Test Accuracy: {test_accuracy}\n")
             f.write(f"Test Perplexity: {test_perplexity}\n")
+            f.write(f"Test BLEU Score: {bleu_score}\n")
 
         print(f"Test Loss: {test_loss}")
         print(f"Test Accuracy: {test_accuracy}")
         print(f"Test Perplexity: {test_perplexity}")
+        print(f"Test BLEU Score: {bleu_score}")
 
     def save_model(self) -> None:
         """
@@ -368,10 +402,8 @@ class Trainer:
         None
         """
         TrainingEnvironment.setup_environment(self.config)
-        self.setup_model()
-        self.build_model()
-        self.setup_callbacks()
-        self.train()
-        self.model.summary()
-        self.save_model()
+        self.load_model('data/training/liu-et-al/model-v17/model/keras/seq2seq_model.keras')
         self.evaluate()
+
+    def load_model(self, model_path: str) -> None:
+        self.model = tensorflow.keras.models.load_model(model_path)
