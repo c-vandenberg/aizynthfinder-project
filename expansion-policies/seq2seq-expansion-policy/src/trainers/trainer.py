@@ -402,8 +402,10 @@ class Trainer:
         None
         """
         TrainingEnvironment.setup_environment(self.config)
-        self.load_model('data/training/liu-et-al/model-v17/model/keras/seq2seq_model.keras')
+        self.setup_model()
+        self.build_model()
+        self.setup_callbacks()
+        self.train()
+        self.model.summary()
+        self.save_model()
         self.evaluate()
-
-    def load_model(self, model_path: str) -> None:
-        self.model = tensorflow.keras.models.load_model(model_path)
