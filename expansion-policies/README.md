@@ -145,6 +145,10 @@ This "memory" is what **distinguishes it from FNNs** and is **passed between tim
   </div>
 <br>
 
+Another characteristic of RNNs that distinguishes them from FNNs is that they **share parameters across each layer of the network**:
+* While FNNs have **different weights across each node**, RNNs **share the same weight parameter within each layer of the network**.
+* That said, while the weight parameter is shared across layers, the weights are **still adjusted through the processes of backpropagation and gradient descent** to **facilitate reinforcement learning**. Though as we will see later, the **backpropagation strategy employed by RNNs is different** to the standard backpropagation used by FNNs.
+
 ### 2.4.1 Recurrent Neural Network Architecture
 
 **Computational graphs** are a way to **formalise the structure and set of given computations**, such as those involved in **mapping inputs and parameters** to **outputs and loss**. **<sup>7</sup>** 
