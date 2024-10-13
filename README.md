@@ -16,6 +16,10 @@
   2.2 [Neural Networks Overview](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#22-neural-networks-overview)<br>
   2.3 [Feedforward Neural Networks (FNNs)](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#23-feedforward-neural-networks-fnns)<br>
   2.4 [Recurrent Neural Networks (RNNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#24-recurrent-neural-networks-rnns)<br>
+  &nbsp; &nbsp; 2.4.1 [Recurrent Neural Network Architecture](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#241-recurrent-neural-network-architecture)<br>
+  &nbsp; &nbsp; 2.4.2 [Backpropagation vs Backpropagation Through Time](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-backpropagation-vs-backpropagation-through-time)<br>
+  &nbsp; &nbsp; 2.4.3 [Recurrent Neural Network Training](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-recurrent-neural-network-training)<br>
+  &nbsp; &nbsp; 2.4.4 [Types of RNNs](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#244-types-of-rnns)<br>
   2.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
 3. [Sequence-to-Sequence Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#3-sequence-to-sequence-expansion-policy)<br>
   3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
