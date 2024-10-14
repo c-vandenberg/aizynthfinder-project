@@ -10,6 +10,7 @@ from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import List, Optional, Sequence, Tuple
 
 from data.utils.tokenization import SmilesTokenizer
+from data.utils.preprocessing import DataPreprocessor
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
@@ -75,9 +76,9 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return tokenizer
 
     def get_actions(
-            self,
-            molecules: Sequence[TreeMolecule],
-            cache_molecules: Optional[Sequence[TreeMolecule]] = None,
+        self,
+        molecules: Sequence[TreeMolecule],
+        cache_molecules: Optional[Sequence[TreeMolecule]] = None,
     ) -> Tuple[List[RetroReaction], List[float]]:
         """
         Generate retrosynthetic actions using the Seq2Seq model.
@@ -114,10 +115,16 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return possible_actions, priors
 
     def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
-        # Tokenize the input SMILES strings
-        encoder_input_seqs = self.tokenizer.texts_to_sequences(smiles_list)
-        encoder_input_seqs = tf.keras.preprocessing.sequence.pad_sequences(
-            encoder_input_seqs, maxlen=self.max_encoder_seq_length, padding='post'
+        reversed_smiles_list = [smiles[::-1] for smiles in smiles_list]
+        tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(reversed_smiles_list)
+
+        encoder_data_preprocessor: DataPreprocessor = DataPreprocessor(
+            smiles_tokenizer=self.smiles_tokenizer,
+            tokenizer=self.tokenizer,
+            max_seq_length=self.max_encoder_seq_length
+        )
+        processed_smiles_list = encoder_data_preprocessor.preprocess_smiles(
+            tokenized_smiles_list=tokenized_smiles_list
         )
 
         start_token = self.smiles_tokenizer.start_token
@@ -127,7 +134,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         # Use beam search to get multiple predictions per molecule
         predicted_seqs_list = self.model.predict_sequence_beam_search(
-            encoder_input_seqs,
+            processed_smiles_list,
             beam_width=self.beam_width,
             max_length=self.max_decoder_seq_length,
             start_token_id=start_token_id,

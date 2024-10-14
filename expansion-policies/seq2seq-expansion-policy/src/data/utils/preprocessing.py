@@ -24,10 +24,10 @@ class DataPreprocessor:
         Converts tokenized SMILES strings into padded integer sequences.
     """
     def __init__(
-            self,
-            smiles_tokenizer: SmilesTokenizer,
-            tokenizer: Tokenizer,
-            max_seq_length: int
+        self,
+        smiles_tokenizer: SmilesTokenizer,
+        tokenizer: Tokenizer,
+        max_seq_length: int
     ) -> None:
         self.smiles_tokenizer = smiles_tokenizer
         self.tokenizer = tokenizer

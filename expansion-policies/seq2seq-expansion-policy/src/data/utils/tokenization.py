@@ -22,9 +22,9 @@ class SmilesTokenizer:
 
     Attributes
     ----------
-    start_token : str
+    _start_token : str
         Start token.
-    end_token : str
+    _end_token : str
         End token.
     oov_token : str
         Out-of-vocabulary token.
