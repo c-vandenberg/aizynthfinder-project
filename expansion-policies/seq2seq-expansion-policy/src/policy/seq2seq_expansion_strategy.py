@@ -146,7 +146,11 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         for predicted_seqs in predicted_seqs_list:
             # Convert token sequences to SMILES strings
-            predicted_smiles = self.tokenizer.sequences_to_texts([predicted_seqs])
+            predicted_smiles_reversed = self.tokenizer.sequences_to_texts([predicted_seqs])
+
+            # Reverse back to the original SMILES orientation
+            predicted_smiles = predicted_smiles_reversed[::-1]
+
             # For beam search, you can assign probabilities based on beam scores if available
             # Here, we assign equal probabilities for simplicity
             num_predictions = len(predicted_smiles)
@@ -160,6 +164,17 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
     def is_valid_smiles(smiles: str) -> bool:
         mol = Chem.MolFromSmiles(smiles)
         return mol is not None
+
+    @staticmethod
+    def clean_sequence(sequence: str, start_token="<START>", end_token="<END>") -> str:
+        # Remove <START>
+        if sequence.startswith(start_token):
+            sequence = sequence[len(start_token):]
+        # Remove everything after <END>
+        end_idx = sequence.find(end_token)
+        if end_idx != -1:
+            sequence = sequence[:end_idx]
+        return sequence.strip()
 
     def reset_cache(self) -> None:
         pass  # Implement caching if necessary
