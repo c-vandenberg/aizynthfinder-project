@@ -304,7 +304,7 @@ These gates **control the flow of information that is needed to predict the outp
 The **general architecture** of an LSTM RNN is as follows:
 1. **Processing Direction**: Can be either **unidirectional** or **bidirectional**.
 2. **Core Components**:
-   * **Cell State ($$C_t$$) - This acts as a **conveyor belt**, carrying information **across time steps**.
+   * **Cell State ($$C_t$$)** - This acts as a **conveyor belt**, carrying information **across time steps**.
    * **Gates** - Structures that **regulate the addition and removal of information from the cell state**
      1. **Forget Gate ($$f_t$$)**: Decides **what information to discard from the cell state**.
     
@@ -335,7 +335,31 @@ However, the **main limitations** of LSTM RNNs are:
 1. **Complexity**: LSTMs have **more parameters** (**cell state $$C$$**) and are **more computationally expensive** compared to standard RNNs.
 2. **Training Time**: This increased complexity results in **longer training times**.
 
-### iv. Gated Recurrent Units (GNUs)
+### iv. Gated Recurrent Units (GRUs)
+
+A **Gated Recurrent Unit (GRU)** is similar to an LSTM in that they **aim to capture long-term dependencies**, but they do so using a **simpler architecture**. GRUs **combine the forget and input gates** into a **single update gate** and **merge the cell and hidden states**. Similar to the gates within LSTMs, the **reset and update gates control how much and which information to retain**.
+
+Because of the **simpler architecture** and **fewer parameters**, GRUs are **computationally more efficient**, making them **faster to train**.
+
+The **general architecture** of a GRU RNN is as follows:
+1. **Processing Direction**: Can be either **unidirectional** or **bidirectional**.
+2. **Core Components**:
+   1. **Update Gate ($$z_t$$)**: Determines **how much of the previous hidden state needs to be carried forward**.
+  
+      $$z_t = \sigma(W_z \cdot [h_{t-1}, x_t] + b_z)$$
+
+   2. **Reset Gate ($$r_t$$)**: Decides **how to combine the new input with the previous memory**.
+  
+      $$r_t = \sigma(W_r \cdot [h_{t-1}, x_t] + b_r)$$
+
+3. **Candidate Hidden State ($$\tilde{h_t}$$)**: Represents the **potential new hidden state** based on the **current input** and the **reset gate**.
+
+   $$\tilde{h_t} = \tanh(W \cdot [r_t \odot h_{t-1}, x_t] + b)$$
+
+3. **Final Updated Hidden State ($$h_t$$)**: The updated hidden state after **considering both the previous state and the candidate state, modulated by the update gate**.
+
+   $$h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
+
 
 ### v. Encoder-Decoder RNN
 
