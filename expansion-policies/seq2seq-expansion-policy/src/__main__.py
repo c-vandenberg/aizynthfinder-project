@@ -3,6 +3,8 @@ import pydevd_pycharm
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
+pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
+
 from trainers.trainer import Trainer
 
 # Configure logging to display debug information
