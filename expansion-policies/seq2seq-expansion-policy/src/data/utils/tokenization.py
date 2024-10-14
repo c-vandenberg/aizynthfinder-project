@@ -114,7 +114,7 @@ class SmilesTokenizer:
         self.tokenizer = Tokenizer(
             filters='',
             lower=False,
-            char_level=False,
+            char_level=True,
             oov_token=self.oov_token
         )
         self.tokenizer.fit_on_texts(tokenized_smiles_list)
