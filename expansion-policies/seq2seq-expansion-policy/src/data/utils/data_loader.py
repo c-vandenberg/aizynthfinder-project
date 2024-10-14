@@ -14,6 +14,7 @@ class DataLoader:
     DEFAULT_BUFFER_SIZE = 10000
     DEFAULT_TEST_SIZE = 0.3
     DEFAULT_RANDOM_STATE = 42
+    DEFAULT_REVERSE_INPUT_SEQ_BOOL = True
 
     def __init__(
         self,
@@ -28,6 +29,7 @@ class DataLoader:
         buffer_size: int = DEFAULT_BUFFER_SIZE,
         test_size: float = DEFAULT_TEST_SIZE,
         random_state: int = DEFAULT_RANDOM_STATE,
+        reverse_input_sequence: bool = DEFAULT_REVERSE_INPUT_SEQ_BOOL
     ) -> None:
         self.products_file = products_file
         self.reactants_file = reactants_file
@@ -40,6 +42,7 @@ class DataLoader:
         self.buffer_size = buffer_size
         self.test_size = test_size
         self.random_state = random_state
+        self.reverse_input_sequence = reverse_input_sequence
 
         self._smiles_tokenizer = SmilesTokenizer()
         self._tokenizer = None
@@ -95,14 +98,19 @@ class DataLoader:
             self.reactants_y_valid_dataset = self.reactants_y_valid_dataset[:self.num_samples]
 
         # Reverse the source SMILES strings before tokenization to prevent data leakage
-        self.products_x_dataset = [smiles[::-1] for smiles in self.products_x_dataset]
-        self.products_x_valid_dataset = [smiles[::-1] for smiles in self.products_x_valid_dataset]
 
     def _tokenize_datasets(self) -> None:
         """Tokenizes the datasets using the SMILES tokenizer."""
-        self.tokenized_products_x_dataset = self.smiles_tokenizer.tokenize_list(self.products_x_dataset)
+        self.tokenized_products_x_dataset = self.smiles_tokenizer.tokenize_list(
+            self.products_x_dataset,
+            reverse_input_smiles=self.reverse_input_sequence
+        )
         self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(self.reactants_y_dataset)
-        self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(self.products_x_valid_dataset)
+
+        self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(
+            self.products_x_valid_dataset,
+            reverse_input_smiles=self.reverse_input_sequence
+        )
         self.tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(self.reactants_y_valid_dataset)
 
     def _split_datasets(self) -> None:

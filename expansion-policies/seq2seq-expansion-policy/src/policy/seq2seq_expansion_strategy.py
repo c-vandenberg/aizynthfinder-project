@@ -96,21 +96,17 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         for mol, predicted_precursors, probs in zip(molecules, predicted_precursors_list, probabilities_list):
             for precursor_smiles, prob in zip(predicted_precursors, probs):
-                # Validate the predicted SMILES
-                if self.is_valid_smiles(precursor_smiles):
-                    metadata = {
-                        "policy_probability": float(prob),
-                        "policy_name": self.key,
-                    }
-                    new_action = SmilesBasedRetroReaction(
-                        mol,
-                        metadata=metadata,
-                        reactants_str=precursor_smiles,
-                    )
-                    possible_actions.append(new_action)
-                    priors.append(prob)
-                else:
-                    self._logger.warning(f"Invalid SMILES generated: {precursor_smiles}")
+                metadata = {
+                    "policy_probability": float(prob),
+                    "policy_name": self.key,
+                }
+                new_action = SmilesBasedRetroReaction(
+                    mol,
+                    metadata=metadata,
+                    reactants_str=precursor_smiles,
+                )
+                possible_actions.append(new_action)
+                priors.append(prob)
 
         return possible_actions, priors
 
@@ -123,7 +119,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             tokenizer=self.tokenizer,
             max_seq_length=self.max_encoder_seq_length
         )
-        processed_smiles_list = encoder_data_preprocessor.preprocess_smiles(
+        preprocessed_smiles = encoder_data_preprocessor.preprocess_smiles(
             tokenized_smiles_list=tokenized_smiles_list
         )
 
@@ -133,10 +129,9 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         end_token_id = self.tokenizer.word_index[end_token]
 
         # Use beam search to get multiple predictions per molecule
-        predicted_seqs_list = self.model.predict_sequence_beam_search(
-            processed_smiles_list,
-            beam_width=self.beam_width,
-            max_length=self.max_decoder_seq_length,
+        predicted_seqs_list = self.model.predict_sequence(
+            preprocessed_smiles,
+            max_length=self.max_encoder_seq_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id
         )
@@ -145,8 +140,11 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         all_probabilities = []
 
         for predicted_seqs in predicted_seqs_list:
+            # Convert Tensor to numpy array, then to list of integers
+            predicted_seqs_list_int = predicted_seqs.numpy().tolist()
+
             # Convert token sequences to SMILES strings
-            predicted_smiles_reversed = self.tokenizer.sequences_to_texts([predicted_seqs])
+            predicted_smiles_reversed = self.tokenizer.sequences_to_texts([predicted_seqs_list_int])[0]
 
             # Reverse back to the original SMILES orientation
             predicted_smiles = predicted_smiles_reversed[::-1]
@@ -157,6 +155,13 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             probabilities = [1.0 / num_predictions] * num_predictions
             all_predicted_smiles.append(predicted_smiles)
             all_probabilities.append(probabilities)
+
+            # Validate and append
+            if self.is_valid_smiles(predicted_smiles):
+                all_predicted_smiles.append([predicted_smiles])
+                all_probabilities.append(probabilities)
+            else:
+                self._logger.warning(f"Invalid SMILES generated: {predicted_smiles}")
 
         return all_predicted_smiles, all_probabilities
 

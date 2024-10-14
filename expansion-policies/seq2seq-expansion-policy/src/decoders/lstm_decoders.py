@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple, Union, Any
 
 import tensorflow as tf
+from tensorflow import Tensor
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.layers import (Embedding, LSTM, Dropout,
                                      Dense, Layer, LayerNormalization)
@@ -204,7 +205,7 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_input: tf.Tensor,
         states: List[tf.Tensor],
         encoder_output: tf.Tensor
-    ) -> Tuple[tf.Tensor]:
+    ) -> tuple[Tensor, list[Tensor]]:
         """
         Performs a single decoding step.
 

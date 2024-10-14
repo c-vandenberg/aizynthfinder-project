@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 from tensorflow.keras.preprocessing.text import Tokenizer
-
+from deepchem.feat.smiles_tokenizer import BasicSmilesTokenizer
 
 class SmilesTokenizer:
     """
@@ -48,7 +48,7 @@ class SmilesTokenizer:
         self,
         start_token: str = '<START>',
         end_token: str = '<END>',
-        oov_token: str = '<OOV>'
+        oov_token: str = '<OOV>',
     ) -> None:
         self._start_token = start_token
         self._end_token = end_token
@@ -63,7 +63,7 @@ class SmilesTokenizer:
     def end_token(self):
         return self._end_token
 
-    def tokenize(self, smiles: str) -> List[str]:
+    def tokenize(self, smiles: str, reverse_input_smiles: bool) -> List[str]:
         """
         Tokenizes a single SMILES string into individual characters.
 
@@ -71,16 +71,24 @@ class SmilesTokenizer:
         ----------
         smiles : str
             A SMILES string.
+        reverse_input_smiles : bool, optional
+            Reverse tokenized SMILES string boolean.
 
         Returns
         -------
         List[str]
             A list of character tokens with start and end tokens.
         """
-        tokens = [self.start_token] + list(smiles) + [self.end_token]
+        basic_smiles_tokenizer = BasicSmilesTokenizer()
+        tokenized_smiles = basic_smiles_tokenizer.tokenize(smiles)
+        tokens = [self.start_token] +  tokenized_smiles + [self.end_token]
+
+        if reverse_input_smiles:
+            tokens = tokens[::-1]
+
         return tokens
 
-    def tokenize_list(self, smiles_list: List[str]) -> List[List[str]]:
+    def tokenize_list(self, smiles_list: List[str], reverse_input_smiles = False) -> List[List[str]]:
         """
         Tokenizes a list of SMILES strings.
 
@@ -88,13 +96,15 @@ class SmilesTokenizer:
         ----------
         smiles_list : List[str]
             A list of SMILES strings.
+        reverse_input_smiles : bool, optional
+            Boolean dictating whether tokenized SMILES string should be reversed
 
         Returns
         -------
         List[List[str]]
             A list of token lists.
         """
-        return [self.tokenize(smiles) for smiles in smiles_list]
+        return [self.tokenize(smiles, reverse_input_smiles) for smiles in smiles_list]
 
     def create_tokenizer(self, tokenized_smiles_list: List[List[str]]) -> Tokenizer:
         """

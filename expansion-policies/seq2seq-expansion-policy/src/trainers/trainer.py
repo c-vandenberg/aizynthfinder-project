@@ -96,7 +96,8 @@ class Trainer:
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
             test_size=data_conf.get('test_size', 0.3),
-            random_state=data_conf.get('random_state', 42)
+            random_state=data_conf.get('random_state', 42),
+            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True)
         )
 
         # Load and prepare data
