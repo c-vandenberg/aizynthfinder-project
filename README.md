@@ -15,7 +15,17 @@
   2.1 [What is AiZynthFinder's Expansion Policy Neural Network?](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#21-what-is-aizynthfinders-expansion-policy-neural-network)<br>
   2.2 [Neural Networks Overview](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#22-neural-networks-overview)<br>
   2.3 [Feedforward Neural Networks (FNNs)](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#23-feedforward-neural-networks-fnns)<br>
-  2.4 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
+  2.4 [Recurrent Neural Networks (RNNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#24-recurrent-neural-networks-rnns)<br>
+  &nbsp; &nbsp; 2.4.1 [Recurrent Neural Network Architecture](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#241-recurrent-neural-network-architecture)<br>
+  &nbsp; &nbsp; 2.4.2 [Backpropagation vs Backpropagation Through Time](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-backpropagation-vs-backpropagation-through-time)<br>
+  &nbsp; &nbsp; 2.4.3 [Recurrent Neural Network Training](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-recurrent-neural-network-training)<br>
+  &nbsp; &nbsp; 2.4.4 [Types of Recurrent Neural Networks](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#244-types-of-recurrent-neural-networks)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Standard RNNs](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#i-standard-rnns)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Bidirectional Recurrent Neural Networks (BRRNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#ii-bidirectional-recurrent-neural-networks-brrns)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Long Short-Term Memory (LSTM)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#iii-long-short-term-memory-lstm)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Gated Recurrent Units (GNUs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#iv-gated-recurrent-units-gnus)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Encoder-Decoder RNN](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#v-encoder-decoder-rnn)<br>
+  2.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
 3. [Sequence-to-Sequence Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#3-sequence-to-sequence-expansion-policy)<br>
   3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
   3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
