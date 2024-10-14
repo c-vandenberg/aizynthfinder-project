@@ -5,6 +5,8 @@ from aizynthfinder.aizynthfinder import AiZynthFinder
 
 from trainers.trainer import Trainer
 
+pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
+
 # Configure logging to display debug information
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("aizynthfinder")

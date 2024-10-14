@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
 
+from data.utils.preprocessing import SmilesTokenizer
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 
@@ -113,9 +114,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.enc_state_h: Dense = Dense(units, name='enc_state_h')
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
-        # Data processors to be set externally
-        self.encoder_data_processor: Optional[Any] = None
-        self.decoder_data_processor: Optional[Any] = None
+        # Smiles tokenizer to be set externally
+        self.smiles_tokenizer: Optional[SmilesTokenizer] = None
 
         self.dropout_rate: float = dropout_rate
         self.weight_decay: float = weight_decay
@@ -365,11 +365,11 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         # Prepare start and end token IDs
         if start_token_id is None:
-            start_token = self.decoder_data_processor.smiles_tokenizer.start_token
-            start_token_id = self.decoder_data_processor.tokenizer.word_index[start_token]
+            start_token = self.smiles_tokenizer.start_token
+            start_token_id = self.smiles_tokenizer.word_index[start_token]
         if end_token_id is None:
-            end_token = self.decoder_data_processor.smiles_tokenizer.end_token
-            end_token_id = self.decoder_data_processor.tokenizer.word_index[end_token]
+            end_token = self.smiles_tokenizer.end_token
+            end_token_id = self.smiles_tokenizer.word_index[end_token]
 
         return batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id
 

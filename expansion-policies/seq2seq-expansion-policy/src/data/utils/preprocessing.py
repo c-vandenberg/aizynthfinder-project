@@ -26,14 +26,12 @@ class DataPreprocessor:
     def __init__(
         self,
         smiles_tokenizer: SmilesTokenizer,
-        tokenizer: Tokenizer,
         max_seq_length: int
     ) -> None:
         self.smiles_tokenizer = smiles_tokenizer
-        self.tokenizer = tokenizer
         self.max_seq_length = max_seq_length
 
-    def preprocess_smiles(self, tokenized_smiles_list: List[List[str]]) -> tf.Tensor:
+    def preprocess_smiles(self, tokenized_smiles_list: List[str]) -> tf.Tensor:
         """
         Converts tokenized SMILES strings into padded sequences of integers.
 
@@ -47,7 +45,7 @@ class DataPreprocessor:
         tf.Tensor
             A tensor of padded sequences of shape (num_sequences, max_seq_length).
         """
-        sequences = self.tokenizer.texts_to_sequences(tokenized_smiles_list)
+        sequences = self.smiles_tokenizer.texts_to_sequences(tokenized_smiles_list)
 
         # Pad sequences
         padded_sequences = pad_sequences(

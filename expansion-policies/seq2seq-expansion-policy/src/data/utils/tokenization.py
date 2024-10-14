@@ -1,6 +1,8 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Union, Optional
 
-from tensorflow.keras.preprocessing.text import Tokenizer
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.layers import TextVectorization
 from deepchem.feat.smiles_tokenizer import BasicSmilesTokenizer
 
 class SmilesTokenizer:
@@ -28,8 +30,6 @@ class SmilesTokenizer:
         End token.
     oov_token : str
         Out-of-vocabulary token.
-    tokenizer : Tokenizer, optional
-        Keras Tokenizer instance used for converting tokens to sequences.
 
     Methods
     -------
@@ -49,11 +49,23 @@ class SmilesTokenizer:
         start_token: str = '<START>',
         end_token: str = '<END>',
         oov_token: str = '<OOV>',
+        max_sequence_tokens: int = 140,
+        reverse_input_sequence: bool = False
     ) -> None:
         self._start_token = start_token
         self._end_token = end_token
         self.oov_token = oov_token
-        self.tokenizer: Optional[Tokenizer] = None
+        self.reverse_input_sequence = reverse_input_sequence
+
+        # Initialize TextVectorization layer
+        self.text_vectorization = TextVectorization(
+            standardize=None,
+            split='whitespace',
+            output_mode='int',
+            output_sequence_length=None,
+            max_tokens=max_sequence_tokens,
+            pad_to_max_tokens=False,
+        )
 
     @property
     def start_token(self):
@@ -63,7 +75,7 @@ class SmilesTokenizer:
     def end_token(self):
         return self._end_token
 
-    def tokenize(self, smiles: str, reverse_input_smiles: bool) -> List[str]:
+    def tokenize(self, smiles: str, is_input_sequence: bool) -> str:
         """
         Tokenizes a single SMILES string into individual characters.
 
@@ -71,8 +83,8 @@ class SmilesTokenizer:
         ----------
         smiles : str
             A SMILES string.
-        reverse_input_smiles : bool, optional
-            Reverse tokenized SMILES string boolean.
+        is_input_sequence : bool, optional
+            Is input SMILES string boolean.
 
         Returns
         -------
@@ -81,14 +93,19 @@ class SmilesTokenizer:
         """
         basic_smiles_tokenizer = BasicSmilesTokenizer()
         tokenized_smiles = basic_smiles_tokenizer.tokenize(smiles)
-        tokens = [self.start_token] +  tokenized_smiles + [self.end_token]
 
-        if reverse_input_smiles:
-            tokens = tokens[::-1]
+        # Add start and end tokens
+        tokens = [self.start_token] + tokenized_smiles + [self.end_token]
 
-        return tokens
+        # Reverse the SMILES tokens if required (excluding special tokens)
+        if self.reverse_input_sequence and is_input_sequence:
+            # Reverse only the SMILES tokens, keep start and end tokens in place
+            tokens = [self.start_token] + tokenized_smiles[::-1] + [self.end_token]
 
-    def tokenize_list(self, smiles_list: List[str], reverse_input_smiles = False) -> List[List[str]]:
+        # Join tokens back into a string separated by spaces (required for TextVectorization)
+        return ' '.join(tokens)
+
+    def tokenize_list(self, smiles_list: List[str], is_input_sequence = False) -> List[List[str]]:
         """
         Tokenizes a list of SMILES strings.
 
@@ -96,75 +113,81 @@ class SmilesTokenizer:
         ----------
         smiles_list : List[str]
             A list of SMILES strings.
-        reverse_input_smiles : bool, optional
-            Boolean dictating whether tokenized SMILES string should be reversed
+        is_input_sequence : bool, optional
+            Boolean declaring whether SMILES list is sequence input or not.
 
         Returns
         -------
         List[List[str]]
             A list of token lists.
         """
-        return [self.tokenize(smiles, reverse_input_smiles) for smiles in smiles_list]
+        return [self.tokenize(smiles, is_input_sequence) for smiles in smiles_list]
 
-    def create_tokenizer(self, tokenized_smiles_list: List[List[str]]) -> Tokenizer:
+    def adapt(self, tokenized_smiles_list: List[str]) -> None:
         """
-        Creates and fits a Keras Tokenizer on the tokenized SMILES list.
+        Adapts the TextVectorization layer to the preprocessed SMILES list.
 
         Parameters
         ----------
-        tokenized_smiles_list : List[List[str]]
-            A list of tokenized SMILES strings.
-
-        Returns
-        -------
-        Tokenizer
-            The fitted Keras Tokenizer instance.
+        tokenized_smiles_list : List[str]
+            A list of preprocessed SMILES strings.
         """
+        # Convert list to TensorFlow dataset
+        self.text_vectorization.adapt(tf.constant(tokenized_smiles_list))
 
-        self.tokenizer = Tokenizer(
-            filters='',
-            lower=False,
-            char_level=True,
-            oov_token=self.oov_token
-        )
-        self.tokenizer.fit_on_texts(tokenized_smiles_list)
-        return self.tokenizer
-
-    def texts_to_sequences(self, texts: List[List[str]]) -> List[List[int]]:
+    def texts_to_sequences(self, texts: List[str]) -> tf.Tensor:
         """
         Converts tokenized texts to sequences of token indices.
 
         Parameters
         ----------
-        texts : List[List[str]]
+        texts : List[str]
             List of tokenized texts.
 
         Returns
         -------
-        List[List[int]]
-            Sequences of token indices.
+        tf.Tensor
+            A tensor of token indices.
         """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer has not been created. Call 'create_tokenizer' first.")
-        return self.tokenizer.texts_to_sequences(texts)
+        return self.text_vectorization(tf.constant(texts))
 
-    def sequences_to_texts(self, sequences: List[List[int]]) -> List[str]:
+    def sequences_to_texts(self, sequences: Union[tf.Tensor, np.ndarray]) -> List[str]:
         """
         Converts sequences of token indices back to texts.
 
         Parameters
         ----------
-        sequences : List[List[int]]
-            Sequences of token indices.
+        sequences : Union[tf.Tensor, np.ndarray]
+            A tensor or NumPy array of token indices.
 
         Returns
         -------
         List[str]
-            List of texts.
+            A list of SMILES strings.
         """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer has not been created. Call 'create_tokenizer' first.")
-        return self.tokenizer.sequences_to_texts(sequences)
+        # Create a reverse mapping from indices to tokens
+        vocab = self.text_vectorization.get_vocabulary()
+        inverse_vocab = {idx: word for idx, word in enumerate(vocab)}
+        texts = []
+
+        # Convert tf.Tensor to NumPy array if necessary
+        if isinstance(sequences, tf.Tensor):
+            sequences = sequences.numpy()
+        elif not isinstance(sequences, np.ndarray):
+            raise TypeError("Input must be a tf.Tensor or np.ndarray")
+
+        for sequence in sequences:
+            tokens = [inverse_vocab.get(idx, self.oov_token) for idx in sequence if idx != 0]
+            # Remove start and end tokens
+            if tokens and tokens[0] == self.start_token:
+                tokens = tokens[1:]
+            if tokens and tokens[-1] == self.end_token:
+                tokens = tokens[:-1]
+            # Reverse back if original was reversed
+            if self.reverse_input_sequence:
+                tokens = tokens[::-1]
+            texts.append(''.join(tokens))
+        return texts
 
     @property
     def word_index(self) -> Dict[str, int]:
@@ -176,9 +199,8 @@ class SmilesTokenizer:
         dict
             Word to index mapping.
         """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer has not been created. Call 'create_tokenizer' first.")
-        return self.tokenizer.word_index
+        vocab = self.text_vectorization.get_vocabulary()
+        return {word: idx for idx, word in enumerate(vocab)}
 
     @property
     def vocab_size(self):
@@ -190,7 +212,4 @@ class SmilesTokenizer:
         int
             Vocabulary size.
         """
-        if self.tokenizer is None:
-            raise ValueError("Tokenizer has not been created. Call 'create_tokenizer' first.")
-        # +1 because Keras Tokenizer reserves index 0
-        return len(self.tokenizer.word_index) + 1
+        return len(self.text_vectorization.get_vocabulary())

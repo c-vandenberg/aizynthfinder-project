@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Dict, Any, List, Union, Optional
 
 import yaml
@@ -104,7 +105,7 @@ class Trainer:
         self.data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokenizer = self.data_loader.tokenizer
+        self.tokenizer = self.data_loader.smiles_tokenizer
         self.vocab_size = self.data_loader.vocab_size
 
         # Save the tokenizer
@@ -113,23 +114,21 @@ class Trainer:
         # Initialize Preprocessors
         self.encoder_preprocessor = DataPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
-            tokenizer=self.tokenizer,
             max_seq_length=data_conf.get('max_encoder_seq_length', 140)
         )
         self.decoder_preprocessor = DataPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
-            tokenizer=self.tokenizer,
             max_seq_length=data_conf.get('max_decoder_seq_length', 140)
         )
 
     def save_tokenizer(self, tokenizer_path: str) -> None:
         """
-        Saves the tokenizer to the specified path.
+        Saves the tokenizer's vocabulary to a JSON file.
 
         Parameters
         ----------
         tokenizer_path : str
-            Path where the tokenizer JSON will be saved.
+            Path where the tokenizer vocabulary JSON will be saved.
 
         Returns
         -------
@@ -137,8 +136,40 @@ class Trainer:
         """
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
         with open(tokenizer_path, 'w') as f:
-            f.write(self.tokenizer.to_json())
-        print(f"Tokenizer saved to {tokenizer_path}")
+            json.dump(self.tokenizer.word_index, f, indent=4)
+        print(f"Tokenizer vocabulary saved to {tokenizer_path}")
+
+    @staticmethod
+    def load_tokenizer(tokenizer_path: str, reverse_input_sequence: bool = False) -> SmilesTokenizer:
+        """
+        Loads the tokenizer's vocabulary from a JSON file.
+
+        Parameters
+        ----------
+        tokenizer_path : str
+            Path to the tokenizer vocabulary JSON file.
+        reverse_input_sequence : bool, optional
+            Boolean dictating whether input sequence should be reversed
+
+        Returns
+        -------
+        SmilesTokenizer
+            An instance of SmilesTokenizer with the loaded vocabulary.
+        """
+        with open(tokenizer_path, 'r') as f:
+            word_index = json.load(f)
+
+        # Initialize a new SmilesTokenizer instance
+        smiles_tokenizer = SmilesTokenizer(
+            start_token='<START>',
+            end_token='<END>',
+            oov_token='<OOV>',
+            reverse_input_sequence=reverse_input_sequence
+        )
+        # Manually set the vocabulary
+        smiles_tokenizer.text_vectorization.set_vocabulary(list(word_index.keys()))
+
+        return smiles_tokenizer
 
     def setup_model(self) -> None:
         """
@@ -176,8 +207,7 @@ class Trainer:
         )
 
         # Set encoder and decoder preprocessors
-        self.model.encoder_data_processor = self.encoder_preprocessor
-        self.model.decoder_data_processor = self.decoder_preprocessor
+        self.model.smiles_tokenizer = self.tokenizer
 
         # Set up the optimizer
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
@@ -261,7 +291,8 @@ class Trainer:
         bleu_callback: BLEUScoreCallback = BLEUScoreCallback(
             tokenizer=self.tokenizer,
             validation_data=self.data_loader.get_valid_dataset(),
-            log_dir=os.path.join(training_conf.get('log_dir', './logs'), 'bleu_score')
+            log_dir=os.path.join(training_conf.get('log_dir', './logs'), 'bleu_score'),
+            max_length=self.data_loader.max_encoder_seq_length
         )
 
         # TensorBoard
@@ -316,10 +347,10 @@ class Trainer:
         references = []
         hypotheses = []
         beam_width = training_conf.get('beam_width', 5)
-        start_token = self.data_loader.smiles_tokenizer.start_token
-        start_token_id = self.tokenizer.word_index[start_token]
-        end_token = self.data_loader.smiles_tokenizer.end_token
-        end_token_id = self.tokenizer.word_index[end_token]
+        start_token = self.tokenizer.start_token
+        start_token_id = self.tokenizer.word_index.get(start_token)
+        end_token = self.tokenizer.end_token
+        end_token_id = self.tokenizer.word_index.get(end_token)
 
         for (encoder_input, decoder_input), target_output in test_dataset:
             predicted_sequences = self.model.predict_sequence_beam_search(

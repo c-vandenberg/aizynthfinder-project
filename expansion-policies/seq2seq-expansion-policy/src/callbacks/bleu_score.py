@@ -40,7 +40,7 @@ class BLEUScoreCallback(Callback):
         tokenizer: Any,
         validation_data: Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]],
         log_dir: Optional[str] = None,
-        max_length: int = 100,
+        max_length: int = 140,
         beam_width: int = 5
     ) -> None:
         super(BLEUScoreCallback, self).__init__()
