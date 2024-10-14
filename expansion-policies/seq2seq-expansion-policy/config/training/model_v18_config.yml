@@ -69,7 +69,7 @@ model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
   output_vocab_size: null  # To be set dynamically based on tokenizer
   attention_dim: 512
-  encoder_embedding_dim: 256
+  encoder_embedding_dim: 512
   decoder_embedding_dim: 512
   units: 512
   encoder_num_layers: 2
