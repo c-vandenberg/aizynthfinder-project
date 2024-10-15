@@ -18,7 +18,7 @@ from attention.attention import BahdanauAttention
 from losses.losses import MaskedSparseCategoricalCrossentropy
 from metrics.metrics import Perplexity
 from callbacks.checkpoints import BestValLossCallback
-from callbacks.bleu_score import BLEUScoreCallback
+from callbacks.validation_metrics import ValidationMetricsCallback
 
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
@@ -56,7 +56,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             'MaskedSparseCategoricalCrossentropy': MaskedSparseCategoricalCrossentropy,
             'Perplexity': Perplexity,
             'BestValLossCallback': BestValLossCallback,
-            'BLEUScoreCallback': BLEUScoreCallback
+            'ValidationMetricsCallback': ValidationMetricsCallback
         }
         try:
             model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)

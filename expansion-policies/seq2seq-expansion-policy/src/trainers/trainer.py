@@ -14,9 +14,9 @@ from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
-from callbacks.bleu_score import BLEUScoreCallback
+from callbacks.validation_metrics import ValidationMetricsCallback
 from losses.losses import MaskedSparseCategoricalCrossentropy
-from metrics.metrics import Perplexity
+from metrics.perplexity import Perplexity
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import SmilesDataPreprocessor
@@ -250,6 +250,7 @@ class Trainer:
         None
         """
         training_conf: dict[str, Any] = self.config.get('training', {})
+        log_dir: str = training_conf.get('log_dir', './logs')
 
         # Early Stopping
         early_stopping: EarlyStopping = EarlyStopping(
@@ -287,24 +288,26 @@ class Trainer:
             patience=3
         )
 
-        # BLEU score callback
-        bleu_callback: BLEUScoreCallback = BLEUScoreCallback(
+        # Validation metrics callback
+        valid_metrics_dir: str = training_conf.get('valid_metrics_dir', './validation-metrics')
+        validation_metrics_callback: ValidationMetricsCallback = ValidationMetricsCallback(
             tokenizer=self.tokenizer,
             validation_data=self.data_loader.get_valid_dataset(),
-            log_dir=os.path.join(training_conf.get('log_dir', './logs'), 'bleu_score'),
+            validation_metrics_dir=valid_metrics_dir,
+            log_dir=os.path.join(log_dir, 'validation_metrics'),
             max_length=self.data_loader.max_encoder_seq_length
         )
 
         # TensorBoard
         tensorboard_callback: EarlyStopping = TensorBoard(
-            log_dir=training_conf.get('log_dir', './logs')
+            log_dir=log_dir
         )
 
         self.callbacks = [
             early_stopping,
             best_val_loss_checkpoint_callback,
             lr_scheduler,
-            bleu_callback,
+            validation_metrics_callback,
             tensorboard_callback
         ]
 

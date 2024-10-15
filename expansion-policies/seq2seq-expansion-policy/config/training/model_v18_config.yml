@@ -68,10 +68,10 @@ data:
 model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
   output_vocab_size: null  # To be set dynamically based on tokenizer
-  attention_dim: 256
-  encoder_embedding_dim: 256
-  decoder_embedding_dim: 256
-  units: 256
+  attention_dim: 128
+  encoder_embedding_dim: 128
+  decoder_embedding_dim: 128
+  units: 128
   encoder_num_layers: 2
   decoder_num_layers: 4
   beam_width: 5
@@ -87,7 +87,8 @@ training:
   reverse_tokenized_input_sequence: True
   model_save_path: 'data/training/liu-et-al/model-v18/model/saved_model'
   model_save_dir: 'data/training/liu-et-al/model-v18/model'
-  test_metrics_dir: 'data/training/liu-et-al/model-v18/evaluate'
+  valid_metrics_dir: 'data/training/liu-et-al/model-v18/validation-metrics'
+  test_metrics_dir: 'data/training/liu-et-al/model-v18/testing-metrics'
   log_dir: 'logs/liu-et-al/model-v18'
   checkpoint_dir: 'data/training/liu-et-al/model-v18/checkpoints'
   num_samples: null # Number of samples to use for debugging model
