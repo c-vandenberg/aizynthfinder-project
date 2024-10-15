@@ -69,11 +69,7 @@ class DataLoader:
         self._load_datasets()
         self._tokenize_datasets()
         self._split_datasets()
-        vocab = self.smiles_tokenizer.text_vectorization.get_vocabulary()
-        print("Vocabulary Size:", len(vocab))
-        print("First 20 Tokens:", vocab[:20])
         self._preprocess_datasets()
-        test='test'
 
     def _load_datasets(self) -> None:
         """Loads the datasets from the provided file paths."""
