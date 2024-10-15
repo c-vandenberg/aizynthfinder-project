@@ -14,6 +14,7 @@ class DataLoader:
     DEFAULT_BUFFER_SIZE = 10000
     DEFAULT_TEST_SIZE = 0.3
     DEFAULT_RANDOM_STATE = 42
+    DEFAULT_MAX_TOKENS = 150
     DEFAULT_REVERSE_INPUT_SEQ_BOOL = True
 
     def __init__(
@@ -44,7 +45,6 @@ class DataLoader:
         self.random_state = random_state
 
         self._smiles_tokenizer = SmilesTokenizer(
-            max_sequence_tokens=self.max_encoder_seq_length,
             reverse_input_sequence=reverse_input_sequence
         )
 
@@ -99,13 +99,19 @@ class DataLoader:
             self.products_x_dataset,
             is_input_sequence=True
         )
-        self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(self.reactants_y_dataset)
+        self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(
+            self.reactants_y_dataset,
+            is_input_sequence=False
+        )
 
         self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(
             self.products_x_valid_dataset,
             is_input_sequence=True
         )
-        self.tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(self.reactants_y_valid_dataset)
+        self.tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(
+            self.reactants_y_valid_dataset,
+            is_input_sequence=False
+        )
 
     def _split_datasets(self) -> None:
         """Splits the datasets into training and test sets."""

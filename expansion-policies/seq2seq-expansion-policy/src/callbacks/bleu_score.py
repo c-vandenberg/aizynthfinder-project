@@ -71,8 +71,14 @@ class BLEUScoreCallback(Callback):
             predicted_sequences = self.model.predict_sequence(encoder_input, max_length=self.max_length)
 
             # Convert sequences to text
-            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences.numpy())
-            target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
+            predicted_texts = self.tokenizer.sequences_to_texts(
+                predicted_sequences.numpy(),
+                is_input_sequence=False
+            )
+            target_texts = self.tokenizer.sequences_to_texts(
+                target_output.numpy(),
+                is_input_sequence=False
+            )
 
             # Prepare for BLEU computation
             for ref, hyp in zip(target_texts, predicted_texts):

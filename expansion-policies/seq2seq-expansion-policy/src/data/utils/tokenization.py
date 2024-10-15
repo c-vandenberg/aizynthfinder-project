@@ -50,7 +50,7 @@ class SmilesTokenizer:
         start_token: str = '<START>',
         end_token: str = '<END>',
         oov_token: str = '<OOV>',
-        max_sequence_tokens: int = 140,
+        max_tokens: int = 150,
         reverse_input_sequence: bool = False
     ) -> None:
         self._start_token = start_token
@@ -64,7 +64,7 @@ class SmilesTokenizer:
             split='whitespace',
             output_mode='int',
             output_sequence_length=None,
-            max_tokens=max_sequence_tokens,
+            max_tokens=max_tokens,
             pad_to_max_tokens=False,
         )
 
@@ -152,7 +152,7 @@ class SmilesTokenizer:
         """
         return self.text_vectorization(tf.constant(texts))
 
-    def sequences_to_texts(self, sequences: Union[tf.Tensor, np.ndarray]) -> List[str]:
+    def sequences_to_texts(self, sequences: Union[tf.Tensor, np.ndarray], is_input_sequence = False) -> List[str]:
         """
         Converts sequences of token indices back to texts.
 
@@ -160,6 +160,8 @@ class SmilesTokenizer:
         ----------
         sequences : Union[tf.Tensor, np.ndarray]
             A tensor or NumPy array of token indices.
+        is_input_sequence : bool, optional
+            Boolean declaring whether SMILES list is sequence input or not.
 
         Returns
         -------
@@ -184,8 +186,7 @@ class SmilesTokenizer:
                 tokens = tokens[1:]
             if tokens and tokens[-1] == self.end_token:
                 tokens = tokens[:-1]
-            # Reverse back if original was reversed
-            if self.reverse_input_sequence:
+            if self.reverse_input_sequence and is_input_sequence:
                 tokens = tokens[::-1]
             texts.append(''.join(tokens))
         return texts
