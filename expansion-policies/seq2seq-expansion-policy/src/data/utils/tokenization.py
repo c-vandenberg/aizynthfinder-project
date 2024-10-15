@@ -2,6 +2,7 @@ from typing import Dict, List, Union, Optional
 
 import numpy as np
 import tensorflow as tf
+from rdkit import Chem
 from tensorflow.keras.layers import TextVectorization
 from deepchem.feat.smiles_tokenizer import BasicSmilesTokenizer
 
@@ -91,6 +92,9 @@ class SmilesTokenizer:
         List[str]
             A list of character tokens with start and end tokens.
         """
+        if not self.is_canonical(smiles):
+            smiles = self.canonicalize_smiles(smiles)
+
         basic_smiles_tokenizer = BasicSmilesTokenizer()
         tokenized_smiles = basic_smiles_tokenizer.tokenize(smiles)
 
@@ -213,3 +217,60 @@ class SmilesTokenizer:
             Vocabulary size.
         """
         return len(self.text_vectorization.get_vocabulary())
+
+    @staticmethod
+    def is_canonical(smiles: str) -> bool:
+        """
+        Checks if a given SMILES string is canonical.
+
+        Parameters
+        ----------
+        smiles : str
+            The SMILES string to check.
+
+        Returns
+        -------
+        bool
+            True if the SMILES is canonical, False otherwise.
+        """
+        try:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                print(f"Invalid SMILES: {smiles}")
+                return False
+
+            # Generate canonical SMILES from the molecule
+            canonical_smiles = Chem.MolToSmiles(mol, canonical=True)
+
+            # Compare with the original SMILES
+            return smiles == canonical_smiles
+        except Exception as e:
+            print(f"Error processing SMILES '{smiles}': {e}")
+            return False
+
+    @staticmethod
+    def canonicalize_smiles(smiles: str) -> Union[str, None]:
+        """
+        Converts a SMILES string to its canonical form.
+
+        Parameters
+        ----------
+        smiles : str
+            The SMILES string to canonicalize.
+
+        Returns
+        -------
+        str
+            The canonical SMILES string, or None if invalid.
+        """
+        try:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                print(f"Invalid SMILES: {smiles}")
+                return None
+
+            canonical_smiles = Chem.MolToSmiles(mol, canonical=True)
+            return canonical_smiles
+        except Exception as e:
+            print(f"Error canonicalizing SMILES '{smiles}': {e}")
+            return None

@@ -1,16 +1,21 @@
+import os
 import logging
 import pydevd_pycharm
 
+import tensorflow as tf
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
 from trainers.trainer import Trainer
 
-pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
+pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True, suspend=False)
 
-# Configure logging to display debug information
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("aizynthfinder")
-logger.setLevel(logging.DEBUG)
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
+os.environ['TF_NUM_INTEROP_THREADS'] = '1'
+
+tf.config.run_functions_eagerly(True)
+tf.config.threading.set_intra_op_parallelism_threads(1)
+tf.config.threading.set_inter_op_parallelism_threads(1)
 
 def main():
 

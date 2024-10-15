@@ -5,7 +5,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import DataPreprocessor
+from data.utils.preprocessing import SmilesDataPreprocessor
 
 
 class DataLoader:
@@ -69,7 +69,11 @@ class DataLoader:
         self._load_datasets()
         self._tokenize_datasets()
         self._split_datasets()
+        vocab = self.smiles_tokenizer.text_vectorization.get_vocabulary()
+        print("Vocabulary Size:", len(vocab))
+        print("First 20 Tokens:", vocab[:20])
         self._preprocess_datasets()
+        test='test'
 
     def _load_datasets(self) -> None:
         """Loads the datasets from the provided file paths."""
@@ -124,11 +128,11 @@ class DataLoader:
     def _preprocess_datasets(self) -> None:
         """Preprocesses the training, validation, and test datasets."""
         # Initialize DataPreprocessors
-        self.encoder_data_processor = DataPreprocessor(
+        self.encoder_data_processor = SmilesDataPreprocessor(
             self.smiles_tokenizer,
             self.max_encoder_seq_length
         )
-        self.decoder_data_processor = DataPreprocessor(
+        self.decoder_data_processor = SmilesDataPreprocessor(
             self.smiles_tokenizer,
             self.max_decoder_seq_length
         )
