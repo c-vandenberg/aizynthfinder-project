@@ -154,6 +154,10 @@ class RetrosynthesisSeq2SeqModel(Model):
         state_c: tf.Tensor
         encoder_output, state_h, state_c = self.encoder(encoder_input, training=training)
 
+        # Compute masks
+        encoder_mask:Optional[tf.Tensor]  = self.encoder.compute_mask(encoder_input)
+        decoder_mask: Optional[tf.Tensor]  = self.decoder.compute_mask([decoder_input, None, None])
+
         # Map encoder final states to decoder initial states
         decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
         decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
@@ -166,14 +170,13 @@ class RetrosynthesisSeq2SeqModel(Model):
             encoder_output
         )
 
-        # Extract encoder mask
         encoder_mask: Optional[tf.Tensor] = self.encoder.compute_mask(encoder_input)
 
         # Decoder input sequence processing
         output: tf.Tensor = self.decoder(
             decoder_inputs,
             training=training,
-            mask=encoder_mask
+            mask=[decoder_mask, encoder_mask]
         )
 
         return output

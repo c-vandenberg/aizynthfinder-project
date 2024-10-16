@@ -128,7 +128,7 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_output : tf.Tensor
             The predicted token probabilities for each timestep in the target sequence.
         """
-        # UNpack inputs
+        # Unpack inputs
         decoder_input: tf.Tensor  # Shape: (batch_size, seq_len_dec)
         initial_state: List[tf.Tensor]  # List of tensors for initial hidden and cell states
         encoder_output: tf.Tensor  # Shape: (batch_size, seq_len_enc, enc_units)
@@ -137,9 +137,17 @@ class StackedLSTMDecoder(DecoderInterface):
         if decoder_input is None or initial_state is None or encoder_output is None:
             raise ValueError('decoder_input, initial_state and encoder_output must be passed to the Decoder.')
 
+        # Unpack masks
+        decoder_mask, encoder_mask = None, None
+        if mask is not None:
+            decoder_mask, encoder_mask = mask
+
+        # Embed the input and extract decoder mask if not provided
+        if decoder_mask is None:
+            decoder_mask = self.embedding.compute_mask(decoder_input) # Shape: (batch_size, seq_len_dec)
+
         # Embed the input and extract decoder mask
         decoder_output: tf.Tensor = self.embedding(decoder_input) # Shape: (batch_size, seq_len_dec, decoder_embedding_dim)
-        decoder_mask: Optional[tf.Tensor] = self.embedding.compute_mask(decoder_input) # Shape: (batch_size, seq_len_dec)
 
         # Initialize previous_output with the embeddings
         previous_output = decoder_output
