@@ -3,7 +3,6 @@ from typing import Iterable, Optional, Tuple, Any
 import os
 import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
-from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 from metrics.bleu_score import BleuScore
 from metrics.smiles_string_metrics import SmilesStringMetrics

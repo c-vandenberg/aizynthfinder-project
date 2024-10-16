@@ -106,7 +106,7 @@ class SmilesTokenizer:
         # Join tokens back into a string separated by spaces (required for TextVectorization)
         return ' '.join(tokens)
 
-    def tokenize_list(self, smiles_list: List[str], is_input_sequence = False) -> List[List[str]]:
+    def tokenize_list(self, smiles_list: List[str], is_input_sequence = False) -> List[str]:
         """
         Tokenizes a list of SMILES strings.
 
@@ -188,7 +188,7 @@ class SmilesTokenizer:
                 tokens = tokens[:-1]
             if self.reverse_input_sequence and is_input_sequence:
                 tokens = tokens[::-1]
-            texts.append(''.join(tokens))
+            texts.append(' '.join(tokens))
         return texts
 
     @property

@@ -1,6 +1,8 @@
 import os
+import random
 from typing import List, Tuple, Optional
 
+from collections import Counter
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
@@ -99,10 +101,20 @@ class DataLoader:
             self.products_x_dataset,
             is_input_sequence=True
         )
+
+        train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
+        train_test_products_token_counts = Counter(train_test_products_all_tokens)
+        print(
+            f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n")
+
         self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(
             self.reactants_y_dataset,
             is_input_sequence=False
         )
+
+        train_test_reactants_all_tokens = ' '.join(self.tokenized_reactants_y_dataset).split()
+        train_test_reactants_token_counts = Counter(train_test_reactants_all_tokens)
+        print(f"Tokenized Train & Test Reactants y-Dataset Token Frequency Distribution: {train_test_reactants_token_counts.most_common(20)}\n")
 
         self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(
             self.products_x_valid_dataset,
@@ -112,6 +124,11 @@ class DataLoader:
             self.reactants_y_valid_dataset,
             is_input_sequence=False
         )
+        secure_random = random.SystemRandom()
+        print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_dataset)}")
+        print(f"Tokenized Reactants y-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_dataset)}")
+        print(f"Tokenized Products Validation x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_valid_dataset)}")
+        print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_valid_dataset)}")
 
     def _split_datasets(self) -> None:
         """Splits the datasets into training and test sets."""
@@ -125,7 +142,9 @@ class DataLoader:
 
         # Adapt tokenizer only on tokenized training data to prevent data leakage
         combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
+        tf.print(f"Tokenizer Word Index Before Adapting: \n{self.smiles_tokenizer.word_index}\n")
         self.smiles_tokenizer.adapt(combined_tokenized_train_data)
+        tf.print(f"Tokenizer Word Index After Adapting: \n{self.smiles_tokenizer.word_index}\n")
 
     def _preprocess_datasets(self) -> None:
         """Preprocesses the training, validation, and test datasets."""
@@ -156,6 +175,12 @@ class DataLoader:
             self.tokenized_products_x_valid_dataset,
             self.tokenized_reactants_y_valid_dataset
         )
+
+        secure_random = random.SystemRandom()
+        tf.print(f"Preprocessed Training Data Sample: {secure_random.choice(self.train_data)}\n")
+        tf.print(f"Preprocessed Testing Data Sample: {secure_random.choice(self.test_data)}\n")
+        tf.print(f"Preprocessed Validation Data Sample: {secure_random.choice(self.valid_data)}\n")
+
 
     def _preprocess_data_pair(
         self,encoder_data: List[str],
