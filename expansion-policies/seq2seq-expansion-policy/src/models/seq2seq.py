@@ -1,4 +1,4 @@
-from typing import Optional, Any, Tuple
+from typing import Optional, Any, Tuple, List
 
 import tensorflow as tf
 from tensorflow.keras import Model
@@ -158,10 +158,14 @@ class RetrosynthesisSeq2SeqModel(Model):
         encoder_mask:Optional[tf.Tensor]  = self.encoder.compute_mask(encoder_input)
         decoder_mask: Optional[tf.Tensor]  = self.decoder.compute_mask([decoder_input, None, None])
 
-        # Map encoder final states to decoder initial states
+        # Map encoder final states to initial states for the decoder's first layer
         decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
         decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
-        decoder_initial_state: Tuple[tf.Tensor, tf.Tensor] = (decoder_initial_state_h, decoder_initial_state_c)
+        decoder_initial_state: List[tf.Tensor, tf.Tensor] = [decoder_initial_state_h, decoder_initial_state_c]
+
+        # Prepare initial states for all decoder layers
+        decoder_initial_state = (decoder_initial_state +
+                                 [tf.zeros_like(decoder_initial_state_h)] * (self.decoder.num_layers * 2 - 2))
 
         # Prepare decoder inputs
         decoder_inputs = (
@@ -169,8 +173,6 @@ class RetrosynthesisSeq2SeqModel(Model):
             decoder_initial_state,
             encoder_output
         )
-
-        encoder_mask: Optional[tf.Tensor] = self.encoder.compute_mask(encoder_input)
 
         # Decoder input sequence processing
         output: tf.Tensor = self.decoder(
@@ -181,7 +183,13 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         return output
 
-    def predict_sequence(self, encoder_input, max_length=100, start_token_id=None, end_token_id=None):
+    def predict_sequence(
+        self,
+        encoder_input: tf.Tensor,
+        max_length: int = 100,
+        start_token_id: Optional[int] = None,
+        end_token_id: Optional[int] = None
+    ) -> tf.Tensor:
         batch_size, encoder_output, decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
             start_token_id,
@@ -189,7 +197,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         )
 
         decoder_input = tf.fill([batch_size, 1], start_token_id)
-        sequences = tf.TensorArray(tf.int32, size=0, dynamic_size=True)
+        sequences = tf.TensorArray(tf.int32, size=max_length, dynamic_size=False)
         finished = tf.zeros([batch_size], dtype=tf.bool)
 
         for t in range(max_length):
