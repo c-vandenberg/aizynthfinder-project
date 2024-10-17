@@ -530,6 +530,16 @@ In an attempt to resolve this issue, various new analytics and debugging tactics
 * **Verifying tokenization process** by manually tokenizing and detokenizing known canonical SMILES strings, and logging random SMILES strings from all data sets throughout the training process.
 * Adding **more validation metrics**, particularly **string and chemical validity metrics**.
 
+The initial tokenizer **fitted the tokenized SMILES list** on a `tensorflow.keras.preprocessing.text.Tokenizer` instance for **character-level tokenization**. This had the advantage of being **simple to implement**, and didn't introduce much **computational overhead** in the model training/inference runs.
+
+However, not only was this resulting in spaec characters being tokenized, but it would also result in **loss of chemical semantic meaning** as there was no mechanism in place to account for **multi-character tokens** such as `Cl`, `Br` etc. As a result, these would be split into `C`, `l` and `B` `r` etc. 
+
+Moreover, research into the **TensorFlow Keras documentation** found that the `tensorflow.keras.preprocessing` module was **deprecated**.
+
+Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the tokenized list of SMILES strings** while **preserving chemical information**, and this list would then be **adapted onto a `tensorflow.keras.layers.TextVectorization` layer instance**, which is a **modern TensorFlow layer**
+
+A **`TextVectorization` layer** is a **more modern TensorFlow integration**, allowing for **better integration with the model graph**.
+
 ### iii. Encoder Optimization
 
 ### iv. Decoder Optimization
