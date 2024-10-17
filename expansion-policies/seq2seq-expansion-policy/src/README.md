@@ -540,7 +540,7 @@ Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_to
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### iii. Callback Optimizations
+### iii. Callbacks Optimization
 
 ### iv. Encoder Optimization
 
