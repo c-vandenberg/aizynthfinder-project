@@ -508,10 +508,10 @@ As this project is to be an introduction to seq2seq models, the model architectu
 
 In the context of optimizing model performance, this is useful as it **reduces noise/random fluctuations in data** between training runs, ensuring any improvement or reduction in performance is solely the result of the hyperparameter change, change in model architecture etc.
 
-Following the **NVIDIA documentation for Clara**, **<sup>10</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/trainers/environment.py)<br>
-&nbsp; &nbsp; &nbsp; &nbsp; 1. Set environment variable for **Python's built-in has seed**.<br>
-&nbsp; &nbsp; &nbsp; &nbsp; 2. Set seeds for the **pseudo-random number generators** used in the model for reproducible random number generation.<br>
-&nbsp; &nbsp; &nbsp; &nbsp; 3. Enabling **deterministic operations** in TensorFlow.
+Following the **NVIDIA documentation for Clara**, **<sup>10</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/trainers/environment.py).
+* Set environment variable for **Python's built-in has seed**.
+* Set seeds for the **pseudo-random number generators** used in the model for reproducible random number generation.
+* Enabling **deterministic operations** in TensorFlow.
 
 Additionally, the environment set up gives the optional measure of **disabling GPU** and **limiting TensorFlow to single-threaded execution**. This is because modern GPUs and CPUs are designed to execute computations **in parallel across many cores**. This parallelism is typically managed **asynchronously**, meaning that the order of operations or the availability of computing resources can vary slightly from one run to another. 
 
@@ -519,7 +519,16 @@ It is this asynchronous parallelism that can introduce random noise, and hence, 
 
 Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
 
-### iI. Tokenizer
+### ii. Data Tokenization and Preprocessing
+
+Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
+
+Debugging of tokenizer showed that space characters between the individual chemical characters were also being tokenized. This explains the relatively **high token-level accuracy**, but very **low sequence-level accuracy** (BLEU score). This also may explain why the model was **overfitting to the most frequent tokens (i.e. `C` and `c`)**.
+
+In an attempt to resolve this issue, various new analytics and debugging tactics were employed for a **more granular analysis** of model performance. This included:
+* Logging tokenizer **word index mappings** and **token frequency distribution** for both **tokenized products** and **tokenized reactants**.
+* **Verifying tokenization process** by manually tokenizing and detokenizing known canonical SMILES strings, and logging random SMILES strings from all data sets throughout the training process.
+* Adding **more validation metrics**, particularly **string and chemical validity metrics**.
 
 ### iii. Encoder Optimization
 
