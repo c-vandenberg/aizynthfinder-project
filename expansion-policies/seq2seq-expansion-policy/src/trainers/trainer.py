@@ -6,6 +6,7 @@ import yaml
 import numpy as np
 import pydevd_pycharm
 from keras.src.utils.module_utils import tensorflow
+import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
@@ -213,7 +214,7 @@ class Trainer:
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
-        self.loss_function = MaskedSparseCategoricalCrossentropy(padding_idx=0)
+        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
         self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
         self.metrics.append(Perplexity(loss_function=self.loss_function))
 
