@@ -222,6 +222,10 @@ class RetrosynthesisSeq2SeqModel(Model):
             # Prepare next decoder input
             decoder_input = predicted_id
 
+            # Check for end token
+            if tf.reduce_all(tf.equal(predicted_id[:, 0], end_token_id)):
+                break
+
         sequences = sequences.stack()
         sequences = tf.transpose(sequences, [1, 0])  # shape (batch_size, seq_len)
         return sequences
