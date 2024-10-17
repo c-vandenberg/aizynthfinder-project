@@ -433,13 +433,13 @@ The sequence-to-sequence (Seq2Seq) model implementation in this project was base
 
 ### 4.1.1 Data Preparation
 
-*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 1.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
+*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 8.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/b4b11d31-9b6b-4527-ae15-ccd9b3abf921", alt="liu-et-al-reaction-types"/>
     <p>
-      <b>Table 1</b> <i>Liu at al.</i> training data set reaction class distribution. <b><sup>1</sup></b>
+      <b>Table 8</b> <i>Liu at al.</i> training data set reaction class distribution. <b><sup>1</sup></b>
     </p>
   </div>
 <br>
@@ -467,13 +467,13 @@ Additionally, a **beam search procedure is used for model inference**: **<sup>1<
 
 From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>*
 
-*Liu et al.* adapted this open source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 8**.
+*Liu et al.* adapted this open source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 9**.
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/999ae54c-1d80-4f0a-8411-cb5d9391766e", alt="liu-et-al-model-hyperparameters"/>
     <p>
-      <b>Table 8</b> Key hyperparameters of the seq2seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
+      <b>Table 9</b> Key hyperparameters of the seq2seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
     </p>
   </div>
 <br>
@@ -492,7 +492,7 @@ These data sets had already been processed as per the process described in **4.1
 5. **Test sources** (products)
 6. **Test targets** (reactants)
 
-As the ultimate goal of this project is to **incorporate this model into AiZynthFinder**, the **prepended reaction type token** in the source sequences **was removed** to leave just the split target molecule SMILES sequence.
+As the ultimate goal of this project is to **incorporate this model into AiZynthFinder**, the **prepended reaction type token** in the source sequences **was removed** to leave just the split target molecule SMILES sequence. Additionally, the **spaces between the characters** were removed to give **raw canonical SMILES**.
 
 Additionally, the sources and target datasets were **combined** so that they could be **split before each training run**. This would allow us to **control the split ratio** during the model development process.
 
@@ -504,11 +504,70 @@ As this project is to be an introduction to seq2seq models, the model architectu
 
 ### i. Deterministic Training Environment
 
-### ii. Encoder Optimization
+**Determinism** when using machine learning frameworks is to have **exact reproducibility from run to run**, with a model's training run **yielding the same weights**, and a model's inference run **yielding the same prediction**. **<sup>10</sup>**
 
-### iii. Decoder Optimization
+In the context of optimizing model performance, this is useful as it **reduces noise/random fluctuations in data** between training runs, ensuring any improvement or reduction in performance is solely the result of the hyperparameter change, change in model architecture etc.
 
-### iv. Attention Mechanism Optimization
+Following the **NVIDIA documentation for Clara**, **<sup>10</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/trainers/environment.py).
+* Set environment variable for **Python's built-in has seed**.
+* Set seeds for the **pseudo-random number generators** used in the model for reproducible random number generation.
+* Enabling **deterministic operations** in TensorFlow.
+
+Additionally, the environment set up gives the optional measure of **disabling GPU** and **limiting TensorFlow to single-threaded execution**. This is because modern GPUs and CPUs are designed to execute computations **in parallel across many cores**. This parallelism is typically managed **asynchronously**, meaning that the order of operations or the availability of computing resources can vary slightly from one run to another. 
+
+It is this asynchronous parallelism that can introduce random noise, and hence, non-deterministic behaviour.
+
+Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
+
+### ii. Data Tokenization and Preprocessing
+
+Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
+
+Debugging of tokenizer showed that space characters between the individual chemical characters were also being tokenized. This explains the relatively **high token-level accuracy**, but very **low sequence-level accuracy** (BLEU score). This also may explain why the model was **overfitting to the most frequent tokens (i.e. `C` and `c`)**.
+
+In an attempt to resolve this issue, various new analytics and debugging tactics were employed for a **more granular analysis** of model performance. This included:
+* Logging tokenizer **word index mappings** and **token frequency distribution** for both **tokenized products** and **tokenized reactants**.
+* **Verifying tokenization process** by manually tokenizing and detokenizing known canonical SMILES strings, and logging random SMILES strings from all data sets throughout the training process.
+* Adding **more validation metrics**, particularly **string and chemical validity metrics**.
+
+The initial tokenizer **fitted the tokenized SMILES list** on a `tensorflow.keras.preprocessing.text.Tokenizer` instance for **character-level tokenization**. This had the advantage of being **simple to implement**, and didn't introduce much **computational overhead** in the model training/inference runs.
+
+However, not only was this resulting in spaec characters being tokenized, but it would also result in **loss of chemical semantic meaning** as there was no mechanism in place to account for **multi-character tokens** such as `Cl`, `Br` etc. As a result, these would be split into `C`, `l` and `B` `r` etc. 
+
+Moreover, research into the **TensorFlow Keras documentation** found that the `tensorflow.keras.preprocessing` module was **deprecated**.
+
+Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the list of tokenized SMILES strings** while **preserving chemical information**, and this list would then be **adapted onto a `tensorflow.keras.layers.TextVectorization` layer instance**. This **`TextVectorization` layer** is a **more modern TensorFlow integration**, allowing for **better integration with the model graph**.
+
+Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
+
+### iii. Callback Optimizations
+
+### iv. Encoder Optimization
+
+Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased to **256** or **128** for efficient hardware usage while testing subsequent model versions.
+
+The first siginificant encoder change implemented during the optimization process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+
+The second significant encoder change was the implementation of **residual connections**. 
+* Residual connections are **direct pathways** that allow the **output of one layer to be added to the output of a deeper layer in the network**.
+* Instead of data flowing **strictly through a sequence of layers**, residual connections provide **shortcuts that bypasss one or more layers**.
+
+The benefits of residual connections include:
+* **Mitigating the Vanishing/Exploding Gradient Problem**: Residual connections help this by **providing alternative pathways** for gradients to **flow backward through the network**, ensuring that gradients **remain sufficiently large** (mitigating vanishing gradients), while being **stable** (mitigating exploding gradients).
+* **Enabling Identity Mappings**: Residual connections **apply identity mappings**, making it easier for **layers to learn identity functions** if necessary. This flexibility allows the network to **adaptively utilize or bypass certain layers**, enchancing its capacity to **model complex data**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/9082fa4e-0eb2-402b-a494-a29740efd7d4", alt="residual-connection"/>
+    <p>
+      <b>Fig 1</b> Residual connection in a FNN <b><sup>11</sup></b>
+    </p>
+  </div>
+<br>
+
+### vi. Decoder Optimization
+
+### vii. Attention Mechanism Optimization
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
@@ -520,3 +579,6 @@ As this project is to be an introduction to seq2seq models, the model architectu
 **[7]** Luong, M. et al. (2016) ‘Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models’, Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics. <br><br>
 **[8]** Wu, Y. et al. (2016) ‘Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation’. <br><br>
 **[9]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
+**[10]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). <br><br>
+**[11]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
+
