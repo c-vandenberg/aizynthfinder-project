@@ -59,7 +59,7 @@
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Decoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vi-decoder-optimization)<br>
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vi. [Attention Mechanism Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vii-attention-mechanism-optimization)<br>
    &nbsp; &nbsp; 4.1.4 [Model Documentation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#414-model-documentation)<br>
-   4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#references)<br>
+   4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
 
