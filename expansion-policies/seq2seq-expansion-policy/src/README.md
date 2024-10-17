@@ -492,7 +492,7 @@ These data sets had already been processed as per the process described in **4.1
 5. **Test sources** (products)
 6. **Test targets** (reactants)
 
-As the ultimate goal of this project is to **incorporate this model into AiZynthFinder**, the **prepended reaction type token** in the source sequences **was removed** to leave just the split target molecule SMILES sequence.
+As the ultimate goal of this project is to **incorporate this model into AiZynthFinder**, the **prepended reaction type token** in the source sequences **was removed** to leave just the split target molecule SMILES sequence. Additionally, the **spaces between the characters** were removed to give **raw canonical SMILES**.
 
 Additionally, the sources and target datasets were **combined** so that they could be **split before each training run**. This would allow us to **control the split ratio** during the model development process.
 
@@ -540,11 +540,17 @@ Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_to
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### iii. Encoder Optimization
+### iii. Callback Optimizations
 
-### iv. Decoder Optimization
+### iv. Encoder Optimization
 
-### vi. Attention Mechanism Optimization
+Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased to **256** or **128** for efficient hardware usage while testing subsequent model versions.
+
+The only siginificant encoder change implemented during the optimization process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+
+### vi. Decoder Optimization
+
+### vii. Attention Mechanism Optimization
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
