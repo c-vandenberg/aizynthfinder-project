@@ -536,7 +536,7 @@ However, not only was this resulting in spaec characters being tokenized, but it
 
 Moreover, research into the **TensorFlow Keras documentation** found that the `tensorflow.keras.preprocessing` module was **deprecated**.
 
-Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the tokenized list of SMILES strings** while **preserving chemical information**, and this list would then be **adapted onto a `tensorflow.keras.layers.TextVectorization` layer instance**. This **`TextVectorization` layer** is a **more modern TensorFlow integration**, allowing for **better integration with the model graph**.
+Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the list of tokenized SMILES strings** while **preserving chemical information**, and this list would then be **adapted onto a `tensorflow.keras.layers.TextVectorization` layer instance**. This **`TextVectorization` layer** is a **more modern TensorFlow integration**, allowing for **better integration with the model graph**.
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
@@ -546,7 +546,15 @@ Analysis using the metrics described above showed that this new approach was vas
 
 Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased to **256** or **128** for efficient hardware usage while testing subsequent model versions.
 
-The only siginificant encoder change implemented during the optimization process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+The first siginificant encoder change implemented during the optimization process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+
+The second significant encoder change was the implementation of **residual connections**. 
+* Residual connections are **direct pathways** that allow the **output of one layer to be added to the output of a deeper layer in the network**.
+* Instead of data flowing **strictly through a sequence of layers**, residual connections provide **shortcuts that bypasss one or more layers**.
+
+The benefits of residual connections include:
+* **Mitigating the Vanishing/Exploding Gradient Problem**: Residual connections help this by **providing alternative pathways** for gradients to **flow backward through the network**, ensuring that gradients **remain sufficiently large** (mitigating vanishing gradients), while being **stable** (mitigating exploding gradients).
+* **Enabling Identity Mappings**: Residual connections **apply identity mappings**, making it easier for **layers to learn identity functions** if necessary. This flexibility allows the network to **adaptively utilize or bypass certain layers**, enchancing its capacity to **model complex data**.
 
 ### vi. Decoder Optimization
 
