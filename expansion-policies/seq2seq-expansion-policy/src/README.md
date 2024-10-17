@@ -558,9 +558,9 @@ The benefits of residual connections include:
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/b4b11d31-9b6b-4527-ae15-ccd9b3abf921", alt="liu-et-al-reaction-types"/>
+    <img src="https://github.com/user-attachments/assets/9082fa4e-0eb2-402b-a494-a29740efd7d4", alt="residual-connection"/>
     <p>
-      <b>fig 1</b> Residual connection in a FNN <b><sup>11</sup></b>
+      <b>Fig 1</b> Residual connection in a FNN <b><sup>11</sup></b>
     </p>
   </div>
 <br>
