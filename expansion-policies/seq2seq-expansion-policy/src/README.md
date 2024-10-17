@@ -504,11 +504,28 @@ As this project is to be an introduction to seq2seq models, the model architectu
 
 ### i. Deterministic Training Environment
 
-### ii. Encoder Optimization
+**Determinism** when using machine learning frameworks is to have **exact reproducibility from run to run**, with a model's training run **yielding the same weights**, and a model's inference run **yielding the same prediction**. **<sup>10</sup>**
 
-### iii. Decoder Optimization
+In the context of optimizing model performance, this is useful as it **reduces noise/random fluctuations in data** between training runs, ensuring any improvement or reduction in performance is solely the result of the hyperparameter change, change in model architecture etc.
 
-### iv. Attention Mechanism Optimization
+Following the **NVIDIA documentation for Clara**, **<sup>10</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](**<sup>10</sup>**):<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 1. Set environment variable for **Python's built-in has seed**.<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 2. Set seeds for the **pseudo-random number generators** used in the model for reproducible random number generation.<br>
+&nbsp; &nbsp; &nbsp; &nbsp; 3. Enabling **deterministic operations** in TensorFlow.
+
+Additionally, the environment set up gives the optional measure of **disabling GPU** and **limiting TensorFlow to single-threaded execution**. This is because modern GPUs and CPUs are designed to execute computations **in parallel across many cores**. This parallelism is typically managed **asynchronously**, meaning that the order of operations or the availability of computing resources can vary slightly from one run to another. 
+
+It is this asynchronous parallelism that can introduce random noise, and hence, non-deterministic behaviour.
+
+Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
+
+### iI. Tokenizer
+
+### iii. Encoder Optimization
+
+### iv. Decoder Optimization
+
+### vi. Attention Mechanism Optimization
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
@@ -520,3 +537,5 @@ As this project is to be an introduction to seq2seq models, the model architectu
 **[7]** Luong, M. et al. (2016) ‘Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models’, Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics. <br><br>
 **[8]** Wu, Y. et al. (2016) ‘Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation’. <br><br>
 **[9]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
+**[10]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). 
+
