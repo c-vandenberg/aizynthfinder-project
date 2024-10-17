@@ -536,9 +536,9 @@ However, not only was this resulting in spaec characters being tokenized, but it
 
 Moreover, research into the **TensorFlow Keras documentation** found that the `tensorflow.keras.preprocessing` module was **deprecated**.
 
-Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the tokenized list of SMILES strings** while **preserving chemical information**, and this list would then be **adapted onto a `tensorflow.keras.layers.TextVectorization` layer instance**, which is a **modern TensorFlow layer**
+Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the tokenized list of SMILES strings** while **preserving chemical information**, and this list would then be **adapted onto a `tensorflow.keras.layers.TextVectorization` layer instance**. This **`TextVectorization` layer** is a **more modern TensorFlow integration**, allowing for **better integration with the model graph**.
 
-A **`TextVectorization` layer** is a **more modern TensorFlow integration**, allowing for **better integration with the model graph**.
+Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
 ### iii. Encoder Optimization
 
