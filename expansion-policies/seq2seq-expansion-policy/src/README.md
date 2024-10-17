@@ -508,7 +508,7 @@ As this project is to be an introduction to seq2seq models, the model architectu
 
 In the context of optimizing model performance, this is useful as it **reduces noise/random fluctuations in data** between training runs, ensuring any improvement or reduction in performance is solely the result of the hyperparameter change, change in model architecture etc.
 
-Following the **NVIDIA documentation for Clara**, **<sup>10</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](**<sup>10</sup>**):<br>
+Following the **NVIDIA documentation for Clara**, **<sup>10</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/trainers/environment.py)<br>
 &nbsp; &nbsp; &nbsp; &nbsp; 1. Set environment variable for **Python's built-in has seed**.<br>
 &nbsp; &nbsp; &nbsp; &nbsp; 2. Set seeds for the **pseudo-random number generators** used in the model for reproducible random number generation.<br>
 &nbsp; &nbsp; &nbsp; &nbsp; 3. Enabling **deterministic operations** in TensorFlow.
