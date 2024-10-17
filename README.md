@@ -55,9 +55,9 @@
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Deterministic Training Environment](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#i-deterministic-training-environment)<br>
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Data Tokenization and Preprocessing](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-data-tokenization-and-preprocessing)<br>
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Callbacks Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iii-callbacks-optimization)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Encoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-encoder-optimization)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Decoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iii-decoder-optimization)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vi. [Attention Mechanism Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iv-attention-mechanism-optimization)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Encoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iv-encoder-optimization)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Decoder Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vi-decoder-optimization)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vi. [Attention Mechanism Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vii-attention-mechanism-optimization)<br>
    &nbsp; &nbsp; 4.1.4 [Model Documentation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#414-model-documentation)<br>
    4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#references)<br>
 
