@@ -544,12 +544,16 @@ Analysis using the metrics described above showed that this new approach was vas
 
 When deciding on a loss function, I considered **Sparse Categorical Cross-Entropy** and **Categorical Cross-Entropy**.
 * **Categorical cross-entropy**:
-  * Categorical cross entropy loss (also known as **softmax loss**), is a common loss function used for **multi-class classification tasks**.
+  * Categorical cross-entropy loss (also known as **softmax loss**), is a common loss function used for **multi-class classification tasks**.
   * It measures the **dissimilarity (or error)** between the **predicted probability distribution** and the **true probability distribution** of the target classes.
   * The **predicted probability distribution** are usually obtained by passing the outputs of the model through a **softmax function**, which converts the **model's raw output** into a **probability distribution across the target classes**.
   * The **true probability distribution** represents the **actual labels of the training (and validation) examples**, typically in the form of **one-hot encoded vectors**.
 * **Sparse categorical cross-entropy**:
-  * 
+  * Sparse categorical cross-entropy loss is another variant of the **cross-entropy loss function** used for **multi-class classification tasks**.
+  * In contract to categorical cross-entropy loss, where the **true labels are represented as one-hit encoded vectors**, sparse categorical cross-entropy loss expects the **target labels to be integers indicating the class indices directly**.
+  * The sparese categorical cross-entropy loss function works by **first converting the true labels into one-hot encoded vectors internally**, and then applying the **regular categorical cross-entropy loss calculation**.
+  * Mathematically, this has the **same formula as cross-entropy loss**, it just **converts the true labels to one-hot encoded vecots first**.
+  * Additionally, sparse cross-entropy loss takes the true labels as a **1D vector of integers**. For example **`[1,2,1,5]`**, not **`[[1], [2], [1], [5]]`**.
 
 ### iv. Metrics and Callbacks Optimisation (Early Stopping, Dynamic Learning Rate, Checkpoints, BLEU and Perplexity)
 
