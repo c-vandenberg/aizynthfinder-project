@@ -642,7 +642,9 @@ Normalising **across all features of each input removes the dependence on batche
   </div>
 <br>
 
-### vii. Attention Mechanism Optimisation
+### vii. Attention Mechanism Optimisation (Bahdanau Attention Mechanism)
+
+### viii. Inference Optimisation (Beam Search)
 
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
