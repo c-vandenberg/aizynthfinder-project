@@ -12,7 +12,7 @@ The neural network is trained on these template rules, and the trained model is 
 
 ## 2.1 What is AiZynthFinder's Expansion Policy Neural Network?
 
-As its standard template-based expantion policy, AiZynthFinder employs a type of ***feedforward neural network** called a **Muti-Layer Perceptron**. **<sup>4</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
+As its standard template-based expantion policy, AiZynthFinder employs a type of **feedforward neural network** called a **Muti-Layer Perceptron**. **<sup>4</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
 
 The architecture effectively **maps molecular representations to reaction probabilities**, generating a **ranked list of reaction templates** representing the most feasbile sets of reactions.
 
