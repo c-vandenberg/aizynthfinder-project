@@ -297,13 +297,13 @@ class Trainer:
             tokenizer=self.tokenizer,
             validation_data=self.data_loader.get_valid_dataset(),
             validation_metrics_dir=valid_metrics_dir,
-            log_dir=os.path.join(log_dir, 'validation_metrics'),
+            log_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
             max_length=self.data_loader.max_encoder_seq_length
         )
 
         # TensorBoard
-        tensorboard_callback: EarlyStopping = TensorBoard(
-            log_dir=log_dir
+        tensorboard_callback: TensorBoard = TensorBoard(
+            log_dir=tensorboard_dir
         )
 
         self.callbacks = [

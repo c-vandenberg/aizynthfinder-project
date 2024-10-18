@@ -3,8 +3,6 @@ import pydevd_pycharm
 
 import tensorflow as tf
 
-pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
-
 from trainers.trainer import Trainer
 
 def main():
