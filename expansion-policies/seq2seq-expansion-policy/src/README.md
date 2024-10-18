@@ -500,7 +500,7 @@ Additionally, the sources and target datasets were **combined** so that they cou
 
 As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture described by *Liu et al.*, to act as a **baseline** for future model iterations.
 
-### 4.1.3 Model Optimization
+### 4.1.3 Model Optimisation
 
 ### i. Deterministic Training Environment
 
@@ -519,7 +519,7 @@ It is this asynchronous parallelism that can introduce random noise, and hence, 
 
 Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
 
-### ii. Data Tokenization and Preprocessing Optimization
+### ii. Data Tokenization and Preprocessing Optimisation (DeepChem Tokenizer and TensorFlow TextVectorisation)
 
 Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
 
@@ -540,13 +540,13 @@ Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_to
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### iii. Loss Function and Callbacks Optimization
+### iii. Loss Function and Callbacks Optimistion
 
-### iv. Encoder Optimization
+### iv. Encoder Optimisation (Residual Connections)
 
 Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-The first siginificant encoder change implemented during the optimization process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+The first siginificant encoder change implemented during the optimisation process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
 
 The second significant encoder change was the implementation of **residual connections**. 
 * Residual connections are **direct pathways** that allow the **output of one layer to be added to the output of a deeper layer in the network**.
@@ -565,15 +565,65 @@ The benefits of residual connections include:
   </div>
 <br>
 
-### vi. Decoder Optimization
+### vi. Decoder Optimisation (Residual Connections, Layer Normalisation)
 
 Initial baseline model decoder architecture consisited of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-The first significant change was the **adddition of residual connections were added to the decoder**. This resulted in an **improvement in both accuracy and loss** for training, validation and testing. This was at odds to what was reported by *Britz et al.* (**Table 4** and **Table 5**). This need for residual connections between layers is likley due to the increased semantic complexity of SMILES strings.
+The first significant change was the **adddition of residual connections were added to the decoder** (**Fig 1**). This resulted in an **improvement in both accuracy and loss** for training, validation and testing. This was at odds to what was reported by *Britz et al.* (**Table 4** and **Table 5**). This need for residual connections between layers is likley due to the increased semantic complexity of SMILES strings.
 
-The second significant change was to incorporate **layer normalization** into the decoder.
+The second significant change was to incorporate **layer normalisation** into the decoder.
+* **Normalisation** works by **mapping all the values of a feature** to be in the **range [0,1]**.
+* Normalisation techniques are employed in neural networks to:
+  * **Stabilise training**: By **standardising inputs to layers**, they help to **maintain consistent activation scales**.
+  * **Accelerate Convergence**: This enables the use of **higher learning rates** without the **risk of divergence**.
+  * **Improve generalisation**: By acting as a form of **regularisation**, reducing overfitting.
+  * **Mitigate Internal Coveriate Shift**: By **reducing the change in the distribution of network activations** during training.
 
-### vii. Attention Mechanism Optimization
+The first normalisation technique to consider is **batch normalisation**. In batch normalisation, the **inputs in each batch are scaled** so that they have a **mean of 0 (zero mean)** and a **standard deviation of 1 (unit standard deviation)**. Batch normalisation is applied **between the hidden layers of the encoder and/or decoder**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/6fdc7bd1-1f0f-450b-938e-83a2df51fb68", alt="batch-normalisation-overview"/>
+    <p>
+      <b>Fig 2</b> Section of a neural network with a Batch Normalisation Layer <b><sup>12</sup></b>
+    </p>
+  </div>
+<br>
+
+To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**.
+
+Following the output of the **layer `k-1`**, we can add a **layer that performs this batch normalisation operation** across the **mini-batch** so that the **pre-activations at layer `k` are unit Gaussians** (**Fig 2**.
+
+As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). 
+
+In reality, forcing all pre-activations to have a **zero mean** and **unit standard deviation** can be **too restrictive**, so batch normalisation **introduces additional parameters**, but this is beyond the scope of this project.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/08e5dda1-8a59-474f-8793-b287424579b2", alt="how-batch-normlisation-works"/>
+    <p>
+      <b>Fig 3</b> How batch normalisation works <b><sup>12</sup></b>
+    </p>
+  </div>
+<br>
+
+**Layer normalisation** is a normalisation technique introduced to address some of the limitations of **batch normalisation**. In layer normalisation, **all neurons in a particular layer** effectively have the **same distribution across all features for a given input**.
+* For example, if each input has **`d` features, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**.
+
+Normalising **across all features of each input removes the dependence on batches/batch statistics**. This makes layer normalisation **well suited for sequence models** such as seq2seq models, RNNs and transformers.
+
+*Fig 4** illustrates the same example as earlier, but with **layer normalisation instead of batch normalisation**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/71187197-02ad-463a-934a-f15abd887344", alt="how-layer-normalisation-works"/>
+    <p>
+      <b>Fig 4</b> How layer normalisation works <b><sup>12</sup></b>
+    </p>
+  </div>
+<br>
+
+### vii. Attention Mechanism Optimisation
 
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
