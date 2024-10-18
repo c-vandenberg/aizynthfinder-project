@@ -540,7 +540,16 @@ Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_to
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### iii. Loss Function Optimisation ((Sparse Categorical Crossentropy and Adam)
+### iii. Loss Function Optimisation (Sparse Categorical Cross-Entropy, Adam and Weight Decay)
+
+When deciding on a loss function, I considered **Sparse Categorical Cross-Entropy** and **Categorical Cross-Entropy**.
+* **Categorical cross-entropy**:
+  * Categorical cross entropy loss (also known as **softmax loss**), is a common loss function used for **multi-class classification tasks**.
+  * It measures the **dissimilarity (or error)** between the **predicted probability distribution** and the **true probability distribution** of the target classes.
+  * The **predicted probability distribution** are usually obtained by passing the outputs of the model through a **softmax function**, which converts the **model's raw output** into a **probability distribution across the target classes**.
+  * The **true probability distribution** represents the **actual labels of the training (and validation) examples**, typically in the form of **one-hot encoded vectors**.
+* **Sparse categorical cross-entropy**:
+  * 
 
 ### iv. Metrics and Callbacks Optimisation (Early Stopping, Dynamic Learning Rate, Checkpoints, BLEU and Perplexity)
 
@@ -596,11 +605,11 @@ The first normalisation technique to consider is **batch normalisation**. In bat
   </div>
 <br>
 
-To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**.
+To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**. **<sup>12</sup>**
 
 Following the output of the **layer `k-1`**, we can add a **layer that performs this batch normalisation operation** across the **mini-batch** so that the **pre-activations at layer `k` are unit Gaussians** (**Fig 2**.
 
-As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). 
+As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). **<sup>12</sup>**
 
 In reality, forcing all pre-activations to have a **zero mean** and **unit standard deviation** can be **too restrictive**, so batch normalisation **introduces additional parameters**, but this is beyond the scope of this project.
 
@@ -614,7 +623,7 @@ In reality, forcing all pre-activations to have a **zero mean** and **unit stand
 <br>
 
 **Layer normalisation** is a normalisation technique introduced to address some of the limitations of **batch normalisation**. In layer normalisation, **all neurons in a particular layer** effectively have the **same distribution across all features for a given input**.
-* For example, if each input has **`d` features, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**.
+* For example, if each input has **`d` features, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**. **<sup>12</sup>**
 
 Normalising **across all features of each input removes the dependence on batches/batch statistics**. This makes layer normalisation **well suited for sequence models** such as seq2seq models, RNNs and transformers.
 
@@ -645,4 +654,5 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
 **[9]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
 **[10]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). <br><br>
 **[11]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
+**[12]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
 
