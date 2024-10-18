@@ -519,7 +519,7 @@ It is this asynchronous parallelism that can introduce random noise, and hence, 
 
 Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
 
-### ii. Data Tokenization and Preprocessing
+### ii. Data Tokenization and Preprocessing Optimization
 
 Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
 
