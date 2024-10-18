@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple, Union, Any
 
 import tensorflow as tf
+from tensorflow import Tensor
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.layers import (Embedding, LSTM, Dropout,
                                      Dense, Layer, LayerNormalization)
@@ -127,7 +128,7 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_output : tf.Tensor
             The predicted token probabilities for each timestep in the target sequence.
         """
-        # UNpack inputs
+        # Unpack inputs
         decoder_input: tf.Tensor  # Shape: (batch_size, seq_len_dec)
         initial_state: List[tf.Tensor]  # List of tensors for initial hidden and cell states
         encoder_output: tf.Tensor  # Shape: (batch_size, seq_len_enc, enc_units)
@@ -136,31 +137,52 @@ class StackedLSTMDecoder(DecoderInterface):
         if decoder_input is None or initial_state is None or encoder_output is None:
             raise ValueError('decoder_input, initial_state and encoder_output must be passed to the Decoder.')
 
-        # Embed the input and extract decoder mask
-        decoder_output: tf.Tensor = self.embedding(decoder_input) # Shape: (batch_size, seq_len_dec, decoder_embedding_dim)
-        decoder_mask: Optional[tf.Tensor] = self.embedding.compute_mask(decoder_input) # Shape: (batch_size, seq_len_dec)
+        # Unpack masks
+        decoder_mask, encoder_mask = None, None
+        if mask is not None:
+            decoder_mask, encoder_mask = mask
+
+        # Embed the input and extract decoder mask if not provided
+        decoder_output = self.embedding(decoder_input) # Shape: (batch_size, seq_len_dec, decoder_embedding_dim)
+        if decoder_mask is None:
+            decoder_mask = self.embedding.compute_mask(decoder_input) # Shape: (batch_size, seq_len_dec)
 
         # Initialize previous_output with the embeddings
         previous_output = decoder_output
 
+        # Prepare initial states for all layers
+        num_states = len(initial_state)
+        expected_states = self.num_layers * 2
+        if num_states == 2:
+            # Use initial_state (encoder final state) for the first LSTM layer
+            states_list = [initial_state] + [(None, None)] * (self.num_layers - 1)
+        elif num_states == expected_states:
+            # Prepare initial states for all layers, initialising to zeros if not provided
+            states_list = [
+                (initial_state[i], initial_state[i + 1]) for i in range(0, num_states, 2)
+            ]
+        else:
+            raise ValueError(f"Expected initial_state length to be 2 or {expected_states}, got {num_states}")
+
         # Process through decoder layers
+        new_states = []
         for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
                 zip(self.lstm_layers, self.dropout_layers, self.layer_norm_layers)
         ):
-            if i == 0:
-                # Use initial_state (encoder final state) for the first LSTM layer
-                decoder_output, state_h, state_c = lstm_layer(
-                    decoder_output,
-                    mask=decoder_mask,
-                    initial_state=initial_state,
-                    training=training
-                )
-            else:
-                decoder_output, state_h, state_c = lstm_layer(
-                    decoder_output,
-                    mask=decoder_mask,
-                    training=training
-                )
+            state_h, state_c = states_list[i]
+            if state_h is None or state_c is None:
+                batch_size = tf.shape(decoder_output)[0]
+                state_h = tf.zeros((batch_size, self.units))
+                state_c = tf.zeros((batch_size, self.units))
+
+            decoder_output, state_h, state_c = lstm_layer(
+                decoder_output,
+                mask=decoder_mask,
+                initial_state=[state_h, state_c],
+                training=training
+            )
+            new_states.extend([state_h, state_c])
+
             # Apply Layer Normalization
             decoder_output = layer_norm_layer(decoder_output)
 
@@ -204,7 +226,7 @@ class StackedLSTMDecoder(DecoderInterface):
         decoder_input: tf.Tensor,
         states: List[tf.Tensor],
         encoder_output: tf.Tensor
-    ) -> Tuple[tf.Tensor]:
+    ) -> tuple[Tensor, list[Tensor]]:
         """
         Performs a single decoding step.
 
@@ -230,12 +252,10 @@ class StackedLSTMDecoder(DecoderInterface):
         expected_states = self.num_layers * 2  # hidden (h) and cell (c) states for each layer
 
         if num_states == 2:
-            # Only initial state for the first layer is provided
-            state_h: tf.Tensor = states[0]  # Shape: (batch_size, units)
-            state_c: tf.Tensor = states[1]
-            states_list: List[Tuple[tf.Tensor, tf.Tensor]] = [(state_h, state_c)] + [(None, None)] * (self.num_layers - 1)
+            # Use initial_state (encoder final state) for the first LSTM layer
+            states_list = [states] + [(None, None)] * (self.num_layers - 1)
         elif num_states == expected_states:
-            # States for all layers are provided
+            # Prepare initial states for all layers, initialising to zeros if not provided
             states_list: List[Tuple[tf.Tensor, tf.Tensor]] = [
                 (states[i], states[i + 1]) for i in range(0, num_states, 2)
             ]
@@ -243,7 +263,10 @@ class StackedLSTMDecoder(DecoderInterface):
             raise ValueError(f"Expected states length to be 2 or {expected_states}, got {num_states}")
 
         new_states: List[tf.Tensor] = []
-        for i, lstm_layer in enumerate(self.lstm_layers):
+        previous_output = decoder_output
+        for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
+                zip(self.lstm_layers, self.dropout_layers, self.layer_norm_layers)
+        ):
             state_h: tf.Tensor
             state_c: tf.Tensor
             state_h, state_c = states_list[i]
@@ -257,6 +280,19 @@ class StackedLSTMDecoder(DecoderInterface):
                 training=False
             )
             new_states.extend([state_h, state_c]) # Shape: (batch_size, 1, units)
+
+            # Apply Layer Normalization
+            decoder_output = layer_norm_layer(decoder_output)
+
+            # Apply residual connection from the second layer onwards
+            if i > 0:
+                decoder_output += previous_output
+
+            # Update previous_output
+            previous_output = decoder_output
+
+            # Apply dropout
+            decoder_output = dropout_layer(decoder_output, training=False)
 
         # Apply attention mechanism
         context_vector: tf.Tensor  # Shape: (batch_size, 1, enc_units)

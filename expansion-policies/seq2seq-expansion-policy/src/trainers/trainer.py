@@ -1,10 +1,12 @@
 import os
+import json
 from typing import Dict, Any, List, Union, Optional
 
 import yaml
 import numpy as np
 import pydevd_pycharm
 from keras.src.utils.module_utils import tensorflow
+import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
@@ -13,12 +15,12 @@ from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
-from callbacks.bleu_score import BLEUScoreCallback
+from callbacks.validation_metrics import ValidationMetricsCallback
 from losses.losses import MaskedSparseCategoricalCrossentropy
-from metrics.metrics import Perplexity
+from metrics.perplexity import Perplexity
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import DataPreprocessor
+from data.utils.preprocessing import SmilesDataPreprocessor
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from models.utils import Seq2SeqModelUtils
 
@@ -44,8 +46,8 @@ class Trainer:
         self.tokenizer: Optional[SmilesTokenizer] = None
         self.data_loader: Optional[DataLoader] = None
         self.vocab_size: Optional[int] = None
-        self.encoder_preprocessor: Optional[DataPreprocessor] = None
-        self.decoder_preprocessor: Optional[DataPreprocessor] = None
+        self.encoder_preprocessor: Optional[SmilesDataPreprocessor] = None
+        self.decoder_preprocessor: Optional[SmilesDataPreprocessor] = None
         self.model: Optional[RetrosynthesisSeq2SeqModel] = None
         self.optimizer: Optional[Adam] = None
         self.loss_function: Optional[Any] = None
@@ -96,39 +98,38 @@ class Trainer:
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
             test_size=data_conf.get('test_size', 0.3),
-            random_state=data_conf.get('random_state', 42)
+            random_state=data_conf.get('random_state', 42),
+            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True)
         )
 
         # Load and prepare data
         self.data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokenizer = self.data_loader.tokenizer
+        self.tokenizer = self.data_loader.smiles_tokenizer
         self.vocab_size = self.data_loader.vocab_size
 
         # Save the tokenizer
         self.save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
 
         # Initialize Preprocessors
-        self.encoder_preprocessor = DataPreprocessor(
+        self.encoder_preprocessor = SmilesDataPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
-            tokenizer=self.tokenizer,
             max_seq_length=data_conf.get('max_encoder_seq_length', 140)
         )
-        self.decoder_preprocessor = DataPreprocessor(
+        self.decoder_preprocessor = SmilesDataPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
-            tokenizer=self.tokenizer,
             max_seq_length=data_conf.get('max_decoder_seq_length', 140)
         )
 
     def save_tokenizer(self, tokenizer_path: str) -> None:
         """
-        Saves the tokenizer to the specified path.
+        Saves the tokenizer's vocabulary to a JSON file.
 
         Parameters
         ----------
         tokenizer_path : str
-            Path where the tokenizer JSON will be saved.
+            Path where the tokenizer vocabulary JSON will be saved.
 
         Returns
         -------
@@ -136,8 +137,40 @@ class Trainer:
         """
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
         with open(tokenizer_path, 'w') as f:
-            f.write(self.tokenizer.to_json())
-        print(f"Tokenizer saved to {tokenizer_path}")
+            json.dump(self.tokenizer.word_index, f, indent=4)
+        print(f"Tokenizer vocabulary saved to {tokenizer_path}")
+
+    @staticmethod
+    def load_tokenizer(tokenizer_path: str, reverse_input_sequence: bool = False) -> SmilesTokenizer:
+        """
+        Loads the tokenizer's vocabulary from a JSON file.
+
+        Parameters
+        ----------
+        tokenizer_path : str
+            Path to the tokenizer vocabulary JSON file.
+        reverse_input_sequence : bool, optional
+            Boolean dictating whether input sequence should be reversed
+
+        Returns
+        -------
+        SmilesTokenizer
+            An instance of SmilesTokenizer with the loaded vocabulary.
+        """
+        with open(tokenizer_path, 'r') as f:
+            word_index = json.load(f)
+
+        # Initialize a new SmilesTokenizer instance
+        smiles_tokenizer = SmilesTokenizer(
+            start_token='<START>',
+            end_token='<END>',
+            oov_token='<OOV>',
+            reverse_input_sequence=reverse_input_sequence
+        )
+        # Manually set the vocabulary
+        smiles_tokenizer.text_vectorization.set_vocabulary(list(word_index.keys()))
+
+        return smiles_tokenizer
 
     def setup_model(self) -> None:
         """
@@ -175,14 +208,13 @@ class Trainer:
         )
 
         # Set encoder and decoder preprocessors
-        self.model.encoder_data_processor = self.encoder_preprocessor
-        self.model.decoder_data_processor = self.decoder_preprocessor
+        self.model.smiles_tokenizer = self.tokenizer
 
         # Set up the optimizer
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
-        self.loss_function = MaskedSparseCategoricalCrossentropy(padding_idx=0)
+        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
         self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
         self.metrics.append(Perplexity(loss_function=self.loss_function))
 
@@ -219,6 +251,7 @@ class Trainer:
         None
         """
         training_conf: dict[str, Any] = self.config.get('training', {})
+        log_dir: str = training_conf.get('log_dir', './logs')
 
         # Early Stopping
         early_stopping: EarlyStopping = EarlyStopping(
@@ -256,23 +289,26 @@ class Trainer:
             patience=3
         )
 
-        # BLEU score callback
-        bleu_callback: BLEUScoreCallback = BLEUScoreCallback(
+        # Validation metrics callback
+        valid_metrics_dir: str = training_conf.get('valid_metrics_dir', './validation-metrics')
+        validation_metrics_callback: ValidationMetricsCallback = ValidationMetricsCallback(
             tokenizer=self.tokenizer,
             validation_data=self.data_loader.get_valid_dataset(),
-            log_dir=os.path.join(training_conf.get('log_dir', './logs'), 'bleu_score')
+            validation_metrics_dir=valid_metrics_dir,
+            log_dir=os.path.join(log_dir, 'validation_metrics'),
+            max_length=self.data_loader.max_encoder_seq_length
         )
 
         # TensorBoard
         tensorboard_callback: EarlyStopping = TensorBoard(
-            log_dir=training_conf.get('log_dir', './logs')
+            log_dir=log_dir
         )
 
         self.callbacks = [
             early_stopping,
             best_val_loss_checkpoint_callback,
             lr_scheduler,
-            bleu_callback,
+            validation_metrics_callback,
             tensorboard_callback
         ]
 
@@ -315,10 +351,10 @@ class Trainer:
         references = []
         hypotheses = []
         beam_width = training_conf.get('beam_width', 5)
-        start_token = self.data_loader.smiles_tokenizer.start_token
-        start_token_id = self.tokenizer.word_index[start_token]
-        end_token = self.data_loader.smiles_tokenizer.end_token
-        end_token_id = self.tokenizer.word_index[end_token]
+        start_token = self.tokenizer.start_token
+        start_token_id = self.tokenizer.word_index.get(start_token)
+        end_token = self.tokenizer.end_token
+        end_token_id = self.tokenizer.word_index.get(end_token)
 
         for (encoder_input, decoder_input), target_output in test_dataset:
             predicted_sequences = self.model.predict_sequence_beam_search(
@@ -402,8 +438,10 @@ class Trainer:
         None
         """
         TrainingEnvironment.setup_environment(self.config)
-        self.load_model('data/training/liu-et-al/model-v17/model/keras/seq2seq_model.keras')
+        self.setup_model()
+        self.build_model()
+        self.setup_callbacks()
+        self.train()
+        self.model.summary()
+        self.save_model()
         self.evaluate()
-
-    def load_model(self, model_path: str) -> None:
-        self.model = tensorflow.keras.models.load_model(model_path)

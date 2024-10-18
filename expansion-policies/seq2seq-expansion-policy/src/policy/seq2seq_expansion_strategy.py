@@ -10,6 +10,7 @@ from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import List, Optional, Sequence, Tuple
 
 from data.utils.tokenization import SmilesTokenizer
+from data.utils.preprocessing import SmilesDataPreprocessor
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
@@ -17,7 +18,7 @@ from attention.attention import BahdanauAttention
 from losses.losses import MaskedSparseCategoricalCrossentropy
 from metrics.metrics import Perplexity
 from callbacks.checkpoints import BestValLossCallback
-from callbacks.bleu_score import BLEUScoreCallback
+from callbacks.validation_metrics import ValidationMetricsCallback
 
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
@@ -55,7 +56,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             'MaskedSparseCategoricalCrossentropy': MaskedSparseCategoricalCrossentropy,
             'Perplexity': Perplexity,
             'BestValLossCallback': BestValLossCallback,
-            'BLEUScoreCallback': BLEUScoreCallback
+            'ValidationMetricsCallback': ValidationMetricsCallback
         }
         try:
             model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
@@ -75,9 +76,9 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return tokenizer
 
     def get_actions(
-            self,
-            molecules: Sequence[TreeMolecule],
-            cache_molecules: Optional[Sequence[TreeMolecule]] = None,
+        self,
+        molecules: Sequence[TreeMolecule],
+        cache_molecules: Optional[Sequence[TreeMolecule]] = None,
     ) -> Tuple[List[RetroReaction], List[float]]:
         """
         Generate retrosynthetic actions using the Seq2Seq model.
@@ -95,29 +96,31 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         for mol, predicted_precursors, probs in zip(molecules, predicted_precursors_list, probabilities_list):
             for precursor_smiles, prob in zip(predicted_precursors, probs):
-                # Validate the predicted SMILES
-                if self.is_valid_smiles(precursor_smiles):
-                    metadata = {
-                        "policy_probability": float(prob),
-                        "policy_name": self.key,
-                    }
-                    new_action = SmilesBasedRetroReaction(
-                        mol,
-                        metadata=metadata,
-                        reactants_str=precursor_smiles,
-                    )
-                    possible_actions.append(new_action)
-                    priors.append(prob)
-                else:
-                    self._logger.warning(f"Invalid SMILES generated: {precursor_smiles}")
+                metadata = {
+                    "policy_probability": float(prob),
+                    "policy_name": self.key,
+                }
+                new_action = SmilesBasedRetroReaction(
+                    mol,
+                    metadata=metadata,
+                    reactants_str=precursor_smiles,
+                )
+                possible_actions.append(new_action)
+                priors.append(prob)
 
         return possible_actions, priors
 
     def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
-        # Tokenize the input SMILES strings
-        encoder_input_seqs = self.tokenizer.texts_to_sequences(smiles_list)
-        encoder_input_seqs = tf.keras.preprocessing.sequence.pad_sequences(
-            encoder_input_seqs, maxlen=self.max_encoder_seq_length, padding='post'
+        reversed_smiles_list = [smiles[::-1] for smiles in smiles_list]
+        tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(reversed_smiles_list)
+
+        encoder_data_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor(
+            smiles_tokenizer=self.smiles_tokenizer,
+            tokenizer=self.tokenizer,
+            max_seq_length=self.max_encoder_seq_length
+        )
+        preprocessed_smiles = encoder_data_preprocessor.preprocess_smiles(
+            tokenized_smiles_list=tokenized_smiles_list
         )
 
         start_token = self.smiles_tokenizer.start_token
@@ -126,10 +129,9 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         end_token_id = self.tokenizer.word_index[end_token]
 
         # Use beam search to get multiple predictions per molecule
-        predicted_seqs_list = self.model.predict_sequence_beam_search(
-            encoder_input_seqs,
-            beam_width=self.beam_width,
-            max_length=self.max_decoder_seq_length,
+        predicted_seqs_list = self.model.predict_sequence(
+            preprocessed_smiles,
+            max_length=self.max_encoder_seq_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id
         )
@@ -138,8 +140,15 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         all_probabilities = []
 
         for predicted_seqs in predicted_seqs_list:
+            # Convert Tensor to numpy array, then to list of integers
+            predicted_seqs_list_int = predicted_seqs.numpy().tolist()
+
             # Convert token sequences to SMILES strings
-            predicted_smiles = self.tokenizer.sequences_to_texts([predicted_seqs])
+            predicted_smiles_reversed = self.tokenizer.sequences_to_texts([predicted_seqs_list_int])[0]
+
+            # Reverse back to the original SMILES orientation
+            predicted_smiles = predicted_smiles_reversed[::-1]
+
             # For beam search, you can assign probabilities based on beam scores if available
             # Here, we assign equal probabilities for simplicity
             num_predictions = len(predicted_smiles)
@@ -147,12 +156,30 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             all_predicted_smiles.append(predicted_smiles)
             all_probabilities.append(probabilities)
 
+            # Validate and append
+            if self.is_valid_smiles(predicted_smiles):
+                all_predicted_smiles.append([predicted_smiles])
+                all_probabilities.append(probabilities)
+            else:
+                self._logger.warning(f"Invalid SMILES generated: {predicted_smiles}")
+
         return all_predicted_smiles, all_probabilities
 
     @staticmethod
     def is_valid_smiles(smiles: str) -> bool:
         mol = Chem.MolFromSmiles(smiles)
         return mol is not None
+
+    @staticmethod
+    def clean_sequence(sequence: str, start_token="<START>", end_token="<END>") -> str:
+        # Remove <START>
+        if sequence.startswith(start_token):
+            sequence = sequence[len(start_token):]
+        # Remove everything after <END>
+        end_idx = sequence.find(end_token)
+        if end_idx != -1:
+            sequence = sequence[:end_idx]
+        return sequence.strip()
 
     def reset_cache(self) -> None:
         pass  # Implement caching if necessary

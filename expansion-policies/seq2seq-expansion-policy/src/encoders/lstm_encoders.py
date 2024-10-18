@@ -109,6 +109,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         """
         # Embed the input and obtain mask
         encoder_output: tf.Tensor = self.embedding(encoder_input) # Shape: (batch_size, seq_len, embedding_dim)
+        encoder_mask: tf.tensor = self.embedding.compute_mask(encoder_input) # Shape: (batch_size, seq_len)
 
         final_state_h: Union[None, tf.Tensor] = None
         final_state_c: Union[None, tf.Tensor] = None
@@ -121,7 +122,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             # forward_c shape: (batch_size, units)
             # backward_c shape: (batch_size, units)
             encoder_output, forward_h, forward_c, backward_h, backward_c = lstm_layer(
-                encoder_output, training=training
+                encoder_output, mask=encoder_mask, training=training
             )
 
             # Concatenate the final forward and backward hidden states

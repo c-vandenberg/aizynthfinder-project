@@ -35,16 +35,14 @@ class MaskedSparseCategoricalCrossentropy(Loss):
     def __init__(
         self,
         padding_idx: int = 0,
+        label_smoothing: float = 0.0,
         name: str = "masked_sparse_categorical_crossentropy",
         **kwargs
     ) -> None:
         super(MaskedSparseCategoricalCrossentropy, self).__init__(name=name, **kwargs)
         self.padding_idx = padding_idx
+        self.label_smoothing = label_smoothing
         self.reduction = tf.keras.losses.Reduction.NONE
-        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(
-            from_logits=False,
-            reduction=self.reduction
-        )
 
     def call(self, y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:
         """
@@ -62,18 +60,48 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         tf.Tensor
             Scalar tensor representing the mean loss over non-padding tokens.
         """
-        # Compute the loss for each token
-        loss = self.loss_function(y_true, y_pred)  # Shape: (batch_size, sequence_length)
+        # Flatten y_true and y_pred for simplicity
+        vocab_size = tf.shape(y_pred)[-1]
+        y_true = tf.cast(y_true, tf.int32)
+        y_true_flat = tf.reshape(y_true, [-1])
+        y_pred_flat = tf.reshape(y_pred, [-1, vocab_size])
 
-        # Create a mask to ignore padding tokens
-        mask = tf.not_equal(y_true, self.padding_idx) # Shape: (batch_size, sequence_length)
-        mask = tf.cast(mask, dtype=loss.dtype) # Cast mask to match y_pred's dtype
+        # Create mask to ignore padding tokens
+        mask = tf.not_equal(y_true_flat, self.padding_idx)
 
-        # Apply the mask to the loss
+        # Apply label smoothing if specified
+        if self.label_smoothing > 0:
+            num_classes = tf.cast(vocab_size, y_pred.dtype)
+            label_smoothing = tf.convert_to_tensor(self.label_smoothing, dtype=y_pred.dtype)
+            smooth_positives = 1.0 - label_smoothing
+            smooth_negatives = label_smoothing / (num_classes - 1)
+
+            # One-hot encode y_true
+            y_true_one_hot = tf.one_hot(y_true_flat, depth=vocab_size, dtype=y_pred.dtype)
+            y_true_smoothed = y_true_one_hot * smooth_positives + smooth_negatives
+
+            # Compute loss
+            loss = tf.keras.losses.categorical_crossentropy(
+                y_true_smoothed,
+                y_pred_flat,
+                from_logits=False
+            )
+        else:
+            # Compute loss without label smoothing
+            loss = tf.keras.losses.sparse_categorical_crossentropy(
+                y_true_flat,
+                y_pred_flat,
+                from_logits=False,
+                reduction=self.reduction
+            )
+
+        # Apply the mask
+        mask = tf.cast(mask, dtype=loss.dtype)
         loss *= mask
 
-        # Compute the mean loss over non-padding tokens
+        # Compute mean loss over non-padding tokens
         return tf.reduce_sum(loss) / tf.reduce_sum(mask)
+
 
     def get_config(self) -> dict:
         """
@@ -87,6 +115,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         config = super(MaskedSparseCategoricalCrossentropy, self).get_config()
         config.update({
             'padding_idx': self.padding_idx,
+            'label_smoothing': self.label_smoothing,
         })
         return config
 

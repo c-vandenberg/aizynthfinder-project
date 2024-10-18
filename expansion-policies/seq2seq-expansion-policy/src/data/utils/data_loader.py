@@ -1,19 +1,23 @@
 import os
+import random
 from typing import List, Tuple, Optional
 
+from collections import Counter
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import DataPreprocessor
+from data.utils.preprocessing import SmilesDataPreprocessor
 
 
 class DataLoader:
-    DEFAULT_MAX_SEQ_LENGTH = 150
+    DEFAULT_MAX_SEQ_LENGTH = 140
     DEFAULT_BATCH_SIZE = 16
     DEFAULT_BUFFER_SIZE = 10000
     DEFAULT_TEST_SIZE = 0.3
     DEFAULT_RANDOM_STATE = 42
+    DEFAULT_MAX_TOKENS = 150
+    DEFAULT_REVERSE_INPUT_SEQ_BOOL = True
 
     def __init__(
         self,
@@ -28,6 +32,7 @@ class DataLoader:
         buffer_size: int = DEFAULT_BUFFER_SIZE,
         test_size: float = DEFAULT_TEST_SIZE,
         random_state: int = DEFAULT_RANDOM_STATE,
+        reverse_input_sequence: bool = DEFAULT_REVERSE_INPUT_SEQ_BOOL
     ) -> None:
         self.products_file = products_file
         self.reactants_file = reactants_file
@@ -41,8 +46,9 @@ class DataLoader:
         self.test_size = test_size
         self.random_state = random_state
 
-        self._smiles_tokenizer = SmilesTokenizer()
-        self._tokenizer = None
+        self._smiles_tokenizer = SmilesTokenizer(
+            reverse_input_sequence=reverse_input_sequence
+        )
 
         self.encoder_data_processor = None
         self.decoder_data_processor = None
@@ -54,13 +60,7 @@ class DataLoader:
     @property
     def vocab_size(self) -> int:
         """Returns the size of the vocabulary."""
-        return len(self.tokenizer.word_index) + 1  # +1 for padding token
-
-    @property
-    def tokenizer(self):
-        if self._tokenizer is None:
-            raise ValueError("Tokenizer has not been created yet.")
-        return self._tokenizer
+        return self.smiles_tokenizer.vocab_size
 
     @property
     def smiles_tokenizer(self):
@@ -71,7 +71,6 @@ class DataLoader:
         self._load_datasets()
         self._tokenize_datasets()
         self._split_datasets()
-        self._create_tokenizer()
         self._preprocess_datasets()
 
     def _load_datasets(self) -> None:
@@ -95,15 +94,41 @@ class DataLoader:
             self.reactants_y_valid_dataset = self.reactants_y_valid_dataset[:self.num_samples]
 
         # Reverse the source SMILES strings before tokenization to prevent data leakage
-        self.products_x_dataset = [smiles[::-1] for smiles in self.products_x_dataset]
-        self.products_x_valid_dataset = [smiles[::-1] for smiles in self.products_x_valid_dataset]
 
     def _tokenize_datasets(self) -> None:
         """Tokenizes the datasets using the SMILES tokenizer."""
-        self.tokenized_products_x_dataset = self.smiles_tokenizer.tokenize_list(self.products_x_dataset)
-        self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(self.reactants_y_dataset)
-        self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(self.products_x_valid_dataset)
-        self.tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(self.reactants_y_valid_dataset)
+        self.tokenized_products_x_dataset = self.smiles_tokenizer.tokenize_list(
+            self.products_x_dataset,
+            is_input_sequence=True
+        )
+
+        train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
+        train_test_products_token_counts = Counter(train_test_products_all_tokens)
+        print(
+            f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n")
+
+        self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(
+            self.reactants_y_dataset,
+            is_input_sequence=False
+        )
+
+        train_test_reactants_all_tokens = ' '.join(self.tokenized_reactants_y_dataset).split()
+        train_test_reactants_token_counts = Counter(train_test_reactants_all_tokens)
+        print(f"Tokenized Train & Test Reactants y-Dataset Token Frequency Distribution: {train_test_reactants_token_counts.most_common(20)}\n")
+
+        self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(
+            self.products_x_valid_dataset,
+            is_input_sequence=True
+        )
+        self.tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(
+            self.reactants_y_valid_dataset,
+            is_input_sequence=False
+        )
+        secure_random = random.SystemRandom()
+        print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_dataset)}")
+        print(f"Tokenized Reactants y-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_dataset)}")
+        print(f"Tokenized Products Validation x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_valid_dataset)}")
+        print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_valid_dataset)}")
 
     def _split_datasets(self) -> None:
         """Splits the datasets into training and test sets."""
@@ -115,25 +140,24 @@ class DataLoader:
             random_state=self.random_state
         )
 
-    def _create_tokenizer(self) -> None:
-        """Creates and fits the tokenizer on the training data."""
-        train_tokenized_smiles = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
-        self._tokenizer = self.smiles_tokenizer.create_tokenizer(train_tokenized_smiles)
-
-        # Initialize DataPreprocessors
-        self.encoder_data_processor = DataPreprocessor(
-            self.smiles_tokenizer,
-            self.tokenizer,
-            self.max_encoder_seq_length
-        )
-        self.decoder_data_processor = DataPreprocessor(
-            self.smiles_tokenizer,
-            self.tokenizer,
-            self.max_decoder_seq_length
-        )
+        # Adapt tokenizer only on tokenized training data to prevent data leakage
+        combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
+        tf.print(f"Tokenizer Word Index Before Adapting: \n{self.smiles_tokenizer.word_index}\n")
+        self.smiles_tokenizer.adapt(combined_tokenized_train_data)
+        tf.print(f"Tokenizer Word Index After Adapting: \n{self.smiles_tokenizer.word_index}\n")
 
     def _preprocess_datasets(self) -> None:
         """Preprocesses the training, validation, and test datasets."""
+        # Initialize DataPreprocessors
+        self.encoder_data_processor = SmilesDataPreprocessor(
+            self.smiles_tokenizer,
+            self.max_encoder_seq_length
+        )
+        self.decoder_data_processor = SmilesDataPreprocessor(
+            self.smiles_tokenizer,
+            self.max_decoder_seq_length
+        )
+
         # Preprocess training data
         self.train_data = self._preprocess_data_pair(
             self.tokenized_products_x_train_data,
@@ -151,6 +175,12 @@ class DataLoader:
             self.tokenized_products_x_valid_dataset,
             self.tokenized_reactants_y_valid_dataset
         )
+
+        secure_random = random.SystemRandom()
+        tf.print(f"Preprocessed Training Data Sample: {secure_random.choice(self.train_data)}\n")
+        tf.print(f"Preprocessed Testing Data Sample: {secure_random.choice(self.test_data)}\n")
+        tf.print(f"Preprocessed Validation Data Sample: {secure_random.choice(self.valid_data)}\n")
+
 
     def _preprocess_data_pair(
         self,encoder_data: List[str],

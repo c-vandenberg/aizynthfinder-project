@@ -1,9 +1,10 @@
-from typing import Optional, Any, Tuple
+from typing import Optional, Any, Tuple, List
 
 import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
 
+from data.utils.preprocessing import SmilesTokenizer
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 
@@ -113,9 +114,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.enc_state_h: Dense = Dense(units, name='enc_state_h')
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
-        # Data processors to be set externally
-        self.encoder_data_processor: Optional[Any] = None
-        self.decoder_data_processor: Optional[Any] = None
+        # Smiles tokenizer to be set externally
+        self.smiles_tokenizer: Optional[SmilesTokenizer] = None
 
         self.dropout_rate: float = dropout_rate
         self.weight_decay: float = weight_decay
@@ -154,10 +154,18 @@ class RetrosynthesisSeq2SeqModel(Model):
         state_c: tf.Tensor
         encoder_output, state_h, state_c = self.encoder(encoder_input, training=training)
 
-        # Map encoder final states to decoder initial states
+        # Compute masks
+        encoder_mask:Optional[tf.Tensor]  = self.encoder.compute_mask(encoder_input)
+        decoder_mask: Optional[tf.Tensor]  = self.decoder.compute_mask([decoder_input, None, None])
+
+        # Map encoder final states to initial states for the decoder's first layer
         decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
         decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
-        decoder_initial_state: Tuple[tf.Tensor, tf.Tensor] = (decoder_initial_state_h, decoder_initial_state_c)
+        decoder_initial_state: List[tf.Tensor, tf.Tensor] = [decoder_initial_state_h, decoder_initial_state_c]
+
+        # Prepare initial states for all decoder layers
+        decoder_initial_state = (decoder_initial_state +
+                                 [tf.zeros_like(decoder_initial_state_h)] * (self.decoder.num_layers * 2 - 2))
 
         # Prepare decoder inputs
         decoder_inputs = (
@@ -166,19 +174,22 @@ class RetrosynthesisSeq2SeqModel(Model):
             encoder_output
         )
 
-        # Extract encoder mask
-        encoder_mask: Optional[tf.Tensor] = self.encoder.compute_mask(encoder_input)
-
         # Decoder input sequence processing
         output: tf.Tensor = self.decoder(
             decoder_inputs,
             training=training,
-            mask=encoder_mask
+            mask=[decoder_mask, encoder_mask]
         )
 
         return output
 
-    def predict_sequence(self, encoder_input, max_length=100, start_token_id=None, end_token_id=None):
+    def predict_sequence(
+        self,
+        encoder_input: tf.Tensor,
+        max_length: int = 100,
+        start_token_id: Optional[int] = None,
+        end_token_id: Optional[int] = None
+    ) -> tf.Tensor:
         batch_size, encoder_output, decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
             start_token_id,
@@ -186,7 +197,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         )
 
         decoder_input = tf.fill([batch_size, 1], start_token_id)
-        sequences = tf.TensorArray(tf.int32, size=0, dynamic_size=True)
+        sequences = tf.TensorArray(tf.int32, size=max_length, dynamic_size=False)
         finished = tf.zeros([batch_size], dtype=tf.bool)
 
         for t in range(max_length):
@@ -210,6 +221,10 @@ class RetrosynthesisSeq2SeqModel(Model):
 
             # Prepare next decoder input
             decoder_input = predicted_id
+
+            # Check for end token
+            if tf.reduce_all(tf.equal(predicted_id[:, 0], end_token_id)):
+                break
 
         sequences = sequences.stack()
         sequences = tf.transpose(sequences, [1, 0])  # shape (batch_size, seq_len)
@@ -365,11 +380,11 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         # Prepare start and end token IDs
         if start_token_id is None:
-            start_token = self.decoder_data_processor.smiles_tokenizer.start_token
-            start_token_id = self.decoder_data_processor.tokenizer.word_index[start_token]
+            start_token = self.smiles_tokenizer.start_token
+            start_token_id = self.smiles_tokenizer.word_index[start_token]
         if end_token_id is None:
-            end_token = self.decoder_data_processor.smiles_tokenizer.end_token
-            end_token_id = self.decoder_data_processor.tokenizer.word_index[end_token]
+            end_token = self.smiles_tokenizer.end_token
+            end_token_id = self.smiles_tokenizer.word_index[end_token]
 
         return batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id
 
