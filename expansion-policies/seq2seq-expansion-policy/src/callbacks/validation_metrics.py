@@ -70,10 +70,17 @@ class ValidationMetricsCallback(Callback):
         hypotheses = []
         target_smiles = []
         predicted_smiles = []
+        start_token = self.tokenizer.start_token
+        end_token = self.tokenizer.end_token
 
         for (encoder_input, decoder_input), target_output in self.validation_data:
             # Generate sequences
-            predicted_sequences = self.model.predict_sequence(encoder_input, max_length=self.max_length)
+            predicted_sequences = self.model.predict_sequence(
+                encoder_input,
+                max_length=self.max_length,
+                start_token_id=self.tokenizer.word_index.get(start_token),
+                end_token_id=self.tokenizer.word_index.get(end_token)
+            )
 
             # Convert sequences to text
             predicted_texts = self.tokenizer.sequences_to_texts(
