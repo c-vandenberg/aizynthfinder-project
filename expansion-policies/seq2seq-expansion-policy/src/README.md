@@ -646,9 +646,9 @@ Normalising **across all features of each input removes the dependence on batche
 
 ### viii. Attention Mechanism Optimisation (Bahdanau Attention Mechanism)
 
-### ix. Inference Optimisation (Beam Search)
-
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
+
+### ix. Inference Optimisation (Beam Search)
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
