@@ -567,7 +567,15 @@ The benefits of residual connections include:
 
 ### vi. Decoder Optimization
 
+Initial baseline model decoder architecture consisited of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However, **decoder embedding dimension** and **units** were decreased to **256** or **128** for efficient hardware usage while testing subsequent model versions.
+
+The first significant change was the **adddition of residual connections were added to the decoder**. This resulted in an **improvement in both accuracy and loss** for training, validation and testing. This was at odds to what was reported by *Britz et al.* (**Table 4** and **Table 5**). This need for residual connections between layers is likley due to the increased semantic complexity of SMILES strings.
+
+The second significant change was to incorporate **layer normalization** into the decoder.
+
 ### vii. Attention Mechanism Optimization
+
+Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased to **256** or **128** for efficient hardware usage while testing subsequent model versions.
 
 ## 4.3 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
