@@ -555,9 +555,11 @@ When deciding on a loss function, I considered **Sparse Categorical Cross-Entrop
   * Mathematically, this has the **same formula as cross-entropy loss**, it just **converts the true labels to one-hot encoded vecots first**.
   * Additionally, sparse cross-entropy loss takes the true labels as a **1D vector of integers**. For example **`[1,2,1,5]`**, not **`[[1], [2], [1], [5]]`**.
 
-### iv. Metrics and Callbacks Optimisation (Early Stopping, Dynamic Learning Rate, Checkpoints, BLEU and Perplexity)
+### iv. Callbacks Optimisation (Early Stopping, Dynamic Learning Rate and Checkpoints)
 
-### v. Encoder Optimisation (Residual Connections)
+### v. Metrics Optimisation (BLEU and Perplexity)
+
+### vi. Encoder Optimisation (Residual Connections)
 
 Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
@@ -582,7 +584,7 @@ The benefits of residual connections include:
   </div>
 <br>
 
-### vi. Decoder Optimisation (Residual Connections, Layer Normalisation)
+### vii. Decoder Optimisation (Residual Connections, Layer Normalisation)
 
 Initial baseline model decoder architecture consisited of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
@@ -642,9 +644,9 @@ Normalising **across all features of each input removes the dependence on batche
   </div>
 <br>
 
-### vii. Attention Mechanism Optimisation (Bahdanau Attention Mechanism)
+### viii. Attention Mechanism Optimisation (Bahdanau Attention Mechanism)
 
-### viii. Inference Optimisation (Beam Search)
+### ix. Inference Optimisation (Beam Search)
 
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
