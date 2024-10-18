@@ -546,7 +546,9 @@ Analysis using the metrics described above showed that this new approach was vas
 
 Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
+
 The first siginificant encoder change implemented during the optimisation process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+
 
 The second significant encoder change was the implementation of **residual connections**. 
 * Residual connections are **direct pathways** that allow the **output of one layer to be added to the output of a deeper layer in the network**.
@@ -569,7 +571,9 @@ The benefits of residual connections include:
 
 Initial baseline model decoder architecture consisited of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
+
 The first significant change was the **adddition of residual connections were added to the decoder** (**Fig 1**). This resulted in an **improvement in both accuracy and loss** for training, validation and testing. This was at odds to what was reported by *Britz et al.* (**Table 4** and **Table 5**). This need for residual connections between layers is likley due to the increased semantic complexity of SMILES strings.
+
 
 The second significant change was to incorporate **layer normalisation** into the decoder.
 * **Normalisation** works by **mapping all the values of a feature** to be in the **range [0,1]**.
