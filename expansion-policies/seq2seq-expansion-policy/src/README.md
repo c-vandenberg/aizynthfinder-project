@@ -540,9 +540,11 @@ Therefore, an alternative strategy was employed whereby `deepchem.feat.smiles_to
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### iii. Loss Function and Callbacks Optimistion
+### iii. Loss Function Optimisation ((Sparse Categorical Crossentropy and Adam)
 
-### iv. Encoder Optimisation (Residual Connections)
+### iv. Metrics and Callbacks Optimisation (Early Stopping, Dynamic Learning Rate, Checkpoints, BLEU and Perplexity)
+
+### v. Encoder Optimisation (Residual Connections)
 
 Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 8**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
