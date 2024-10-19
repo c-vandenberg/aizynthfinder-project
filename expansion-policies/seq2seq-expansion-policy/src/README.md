@@ -431,7 +431,7 @@ The investigation shows that the **optimal beam width** appears to reside around
 
 The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the prediced molecular precursors in the same notation.
 
-### 4.1.1 Data Preparation
+### 4.2.1 Data Preparation
 
 *Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 8.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
 
@@ -463,7 +463,7 @@ Additionally, a **beam search procedure is used for model inference**: **<sup>1<
 3. The candidate sequences that contain an **end of sequence character are considered to be complete**. This was on average about **97% of all beam search predicted candidate sequences**.
 4. These complete candidate sequences represent the **reactant sets predicted by the seq2seq model** for a particular target molecule, and they are **ranked by the overall sequence log probabilities**. The overall sequence log probability for a candidate sequence consists of the **log probabilities of the individual characters** in that candidate sequence.
 
-### 4.1.2 Model Architecture
+### 4.2.2 Model Architecture
 
 From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>*
 
