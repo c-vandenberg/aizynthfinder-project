@@ -74,6 +74,8 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         # Build first Bidirectional LSTM layer
         self.bidirectional_lstm_layers = []
         self.dropout_layers = []
+        self.layer_norm_layers = []
+        self.residual_projection_layers = []
         for i in range(num_layers):
             lstm_layer = Bidirectional(
                 LSTM(
@@ -84,9 +86,13 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
                 ),
                 name=f'bidirectional_lstm_encoder_{i + 1}'
             )
-            dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
             self.bidirectional_lstm_layers.append(lstm_layer)
+
+            dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
             self.dropout_layers.append(dropout_layer)
+
+            layer_norm_layer = LayerNormalization(name=f'encoder_layer_norm_{i + 1}')
+            self.layer_norm_layers.append(layer_norm_layer)
 
     def call(
         self,
@@ -114,7 +120,12 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         final_state_h: Union[None, tf.Tensor] = None
         final_state_c: Union[None, tf.Tensor] = None
 
-        for lstm_layer, dropout_layer in zip(self.bidirectional_lstm_layers, self.dropout_layers):
+        # Initialize previous_output with the embeddings
+        previous_output = encoder_output
+
+        for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
+                zip(self.bidirectional_lstm_layers, self.dropout_layers, self.layer_norm_layers)
+        ):
             # Pass through the Bidirectional LSTM layer
             # encoder_output shape: (batch_size, seq_len, units * 2)
             # forward_h shape: (batch_size, units)
@@ -130,6 +141,16 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
             # Concatenate the final forward and backward cell states
             final_state_c = tf.concat([forward_c, backward_c], axis=-1) # Shape: (batch_size, units * 2)
+
+            # Apply Layer Normalization
+            encoder_output = layer_norm_layer(encoder_output)
+
+            # Apply residual connection from the second layer onwards
+            if i > 0:
+                encoder_output += previous_output
+
+            # Update previous_output
+            previous_output = encoder_output
 
             # Apply dropout to the encoder output
             encoder_output: tf.Tensor = dropout_layer(
