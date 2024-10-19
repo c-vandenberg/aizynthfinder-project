@@ -18,17 +18,26 @@ Additionally, the sources and target datasets were **combined** so that they cou
 
 ## 5.2 Model Architecture
 
-As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture described by *Liu et al.*, to act as a **baseline** for future model iterations.
+As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**), to act as a **baseline** for future model iterations.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/999ae54c-1d80-4f0a-8411-cb5d9391766e", alt="liu-et-al-model-hyperparameters"/>
+    <p>
+      <b>Table 1</b> Key hyperparameters of the seq2seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
+    </p>
+  </div>
+<br>
 
 ## 5.3 Model Optimisation
 
 ### 5.3.1 Deterministic Training Environment
 
-**Determinism** when using machine learning frameworks is to have **exact reproducibility from run to run**, with a model's training run **yielding the same weights**, and a model's inference run **yielding the same prediction**. **<sup>2</sup>**
+**Determinism** when using machine learning frameworks is to have **exact reproducibility from run to run**, with a model's training run **yielding the same weights**, and a model's inference run **yielding the same prediction**. **<sup>3</sup>**
 
 In the context of optimizing model performance, this is useful as it **reduces noise/random fluctuations in data** between training runs, ensuring any improvement or reduction in performance is solely the result of the hyperparameter change, change in model architecture etc.
 
-Following the **NVIDIA documentation for Clara**, **<sup>2</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/trainers/environment.py).
+Following the **NVIDIA documentation for Clara**, **<sup>3</sup>** the following steps were taken to ensure **deterministic training** in the [training environment set up](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/trainers/environment.py).
 * Set environment variable for **Python's built-in has seed**.
 * Set seeds for the **pseudo-random number generators** used in the model for reproducible random number generation.
 * Enabling **deterministic operations** in TensorFlow.
@@ -73,11 +82,11 @@ When deciding on a loss function, both **Sparse Categorical Cross-Entropy** and 
   * In contract to categorical cross-entropy loss, where the **true labels are represented as one-hit encoded vectors**, sparse categorical cross-entropy loss expects the **target labels to be integers indicating the class indices directly**.
   * The sparse categorical cross-entropy loss function works by **first converting the true labels into one-hot encoded vectors internally**, and then applying the **regular categorical cross-entropy loss calculation**.
   * Mathematically, this has the **same formula as cross-entropy loss**, it just **converts the true labels to one-hot encoded vecots first**.
-  * Additionally, sparse cross-entropy loss takes the true labels as a **1D vector of integers**. For example **`[1,2,1,5]`**, not **`[[1], [2], [1], [5]]`**. **<sup>3</sup>**
+  * Additionally, sparse cross-entropy loss takes the true labels as a **1D vector of integers**. For example **`[1,2,1,5]`**, not **`[[1], [2], [1], [5]]`**. **<sup>4</sup>**
  
 The chosen preprocessing approach in `data.utils.preprocessing.SmilesDataPreprocessor` was to **map characters tokenized smiles strings** in the tokenized_smiles_list to **the integers that they correspond to in the smiles_tokenizers word index**. Given that this would give a **1D vector of integers**, a **sparse categorical cross-entropy loss function** was the appropriate choice.
 
-For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was chosen, in line with *Liu et al.* **<sup>1</sup>** (**Table 8**).
+For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was chosen, in line with *Liu et al.* **<sup>2</sup>** (**Table 1**).
 * **Role of Optimisers**: In machine learning, optimisers **adjust the weights and biases** of a neural network to **minimise the loss** calculated by the loss function.
 * **Gradient Descent**: Most optimisers are based on **gradient descent principles**, where the idea is to **move in the direction opposite to the gradient of the loss function (i.e the negative gradient direction)** by **adjusting the model's parameters** (the **weights and biases**).
 * There are various optimisers that use different strategies to **improve convergence speed**, **handle noisy gradients**, or **escape local minima**.
@@ -109,7 +118,7 @@ The benefits of residual connections include:
   <div align="center">
     <img src="https://github.com/user-attachments/assets/9082fa4e-0eb2-402b-a494-a29740efd7d4", alt="residual-connection"/>
     <p>
-      <b>Fig 1</b> Residual connection in a FNN <b><sup>4</sup></b>
+      <b>Fig 1</b> Residual connection in a FNN <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -136,16 +145,16 @@ The first normalisation technique to consider is **batch normalisation**. In bat
   <div align="center">
     <img src="https://github.com/user-attachments/assets/6fdc7bd1-1f0f-450b-938e-83a2df51fb68", alt="batch-normalisation-overview"/>
     <p>
-      <b>Fig 2</b> Section of a neural network with a Batch Normalisation Layer <b><sup>5</sup></b>
+      <b>Fig 2</b> Section of a neural network with a Batch Normalisation Layer <b><sup>6</sup></b>
     </p>
   </div>
 <br>
 
-To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**. **<sup>5</sup>**
+To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**. **<sup>6</sup>**
 
 Following the output of the **layer `k-1`**, we can add a **layer that performs this batch normalisation operation** across the **mini-batch** so that the **pre-activations at layer `k` are unit Gaussians** (**Fig 2**).
 
-As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). **<sup>5</sup>**
+As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). **<sup>6</sup>**
 
 In reality, forcing all pre-activations to have a **zero mean** and **unit standard deviation** can be **too restrictive**, so batch normalisation **introduces additional parameters**, but this is beyond the scope of this project.
 
@@ -153,13 +162,13 @@ In reality, forcing all pre-activations to have a **zero mean** and **unit stand
   <div align="center">
     <img src="https://github.com/user-attachments/assets/08e5dda1-8a59-474f-8793-b287424579b2", alt="how-batch-normlisation-works"/>
     <p>
-      <b>Fig 3</b> How batch normalisation works <b><sup>5</sup></b>
+      <b>Fig 3</b> How batch normalisation works <b><sup>6</sup></b>
     </p>
   </div>
 <br>
 
 **Layer normalisation** is a normalisation technique introduced to address some of the limitations of **batch normalisation**. In layer normalisation, **all neurons in a particular layer** effectively have the **same distribution across all features for a given input**.
-* For example, if each input has **`d` features, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**. **<sup>5</sup>**
+* For example, if each input has **`d` features, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**. **<sup>6</sup>**
 
 Normalising **across all features of each input removes the dependence on batches/batch statistics**. This makes layer normalisation **well suited for sequence models** such as seq2seq models, RNNs and transformers.
 
@@ -169,7 +178,7 @@ Normalising **across all features of each input removes the dependence on batche
   <div align="center">
     <img src="https://github.com/user-attachments/assets/71187197-02ad-463a-934a-f15abd887344", alt="how-layer-normalisation-works"/>
     <p>
-      <b>Fig 4</b> How layer normalisation works <b><sup>5</sup></b>
+      <b>Fig 4</b> How layer normalisation works <b><sup>6</sup></b>
     </p>
   </div>
 <br>
@@ -181,8 +190,9 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
 ### 5.3.9 Inference Optimisation (Beam Search)
 
 ## 5.4 References
-**[1]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
-**[2]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). <br><br>
-**[3]** Chand, S. (2023) Choosing between cross entropy and sparse cross entropy - the only guide you need!, Medium. Available at: https://medium.com/@shireenchand/choosing-between-cross-entropy-and-sparse-cross-entropy-the-only-guide-you-need-abea92c84662 (Accessed: 18 October 2024). <br><br>
-**[4]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
-**[5]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
+**[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
+**[2]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
+**[3]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). <br><br>
+**[4]** Chand, S. (2023) Choosing between cross entropy and sparse cross entropy - the only guide you need!, Medium. Available at: https://medium.com/@shireenchand/choosing-between-cross-entropy-and-sparse-cross-entropy-the-only-guide-you-need-abea92c84662 (Accessed: 18 October 2024). <br><br>
+**[5]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
+**[6]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
