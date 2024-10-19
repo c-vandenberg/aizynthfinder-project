@@ -35,7 +35,7 @@
   &nbsp; &nbsp; 3.4.2 [Decoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#342-decoder)<br>
   &nbsp; &nbsp; 3.4.3 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism)<br>
   3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#35-references)<br>
-4. [Retrosynthesis Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#4-retrosynthesis-sequence-to-sequence-model)<br>
+4. [Retrosynthesis Sequence-to-Sequence Model Literature](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#4-retrosynthesis-sequence-to-sequence-model)<br>
   4.1 [*Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#41-britz-et-al-analysis-of-neural-machine-translation-architecture-hyperparameters)<br>
    &nbsp; &nbsp; 4.1.1 [Embedding Dimensionality](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-embedding-dimensionality)<br>
    &nbsp; &nbsp; 4.1.2 [Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-encoder-and-decoder-recurrent-neural-network-rnn-cell-variant)<br>
@@ -48,21 +48,22 @@
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Training](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#i-training)<br>
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Testing](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-testing)<br>
    &nbsp; &nbsp; 4.1.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-model-architecture)<br>
-   4.2 [Project Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#42-project-sequence-to-sequence-model)<br>
-   &nbsp; &nbsp; 4.1.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#421-data-preparation)<br>
-   &nbsp; &nbsp; 4.1.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#422-model-architecture)<br>
-   &nbsp; &nbsp; 4.1.3 [Model Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-model-optimization)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Deterministic Training Environment](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#i-deterministic-training-environment)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Data Tokenization and Preprocessing Optimisation (DeepChem Tokenizer and TensorFlow TextVectorisation)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-data-tokenization-and-preprocessing-optimisation-deepchem-tokenizer-and-tensorflow-textvectorisation)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Loss Function Optimisation (Sparse Categorical Cross-Entropy, Adam and Weight Decay)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iii-loss-function-optimisation-sparse-categorical-cross-entropy-adam-and-weight-decay)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Callbacks Optimisation (Early Stopping, Dynamic Learning Rate and Checkpoints)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#iv-callbacks-optimisation-early-stopping-dynamic-learning-rate-and-checkpoints)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Metrics Optimisation (BLEU and Perplexity)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#v-metrics-optimisation-bleu-and-perplexity)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Encoder Optimisation (Residual Connections)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vi-encoder-optimisation-residual-connections)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vi. [Decoder Optimisation (Residual Connections, Layer Normalisation)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#vii-decoder-optimisation-residual-connections-layer-normalisation)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; vii. [Attention Mechanism Optimisation (Bahdanau Attention Mechanism)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#viii-attention-mechanism-optimisation-bahdanau-attention-mechanism)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; viii. [Inference Optimisation (Beam Search)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ix-inference-optimisation-beam-search)<br>
-   &nbsp; &nbsp; 4.1.4 [Model Documentation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#414-model-documentation)<br>
-   4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
+  4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
+5. [Project Retrosynthesis Sequence-to-Sequence Model]()<br>
+   5.1 [Data Preparation]()<br>
+   5.2 [Model Architecture]()<br>
+   5.3 [Model Optimization]()<br>
+   &nbsp; &nbsp; 5.3.1 [Deterministic Training Environment]()<br>
+   &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation (DeepChem Tokenizer and TensorFlow TextVectorisation)]()<br>
+   &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation (Sparse Categorical Cross-Entropy, Adam and Weight Decay)]()<br>
+   &nbsp; &nbsp; 5.3.4 [Callbacks Optimisation (Early Stopping, Dynamic Learning Rate and Checkpoints)]()<br>
+   &nbsp; &nbsp; 5.3.5 [Metrics Optimisation (BLEU and Perplexity)]()<br>
+   &nbsp; &nbsp; 5.3.6 [Encoder Optimisation (Residual Connections)]()<br>
+   &nbsp; &nbsp; 5.3.7 [Decoder Optimisation (Residual Connections, Layer Normalisation)]()<br>
+   &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation (Bahdanau Attention Mechanism)]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; viii. [Inference Optimisation (Beam Search)]()<br>
+   5.4 [Model Documentation]()<br>
+   5.5 [References]()<br>
  5. [Transformer Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/transformer-expansion-policy/README.md#5-transformer-expansion-policy)<br>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
