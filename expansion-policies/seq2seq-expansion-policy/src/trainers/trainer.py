@@ -11,21 +11,17 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (Callback, EarlyStopping,
                                         TensorBoard, ReduceLROnPlateau)
 from tensorflow.train import Checkpoint, CheckpointManager
-from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.validation_metrics import ValidationMetricsCallback
-from losses.losses import MaskedSparseCategoricalCrossentropy
+from callbacks.gradient_monitoring import GradientMonitoringCallback
 from metrics.perplexity import Perplexity
-from metrics.bleu_score import BleuScore
-from metrics.smiles_string_metrics import SmilesStringMetrics
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import SmilesDataPreprocessor
 from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
-                                log_sample_predictions, print_sample_predictions,
-                                log_to_tensorboard)
+                                log_sample_predictions, print_sample_predictions)
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from models.utils import Seq2SeqModelUtils
 
@@ -224,7 +220,11 @@ class Trainer:
         self.metrics.append(Perplexity(loss_function=self.loss_function))
 
         # Compile the model
-        self.model.compile(optimizer=self.optimizer, loss=self.loss_function, metrics=self.metrics)
+        self.model.compile(
+            optimizer=self.optimizer,
+            loss=self.loss_function,
+            metrics=self.metrics
+        )
 
     def build_model(self) -> None:
         """
@@ -307,6 +307,11 @@ class Trainer:
         # TensorBoard
         tensorboard_callback: TensorBoard = TensorBoard(
             log_dir=tensorboard_dir
+        )
+
+        # Gradient monitoring
+        gradient_callback = GradientMonitoringCallback(
+            log_dir=os.path.join(tensorboard_dir, 'gradients')
         )
 
         self.callbacks = [
@@ -482,3 +487,21 @@ class Trainer:
         self.model.summary()
         self.save_model()
         self.evaluate()
+
+
+def custom_train_step(model, optimizer, loss_fn, gradient_callback):
+    @tf.function
+    def train_step(inputs):
+        x, y = inputs
+        with tf.GradientTape() as tape:
+            y_pred = model(x, training=True)
+            loss = loss_fn(y, y_pred)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+        # Call gradient callback
+        gradient_callback.on_gradients_computed(gradients, model.trainable_variables)
+
+        return loss
+
+    return train_step
