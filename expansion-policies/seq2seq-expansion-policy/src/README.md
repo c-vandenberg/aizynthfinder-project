@@ -542,7 +542,7 @@ Analysis using the metrics described above showed that this new approach was vas
 
 ### iii. Loss Function Optimisation (Sparse Categorical Cross-Entropy, Adam and Weight Decay)
 
-When deciding on a loss function, I considered **Sparse Categorical Cross-Entropy** and **Categorical Cross-Entropy**.
+When deciding on a loss function, both **Sparse Categorical Cross-Entropy** and **Categorical Cross-Entropy** were considered.
 * **Categorical cross-entropy**:
   * Categorical cross-entropy loss (also known as **softmax loss**), is a common loss function used for **multi-class classification tasks**.
   * It measures the **dissimilarity (or error)** between the **predicted probability distribution** and the **true probability distribution** of the target classes.
@@ -551,9 +551,11 @@ When deciding on a loss function, I considered **Sparse Categorical Cross-Entrop
 * **Sparse categorical cross-entropy**:
   * Sparse categorical cross-entropy loss is another variant of the **cross-entropy loss function** used for **multi-class classification tasks**.
   * In contract to categorical cross-entropy loss, where the **true labels are represented as one-hit encoded vectors**, sparse categorical cross-entropy loss expects the **target labels to be integers indicating the class indices directly**.
-  * The sparese categorical cross-entropy loss function works by **first converting the true labels into one-hot encoded vectors internally**, and then applying the **regular categorical cross-entropy loss calculation**.
+  * The sparse categorical cross-entropy loss function works by **first converting the true labels into one-hot encoded vectors internally**, and then applying the **regular categorical cross-entropy loss calculation**.
   * Mathematically, this has the **same formula as cross-entropy loss**, it just **converts the true labels to one-hot encoded vecots first**.
   * Additionally, sparse cross-entropy loss takes the true labels as a **1D vector of integers**. For example **`[1,2,1,5]`**, not **`[[1], [2], [1], [5]]`**. **<sup>11</sup>**
+ 
+The chosen preprocessing approach in `data.utils.preprocessing.SmilesDataPreprocessor` was to **map characters tokenized smiles strings** in the tokenized_smiles_list to **the integers that they correspond to in the smiles_tokenizers word index**. Given that this would give a **1D vector of integers**, a **sparse categorical cross-entropy loss function** was the appropriate choice.
 
 ### iv. Callbacks Optimisation (Early Stopping, Dynamic Learning Rate and Checkpoints)
 
