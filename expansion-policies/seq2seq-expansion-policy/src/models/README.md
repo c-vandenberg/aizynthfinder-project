@@ -48,7 +48,7 @@ It is this asynchronous parallelism that can introduce random noise, and hence, 
 
 Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
 
-### 5.3.2 Data Tokenization and Preprocessing Optimisation (DeepChem Tokenizer and TensorFlow TextVectorisation)
+### 5.3.2 Data Tokenization and Preprocessing Optimisation
 
 Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
 
@@ -73,7 +73,7 @@ Therefore, an alternative strategy was employed whereby the **list of tokenized 
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### 5.3.3 Loss Function Optimisation (Sparse Categorical Cross-Entropy, Adam and Weight Decay)
+### 5.3.3 Loss Function Optimisation
 
 ### i. Categorical Cross-Entropy vs Sparse Categorical Cross-Entropy
 When deciding on a loss function, both **Sparse Categorical Cross-Entropy** and **Categorical Cross-Entropy** were considered.
@@ -91,26 +91,36 @@ When deciding on a loss function, both **Sparse Categorical Cross-Entropy** and 
  
 The chosen preprocessing approach in `data.utils.preprocessing.SmilesDataPreprocessor` was to **map characters tokenized smiles strings** in the tokenized_smiles_list to **the integers that they correspond to in the smiles_tokenizers word index**. Given that this would give a **1D vector of integers**, a **sparse categorical cross-entropy loss function** was the appropriate choice.
 
+### ii. Optimiser - Adam
 For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was chosen, in line with *Liu et al.* **<sup>2</sup>** (**Table 1**).
 * **Role of Optimisers**: In machine learning, optimisers **adjust the weights and biases** of a neural network to **minimise the loss** calculated by the loss function.
 * **Gradient Descent**: Most optimisers are based on **gradient descent principles**, where the idea is to **move in the direction opposite to the gradient of the loss function (i.e the negative gradient direction)** by **adjusting the model's parameters** (the **weights and biases**).
 * There are various optimisers that use different strategies to **improve convergence speed**, **handle noisy gradients**, or **escape local minima**.
 * **Adam** is one of the most popular and widely used optimisation algorithms in machine learning. It is a **combines two extensions of Stochastic Gradient Descent (SGD)** called **AdaGrad** and **RMSProp**, though this is beyond the scope of this project.
 
- 
+### iii. Weight Decay
 
-### 5.3.4 Callbacks Optimisation (Early Stopping, Dynamic Learning Rate and Checkpoints)
+### 5.3.4 Callbacks Optimisation
 
-### 5.3.5 Metrics Optimisation (BLEU and Perplexity)
+### i. Early Stopping
 
-### 5.3.6 Encoder Optimisation (Residual Connections)
+### ii. Dynamic Learning Rate
+
+### iii. Checkpoints
+
+### 5.3.5 Metrics Optimisation
+
+### i. Perplexity
+
+### ii. BLEU Score
+
+### 5.3.6 Encoder Optimisation
 
 Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-
 The first siginificant encoder change implemented during the optimisation process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
 
-
+### i. Residual Connections
 The second significant encoder change was the implementation of **residual connections**. 
 * Residual connections are **direct pathways** that allow the **output of one layer to be added to the output of a deeper layer in the network**.
 * Instead of data flowing **strictly through a sequence of layers**, residual connections provide **shortcuts that bypasss one or more layers**.
@@ -128,14 +138,14 @@ The benefits of residual connections include:
   </div>
 <br>
 
-### 5.3.7 Decoder Optimisation (Residual Connections, Layer Normalisation)
+### 5.3.7 Decoder Optimisation
 
 Initial baseline model decoder architecture consisited of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-
+### i. Residual Connections
 The first significant change was the **adddition of residual connections were added to the decoder** (**Fig 1**). This resulted in an **improvement in both accuracy and loss** for training, validation and testing. This was at odds to what was reported by *Britz et al.* (sections **[4.1.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-encoder-and-decoder-depth)** and **[4.1.4](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#414-unidirectional-vs-bidirectional-encoder)**). This need for residual connections between layers is likley due to the increased semantic complexity of SMILES strings.
 
-
+### ii. Layer Normalisation
 The second significant change was to incorporate **layer normalisation** into the decoder.
 * **Normalisation** works by **mapping all the values of a feature** to be in the **range [0,1]**.
 * Normalisation techniques are employed in neural networks to:
@@ -188,11 +198,14 @@ Normalising **across all features of each input removes the dependence on batche
   </div>
 <br>
 
-### 5.3.8 Attention Mechanism Optimisation (Bahdanau Attention Mechanism)
+### 5.3.8 Attention Mechanism Optimisation
 
+### i. Bahdanau Attention Mechanism
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-### 5.3.9 Inference Optimisation (Beam Search)
+### 5.3.9 Inference Optimisation
+
+### i. Beam Search
 
 ## 5.4 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
