@@ -487,4 +487,3 @@ From their analysis, *Britz et al.* released an **open source, TensorFlow-based 
 **[6]** Bahdanau, D. et al. (2015) ‘Neural machine translation by jointly learning to align and translate’, Proceedings of the 2015 International Conference on Learning Representations (ICLR). <br><br>
 **[7]** Luong, M. et al. (2016) ‘Achieving Open Vocabulary Neural Machine Translation with Hybrid Word-Character Models’, Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics. <br><br>
 **[8]** Wu, Y. et al. (2016) ‘Google's Neural Machine Translation System: Bridging the Gap between Human and Machine Translation’. <br><br>
-
