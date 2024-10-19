@@ -1,13 +1,13 @@
 import os
-from typing import Iterable, Optional, Union, Tuple, List, Any
+from typing import Iterable, Optional, Union, Tuple, List, Dict, Any
 
 import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
 from tensorflow.summary import SummaryWriter
 
-from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
-                                log_sample_predictions, print_sample_predictions,
-                                log_to_tensorboard)
+from data.utils.logging import (extract_core_log_metrics, compute_metrics,
+                                log_metrics, print_metrics, log_sample_predictions,
+                                print_sample_predictions, log_to_tensorboard)
 
 class ValidationMetricsCallback(Callback):
     """
@@ -103,6 +103,7 @@ class ValidationMetricsCallback(Callback):
                 predicted_smiles.append(hyp)
 
         self.validation(
+            logs=logs,
             epoch=epoch,
             references=references,
             hypotheses=hypotheses,
@@ -115,6 +116,7 @@ class ValidationMetricsCallback(Callback):
 
     @staticmethod
     def validation(
+        logs: Union[Dict, None],
         epoch: int,
         references,
         hypotheses,
@@ -124,7 +126,16 @@ class ValidationMetricsCallback(Callback):
         tensorboard_dir: Optional[str] = None,
         file_writer: Optional[SummaryWriter] = None
     ) -> None:
-        metrics = compute_metrics(references, hypotheses, target_smiles, predicted_smiles)
+        metrics = extract_core_log_metrics(logs)
+        custom_metrics = compute_metrics(
+            references=references,
+            hypotheses=hypotheses,
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            evaluation_stage='Validation'
+        )
+        metrics.update(custom_metrics)
+
         log_metrics(metrics=metrics, directory=validation_metrics_dir, epoch=epoch)
         print_metrics(metrics=metrics, epoch=epoch)
         log_sample_predictions(
