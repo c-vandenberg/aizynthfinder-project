@@ -2,7 +2,6 @@ from typing import Dict, List, Union, Optional
 
 import numpy as np
 import tensorflow as tf
-from rdkit import Chem
 from tensorflow.keras.layers import TextVectorization
 from deepchem.feat.smiles_tokenizer import BasicSmilesTokenizer
 
