@@ -110,7 +110,7 @@ class ValidationMetricsCallback(Callback):
             predicted_smiles=predicted_smiles,
             validation_metrics_dir=self.validation_metrics_dir,
             tensorboard_dir=self.tensorboard_dir,
-            file_writer=self.file_writer,
+            file_writer=self.file_writer
         )
 
     @staticmethod
@@ -121,14 +121,19 @@ class ValidationMetricsCallback(Callback):
         target_smiles: List[str],
         predicted_smiles: List[str],
         validation_metrics_dir: str,
-        tensorboard_dir: Optional[Union[str, None]] = None,
-        file_writer: Optional[Union[SummaryWriter, None]] = None
+        tensorboard_dir: Optional[str] = None,
+        file_writer: Optional[SummaryWriter] = None
     ) -> None:
         metrics = compute_metrics(references, hypotheses, target_smiles, predicted_smiles)
-        log_metrics(epoch, metrics, validation_metrics_dir)
-        print_metrics(epoch, metrics)
-        log_sample_predictions(epoch, target_smiles, predicted_smiles, validation_metrics_dir)
-        print_sample_predictions(target_smiles, predicted_smiles)
+        log_metrics(metrics=metrics, directory=validation_metrics_dir, epoch=epoch)
+        print_metrics(metrics=metrics, epoch=epoch)
+        log_sample_predictions(
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            directory=validation_metrics_dir,
+            epoch=epoch,
+        )
+        print_sample_predictions(target_smiles=target_smiles, predicted_smiles=predicted_smiles)
 
         if tensorboard_dir and file_writer:
             log_to_tensorboard(file_writer, metrics, epoch)

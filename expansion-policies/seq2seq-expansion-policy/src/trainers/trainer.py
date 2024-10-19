@@ -23,6 +23,9 @@ from metrics.smiles_string_metrics import SmilesStringMetrics
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import SmilesDataPreprocessor
+from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
+                                log_sample_predictions, print_sample_predictions,
+                                log_to_tensorboard)
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from models.utils import Seq2SeqModelUtils
 
@@ -346,7 +349,6 @@ class Trainer:
         training_conf: Dict[str, Any] = self.config.get('training', {})
         model_conf: Dict[str, Any] = self.config.get('model', {})
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
-        os.makedirs(test_metrics_dir, exist_ok=True)
 
         test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
 
@@ -384,27 +386,46 @@ class Trainer:
                 target_smiles.append(ref)
                 predicted_smiles.append(hyp)
 
-        bleu_score = BleuScore.smoothed_corpus_bleu(references, hypotheses)
-        exact_accuracy = SmilesStringMetrics.smiles_exact_match(target_smiles, predicted_smiles)
-        validity_score = SmilesStringMetrics.chemical_validity(predicted_smiles)
-        ave_levenshtein_distance = SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles)
+        metrics: Dict[str, float] = {
+            'Test Loss': test_loss,
+            'Test Accuracy': test_accuracy,
+            'Test Perplexity': test_perplexity,
+        }
 
-        with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
-            f.write(f"Test Loss: {test_loss}\n")
-            f.write(f"Test Accuracy: {test_accuracy}\n")
-            f.write(f"Test Perplexity: {test_perplexity}\n")
-            f.write(f"Test BLEU Score: {bleu_score}\n")
-            f.write(f"Test Exact Match Accuracy: {exact_accuracy:.4f}\n")
-            f.write(f"Test Chemical Validity Score: {validity_score:.4f}\n")
-            f.write(f"Test Average Levenshtein Distance: {ave_levenshtein_distance:.4f}\n")
+        additional_metrics: Dict[str, float] = compute_metrics(
+            references=references,
+            hypotheses=hypotheses,
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            evaluation_stage='Test'
+        )
 
-        print(f"Test Loss: {test_loss}")
-        print(f"Test Accuracy: {test_accuracy}")
-        print(f"Test Perplexity: {test_perplexity}")
-        print(f"Test BLEU Score: {bleu_score}")
-        print(f"Test Exact Match Accuracy: {exact_accuracy}")
-        print(f"Test Chemical Validity Score: {validity_score}")
-        print(f"Test Average Levenshtein Distance: {ave_levenshtein_distance}")
+        metrics.update(additional_metrics)
+
+        log_metrics(
+            metrics=metrics,
+            directory=test_metrics_dir,
+            filename='test_metrics.txt',
+            separator='-' * 40
+        )
+
+        print_metrics(metrics=metrics)
+
+        log_sample_predictions(
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            directory=test_metrics_dir,
+            filename='test_sample_predictions.txt',
+            num_samples=5,
+            separator_length=153
+        )
+
+        print_sample_predictions(
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            num_samples=5,
+            separator_length=153
+        )
 
     def save_model(self) -> None:
         """

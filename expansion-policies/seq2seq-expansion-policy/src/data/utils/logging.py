@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import tensorflow as tf
 from tensorflow.summary import SummaryWriter
@@ -11,22 +11,28 @@ def compute_metrics(
     references,
     hypotheses,
     target_smiles: List[str],
-    predicted_smiles: List[str]
+    predicted_smiles: List[str],
+    evaluation_stage: Optional[str] = None,
 ) -> Dict[str, float]:
     """
-       Compute all required metrics and return them as a dictionary.
-       """
-    return {
+    Compute all required metrics and return them as a dictionary.
+    """
+    metrics = {
         'BLEU score': BleuScore.smoothed_corpus_bleu(references, hypotheses),
         'Exact Match Accuracy': SmilesStringMetrics.smiles_exact_match(target_smiles, predicted_smiles),
         'Chemical Validity Score': SmilesStringMetrics.chemical_validity(predicted_smiles),
         'Average Levenshtein Distance': SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles),
     }
 
+    if evaluation_stage:
+        metrics = {f"{evaluation_stage} {name}": value for name, value in metrics.items()}
+
+    return metrics
+
 def log_metrics(
-    epoch: int,
     metrics: Dict[str, float],
     directory: str,
+    epoch: Optional[Union[int, None]] = None,
     filename: Optional[str] = 'valid_metrics.txt',
     separator: Optional[str] = '-'*40
 ) -> None:
@@ -37,24 +43,33 @@ def log_metrics(
     filepath = os.path.join(directory, filename)
 
     with open(filepath, "a") as f:
-        f.write(f"Epoch {epoch + 1} Validation Metrics\n")
+        if epoch is not None:
+            f.write(f"Epoch {epoch + 1} Validation Metrics\n")
+        else:
+            f.write(f"Testing Metrics\n")
         for name, value in metrics.items():
             f.write(f"{name}: {value:.4f}\n")
         f.write(f"{separator}\n\n\n")
 
-def print_metrics(epoch: int, metrics: Dict[str, float]) -> None:
+def print_metrics(
+    metrics: Dict[str, float],
+    epoch: Optional[int] = None
+) -> None:
     """
     Print metrics to the console.
     """
     for name, value in metrics.items():
-        print(f'Epoch {epoch + 1}: {name}: {value:.4f}')
+        if epoch is not None:
+            print(f'Epoch {epoch + 1}: {name}: {value:.4f}')
+        else:
+            print(f'{name}: {value:.4f}')
 
 def log_sample_predictions(
-    epoch: int,
     target_smiles: List[str],
     predicted_smiles: List[str],
     directory: str,
     filename='sample_predictions.txt',
+    epoch: Optional[int] = None,
     num_samples: Optional[int] = 5,
     separator_length: Optional[int] = 153
 ) -> None:
@@ -67,7 +82,11 @@ def log_sample_predictions(
     separator = '-' * separator_length
 
     with open(filepath, "a") as f:
-        f.write(f"Epoch {epoch + 1} Sample Predictions\n")
+        if epoch is not None:
+            f.write(f"Epoch {epoch + 1} Validation Sample Predictions\n")
+        else:
+            f.write(f"Testing Sample Predictions\n")
+
         for i in range(num_samples):
             f.write(f"Sample {i + 1}:\n")
             f.write(f"  Target:    {target_smiles[i]}\n")
