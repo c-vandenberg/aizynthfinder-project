@@ -54,14 +54,14 @@
    5.2 [Model Architecture]()<br>
    5.3 [Model Optimization]()<br>
    &nbsp; &nbsp; 5.3.1 [Deterministic Training Environment]()<br>
-   &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation (DeepChem Tokenizer and TensorFlow TextVectorisation)]()<br>
-   &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation (Sparse Categorical Cross-Entropy, Adam and Weight Decay)]()<br>
-   &nbsp; &nbsp; 5.3.4 [Callbacks Optimisation (Early Stopping, Dynamic Learning Rate and Checkpoints)]()<br>
-   &nbsp; &nbsp; 5.3.5 [Metrics Optimisation (BLEU and Perplexity)]()<br>
-   &nbsp; &nbsp; 5.3.6 [Encoder Optimisation (Residual Connections)]()<br>
-   &nbsp; &nbsp; 5.3.7 [Decoder Optimisation (Residual Connections, Layer Normalisation)]()<br>
-   &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation (Bahdanau Attention Mechanism)]()<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; viii. [Inference Optimisation (Beam Search)]()<br>
+   &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.4 [Callbacks Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.5 [Metrics Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.6 [Encoder Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.7 [Decoder Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; viii. [Inference Optimisation]()<br>
    5.4 [Model Documentation]()<br>
    5.5 [References]()<br>
  5. [Transformer Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/transformer-expansion-policy/README.md#5-transformer-expansion-policy)<br>
