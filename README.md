@@ -61,7 +61,7 @@
    &nbsp; &nbsp; 5.3.6 [Encoder Optimisation]()<br>
    &nbsp; &nbsp; 5.3.7 [Decoder Optimisation]()<br>
    &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation]()<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; viii. [Inference Optimisation]()<br>
+   &nbsp; &nbsp; 5.3.9 [Inference Optimisation]()<br>
    5.4 [Model Documentation]()<br>
    5.5 [References]()<br>
  5. [Transformer Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/transformer-expansion-policy/README.md#5-transformer-expansion-policy)<br>
