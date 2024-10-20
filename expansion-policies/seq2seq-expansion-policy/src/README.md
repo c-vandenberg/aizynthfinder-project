@@ -465,7 +465,7 @@ Additionally, a **beam search procedure is used for model inference**: **<sup>1<
 
 ### 4.2.2 Model Architecture
 
-From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>*
+From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>**
 
 *Liu et al.* adapted this open source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 9**.
 
