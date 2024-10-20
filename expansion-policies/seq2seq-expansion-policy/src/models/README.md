@@ -214,6 +214,7 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
 ### i. Data Tokenization and Preprocessing Debugging
 1. To analyse **data set token frequency distribution**:
    * Add `tensorflow.print()` statement **immediately after data set tokenization** in `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._tokenize_datasets`. For example, to check tokenized products (input) data set:
+     
     ```
     train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
     train_test_products_token_counts = Counter(train_test_products_all_tokens)
@@ -221,8 +222,10 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
       f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n"
     )
     ```
+    
 2. To analyse **tokenizer functionality**:
   * Check that tokenizer **reverses only the product (input/x-data) data set** by printing/logging random tokenized data set samples. For example:
+    
     ```
     secure_random = random.SystemRandom()
     print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_dataset)}")
@@ -230,16 +233,20 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
     print(f"Tokenized Products Validation x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_valid_dataset)}")
     print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_valid_dataset)}")
     ```
+    
   * Check tokenizer word index **before and after adapting** with `tensorflow.print()` statement. Tokenizer is adapted to **tokenized products only** to prevent data leakage. This is carried **immediately after splitting data** in data loader class `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._split_datasets()`. For example:
+    
     ```
     combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
     tf.print(f"Tokenizer Word Index Before Adapting: \n{self.smiles_tokenizer.word_index}\n")
     self.smiles_tokenizer.adapt(combined_tokenized_train_data)
     tf.print(f"Tokenizer Word Index After Adapting: \n{self.smiles_tokenizer.word_index}\n")
     ```
+    
   * **N.B.** Because environment setup has **set seeds for `random` psuedorandom number generator**, you will get the **same 'random' samples each time**.
 3. To analyse **data preprocesser functionality**:
   * Print/log random preprocessed data set samples and **cross reference integers with adapted tokenizer word index**. For example:
+    
     ```
     secure_random = random.SystemRandom()
     tf.print(f"Preprocessed Training Data Sample: {secure_random.choice(self.train_data)}\n")
