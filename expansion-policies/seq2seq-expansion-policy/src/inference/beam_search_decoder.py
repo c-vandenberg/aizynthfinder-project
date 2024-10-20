@@ -1,97 +1,155 @@
-import numpy as np
+from typing import List
+
 import tensorflow as tf
 
-from inference.inference_decoder_interface import InferenceDecoderInterface
+from decoders.decoder_interface import DecoderInterface
 
 
-class BeamSearchDecoder(InferenceDecoderInterface):
+class BeamSearchDecoder:
     def __init__(
         self,
-        model,
-        tokenizer,
-        beam_width=5,
-        max_seq_len=100
+        decoder: DecoderInterface,
+        start_token_id: int,
+        end_token_id: int,
+        beam_width: int = 5,
+        max_length: int = 140
     ) -> None:
         """
         Initializes the BeamSearchDecoder.
 
-        Args:
-            model: The trained seq2seq model.
-            tokenizer: The tokenizer used for encoding and decoding.
-            beam_width: The number of beams to keep during decoding.
-            max_seq_len: The maximum length of the decoded sequences.
         """
-        self.model = model
-        self.tokenizer = tokenizer
+        self.decoder = decoder
         self.beam_width = beam_width
-        self.max_seq_len = max_seq_len
-        self.start_token_index = tokenizer.word_index['<START>']
-        self.end_token_index = tokenizer.word_index['<END>']
-        self.vocab_size = len(tokenizer.word_index) + 1  # +1 for padding
+        self.max_length = max_length
+        self.start_token_id = start_token_id
+        self.end_token_id = end_token_id
 
-    def decode(self, input_sequence):
+    def search(
+        self,
+        encoder_output: tf.Tensor,
+        initial_decoder_states: List[tf.Tensor],
+    ) -> List[List[int]]:
         """
-        Performs beam search decoding on the input sequence.
+        Perform beam search decoding.
 
-        Args:
-            input_sequence: The input sequence (encoder input).
+        Parameters:
+        -----------
+        encoder_output: tf.Tensor
+            The output from the encoder (shape: [batch_size, seq_len_enc, enc_units]).
+        initial_decoder_states: List[tf.Tensor]
+            The initial state of the decoder LSTM layers (list of tensors).
 
         Returns:
-            List of tuples: Each tuple contains a decoded sequence and its score.
+        --------
+        best_sequences: List[List[int]]
+            The best decoded sequences for each item in the batch.
         """
-        # Encode the input sequence to get the encoder output and states
-        encoder_input = tf.expand_dims(input_sequence, axis=0)  # Add batch dimension
-        encoder_output, state_h, state_c = self.model.encoder(encoder_input)
+        batch_size = tf.shape(encoder_output)[0]
 
-        # Prepare initial decoder input (start token) and states
-        decoder_input = tf.expand_dims([self.start_token_index], 0)  # Shape: (1, 1)
-        decoder_state_h = self.model.enc_state_h(state_h)
-        decoder_state_c = self.model.enc_state_c(state_c)
+        # Initialize beams
+        sequences = [[self.start_token_id] for _ in range(batch_size * self.beam_width)]  # List of sequences
+        scores = tf.zeros([batch_size, self.beam_width], dtype=tf.float32)  # Shape: (batch_size, beam_width)
 
-        # Initialize states for all layers
-        zero_state = tf.zeros_like(decoder_state_h)
-        decoder_states = [decoder_state_h, decoder_state_c, zero_state, zero_state, zero_state, zero_state, zero_state,
-                          zero_state]
+        # Tile the initial decoder states and encoder outputs across the beam width
+        tiled_states = []
+        for state in initial_decoder_states:
+            state = tf.expand_dims(state, axis=1)  # Shape: (batch_size, 1, units)
+            state = tf.tile(state, [1, self.beam_width, 1])  # Shape: (batch_size, beam_width, units)
+            tiled_states.append(state)
 
-        # Initialize the beam with the start token sequence
-        sequences = [([self.start_token_index], 0.0, decoder_states)]  # (sequence, score, states)
+        # Flatten the beam dimension into the batch dimension
+        flat_states = [tf.reshape(state, [batch_size * self.beam_width, -1]) for state in tiled_states]
 
-        for _ in range(self.max_seq_len):
-            all_candidates = []
-            for seq, score, states in sequences:
-                if seq[-1] == self.end_token_index:
-                    # If the last token is the end token, add the sequence as is
-                    all_candidates.append((seq, score, states))
-                    continue
+        encoder_outputs = tf.expand_dims(encoder_output, axis=1)  # Shape: (batch_size, 1, seq_len_enc, enc_units)
+        encoder_outputs = tf.tile(encoder_outputs, [1, self.beam_width, 1, 1])  # Shape: (batch_size, beam_width, seq_len_enc, enc_units)
+        flat_encoder_outputs = tf.reshape(encoder_outputs, [batch_size * self.beam_width, -1, encoder_output.shape[-1]])
 
-                # Prepare decoder input
-                decoder_input = tf.expand_dims([seq[-1]], 0)  # Shape: (1, 1)
-                decoder_input = tf.cast(decoder_input, tf.int32)
+        # Initialize finished flags
+        finished = tf.zeros([batch_size, self.beam_width], dtype=tf.bool)  # Shape: (batch_size, beam_width)
 
-                # Run the decoder for one step
-                decoder_output, decoder_states = self.model.decoder.single_step(
-                    decoder_input, states, encoder_output
-                )
+        for t in range(self.max_length):
+            # Prepare decoder input
+            last_tokens = [seq[-1] for seq in sequences]  # List of last tokens
+            decoder_input = tf.convert_to_tensor(last_tokens, dtype=tf.int32)  # Shape: (batch_size * beam_width,)
+            decoder_input = tf.expand_dims(decoder_input, axis=1)  # Shape: (batch_size * beam_width, 1)
 
-                # Get the log probabilities and top candidates
-                log_probs = tf.math.log(decoder_output[0, -1] + 1e-9).numpy()  # Shape: (vocab_size,)
+            # Run decoder single step
+            decoder_output, new_states = self.decoder.single_step(
+                decoder_input,
+                flat_states,
+                flat_encoder_outputs
+            )
 
-                # Get the top beam_width candidates
-                top_k_indices = np.argsort(log_probs)[-self.beam_width:]
+            # Get log probabilities
+            decoder_output = tf.squeeze(decoder_output, axis=1)  # Shape: (batch_size * beam_width, vocab_size)
+            log_probs = tf.math.log(decoder_output + 1e-10)  # Shape: (batch_size * beam_width, vocab_size)
+            vocab_size = log_probs.shape[-1]
 
-                for idx in top_k_indices:
-                    candidate_seq = seq + [idx]
-                    candidate_score = score + log_probs[idx]
-                    candidate_states = decoder_states
-                    all_candidates.append((candidate_seq, candidate_score, candidate_states))
+            # Reshape to (batch_size, beam_width, vocab_size)
+            log_probs = tf.reshape(log_probs, [batch_size, self.beam_width, vocab_size])
 
-            # Select the top beam_width sequences
-            sequences = sorted(all_candidates, key=lambda tup: tup[1], reverse=True)[:self.beam_width]
+            # Compute total scores
+            total_scores = tf.expand_dims(scores, 2) + log_probs  # Shape: (batch_size, beam_width, vocab_size)
 
-            # Check if all sequences have reached the end token
-            if all(seq[-1] == self.end_token_index for seq, _, _ in sequences):
+            # Flatten beams
+            flat_scores = tf.reshape(total_scores, [batch_size, -1])  # Shape: (batch_size, beam_width * vocab_size)
+
+            # Get top beam_width scores and indices
+            topk_scores, topk_indices = tf.nn.top_k(flat_scores, k=self.beam_width)
+
+            # Compute new sequences, states, and finished flags
+            new_sequences = []
+            new_states_list = [[] for _ in range(len(new_states))]  # Prepare a list for each state tensor
+            new_finished = []
+
+            for i in range(batch_size):
+                seqs = []
+                fin = []
+                for j in range(self.beam_width):
+                    index = topk_indices[i, j].numpy()
+                    beam_idx = index // vocab_size
+                    token_idx = index % vocab_size
+
+                    seq_idx = i * self.beam_width + beam_idx
+
+                    # Get the previous sequence and append the new token
+                    seq = sequences[seq_idx] + [token_idx]
+                    seqs.append(seq)
+
+                    # Get the corresponding state
+                    state_idx = seq_idx
+                    for k in range(len(new_states)):
+                        state_slice = new_states[k][state_idx]
+                        new_states_list[k].append(state_slice)
+
+                    # Check if finished
+                    fin.append(token_idx == self.end_token_id)
+                new_sequences.extend(seqs)
+                new_finished.append(fin)
+
+            # Update sequences, states, scores, and finished
+            sequences = new_sequences  # Length: batch_size * beam_width
+            scores = topk_scores  # Shape: (batch_size, beam_width)
+
+            # Reconstruct flat_states from new_states_list
+            flat_states = []
+            for k in range(len(new_states_list)):
+                state_tensor = tf.stack(new_states_list[k], axis=0)  # Shape: (batch_size * beam_width, units)
+                flat_states.append(state_tensor)
+
+            finished = tf.convert_to_tensor(new_finished, dtype=tf.bool)  # Shape: (batch_size, beam_width)
+
+            # If all sequences are finished, break
+            if tf.reduce_all(finished):
                 break
 
-        # Return the sequences sorted by score
-        final_sequences = sorted(sequences, key=lambda tup: tup[1], reverse=True)
-        return final_sequences
+        # Select best sequences for each batch item
+        best_sequences = []
+        for i in range(batch_size):
+            # The best sequence is the one with the highest score
+            best_idx = tf.argmax(scores[i]).numpy()
+            seq_idx = i * self.beam_width + best_idx
+            best_seq = sequences[seq_idx]
+            best_sequences.append(best_seq)
+
+        return best_sequences

@@ -301,7 +301,7 @@ class Trainer:
             validation_data=self.data_loader.get_valid_dataset(),
             validation_metrics_dir=valid_metrics_dir,
             tensorboard_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
-            max_length=self.data_loader.max_encoder_seq_length
+            max_length=self.data_loader.max_decoder_seq_length
         )
 
         # TensorBoard
@@ -366,20 +366,27 @@ class Trainer:
 
         for (encoder_input, decoder_input), target_output in test_dataset:
             # Generate sequences
-            predicted_sequences = self.model.predict_sequence(
-                encoder_input,
-                max_length=self.data_loader.max_encoder_seq_length,
+            predicted_sequences = self.model.predict_sequence_beam_search(
+                encoder_input=encoder_input,
+                beam_width=model_conf.get('beam_width', 5),
+                max_length=self.data_loader.max_decoder_seq_length,
                 start_token_id=self.tokenizer.word_index.get(start_token),
                 end_token_id=self.tokenizer.word_index.get(end_token)
             )
 
+            # Ensure `predicted_sequences` is a NumPy array
+            predicted_sequences = np.array(predicted_sequences)
+
+            # Ensure `target_sequences` is a NumPy array
+            target_sequences = target_output.numpy()
+
             # Convert sequences to text
             predicted_texts = self.tokenizer.sequences_to_texts(
-                predicted_sequences.numpy(),
+                predicted_sequences,
                 is_input_sequence=False
             )
             target_texts = self.tokenizer.sequences_to_texts(
-                target_output.numpy(),
+                target_sequences,
                 is_input_sequence=False
             )
 
