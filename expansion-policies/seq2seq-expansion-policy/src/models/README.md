@@ -212,7 +212,7 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
 ### 5.4.1 Model Debugging
 
 ### i. Data Tokenization and Preprocessing Debugging
-1. To analyse **data set token frequency distribution**:
+1. **Analyse Data Set Token Frequency Distribution**:
    * Add `tensorflow.print()` statement **immediately after data set tokenization** in `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._tokenize_datasets`. For example, to check tokenized products (input) data set:
      
     ```
@@ -223,7 +223,7 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
     )
     ```
     
-2. To analyse **tokenizer functionality**:
+2. **Analyse Tokenizer Functionality**:
   * Check that tokenizer **reverses only the product (input/x-data) data set** by printing/logging random tokenized data set samples. For example:
     
     ```
@@ -244,7 +244,7 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
     ```
     
   * **N.B.** Because environment setup has **set seeds for `random` psuedorandom number generator**, you will get the **same 'random' samples each time**.
-3. To analyse **data preprocesser functionality**:
+3. **Analyse Data Preprocesser Functionality**:
   * Print/log random preprocessed data set samples and **cross reference integers with adapted tokenizer word index**. For example:
     
     ```
@@ -253,6 +253,15 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
     tf.print(f"Preprocessed Testing Data Sample: {secure_random.choice(self.test_data)}\n")
     tf.print(f"Preprocessed Validation Data Sample: {secure_random.choice(self.valid_data)}\n")
     ```
+
+### ii. General TensorFlow Debugging
+1. **Analyse Tensor Shape**:
+   * Add `tensorflow.print()` statement to print/log to **dynamically check tensor dimensions/shape**. For example:
+     
+     ```
+     encoder_output: tf.Tensor = self.embedding(encoder_input)
+     tf.print(encoder_output.shape) # Shape: (batch_size, seq_len, embedding_dim)
+     ```
 
 ## 5.5 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
