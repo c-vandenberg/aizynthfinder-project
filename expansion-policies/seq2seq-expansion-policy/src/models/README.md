@@ -124,7 +124,7 @@ The weight decay penalty is typically implemented in **one of two ways**:
 1. **L2 Regularisation**: This **directly adds the penalty term to the loss function**. The penalty term is **proportional to the sum of the squared weights**.
 2. **Weight Decay in the Optimiser**: This **modifies the update rule of the optimiser** to include a **delay factor** that **reduces the weights at each update step**.
 
-The weight decay implementation used in this project is **L2 regularisation**. The implementation was designed in a way so that weight decay can be **fully controlled via the config file**. If the value for `weight_decay` in the config file is `null`, no weight decay is added, else the weight decay is passed to the **`kernal_regulariser`** in the encoder and decoder LSTM layers**.
+The weight decay implementation used in this project is **L2 regularisation**. The implementation was designed in a way so that weight decay can be **fully controlled via the config file**. If the value for `weight_decay` in the config file is `null`, no weight decay is added, else the weight decay is passed to the **`kernal_regulariser`** in the **encoder and decoder LSTM layers**.
 
 As of the latest model version (V 21), small experimentation of weight decay has been carried out, with **simple cross-validation analysis**. 
 
