@@ -100,7 +100,7 @@ For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was c
 
 ### iii. Weight Decay (L2 Regularisation)
 
-**Weight decay** is a fundamental technique used in deep learning to **improve model performance**. It acts as a **regulariser** that **penalises large weights** in the network. This can lead to several benefits:
+**Weight decay** is a fundamental technique used in deep learning to **improve model performance**. It acts as a **regulariser** that **penalises large weights** in the network. This can lead to several benefits: **<sup>5</sup>**
 1. **Reducing Overfitting**
    * Large weights can **lead to the model memorising the training data** and **failing to generalise to unseen examples**.
    * Weight decay **penalises large weights**, encouraging the model to **learn smaller weights** that **capture the undelying patterns in the data** rather than **memorising specific details**.
@@ -120,7 +120,7 @@ For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was c
   
 How weight decay works is that is **adds a penalty term to the loss function** that is proportional to the **sum of the squared weights** in the model. This penalty term **encourages the model to learn smaller weights** during training.
 
-The weight decay penalty is typically implemented in **one of two ways**:
+The weight decay penalty is typically implemented in **one of two ways**: **<sup>5</sup>**
 1. **L2 Regularisation**: This **directly adds the penalty term to the loss function**. The penalty term is **proportional to the sum of the squared weights**.
 2. **Weight Decay in the Optimiser**: This **modifies the update rule of the optimiser** to include a **delay factor** that **reduces the weights at each update step**.
 
@@ -135,11 +135,109 @@ However, choosing the right weight decay **depends on various factors**, such as
 
 ### 5.3.4 Callbacks Optimisation
 
-### i. Early Stopping
+**Callbacks** are powerful tools in **TensorFlow's Keras API** that allow you to customize and control the training process of your models. They are **Python objects** with methods that are **executed during training at given stages of the training procedure**, allowing you to **exectute specific actions** at various stages of training (e.g. at the **end of an epoch**, **after a batch**, or **before training begins**).
 
-### ii. Dynamic Learning Rate
+Callbacks can be used for a wide range of purposes, such as:
+1. **Monitoring training progress**
+2. **Adjusting learning rates**
+3. **Save model checkpoints**
+4. **Generate logs**
+5. **Create a TensorBoard**
+
+TensorFlow Keras provides a **set of built-in callbacks**, but you can also **create custom callbacks** by **subclassing the `tf.keras.callbacks.Callback` class**. During training, Keras **calls specific methods of these callback objects** at different points. **Table 1** shows the methods within the  `tf.keras.callbacks.Callback` class.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Method</th>
+            <th>When It's Called</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>on_epoch_begin</td>
+            <td>At the start of an epoch</td>
+            <td>Initialize or reset variables related to epochs</td>
+        </tr>
+        <tr>
+            <td>on_epoch_end</td>
+            <td>At the end of an epoch</td>
+            <td>Perform actions like logging or saving models</td>
+        </tr>
+        <tr>
+            <td>on_batch_begin</td>
+            <td>At the start of a batch</td>
+            <td>Actions before processing a batch</td>
+        </tr>
+        <tr>
+            <td>on_batch_end</td>
+            <td>At the end of a batch</td>
+            <td>Actions after processing a batch</td>
+        </tr>
+        <tr>
+            <td>on_train_begin</td>
+            <td>At the start of training</td>
+            <td>Initialize resources or logging</td>
+        </tr>
+        <tr>
+            <td>on_train_end</td>
+            <td>At the end of training</td>
+            <td>Cleanup resources or finalize logging</td>
+        </tr>
+        <tr>
+            <td>on_predict_begin</td>
+            <td>At the start of prediction</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>on_predict_end</td>
+            <td>At the end of prediction</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>on_test_begin</td>
+            <td>At the start of testing</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>on_test_end</td>
+            <td>At the end of testing</td>
+            <td></td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 1</b> Lifecycle methods of the `tf.keras.callbacks.Callback` class.
+  </p>
+</div>
+
+### i. Early Stopping (EarlyStopping)
+
+**EarlyStopping** is a built-in callback in Keras (`tensorflow.keras.callbacks.EarlyStopping`) that **monitors a specific metric** and **stops training when it stops improving**. In this project it was used to **monitor validation loss**, and **stop training once it hasn't improved in over 5 consecutive epochs**. This helps to:
+1. **Prevent overfitting**
+   * Overfitting occurs when a model **learns the noise** and **specific patterns** in the training data to an extent that it **negatively impacts the model's performance on new, unseen data**.
+   * **Training loss** measures how well the model **fits the training data**.
+   * **Validation loss** measures how well the model **generalises to new data**.
+   * As training progresses, training loss typically **decreases steadily**, whereas validation loss may **initially decrease**, but can **increase after a certain point**. This **indicates overfitting**.
+2. **Ensures Computational Resources Aren't Wasted**
+   * If the model's performance on the validation data **stops improving**, continued training may, at best, **lead to diminishing returns** or, at worse, **lead to overfitting**.
+   * Early stopping by monitoring validation loss **conserves computational resources** by **preventing unnecessary epochs**, saving both **time and computational power**.
+
+### ii. Dynamic Learning Rate (ReduceLROnPlateau)
+
+In machine learning, **learning rate** is **one of the most critical hyperparameters**. It plays a pivotal role in **how effectively and efficiently a model learns from data**.
+
+Learning rate ($$\eta$$) is a **scalar hyperparameter** that controls the **size of the steps taken during the optimisation process to minimise the loss function**. It dictates **how much the model's weights and biases are updated** in response to the estimated error each time a model processes a batch of data.
+
+**ReduceLROnPlateau** is another built-in callback in Keras (`tensorflow.keras.callbacks.ReduceLROnPlateau`) that **monitors a specific metric**, and **reduces the learning rate by a specified factor when it stops improving**. In this model it was also used to **monitor validation loss**, and **reduce learning rate by a factor of 0.1** when validation loss **hadn't improved over 3 epochs**.
 
 ### iii. Checkpoints
+
+### iv. Validation Metrics (ValidationMetricsCallback)
+
+### v. Visualisation in TensorBoard (TensorBoard)
 
 ### 5.3.5 Metrics Optimisation
 
@@ -166,7 +264,7 @@ The benefits of residual connections include:
   <div align="center">
     <img src="https://github.com/user-attachments/assets/9082fa4e-0eb2-402b-a494-a29740efd7d4", alt="residual-connection"/>
     <p>
-      <b>Fig 1</b> Residual connection in a FNN <b><sup>5</sup></b>
+      <b>Fig 1</b> Residual connection in a FNN <b><sup>6</sup></b>
     </p>
   </div>
 <br>
@@ -193,16 +291,16 @@ The first normalisation technique to consider is **batch normalisation**. In bat
   <div align="center">
     <img src="https://github.com/user-attachments/assets/6fdc7bd1-1f0f-450b-938e-83a2df51fb68", alt="batch-normalisation-overview"/>
     <p>
-      <b>Fig 2</b> Section of a neural network with a Batch Normalisation Layer <b><sup>6</sup></b>
+      <b>Fig 2</b> Section of a neural network with a Batch Normalisation Layer <b><sup>7</sup></b>
     </p>
   </div>
 <br>
 
-To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**. **<sup>6</sup>**
+To get the output of any hidden layer `h` within a neural network, we pass the inputs through a **non-linear activation function**. To **normalise the neurons (activation) in a given layer (`k-1`)**, we can **force the pre-activations** to have a **mean of 0** and a **standard deviation of 1**. In batch normalisation this is achieved by **subtracting the mean from each of the input features across the mini-batch** and **dividing by the standard deviation**. **<sup>7</sup>**
 
 Following the output of the **layer `k-1`**, we can add a **layer that performs this batch normalisation operation** across the **mini-batch** so that the **pre-activations at layer `k` are unit Gaussians** (**Fig 2**).
 
-As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). **<sup>6</sup>**
+As a high-level example, we can consider a mini-batch with **3 input samples**, with each **input vector** being **four features long**. Once the **mean and standard deviation** is computed for **each feature in the batch dimension**, we can **subtract the mean** and **divide by the standard deviation** (**Fig 3**). **<sup>7</sup>**
 
 In reality, forcing all pre-activations to have a **zero mean** and **unit standard deviation** can be **too restrictive**, so batch normalisation **introduces additional parameters**, but this is beyond the scope of this project.
 
@@ -210,13 +308,13 @@ In reality, forcing all pre-activations to have a **zero mean** and **unit stand
   <div align="center">
     <img src="https://github.com/user-attachments/assets/08e5dda1-8a59-474f-8793-b287424579b2", alt="how-batch-normlisation-works"/>
     <p>
-      <b>Fig 3</b> How batch normalisation works <b><sup>6</sup></b>
+      <b>Fig 3</b> How batch normalisation works <b><sup>7</sup></b>
     </p>
   </div>
 <br>
 
 **Layer normalisation** is a normalisation technique introduced to address some of the limitations of **batch normalisation**. In layer normalisation, **all neurons in a particular layer** effectively have the **same distribution across all features for a given input**.
-* For example, if each input has **`d` features**, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**. **<sup>6</sup>**
+* For example, if each input has **`d` features**, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**. **<sup>7</sup>**
 
 Normalising **across all features of each input removes the dependence on batches/batch statistics**. This makes layer normalisation **well suited for sequence models** such as seq2seq models, RNNs and transformers.
 
@@ -226,7 +324,7 @@ Normalising **across all features of each input removes the dependence on batche
   <div align="center">
     <img src="https://github.com/user-attachments/assets/71187197-02ad-463a-934a-f15abd887344", alt="how-layer-normalisation-works"/>
     <p>
-      <b>Fig 4</b> How layer normalisation works <b><sup>6</sup></b>
+      <b>Fig 4</b> How layer normalisation works <b><sup>7</sup></b>
     </p>
   </div>
 <br>
@@ -301,5 +399,6 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
 **[2]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
 **[3]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). <br><br>
 **[4]** Chand, S. (2023) Choosing between cross entropy and sparse cross entropy - the only guide you need!, Medium. Available at: https://medium.com/@shireenchand/choosing-between-cross-entropy-and-sparse-cross-entropy-the-only-guide-you-need-abea92c84662 (Accessed: 18 October 2024). <br><br>
-**[5]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
-**[6]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
+**[5]** Mudadla, S. (2023) Weight decay in deep learning., Medium. Available at: https://medium.com/@sujathamudadla1213/weight-decay-in-deep-learning-8fb8b5dd825c (Accessed: 20 October 2024). <br><br>
+**[6]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
+**[7]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
