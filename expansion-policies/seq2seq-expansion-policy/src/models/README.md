@@ -98,7 +98,40 @@ For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was c
 * There are various optimisers that use different strategies to **improve convergence speed**, **handle noisy gradients**, or **escape local minima**.
 * **Adam** is one of the most popular and widely used optimisation algorithms in machine learning. It is a **combines two extensions of Stochastic Gradient Descent (SGD)** called **AdaGrad** and **RMSProp**, though this is beyond the scope of this project.
 
-### iii. Weight Decay
+### iii. Weight Decay (L2 Regularisation)
+
+**Weight decay** is a fundamental technique used in deep learning to **improve model performance**. It acts as a **regulariser** that **penalises large weights** in the network. This can lead to several benefits:
+1. **Reducing Overfitting**
+   * Large weights can **lead to the model memorising the training data** and **failing to generalise to unseen examples**.
+   * Weight decay **penalises large weights**, encouraging the model to **learn smaller weights** that **capture the undelying patterns in the data** rather than **memorising specific details**.
+   * This leads to **better generalisation performance on unseen data**.
+2. **Improving model stability**
+   * Large weights can make training process **unstable** and **sensitive to noise** in the data.
+   * Weight decay helps to **stabilise the training process** by **preventing the weights from becoming too large**.
+   * This makes the model **less prone to overfitting** and **improves its overall robustness**.
+3. **Promoting Feature Sharing**
+   * Weight decay encourages the model to **learn weights that are similar across different nodes/neurons**.
+   * This promotes **feature sharing**, where a **single feature is used by multiple nodes/neurons** in the network.
+   * This can lead to a **more efficient model** with **fewer parameters**.
+4. **Improving Generalisation in Overparameterised Models**
+   * In modern deep learning, models often have **many more parameters than the amount of data they are trained on**.
+   * This phenomenon is known as **overparameterisation**.
+   * Weight decay helps to **control the complexity of overparameterised models** and **improves their generalisation performance**.
+  
+How weight decay works is that is **adds a penalty term to the loss function** that is proportional to the **sum of the squared weights** in the model. This penalty term **encourages the model to learn smaller weights** during training.
+
+The weight decay penalty is typically implemented in **one of two ways**:
+1. **L2 Regularisation**: This **directly adds the penalty term to the loss function**. The penalty term is **proportional to the sum of the squared weights**.
+2. **Weight Decay in the Optimiser**: This **modifies the update rule of the optimiser** to include a **delay factor** that **reduces the weights at each update step**.
+
+The weight decay implementation used in this project is **L2 regularisation**. The implementation was designed in a way so that weight decay can be **fully controlled via the config file**. If the value for `weight_decay` in the config file is `null`, no weight decay is added, else the weight decay is passed to the **`kernal_regulariser`** in the encoder and decoder LSTM layers**.
+
+As of the latest model version (V 21), small experimentation of weight decay has been carried out, with **simple cross-validation analysis**. 
+
+However, choosing the right weight decay **depends on various factors**, such as the **model's size and complexity**, the **amount of training data** and the **learning rate**. Therefore, once the model architecture has been fully optimised, one of the following techniques will be used during **hyperparameter tuning** one of the following techniques will be used to **identify the best hyperparameter values for the model**, and hence the **optimal weight decay value**:
+1. **Grid Search**
+2. **Random Search**
+3. **Bayesian Optimisation**
 
 ### 5.3.4 Callbacks Optimisation
 
