@@ -440,7 +440,11 @@ By **integrating residual connections around attention**, in theory, the model i
 
 By **applying layer normalisation around attention**, in theory, the model is able to:
 1. **Stabilise Activations**:
-   * **Normalising the combined outputs of the attention and decoder** ensures that the **activations maintain a stable distribution**, preventing issues like **exploding or vanishing activations**
+   * **Normalising the combined outputs of the attention and decoder** ensures that the **activations maintain a stable distribution**, preventing issues like **exploding or vanishing activations**.
+2. **Improving Convergence**:
+   * **Consistent activation scales** across different layers **facilitates faster and more reliable convergence** during training.
+3. **Enhancing Generalisation**:
+   * **Normalised features tend to generalise better**, reducing overfitting and improving performance on unseen data.
 
 ### 5.3.9 Inference Optimisation
 
