@@ -422,6 +422,20 @@ Regarding residual connection, this improvement in model performance was at odds
 ### i. Bahdanau Attention Mechanism
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
+As with all attention mechanisms, the Bahdanau attention mechanism enables the seq2seq model to **dynamically focus on different parts of the input sequence** when **generating each element of the output sequence**. The high-level breakdown of this process is described in section [3.4.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism). 
+
+The mechanism by which Bahdanau attention does this though is as follows:
+1. **Mechanism**: Computes **alignment scores** by using a **feedforward neural network (FNN)** that **jointly considers the encoder hidden states** and the **decoder's previous hidden state**.
+2. **Formula**:
+   
+$$
+  e_{t,i} = v^T \tanh(W_1s_{t-1} + W_2h_i)
+$$
+
+where:
+  * **$$W_1$$ and $$W_2$$** are **learnable weight matrices**
+  * **$$v$$** is a **learnable weight vector**
+
 ### ii. Residual Connections and Layer Normalisation
 
 Given the improvement in model performance after **integrating residual connections and applying layer normalisation into the encoder and decoder**, a further avenue for optimisation was to **integrate residual connections and applying layer normalisation around the attention mechanism**.
