@@ -422,6 +422,26 @@ Regarding residual connection, this improvement in model performance was at odds
 ### i. Bahdanau Attention Mechanism
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
+### ii. Residual Connections and Layer Normalisation
+
+Given the improvement in model performance after **integrating residual connections and applying layer normalisation into the encoder and decoder**, a further avenue for optimisation was to **integrate residual connections and applying layer normalisation around the attention mechanism**.
+
+There is precedent for this in the literature; **Transformers heavily rely on residual connections and layer normalization** around their **multi-head attention mechanisms**. Given that transformers have achieved **state-of-the-art results** in various NPL tasks, this provides **strong emperical evidence** for the effectiveness of this approach.
+
+By **integrating residual connections around attention**, in theory, the model is able to:
+1. **Preserve Information Flow**:
+   * The **original decoder output (`decoder_output`) is directly added to the attention-enhanced output (`context_vector`)**, ensuring that **essential information is not lost or distorted** through the attention layers.
+2. **Facilitate Leaning Complex Representations**:
+   * Residual connections allow the model to **combine both raw (`decoder_output`)** and **attention-processed (`context_vector`) features**, leading to **richer and more nuanced representations**.
+3. **Enchance Gradient Propagation**:
+   * A with the encoder and decoder, **gradients flow through the attention layers during backpropagation through time (BPTT)**.
+   * As such, residual connections **facilitate efficient gradient flow** by **providing alternative pathways** for gradients to **flow backward through the network**.
+   * This ensures that gradients **remain sufficiently large** (mitigating vanishing gradients), while being **stable** (mitigating exploding gradients).
+
+By **applying layer normalisation around attention**, in theory, the model is able to:
+1. **Stabilise Activations**:
+   * **Normalising the combined outputs of the attention and decoder** ensures that the **activations maintain a stable distribution**, preventing issues like **exploding or vanishing activations**
+
 ### 5.3.9 Inference Optimisation
 
 ### i. Beam Search
@@ -490,3 +510,4 @@ Initial baseline model used an **additive (Bahdanau) attention mechanism** in li
 **[5]** Mudadla, S. (2023) Weight decay in deep learning., Medium. Available at: https://medium.com/@sujathamudadla1213/weight-decay-in-deep-learning-8fb8b5dd825c (Accessed: 20 October 2024). <br><br>
 **[6]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
 **[7]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
+**[8]** Kalra, R. (2024) Introduction to transformers and attention mechanisms, Medium. Available at: https://medium.com/@kalra.rakshit/introduction-to-transformers-and-attention-mechanisms-c29d252ea2c5 (Accessed: 21 October 2024). <br><br>
