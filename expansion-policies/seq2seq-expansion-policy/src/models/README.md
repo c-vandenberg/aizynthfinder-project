@@ -266,8 +266,6 @@ As of the **latest model version (V 21)**, the following validation metric analy
 1. **Perplexity**
 2. **BleuScore**
 3. **SmilesStringMetrics**
-   * **Exact SMILES string match** as a percentage of total target SMILES.
-   * **Chemical validity** based on whether an **`rdkit.Chem` `mol` object** could be created from the predicted SMILES string.
 
 ### 5.3.5 Metrics Optimisation
 
@@ -286,11 +284,52 @@ The **Bilingual Evaluation Understudy (BLEU) score** is a metric for assessing t
 In this model a **custom `metrics.bleu_score.BLEUScore` metric** was integrated into the `callbacks.validation_metrics.ValidationMetricsCallback` class, allowing for BLEU score calculation on the validation data predictions, and was integrated in to the model's **test data evaluation**. The BLEU score implementation chosen was **`nltk.translate.bleu_score.corpus_bleu`** with a **`SmoothingFunction`**.
 
 While BLEU score useful metric for **quanitfying how closely the predicted SMILES match the reference reactants** due to the **ease of computation**, it is important to **consider its limitations** in the context of **SMILES-based retrosynthesis prediction**:
-1. **SMILES Syntax Sensitivity** - Due to the **strict syntax rules** that SMILES strings have, even a **minor error can represent a differen molecule entirely**, **rendering a SMILES string invalid**.
+1. **SMILES Syntax Sensitivity** - Due to the **strict syntax rules** that SMILES strings have, even a **minor error can represent a different molecule entirely**, **rendering a SMILES string invalid**.
 2. **Chemical Correctness** - BLEU measures **surface-level similarity** and does not assess whether the predicted reactants can be used to **synthesise the target molecule**. Additionally, there is **no emphasis on functional group importance**.
 3. **Multiple Valid Representations** - A single molecule can have **mutiple valid SMILES representations**, which can **complicate BLEU's n-gram overlap assessment**. However, by **canonicalising SMILES during data preprocessing**, this can be accounted for.
 
-### iii. SMILES String Metrics (Exact Match, Chemical Validity, Tanimoto Coefficient, Levenshtein Distance)
+### iii. SMILES String Metrics (Exact Match, Chemical Validity, Tanimoto Similarity, Levenshtein Distance)
+
+As eluded to earlier, a series of **custom metrics** for **in-depth SMILES string analysis** were added to the custom `ValidationMetricsCallback` callback class.
+
+1. **Exact SMILES string match**: Number of predicted exact SMILES string match as a percentage of total target SMILES.
+2. **Chemical validity**: Measurement of whether the predicted SMILES string is chemically valid based on whether an **`rdkit.Chem.Mol` object** could be created from the predicted SMILES string. Metric is given the numner of chemically valid predicted SMILES string as a percentage of total target SMILES.
+3. **Tanimoto Similarity**: The Tanimoto similarity algorithm provides a **measure of similarity between the molecular fingerprints of two molecules**. This is a commonly used metric in cheminformatics.
+   * The Tanimoto similarity algorithm provides a **measure of similarity between the molecular fingerprints of two molecules**.
+   * Usually the two molecular fingerprints are represented as **two sets of fingerprint 'bits'**, denoted as *A* and *B*.
+   * The **Tanimoto coefficient**, *T(A,B)*, is calculated as the **ratio of the intersection of A and B to the union of A and B** (**Fig 1**) and is given by the equation:
+
+$$
+T(\mathbf{A}, \mathbf{B}) = \frac{|\mathbf{A} \cap \mathbf{B}|}{\|\mathbf{A}\| + \|\mathbf{B}\| - |\mathbf{A} \cap \mathbf{B}|}
+$$
+
+  * This can also be written in the form where the **union of A and B** is given as the **dot product of vectors A and B**:
+
+$$
+|\mathbf{A} \cap \mathbf{B}| = \mathbf{A} \cdot \mathbf{B}
+$$
+
+$$
+T(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| + \|\mathbf{B}\| - \mathbf{A} \cdot \mathbf{B}}
+$$
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/704fb554-f64f-43e3-8c25-2b26ad67e2cc", alt="tanimoto-coefficient-set-diagram"/>
+    <p>
+      <b>Fig 1</b> Tanimoto Coefficient Set Diagram
+    </p>
+  </div>
+<br>
+
+4. **Levenshtein Distance**: Also known as **Edit Distance**, Levenshtein distance measures the **minimum number of single-character edits** required to **change on string into another**.
+   * The **allowable edits** are:
+     * **Insertion**: Adding a character.
+     * **Deletion**: Removing a character.
+     * **Substitution**: Replacing one character with another.
+   * Unlike other metrics such as BLEU, Levenshtein distance accouts for the **order of characters**, giving a **more granular view of sequence differences**.
+   * This **sequential error quantification** is beneficial for tasks **requiring high precision**, such as **generating chemically valid SMILES strings**.
+   * Additionally, Levenshtein distance gives **error type identification**. This helps in understanding whether the errors are primarily due to **insertions**, **deletions**, or **substitutions**, which can **inform model improvements**.
 
 ### 5.3.6 Encoder Optimisation
 
@@ -311,7 +350,7 @@ The benefits of residual connections include:
   <div align="center">
     <img src="https://github.com/user-attachments/assets/9082fa4e-0eb2-402b-a494-a29740efd7d4", alt="residual-connection"/>
     <p>
-      <b>Fig 1</b> Residual connection in a FNN <b><sup>6</sup></b>
+      <b>Fig 2</b> Residual connection in a FNN <b><sup>6</sup></b>
     </p>
   </div>
 <br>
