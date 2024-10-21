@@ -215,7 +215,9 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
 
 ### i. Early Stopping (EarlyStopping)
 
-**EarlyStopping** is a built-in callback in Keras (`tensorflow.keras.callbacks.EarlyStopping`) that **monitors a specific metric** and **stops training when it stops improving**. In this project it was used to **monitor validation loss**, and **stop training once it hasn't improved in over 5 consecutive epochs**. This helps to:
+**EarlyStopping** is a built-in callback in Keras (`tensorflow.keras.callbacks.EarlyStopping`) that **monitors a specific metric** and **stops training when it stops improving**. 
+
+In this project, `tensorflow.keras.callbacks.EarlyStopping` was used to **monitor validation loss**, and **stop training once it hasn't improved in over 5 consecutive epochs**. This helps to:
 1. **Prevent overfitting**
    * Overfitting occurs when a model **learns the noise** and **specific patterns** in the training data to an extent that it **negatively impacts the model's performance on new, unseen data**.
    * **Training loss** measures how well the model **fits the training data**.
@@ -231,13 +233,34 @@ In machine learning, **learning rate** is **one of the most critical hyperparame
 
 Learning rate ($$\eta$$) is a **scalar hyperparameter** that controls the **size of the steps taken during the optimisation process to minimise the loss function**. It dictates **how much the model's weights and biases are updated** in response to the estimated error each time a model processes a batch of data.
 
-**ReduceLROnPlateau** is another built-in callback in Keras (`tensorflow.keras.callbacks.ReduceLROnPlateau`) that **monitors a specific metric**, and **reduces the learning rate by a specified factor when it stops improving**. In this model it was also used to **monitor validation loss**, and **reduce learning rate by a factor of 0.1** when validation loss **hadn't improved over 3 epochs**.
+**ReduceLROnPlateau** is another built-in callback in Keras (`tensorflow.keras.callbacks.ReduceLROnPlateau`) that **monitors a specific metric**, and **reduces the learning rate by a specified factor when it stops improving**. 
 
-### iii. Checkpoints
+In this model `tensorflow.keras.callbacks.ReduceLROnPlateau` was used to **monitor validation loss**, and **reduce learning rate by a factor of 0.1** when validation loss **hadn't improved over 3 epochs**.
 
-### iv. Validation Metrics (ValidationMetricsCallback)
+### iii. Checkpoints (ModelCheckpoint)
 
-### v. Visualisation in TensorBoard (TensorBoard)
+**Checkpoint callbacks** allow the **saving of the model regularly during training**, which is especially useful when training deep learning models which can take a **long time to train**. The callback monitors the training and **saves model checkpoints at regular intervals**, based on the metrics.
+
+**ModelCheckpoint** is built-in callback in Keras (`tensorflow.keras.callbacks.ModelCheckpoint`) that can **save the whole model** or **just its weights** at **predefined intervals** (e.g. **after each epoch**), or **based on specific conditions** (e.g. an **improvement in validation loss**). This gives access to **intermediate versions** of the model that can be **restored later**, either to **resume training**, or to **deploy the best performing model**.
+
+In this model, for greater customisability, a custom callback integrated with `from tensorflow.train.CheckpointManager` was used to save a **full-model checkpoint** when there was an **improvement in valdiation loss**, keeping only the **latest 5 checkpoints**, given the number of training runs needed to optimise the model.
+
+### iv. Visualisation in TensorBoard (TensorBoard)
+
+**TensorBoard** is TensorFlow's **comprehensive visualisation toolket**, enabling developers to **gain insights into their machine learning model's training processes**. It provides tools to **visualise metrics** such as loss and accuracy, **analyse model architectures**, and **debug training processes**.
+
+By **leveraging TensorBoard**, a developer can:
+1. **Monitor Training Metrics**: Track how metrics evolve over time.
+2. **Visualize Model Graphs**: Inspect the computational graph of the model.
+3. **Analyze Distributions**: Examine weight and bias distributions, histograms etc.
+4. **Project Embeddings**: Visualize high-dimensional data embeddings in lower-dimensional spaces.
+5. **Profile Performance**: Identify bottlenecks and optimize performance.
+
+**Tensorboard** is built-in callback in Keras (`tensorflow.keras.callbacks.TensorBoard`) that allows leveraging of TensorBoard and was **utilised extensively** in this project.
+
+### v. Validation Metrics (ValidationMetricsCallback)
+
+
 
 ### 5.3.5 Metrics Optimisation
 
