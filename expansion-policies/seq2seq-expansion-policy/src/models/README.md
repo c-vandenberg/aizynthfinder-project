@@ -462,7 +462,42 @@ By **applying layer normalisation around attention**, in theory, the model is ab
 
 ### 5.3.9 Inference Optimisation
 
-### i. Beam Search
+### i. Greedy Decoding vs Beam Search
+
+Once the model had the **majority of its optimisation features implemented**, a **beam search** was implemented with a **beam width of 5**, in line with *Liu et al.* **<sup>1</sup>**.
+
+Beam search is a **heuristic search algorithm** that **explores a graph** by **expanding the most promising nodes in a limited set**. In the context of seq2seq models, it is used during the **decoding phase** to **generate the most probable output sequences based on the model's predictions**.
+
+Before we consider beam search, let us consider the simple **greedy search strategy**: **<sup>9</sup>**
+- With **greedy search**, at any **time step $$t`$$**, we simply select the token with the **highest conditional probability from $$Y$$**. I.e.
+
+$$
+  y_{t'} = \text{argmax} P\left(y \mid y_1, \ldots, y{t'-1}, \mathbf{c}\right)
+$$
+ 
+ where:
+   * $$y \in \mathcal{Y}$$
+
+- This is a fairly reasonable strategy due it how **computationally undemanding it is**.
+- However, putting aside efficiency, it may seem more reasonable to **search for the most likely sequence**, not the **sequence of (greedily selected) most likely tokens**. It turns out, **these two sequences can be quite different**.
+- To illustrate this with an example, suppose there are four tokens 'A', 'B', 'C' and '<eos>' (end of sequence) in the **output dictionary (tokenizer word index)**. In **Fig 6**, the four numbers under each time step represent the **conditional probabilities of **generating 'A', 'B', 'C' and '<eos>' respectively, at that time step**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/e4aa34a8-375b-46fe-9eba-cc51a38b06a5", alt="greedy-search-probabilities"/>
+    <p>
+      <b>Fig 6</b> At each time step, greedy search selects the token with the highest conditional probability <b><sup>9</sup></b>
+    </p>
+  </div>
+<br>
+
+- Because greedy search **selects the token with the highest conditional probability at each time step**, the **predicted output sequence** will be `['A', 'B', 'C', '<eos>']`. The **conditional probability** of this output sequence is $$0.5\times0.4\times0.4\times0.6 = 0.048$$
+- 
+
+The **key characteristics** of beam search are:
+1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
+2. **Beam Width (Beam Size)** - This determines the **number of top candidate sequences to keep at each decoding step**. A larger beam width allows for a **more exhaustive search** but **increases computational complexity**.
+3. **Probablistic Approach** - Beam search **combines the probabilities of individual tokens** to **evaluate overall likelihood of entire sequences**.
 
 ## 5.4 Model Documentation
 
@@ -529,3 +564,4 @@ By **applying layer normalisation around attention**, in theory, the model is ab
 **[6]** Wong, W. (2021) What is residual connection?, Medium. Available at: https://towardsdatascience.com/what-is-residual-connection-efb07cab0d55 (Accessed: 18 October 2024). <br><br>
 **[7]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
 **[8]** Kalra, R. (2024) Introduction to transformers and attention mechanisms, Medium. Available at: https://medium.com/@kalra.rakshit/introduction-to-transformers-and-attention-mechanisms-c29d252ea2c5 (Accessed: 21 October 2024). <br><br>
+**[9]** Modern Recurrent Neural Networks - Beam Search (2020) 10.8. Beam Search - Dive into Deep Learning 1.0.3 documentation. Available at: https://d2l.ai/chapter_recurrent-modern/beam-search.html (Accessed: 21 October 2024). <br><br>
