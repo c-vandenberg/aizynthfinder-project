@@ -468,6 +468,7 @@ Once the model had the **majority of its optimisation features implemented**, a 
 
 Beam search is a **heuristic search algorithm** that **explores a graph** by **expanding the most promising nodes in a limited set**. In the context of seq2seq models, it is used during the **decoding phase** to **generate the most probable output sequences based on the model's predictions**.
 
+### Greedy Search
 Before we consider beam search, let us consider the simple **greedy search strategy**: **<sup>9</sup>**
 - With **greedy search**, at any **time step $$t`$$**, we simply select the token with the **highest conditional probability from $$Y$$**. I.e.
 
@@ -486,13 +487,31 @@ $$
   <div align="center">
     <img src="https://github.com/user-attachments/assets/e4aa34a8-375b-46fe-9eba-cc51a38b06a5", alt="greedy-search-probabilities"/>
     <p>
-      <b>Fig 6</b> At each time step, greedy search selects the token with the highest conditional probability <b><sup>9</sup></b>
+      <b>Fig 6</b> Greedy search selects the token with the highest conditional probability at each time step <b><sup>9</sup></b>
     </p>
   </div>
 <br>
 
-- Because greedy search **selects the token with the highest conditional probability at each time step**, the **predicted output sequence** will be `['A', 'B', 'C', '<eos>']`. The **conditional probability** of this output sequence is $$0.5\times0.4\times0.4\times0.6 = 0.048$$
-- 
+- Because greedy search **selects the token with the highest conditional probability at each time step**, the **predicted output sequence** will be **`['A', 'B', 'C', '<eos>']`**. The **conditional probability** of this output sequence is $$0.5\times0.4\times0.4\times0.6 = 0.048$$
+- If we look at the same example, but **at time step 2 we instead select the token 'C'**, which has the **second highest conditional probability at that time step** (**Fig 7**)
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/4a4887a6-e43b-48e6-bb2f-e6e6e4239f8d", alt="greedy-search-probabilities-2"/>
+    <p>
+      <b>Fig 7</b> Greedy search selects the token with the highest conditional probability at each time step, except for time step 2 <b><sup>9</sup></b>
+    </p>
+  </div>
+<br>
+
+- Now the **output subsequences** at time steps 1 and 2 have changed from **'A', 'B'** to **'A', 'C'**.
+- Because **each tokens conditional probability at each time step are dependent on the output sequences of all prior time steps (temporal dependency)**, now the **conditional probability of each token at time step 3 have changed**.
+- If greedy search continues to select the token with the highest conditional probability, the **predicted output sequence** will be **`['A', 'C', 'B', '<eos>']`**. The **conditional probability** of this output sequence is $$0.5\times0.3 \times0.6\times0.6=0.054$$.
+- As you can see, **this conditional probability is higher than that of the greedy search in Fig 6**. Therefore, the output sequence **`['A', 'B', 'C', '<eos>']`** obtained by the greedy search **is not optimal**.
+
+### Exhaustive Search
+
+If the goal is to obtain the **most likely sequence**, we may consider using **exhaustive search**
 
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
