@@ -364,7 +364,7 @@ class Trainer:
         start_token = self.tokenizer.start_token
         end_token = self.tokenizer.end_token
 
-        for (encoder_input, decoder_input), target_output in test_dataset:
+        for (encoder_input, decoder_input), target_sequences in test_dataset:
             # Generate sequences
             predicted_sequences = self.model.predict_sequence_beam_search(
                 encoder_input=encoder_input,
@@ -373,12 +373,6 @@ class Trainer:
                 start_token_id=self.tokenizer.word_index.get(start_token),
                 end_token_id=self.tokenizer.word_index.get(end_token)
             )
-
-            # Ensure `predicted_sequences` is a NumPy array
-            predicted_sequences = np.array(predicted_sequences)
-
-            # Ensure `target_sequences` is a NumPy array
-            target_sequences = target_output.numpy()
 
             # Convert sequences to text
             predicted_texts = self.tokenizer.sequences_to_texts(
