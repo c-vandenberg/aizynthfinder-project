@@ -1,6 +1,4 @@
-import pydevd_pycharm
 import tensorflow as tf
-from lxml.html.diff import token
 from rdkit import Chem
 from aizynthfinder.context.policy.expansion_strategies import ExpansionStrategy
 from aizynthfinder.chem import SmilesBasedRetroReaction
@@ -17,7 +15,6 @@ from decoders.lstm_decoders import StackedLSTMDecoder
 from attention.attention import BahdanauAttention
 from losses.losses import MaskedSparseCategoricalCrossentropy
 from metrics.perplexity import Perplexity
-from metrics.smiles_string_metrics import SmilesStringMetrics
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.validation_metrics import ValidationMetricsCallback
 
@@ -40,6 +37,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         self.max_decoder_seq_length = int(kwargs.get("max_decoder_seq_length", 140))
         self.beam_width = int(kwargs.get("beam_width", 5))
         self.use_remote_models = bool(kwargs.get("use_remote_models", True))
+
         self.model = self.load_model(model_path)
         self.smiles_tokenizer = self.load_tokenizer(tokenizer_path)
 
@@ -70,9 +68,10 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
     def load_tokenizer(self, tokenizer_path: str):
         self._logger.info(f"Loading tokenizer from {tokenizer_path}")
-        tokenizer: SmilesTokenizer = SmilesTokenizer()
+        tokenizer: SmilesTokenizer = SmilesTokenizer.from_json(tokenizer_path)
+        self._logger.info("Tokenizer loaded successfully.")
 
-        return tokenizer.from_json(tokenizer_path)
+        return tokenizer
 
     def get_actions(
         self,
@@ -110,9 +109,11 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return possible_actions, priors
 
     def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
-        reversed_smiles_list = [smiles[::-1] for smiles in smiles_list]
-        tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(reversed_smiles_list)
-        raise ValueError
+        # Reverse the SMILES strings as per model training
+        tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(
+            smiles_list,
+            is_input_sequence=True
+        )
 
         encoder_data_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor(
             smiles_tokenizer=self.smiles_tokenizer,
@@ -141,16 +142,15 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         for predicted_seqs in predicted_seqs_list:
             # Convert token sequences to SMILES strings
-            predicted_smiles_reversed = self.smiles_tokenizer.sequences_to_texts([predicted_seqs])
+            predicted_smiles = self.smiles_tokenizer.sequences_to_texts(
+                sequences=[predicted_seqs],
+                is_input_sequence=True
+            )
 
-            # Reverse back to the original SMILES orientation
-            predicted_smiles = predicted_smiles_reversed[::-1]
             # For beam search, you can assign probabilities based on beam scores if available
             # Here, we assign equal probabilities for simplicity
             num_predictions = len(predicted_smiles)
             probabilities = [1.0 / num_predictions] * num_predictions
-            all_predicted_smiles.append(predicted_smiles)
-            all_probabilities.append(probabilities)
 
             # Validate and append
             for smiles_string in predicted_smiles:
