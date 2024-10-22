@@ -109,7 +109,6 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return possible_actions, priors
 
     def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
-        # Reverse the SMILES strings as per model training
         tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(
             smiles_list,
             is_input_sequence=True

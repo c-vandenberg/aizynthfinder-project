@@ -68,10 +68,10 @@ data:
 model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
   output_vocab_size: null  # To be set dynamically based on tokenizer
-  attention_dim: 128
-  encoder_embedding_dim: 128
-  decoder_embedding_dim: 128
-  units: 128
+  attention_dim: 256
+  encoder_embedding_dim: 256
+  decoder_embedding_dim: 256
+  units: 256
   encoder_num_layers: 2
   decoder_num_layers: 4
   beam_width: 5
@@ -82,7 +82,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 3
+  epochs: 10
   patience: 5
   reverse_tokenized_input_sequence: True
   model_save_path: 'data/training/liu-et-al/model-v23/model/saved_model'
@@ -92,7 +92,7 @@ training:
   tensorboard_dir: 'data/training/liu-et-al/model-v23/tensorboard'
   log_dir: 'logs/liu-et-al/model-v23'
   checkpoint_dir: 'data/training/liu-et-al/model-v23/checkpoints'
-  num_samples: 100 # Number of samples to use for debugging model
+  num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
 env:
