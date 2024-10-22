@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Union
 
 import numpy as np
@@ -20,7 +21,11 @@ class SmilesTokenizer:
     end_token : str, optional
         Token representing the end of a sequence (default is '<END>').
     oov_token : str, optional
-        Token representing out-of-vocabulary tokens (default is '<OOV>').
+        Token representing out-of-vocabulary tokens (default is '').
+    max_tokens : int, optional
+        Maximum number of tokens in the vocabulary (default is 150).
+    reverse_input_sequence : bool, optional
+        Whether to reverse the input sequence during tokenization (default is False).
 
     Attributes
     ----------
@@ -28,20 +33,25 @@ class SmilesTokenizer:
         Start token.
     _end_token : str
         End token.
-    oov_token : str
+    _oov_token : str
         Out-of-vocabulary token.
+    reverse_input_sequence: int
+        Boolean indicating whether to reverse the input sequence during tokenization or not.
 
     Methods
     -------
-    tokenize(smiles)
-        Tokenizes a single SMILES string.
-    tokenize_list(smiles_list)
+    from_json(tokenizer_path: str, reverse_input_sequence: bool = False, start_token: str = '<START>',
+              end_token: str = '<END>', oov_token: str = '') -> 'SmilesTokenizer'
+        Class method to load a tokenizer from a JSON file with defensive checks.
+    tokenize(smiles: str, is_input_sequence: bool) -> str:
+        Tokenizes a single SMILES string into individual characters.
+    tokenize_list(smiles_list: List[str], is_input_sequence = False) -> List[str]:
         Tokenizes a list of SMILES strings.
-    create_tokenizer(tokenized_smiles_list)
-        Creates and fits the internal tokenizer on the tokenized SMILES list.
-    texts_to_sequences(texts)
+    adapt(tokenized_smiles_list: List[str]) -> None:
+        Adapts the TextVectorization layer to the preprocessed SMILES list.
+    texts_to_sequences(texts: List[str]) -> tf.Tensor:
         Converts tokenized texts to sequences of token indices.
-    sequences_to_texts(sequences)
+    sequences_to_texts(sequences: Union[tf.Tensor, np.ndarray], is_input_sequence = False) -> List[str]:
         Converts sequences of token indices back to texts.
     """
     def __init__(
@@ -54,7 +64,7 @@ class SmilesTokenizer:
     ) -> None:
         self._start_token = start_token
         self._end_token = end_token
-        self.oov_token = oov_token
+        self._oov_token = oov_token
         self.reverse_input_sequence = reverse_input_sequence
 
         # Initialize TextVectorization layer
@@ -67,13 +77,51 @@ class SmilesTokenizer:
             pad_to_max_tokens=False,
         )
 
-    @property
-    def start_token(self):
-        return self._start_token
+    @classmethod
+    def from_json(
+        cls,
+        tokenizer_path: str,
+        reverse_input_sequence: bool = False,
+        start_token: str = '<START>',
+        end_token: str = '<END>',
+        oov_token: str = '',
+    ) -> 'SmilesTokenizer':
+        """
+        Loads the tokenizer's vocabulary from a JSON file and initializes a SmilesTokenizer instance.
 
-    @property
-    def end_token(self):
-        return self._end_token
+        Parameters
+        ----------
+        tokenizer_path : str
+            Path to the tokenizer vocabulary JSON file.
+        reverse_input_sequence : bool, optional
+            Whether to reverse the input sequence during tokenization (default is False).
+        start_token : str, optional
+            Token representing the start of a sequence (default is '<START>').
+        end_token : str, optional
+            Token representing the end of a sequence (default is '<END>').
+        oov_token : str, optional
+            Token representing out-of-vocabulary tokens (default is '').
+
+        Returns
+        -------
+        SmilesTokenizer
+            An instance of SmilesTokenizer with the loaded vocabulary.
+        """
+        with open(tokenizer_path, 'r') as f:
+            word_index = json.load(f)
+
+        # Initialize a new SmilesTokenizer instance
+        smiles_tokenizer = cls(
+            start_token=start_token,
+            end_token=end_token,
+            oov_token=oov_token,
+            max_tokens=len(word_index) + 1,  # +1 to account for padding or OOV
+            reverse_input_sequence=reverse_input_sequence
+        )
+        # Manually set the vocabulary
+        smiles_tokenizer.text_vectorization.set_vocabulary(list(word_index.keys()))
+
+        return smiles_tokenizer
 
     def tokenize(self, smiles: str, is_input_sequence: bool) -> str:
         """
@@ -157,7 +205,7 @@ class SmilesTokenizer:
 
     def sequences_to_texts(
         self,
-        sequences: Union[tf.Tensor, np.ndarray],
+        sequences: Union[tf.Tensor, np.ndarray, List[int]],
         is_input_sequence = False
     ) -> List[str]:
         """
@@ -200,6 +248,18 @@ class SmilesTokenizer:
                 tokens = tokens[::-1]
             texts.append(' '.join(tokens))
         return texts
+
+    @property
+    def start_token(self):
+        return self._start_token
+
+    @property
+    def end_token(self):
+        return self._end_token
+
+    @property
+    def oov_token(self):
+        return self._oov_token
 
     @property
     def word_index(self) -> Dict[str, int]:

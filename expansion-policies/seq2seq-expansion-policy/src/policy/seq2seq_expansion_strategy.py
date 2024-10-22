@@ -1,7 +1,7 @@
 import pydevd_pycharm
 import tensorflow as tf
+from lxml.html.diff import token
 from rdkit import Chem
-from tensorflow.keras.preprocessing.text import tokenizer_from_json
 from aizynthfinder.context.policy.expansion_strategies import ExpansionStrategy
 from aizynthfinder.chem import SmilesBasedRetroReaction
 from aizynthfinder.chem import TreeMolecule
@@ -16,7 +16,8 @@ from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 from attention.attention import BahdanauAttention
 from losses.losses import MaskedSparseCategoricalCrossentropy
-from metrics.metrics import Perplexity
+from metrics.perplexity import Perplexity
+from metrics.smiles_string_metrics import SmilesStringMetrics
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.validation_metrics import ValidationMetricsCallback
 
@@ -38,10 +39,9 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         self.max_encoder_seq_length = int(kwargs.get("max_encoder_seq_length", 140))
         self.max_decoder_seq_length = int(kwargs.get("max_decoder_seq_length", 140))
         self.beam_width = int(kwargs.get("beam_width", 5))
-        self.use_remote_models: bool = bool(kwargs.get("use_remote_models", True))
+        self.use_remote_models = bool(kwargs.get("use_remote_models", True))
         self.model = self.load_model(model_path)
-        self.tokenizer = self.load_tokenizer(tokenizer_path)
-        self.smiles_tokenizer = SmilesTokenizer()
+        self.smiles_tokenizer = self.load_tokenizer(tokenizer_path)
 
         self._logger.info(f"Loaded Seq2Seq model and tokenizers for expansion policy {self.key}")
 
@@ -70,10 +70,9 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
     def load_tokenizer(self, tokenizer_path: str):
         self._logger.info(f"Loading tokenizer from {tokenizer_path}")
-        with open(tokenizer_path, 'r') as f:
-            tokenizer_json = f.read()
-        tokenizer = tokenizer_from_json(tokenizer_json)
-        return tokenizer
+        tokenizer: SmilesTokenizer = SmilesTokenizer()
+
+        return tokenizer.from_json(tokenizer_path)
 
     def get_actions(
         self,
@@ -113,10 +112,10 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
     def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
         reversed_smiles_list = [smiles[::-1] for smiles in smiles_list]
         tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(reversed_smiles_list)
+        raise ValueError
 
         encoder_data_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor(
             smiles_tokenizer=self.smiles_tokenizer,
-            tokenizer=self.tokenizer,
             max_seq_length=self.max_encoder_seq_length
         )
         preprocessed_smiles = encoder_data_preprocessor.preprocess_smiles(
@@ -124,14 +123,15 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         )
 
         start_token = self.smiles_tokenizer.start_token
-        start_token_id = self.tokenizer.word_index[start_token]
+        start_token_id = self.smiles_tokenizer.word_index[start_token]
         end_token = self.smiles_tokenizer.end_token
-        end_token_id = self.tokenizer.word_index[end_token]
+        end_token_id = self.smiles_tokenizer.word_index[end_token]
 
         # Use beam search to get multiple predictions per molecule
-        predicted_seqs_list = self.model.predict_sequence(
-            preprocessed_smiles,
-            max_length=self.max_encoder_seq_length,
+        predicted_seqs_list = self.model.predict_sequence_beam_search(
+            encoder_input=preprocessed_smiles,
+            beam_width=self.beam_width,
+            max_length=self.max_decoder_seq_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id
         )
@@ -140,15 +140,11 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         all_probabilities = []
 
         for predicted_seqs in predicted_seqs_list:
-            # Convert Tensor to numpy array, then to list of integers
-            predicted_seqs_list_int = predicted_seqs.numpy().tolist()
-
             # Convert token sequences to SMILES strings
-            predicted_smiles_reversed = self.tokenizer.sequences_to_texts([predicted_seqs_list_int])[0]
+            predicted_smiles_reversed = self.smiles_tokenizer.sequences_to_texts([predicted_seqs])
 
             # Reverse back to the original SMILES orientation
             predicted_smiles = predicted_smiles_reversed[::-1]
-
             # For beam search, you can assign probabilities based on beam scores if available
             # Here, we assign equal probabilities for simplicity
             num_predictions = len(predicted_smiles)
@@ -157,25 +153,25 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             all_probabilities.append(probabilities)
 
             # Validate and append
-            if self.is_valid_smiles(predicted_smiles):
-                all_predicted_smiles.append([predicted_smiles])
-                all_probabilities.append(probabilities)
-            else:
-                self._logger.warning(f"Invalid SMILES generated: {predicted_smiles}")
+            for smiles_string in predicted_smiles:
+                if self._is_valid_smiles(smiles_string):
+                    all_predicted_smiles.append([smiles_string])
+                    all_probabilities.append(probabilities)
+                else:
+                    self._logger.warning(f"Invalid SMILES generated: {predicted_smiles}")
 
         return all_predicted_smiles, all_probabilities
 
     @staticmethod
-    def is_valid_smiles(smiles: str) -> bool:
-        mol = Chem.MolFromSmiles(smiles)
-        return mol is not None
+    def _is_valid_smiles(smiles: str) -> bool:
+        return Chem.MolFromSmiles(smiles) is not None
 
     @staticmethod
-    def clean_sequence(sequence: str, start_token="<START>", end_token="<END>") -> str:
-        # Remove <START>
+    def _clean_sequence(sequence: str, start_token: str, end_token: str) -> str:
+        # Remove start token
         if sequence.startswith(start_token):
             sequence = sequence[len(start_token):]
-        # Remove everything after <END>
+        # Remove everything after end token
         end_idx = sequence.find(end_token)
         if end_idx != -1:
             sequence = sequence[:end_idx]

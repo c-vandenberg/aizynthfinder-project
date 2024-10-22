@@ -18,9 +18,8 @@ tf.config.threading.set_intra_op_parallelism_threads(1)
 tf.config.threading.set_inter_op_parallelism_threads(1)
 
 def main():
-
     # Path to the configuration file
-    config_path = 'config/training/model_v18_config.yml'
+    config_path = 'config/training/model_v23_config.yml'
 
     # Initialize the Trainer with the configuration
     trainer = Trainer(config_path=config_path)

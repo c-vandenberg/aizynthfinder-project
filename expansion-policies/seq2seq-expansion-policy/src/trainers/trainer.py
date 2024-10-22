@@ -141,38 +141,6 @@ class Trainer:
             json.dump(self.tokenizer.word_index, f, indent=4)
         print(f"Tokenizer vocabulary saved to {tokenizer_path}")
 
-    @staticmethod
-    def load_tokenizer(tokenizer_path: str, reverse_input_sequence: bool = False) -> SmilesTokenizer:
-        """
-        Loads the tokenizer's vocabulary from a JSON file.
-
-        Parameters
-        ----------
-        tokenizer_path : str
-            Path to the tokenizer vocabulary JSON file.
-        reverse_input_sequence : bool, optional
-            Boolean dictating whether input sequence should be reversed
-
-        Returns
-        -------
-        SmilesTokenizer
-            An instance of SmilesTokenizer with the loaded vocabulary.
-        """
-        with open(tokenizer_path, 'r') as f:
-            word_index = json.load(f)
-
-        # Initialize a new SmilesTokenizer instance
-        smiles_tokenizer = SmilesTokenizer(
-            start_token='<START>',
-            end_token='<END>',
-            oov_token='<OOV>',
-            reverse_input_sequence=reverse_input_sequence
-        )
-        # Manually set the vocabulary
-        smiles_tokenizer.text_vectorization.set_vocabulary(list(word_index.keys()))
-
-        return smiles_tokenizer
-
     def setup_model(self) -> None:
         """
         Initializes and compiles the Seq2Seq model.
