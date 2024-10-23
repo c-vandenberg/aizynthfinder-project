@@ -92,7 +92,7 @@
 
 **AiZynthFinder** is a **computer-aided synthesis planning (CASP)** tool developed by **AstraZeneca's MolecularAI department**. Specifically, it is a **computer-assisted synthesis prediction tool** that seeks to identify the **optimal sequence of chemical reaction steps** capable of transforming a set of **commercially available starting materials** into a **desired chemical compound**. **<sup>1</sup>**  **<sup>2</sup>**
 
-AiZynthfinder leverages recent advancements in **machine learning techniques**, specifically **deep neural networks**, to **predict synthetic pathways via retrosynthetic analysis** with **minimal human intervention**. **<sup>1</sup>**  **<sup>3</sup>**
+AiZynthFinder leverages recent advancements in **machine learning techniques**, specifically **deep neural networks**, to **predict synthetic pathways via retrosynthetic analysis** with **minimal human intervention**. **<sup>1</sup>**  **<sup>3</sup>**
 
 ## 1.1 Basics of Retrosynthesis 
 
@@ -122,7 +122,7 @@ Retrosynthesis involves:
   </div>
 <br>
 
-   * However, other times the disconnection will give **neutral fragments**. Classical examples of this are **pericyclic reactions** such as **Diels-Alder reactions**.
+   * However, other times the disconnection will give **neutral fragments**. Classical examples of this are **pericyclic reactions**, such as **Diels-Alder reactions**.
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/0715c148-cbb2-4ba2-b1f3-ece94738276c", alt="retrosynthesis-synthons-neutral"/>
@@ -138,7 +138,7 @@ Retrosynthesis involves:
 
 4. **Functional Group Interconversion (FGI)**:
    * If a **disconnection is not possible** at a given site, **FGI can be used**.
-   * A FGI is an operation whereby **one functional group is converted into another** so that a **disconnection becomes possible**.
+   * An FGI is an operation whereby **one functional group is converted into another** so that a **disconnection becomes possible**.
    * A common FGI is the **oxidation of an alcohol to a carbonyl, or amine to nitro group**
 <br>
   <div align="center">
