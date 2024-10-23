@@ -537,6 +537,16 @@ As you can see, despite **not being optimal**, it is **computationally cheap**. 
 
 If **sequence decoding strategies lay on a spectrum**, with **greedy search on one end** (**least computationally demanding**, but **least optimal**), and **exhaustive search on the other end** (**most computationally expensive**, but **most optimal**), then **beam search would lie in the middle**, striking a **compromise between greedy seach and exhaustive search**.
 
+The most straightforward version of beam search is **characterised by a single hyperparameter**, the **beam size $$k$$**, and works as follows:
+1. **Time Step 1**:
+   * At time step 1, we select the **$$k$$ tokens with the highest predicted probabilities**.
+3. **Time Step 2**:
+   * Each of these **$$k$$ candidates tokens from time step 1** will be the **first token of $$k$$ candidate output sequences** in **time step 2**.
+   * Because **each tokens conditional probability at each time step are dependent on the output sequences of all prior time steps (temporal dependency)**, these tokens will **determine the conditional probabilies of all tokens in the $$k$$ candidate output sequences** in time step 2.
+   * In time step 2, the **token chosen at each **$$k$$ candidate output sequence** is simply the token the **highest conditional probability**, as with greedy search.
+5. **Iterative Process**: This process is **repeated for $$T'$$** time steps.
+6. **Candidate Output Sequence Comparison**: At the end of the beam search, the **output sequence candidate with the highest conditional probability $$k|\mathcal{Y}|$$** is chosen as the **predicted sequence**.
+
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
 2. **Beam Width (Beam Size)** - This determines the **number of top candidate sequences to keep at each decoding step**. A larger beam width allows for a **more exhaustive search** but **increases computational complexity**.
