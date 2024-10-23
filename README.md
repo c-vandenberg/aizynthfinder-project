@@ -81,8 +81,11 @@
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Residual Connections and Layer Normalisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-residual-connections-and-layer-normalisation)<br>
    &nbsp; &nbsp; 5.3.9 [Inference Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#539-inference-optimisation)<br>
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Greedy Decoding vs Beam Search](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-greedy-decoding-vs-beam-search)<br>
-   5.4 [Model Documentation]()<br>
-   5.5 [References]()<br>
+   5.4 [Model Documentation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#54-model-documentation)<br>
+   &nbsp; &nbsp; 5.4.1 [TensorFlow Graph](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#541-tensorflow-graph)
+   &nbsp; &nbsp; 5.4.2 [Results and Discussion](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#542-results-and-discussion)
+   &nbsp; &nbsp; 5.4.2 [Debugging](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#543-debugging)
+   5.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#55-references)<br>
  5. [Transformer Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/transformer-expansion-policy/README.md#5-transformer-expansion-policy)<br>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
