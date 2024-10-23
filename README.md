@@ -49,19 +49,38 @@
    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Testing](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-testing)<br>
    &nbsp; &nbsp; 4.1.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-model-architecture)<br>
   4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
-5. [Project Retrosynthesis Sequence-to-Sequence Model]()<br>
-   5.1 [Data Preparation]()<br>
-   5.2 [Model Architecture]()<br>
-   5.3 [Model Optimization]()<br>
-   &nbsp; &nbsp; 5.3.1 [Deterministic Training Environment]()<br>
-   &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation]()<br>
+5. [Project Retrosynthesis Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#5-project-retrosynthesis-sequence-to-sequence-model)<br>
+   5.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation)<br>
+   5.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#52-model-architecture)<br>
+   5.3 [Model Optimization](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#53-model-optimisation)<br>
+   &nbsp; &nbsp; 5.3.1 [Deterministic Training Environment](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#531-deterministic-training-environment)<br>
+   &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#532-data-tokenization-and-preprocessing-optimisation)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [DeepChem Tokenizer](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-deepchem-tokenizer)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [TensorFlow TextVectorisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-tensorflow-textvectorisation)<br>
+   &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#533-loss-function-optimisation)<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. []()<br>
    &nbsp; &nbsp; 5.3.4 [Callbacks Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. []()<br>
    &nbsp; &nbsp; 5.3.5 [Metrics Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. []()<br>
    &nbsp; &nbsp; 5.3.6 [Encoder Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. []()<br>
    &nbsp; &nbsp; 5.3.7 [Decoder Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
    &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. []()<br>
    &nbsp; &nbsp; 5.3.9 [Inference Optimisation]()<br>
+   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. []()<br>
    5.4 [Model Documentation]()<br>
    5.5 [References]()<br>
  5. [Transformer Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/transformer-expansion-policy/README.md#5-transformer-expansion-policy)<br>
