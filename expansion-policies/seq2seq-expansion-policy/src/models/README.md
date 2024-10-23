@@ -18,7 +18,7 @@ Additionally, the sources and target datasets were **combined** so that they cou
 
 ## 5.2 Model Architecture
 
-As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**), to act as a **baseline** for future model iterations.
+As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**). This model was **iteratively optimised** over the course of the research project.
 
 <br>
   <div align="center">
