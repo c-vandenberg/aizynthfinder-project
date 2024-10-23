@@ -523,7 +523,7 @@ where:
 * **$$\mathcal{Y}$$** is the **entire vocabulary set**
 * **$$T'$$** is the **number of timesteps/the sequence length**
 
-For example, even for a sequence with a **small vocabulary set $$\mathcal{Y}$$ = 10,000**, and **short sequence length $$T'$$ = 10**, an exhaustive search algorithm would need to evaluate **$$10000^10 = 10^40$$ sequences**. Even for this small, non-complex sequence, an exhaustive search is **beyond the capabilities of most/all computers**.
+For example, even for a sequence with a **small vocabulary set $$\mathcal{Y}$$ = 10,000**, and **short max sequence length $$T'$$ = 10**, an exhaustive search algorithm would need to evaluate **$$10000^10 = 10^40$$ sequences**. Even for this small, non-complex sequence, an exhaustive search is **beyond the capabilities of most/all computers**.
 
 On the other hand, **Big-O complexity of greedy search** is:
 
@@ -546,6 +546,16 @@ The most straightforward version of beam search is **characterised by a single h
    * In time step 2, the **token chosen at each **$$k$$ candidate output sequence** is simply the token the **highest conditional probability**, as with greedy search.
 5. **Iterative Process**: This process is **repeated for $$T'$$** time steps.
 6. **Candidate Output Sequence Comparison**: At the end of the beam search, the **output sequence candidate with the highest conditional probability $$k|\mathcal{Y}|$$** is chosen as the **predicted sequence**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/da15729e-cfbf-464d-a213-bc2c6223ee1e", alt="beam-search"/>
+    <p>
+      <b>Fig 8</b> Beam search with **beam width, $$k$$ = 2** and an ** <b><sup>9</sup></b>
+    </p>
+  </div>
+<br>
+
 
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
