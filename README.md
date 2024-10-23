@@ -230,11 +230,11 @@ Therefore, AiZynthFinder has **another trained neural network** called **filter 
 
 ### 1.4.1 Heuristic Search Algorithms
 
-**Monte Carlo Tree Search (MCTS)** **<sup>9</sup>** is a powerful search algorithm that uses **heuristics** (i.e. **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
+**Monte Carlo Tree Search (MCTS)** **<sup>9</sup>** is a powerful search algorithm that uses **heuristics** (i.e., **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
 
   * Like with other **heuristic search algorithms**, the goal of MCTS is to **find a good enough solution within a reasonable amount of time**, rather than **guaranteeing the optimal solution** by **examining all possible outcomes**.
   * Heuristic search algorithms like MCTS are guided by a **heuristic function**, which is a mathematical function used to estimate the **cost, distance or likelihood of reaching the goal from a given state or node**. This function helps **prioritse which paths or options to explore**, based on their likelihood of **leading to an optimal or near-optimal solution**.
-  * Heuristic search algorithms aim to **reduce the search space**, making them **more efficient than exhaustive search methods**. By **focusing on promised paths**, they can often **find solutions faster**, especially in complex or large problem spaces. Although these solutions **may not be optimal**, they are **usually good enough for practical purposes**.
+  * Heuristic search algorithms aim to **reduce the search space**, making them **more efficient than exhaustive search methods**. By **focusing on promising paths**, they can often **find solutions faster**, especially in complex or large problem spaces. Although these solutions **may not be optimal**, they are **usually good enough for practical purposes**.
 
 ### 1.4.2 Monte Carlo Tree Search in AiZynthFinder
 
@@ -242,13 +242,13 @@ In AiZynthFinder, MCTS plays a crucial role in **effectively navigating the vast
 
 To recap, the **retrosynthesis tree structure representation** consists of:
 * **Nodes**: Each node in the tree represents **a state of the retrosynthesis problem**. In AiZynthFinder, a node corresponds to **a set of one or more intermediate molecules** that can be used to **synthesise the molecule(s)** in the **current node's parent node**.
-* **Edges**: The edges between the nodes represent the **application of a specific reaction template (disconnection rule)** to **decompose the molecule set in the parent node** into **simpler precursor molecules in the child node**
+* **Edges**: The edges between the nodes represent the **application of a specific reaction template (disconnection rule)** to **decompose the molecule set in the parent node** into **simpler precursor molecules in the child node**.
 
 In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<sup>10</sup>** to explore potential synthetic routes as follows:
 
 **1. Selection**
 * Starting at the **root node** (target molecule), the MCTS algorithm selects the **most promising node for expansion** based on a balance of **exploration (trying new reactions)**, and **exploitation (further exploring known good reactions)**
-* This is goverened by a **Upper Confidence Bound (UCB) score formula** (**Fig 10**) and is how AiZynthFinder **selects and scores routes**.
+* This is governed by a **Upper Confidence Bound (UCB) score formula** (**Fig 10**) and is how AiZynthFinder **selects and scores routes**.
 
 <br>
   <div align="center">
@@ -260,21 +260,20 @@ In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<
 <br>
 
 **2. Expansion**
-* Once a node has been selected, the MCTS algorithm **expands it** by applying a **new reaction template** from the **expansion policy** and **filter policy**, generating **new precursor molecules** (i.e. **new child nodes**).
+* Once a node has been selected, the MCTS algorithm **expands it** by applying a **new reaction template** from the **expansion policy** and **filter policy**, generating **new precursor molecules** (i.e., **new child nodes**).
 * At **each expansion step**, the **expansion policy and filter policy** are used to **filter out unfeasible reactions**, ensuring that the search **focuses on viable synthetic routes**.
 
 **3. Rollout/Iteration**
 * This process of **selection and expansion** is then **repeated for each resulting precursor molecule** until the **stop criterion is met** and we reach a **terminal node**.
-* The stop criterion is usually either when the search reaches **commercially available precursors**, or it reaches a **pre-defined tree depth/number of disconnections**.
-* Once
+* The stop criterion is usually either when the search reaches **commercially available precursors**, or when it reaches a **pre-defined tree depth/number of disconnections**.
 
 **4. Update/Backpropagation**
 * Once the **terminal node is reached**, the **Monte Carlo simulation** is complete and a **complete synthetic route is generated**. This completed simulation/synthetic route is known as a **playout**.
 * The **score of the terminal node** (and hence the **score of the playout/synthetic route**) is then **propagated up through the tree**.
-* This score of the terminal node is the **accumulated reward (Q)** in the **UCB Score formula** (**Fig 10**), which is s function of the **tree depth** at the terminal node (i.e. **how many synthesis steps** between it and the target molecule), and the **fraction of the precursor molecules in that route that are in stock**.
+* This score of the terminal node is the **accumulated reward (Q)** in the **UCB Score formula** (**Fig 10**), which is a function of the **tree depth** at the terminal node (i.e., **how many synthesis steps** between it and the target molecule), and the **fraction of the precursor molecules in that route that are in stock**.
 * This gives a quantitative analysis of the **quality of the synthetic route**.
 
-Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The number of itertations is governed by a **predefined limit**, or a **predefined search time**. This iterative process is illustrated in **Fig 11**.
+Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The number of iterations is governed by a **predefined limit**, or a **predefined search time**. This iterative process is illustrated in **Fig 11**.
 
 <br>
   <div align="center">
