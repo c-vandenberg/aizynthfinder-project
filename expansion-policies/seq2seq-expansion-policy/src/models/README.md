@@ -521,9 +521,9 @@ $$**
 
 where:
 * **$$\mathcal{Y}$$** is the **entire vocabulary set**
-* **$$T'$$** is the **number of timesteps/the sequence length**
+* **$$T'$$** is the **number of timesteps/the max output sequence length**
 
-For example, even for a sequence with a **small vocabulary set $$\mathcal{Y}$$ = 10,000**, and **short max sequence length $$T'$$ = 10**, an exhaustive search algorithm would need to evaluate **$$10000^10 = 10^40$$ sequences**. Even for this small, non-complex sequence, an exhaustive search is **beyond the capabilities of most/all computers**.
+For example, even for a sequence with a **small vocabulary set $$\mathcal{Y}$$ = 10,000**, and **short max output sequence length $$T'$$ = 10**, an exhaustive search algorithm would need to evaluate **$$10000^10 = 10^40$$ sequences**. Even for this small, non-complex sequence, an exhaustive search is **beyond the capabilities of most/all computers**.
 
 On the other hand, **Big-O complexity of greedy search** is:
 
@@ -543,19 +543,21 @@ The most straightforward version of beam search is **characterised by a single h
 3. **Time Step 2**:
    * Each of these **$$k$$ candidates tokens from time step 1** will be the **first token of $$k$$ candidate output sequences** in **time step 2**.
    * Because **each tokens conditional probability at each time step are dependent on the output sequences of all prior time steps (temporal dependency)**, these tokens will **determine the conditional probabilies of all tokens in the $$k$$ candidate output sequences** in time step 2.
-   * In time step 2, the **token chosen at each **$$k$$ candidate output sequence** is simply the token the **highest conditional probability**, as with greedy search.
-5. **Iterative Process**: This process is **repeated for $$T'$$** time steps.
+   * In time step 2, the **token chosen at each **$$k$$ candidate output sequence** is the one that **gives the highest total conditional probability for that candidate sequence**.
+5. **Iterative Process**: This process is **repeated for $$T'$$** time steps (the **max output sequence length**).
 6. **Candidate Output Sequence Comparison**: At the end of the beam search, the **output sequence candidate with the highest conditional probability $$k|\mathcal{Y}|$$** is chosen as the **predicted sequence**.
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/da15729e-cfbf-464d-a213-bc2c6223ee1e", alt="beam-search"/>
     <p>
-      <b>Fig 8</b> Beam search with **beam width, $$k$$ = 2** and an ** <b><sup>9</sup></b>
+      <b>Fig 8</b> Beam search with <b>beam width, k = 2</b> and a <b>max sequence = 3</b>. The candidate output sequences chosen by beam search are <b>A, C, AB, CE, ABD</b> and <b>CED</b> <b><sup>9</sup></b>
     </p>
   </div>
 <br>
 
+**Fig 8** illustrates an example of beam search with an example. In this example, the **output vocabulary contains only five elements**: **$$Y = {A, B, C, D, E}$$** (where **one of them is **"<eos>"**), a **beam width, $$k = 2$$** and a **maximum output sequence = 3**.
+* At **time step 1**, suppose that the **tokens with the highest conditional probabilities $$P(y_1 \mid \mathbf{c})$$** are **$$A$$** and **$$C$$**.
 
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
