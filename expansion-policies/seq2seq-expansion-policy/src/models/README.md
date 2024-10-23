@@ -213,7 +213,7 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
   </p>
 </div>
 
-### i. Early Stopping (EarlyStopping)
+### i. EarlyStopping
 
 **EarlyStopping** is a built-in callback in Keras (`tensorflow.keras.callbacks.EarlyStopping`) that **monitors a specific metric** and **stops training when it stops improving**. 
 
