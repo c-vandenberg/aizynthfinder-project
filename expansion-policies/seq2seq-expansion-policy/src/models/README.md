@@ -602,7 +602,11 @@ The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\rig
 
 ## 5.4 Model Documentation
 
-### 5.4.1 Model Debugging
+### 5.4.1 TensorFlow Graph
+
+### 5.4.2 Results and Discussion
+
+### 5.4.3 Debugging
 
 ### i. Data Tokenization and Preprocessing Debugging
 1. **Analyse Data Set Token Frequency Distribution**:
