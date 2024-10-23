@@ -162,7 +162,7 @@ Retrosynthesis involves:
 
 ## 1.2 Retrosynthetic Search Tree
 
-Typically, the retrosynthetic analysis of a target molecule is an **iterative process** whereby the **subsequent fragments are themselves broken down** until we **reach a stop criterion**. This stop criterion is typically when we reach **precursors that are commerically available/in stock**.
+Typically, the retrosynthetic analysis of a target molecule is an **iterative process** whereby the **subsequent fragments are themselves broken down** until we **reach a stop criterion**. This stop criterion is typically when we reach **precursors that are commercially available/in stock**.
 
 <br>
   <div align="center">
@@ -173,29 +173,29 @@ Typically, the retrosynthetic analysis of a target molecule is an **iterative pr
   </div>
 <br>
 
-This iterative process results in a **retrosynthesis tree** where the **bredth is incredibly large**, but the **depth is quite small/shallow**. In comparison to the search trees for games such as chess and Go (**Fig 6**), the **bredth of a retrosynthesis search tree is incredibly large** because you could **theoretically break any bonds** in the target molecule, and the subsequent fragments. This leads to an **explosion in child nodes** from the **first few substrees**.
+This iterative process results in a **retrosynthesis tree** where the **breadth is incredibly large**, but the **depth is quite small/shallow**. In comparison to the search trees for games such as chess and Go (**Fig 6**), the **breadth of a retrosynthesis search tree is incredibly large** because you could **theoretically break any bonds** in the target molecule, and the subsequent fragments. This leads to an **explosion in child nodes** from the **first few subtrees**.
 
 The **depth** of a retrosynthesis search tree is **small/shallow** on the other hand, as it only takes a **few disconnections before viable precursors are found**. This is ideal since we don't want **linear synthetic reactions** with an **excessive number of steps**.
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/6c3efa40-bf2c-4124-bd13-4ad9f5a5d6b0", alt="retrosynthetic-search-tree-bredth-depth"/>
+    <img src="https://github.com/user-attachments/assets/6c3efa40-bf2c-4124-bd13-4ad9f5a5d6b0", alt="retrosynthetic-search-tree-breadth-depth"/>
     <p>
-      <b>Fig 7</b> Retrosynthesis search tree bredth and depth compared to the search trees in chess and Go. <b><sup>5</sup></b>
+      <b>Fig 7</b> Retrosynthesis search tree breadth and depth compared to the search trees in chess and Go. <b><sup>5</sup></b>
     </p>
   </div>
 <br>
 
 For **effective retrosynthetic analysis**, a retrosynthesis program must:
-1. **Define the disconnection rules clearly and efficiently** in order to **reduce the bredth** of the retrosynthesis search tree.
+1. **Define the disconnection rules clearly and efficiently** in order to **reduce the breadth** of the retrosynthesis search tree.
 2. **Traverse the retrosynthesis search tree efficiently** using an **effective search algorithm**.
 
 ### 1.3 AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)
 
 AiZynthFinder uses a **template-based retrosynthesis model** to **define the disconnection rules**. This approach utilises a **curated database** of **transformation rules** that are **extracted from external reaction databases** that are then **encoded computationally into reaction templates** as **SMIRKS**. 
-* **SMIRKS** is a form of **linear notation** used for **molecular reaction representation**. It was developed by **Daylight** and can be thought of as a hybrid between **SMILES** and **SMARTS**
+* **SMIRKS** is a form of **linear notation** used for **molecular reaction representation**. It was developed by **Daylight** and can be thought of as a hybrid between **SMILES** and **SMARTS**.
 
-These reaction templates can then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
+These reaction templates can then be used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
 
 However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** **<sup>6</sup>** (**Fig 8**).
 
@@ -213,7 +213,7 @@ This **expansion policy neural network template ranking** works as follows:
 2. **Expansion policy neural network**: The ECFP4 fingerprints are then **fed into a simple neural network**, called an **expansion policy**. The **output of this neural network** is a **ranked list of templates**.
 3. **Keep top-ranked templates and apply to target molecule**: The top-ranked templates are kept (typically the **top 50**), and are **applied to the target molecule**, producing **different sets of precursors**
 
-However, because the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
+However, the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
 
 Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**). **<sup>8</sup>**
 
