@@ -511,7 +511,31 @@ $$
 
 ### Exhaustive Search
 
-If the goal is to obtain the **most likely sequence**, we may consider using **exhaustive search**
+If the goal is to obtain the **most likely sequence**, we may consider using **exhaustive search**. This involves **enumerating all the possible output sequences with their conditional probabilities**, and then output the one that **scores the highest probability**.
+
+While this would certainly work, it comes at a **prohibative computational cost**. The **Big-O complexity** of an exhastive search would be:
+
+**$$
+  \mathcal{O}(\left|\mathcal{Y}\right|^{T'})
+$$**
+
+where:
+* **$$\mathcal{Y}$$** is the **entire vocabulary set**
+* **$$T'$$** is the **number of timesteps/the sequence length**
+
+For example, even for a sequence with a **small vocabulary set $$\mathcal{Y}$$ = 10,000**, and **short sequence length $$T'$$ = 10**, an exhaustive search algorithm would need to evaluate **$$10000^10 = 10^40$$ sequences**. Even for this small, non-complex sequence, an exhaustive search is **beyond the capabilities of most/all computers**.
+
+On the other hand, **Big-O complexity of greedy search** is:
+
+**$$
+   \mathcal{O}(\left|\mathcal{Y}\right|T')
+$$**
+
+As you can see, despite **not being optimal**, it is **computationally cheap**. For example for the **same sequence as earlier**, a greedy search algorithm would only need to evaluate **$$10000 \times 10 = 10^5$$ sequences**.
+
+### Beam Search
+
+If **sequence decoding strategies lay on a spectrum**, with **greedy search on one end** (**least computationally demanding**, but **least optimal**), and **exhaustive search on the other end** (**most computationally expensive**, but **most optimal**), then **beam search would lie in the middle**, striking a **compromise between greedy seach and exhaustive search**.
 
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
