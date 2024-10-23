@@ -543,7 +543,7 @@ The most straightforward version of beam search is **characterised by a single h
 3. **Time Step 2**:
    * Each of these **$$k$$ candidates tokens from time step 1** will be the **first token of $$k$$ candidate output sequences** in **time step 2**.
    * Because **each tokens conditional probability at each time step are dependent on the output sequences of all prior time steps (temporal dependency)**, these tokens will **determine the conditional probabilies of all tokens in the $$k$$ candidate output sequences** in time step 2.
-   * In time step 2, the **token chosen at each **$$k$$ candidate output sequence** is the one that **gives the highest total conditional probability for that candidate sequence**.
+   * In time step 2, the **token chosen at each $$k$$ candidate output sequence** is the one that **gives the highest total conditional probability for that candidate sequence** (i.e. the **token with the highest conditional probability at that time step**)
 5. **Iterative Process**: This process is **repeated for $$T'$$** time steps (the **max output sequence length**).
 6. **Candidate Output Sequence Comparison**: At the end of the beam search, the **output sequence candidate with the highest conditional probability $$k|\mathcal{Y}|$$** is chosen as the **predicted sequence**.
 
@@ -556,8 +556,44 @@ The most straightforward version of beam search is **characterised by a single h
   </div>
 <br>
 
-**Fig 8** illustrates an example of beam search with an example. In this example, the **output vocabulary contains only five elements**: **$$Y = {A, B, C, D, E}$$** (where **one of them is **"<eos>"**), a **beam width, $$k = 2$$** and a **maximum output sequence = 3**.
-* At **time step 1**, suppose that the **tokens with the highest conditional probabilities $$P(y_1 \mid \mathbf{c})$$** are **$$A$$** and **$$C$$**.
+**Fig 8** illustrates an example of beam search with an example. In this example, the **output vocabulary contains only five elements**: **$$Y = {A, B, C, D, E}$$** (where **one of them is `<eos>`**), a **beam width, $$k = 2$$** and a **maximum output sequence = 3**.
+1. At **time step 1**, suppose that the **tokens with the highest conditional probabilities $$P(y_1 \mid \mathbf{c})$$** are **$$A$$** and **$$C$$**. Because we have a beam width = 2, these tokens are **chosen for each of the two beams**.
+2. At **time step 2**, for all **$$y_2 \in \mathcal{Y},$$** (**tokens in output vocabulary set at time step 2**), we compute the below and **pick the largest two amount these ten value**. In **Fig 8** this is **$$P(A, B \mid \mathbf{c})$$** and **$$P(C, E \mid \mathbf{c})$$**:
+
+$$
+  \begin{split}\begin{aligned}P(A, y_2 \mid \mathbf{c}) = P(A \mid \mathbf{c})P(y_2 \mid A, \mathbf{c}),\end{aligned}\end{split}
+$$
+$$
+   \begin{split}\begin{aligned}P(C, y_2 \mid \mathbf{c}) = P(C \mid \mathbf{c})P(y_2 \mid C, \mathbf{c}),\end{aligned}\end{split}
+$$
+
+3. At **time step 3**, for all **$$y_3 \in \mathcal{Y},$$** (**tokens in output vocabulary set at time step 2**), we compute the below and, again, **pick the largest two amount these ten value**. In **Fig 8** this is **$$P(A, B, D \mid \mathbf{c})$$** and **$$P(C, E, D \mid \mathbf{c})$$**:
+
+$$
+  \begin{split}\begin{aligned}P(A, B, y_3 \mid \mathbf{c}) = P(A, B \mid \mathbf{c})P(y_3 \mid A, B, \mathbf{c}),\end{aligned}\end{split}
+$$
+$$
+   \begin{split}\begin{aligned}P(C, E, y_3 \mid \mathbf{c}) = P(C, E \mid \mathbf{c})P(y_3 \mid C, E, \mathbf{c}),\end{aligned}\end{split}
+$$
+
+4. As a result, we get **six candidate output sequences**:
+   1. **$$A$$**
+   2. **$$C$$**
+   3. **$$A, B$$**
+   4. **$$C, E$$**
+   5. **$$A, B, D$$**
+   6. **$$C, E, D$$**
+5. At the **end of the beam search**, the algorithm **discards portions of these output sequences** (e.g. the **`<eos>` token** and **any tokens after it**) to obtain the **set of final six candidate output sequences**.
+6. The algorithm then **chooses the output sequence** which **maximises the following score**;
+
+$$
+  \frac{1}{L^\alpha} \log P(y_1, \ldots, y_{L}\mid \mathbf{c}) = \frac{1}{L^\alpha} \sum_{t'=1}^L \log P(y_{t'} \mid y_1, \ldots, y_{t'-1}, \mathbf{c});
+$$
+  * Here, **$$L$$** is the **length of the final candidate sequence** and **$$\alpha$$** is usually set to **$$0.75$$**.
+  * Since **longer sequences have more logarithmic terms in the summation**, the term **$$L^\alpha$$** in the denominator **penalises long sequences**.
+
+The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\right|T')$$**. This is **between the Big-O complexities of greedy search and exhaustive search**.
+  * **N.B.**: Greedy search can be thought of as a **special case of beam search arising when the beam size is set to 1**.
 
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
