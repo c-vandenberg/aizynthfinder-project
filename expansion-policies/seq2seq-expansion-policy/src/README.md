@@ -4,11 +4,11 @@
 
 *Liu et al.* derived their seq2seq model architecture from the large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters** by *Britz et al.*.
 
-In their seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statisitcally significant results** from **random noise**.
+In their seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statistically significant results** from **random noise**.
 
 ### 4.1.1 Embedding Dimensionality
 
-Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**). *N.B* The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.
+Using a validation data set (**newtest2013**) *Britz et al.* evaluated the effect of **varying embedding dimensionality** on model performance (**Table 2**). *N.B* The values in parentheses represent the maximum observed BLEU score within the given uncertainty range.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -70,17 +70,17 @@ Using a valiation data set (**newtest2013**) *Britz et al.* evaluated the effect
 
 To evaluate the effect of encoder and decoder RNN cell variant on model performance, *Britz et al.* **compared three cell variants**:
 1. **Long Short-Term Memory (LSTM) Cells**
-2. **Gated Recurrent Unit (GNU) Cells**
+2. **Gated Recurrent Unit (GRU) Cells**
 3. **A Vanilla RNN Cell in the Decoder Only**
 
-The LSTM and GNU cells are what are known as **gated cells**:
+The LSTM and GRU cells are what are known as **gated cells**:
 * **Gated cells** are **specialised types of RNN units** that **incorporate gates** - mechanisms designed to **regulate the flow of information**.
 * These gates control **how information is retained, forgotten, or updated** as the network **processes sequential data**.
 * The primary purpose of gated cells is to **address and mitigate common issues** encountered in **traditional RNNs**, such as the **vanishing gradient problem**, which **hampers the ability to learn long-term dependencies in data**.
 
-Using **vanillar RNN cells**, deep networks **cannot efficiently propagate information and gradients though mulitple layers and time steps**, hence the need for gated cells. However, *Britz et al.* hypothesised that, with an **attention-based model**, the decoder should be able to make decisions almost **exclusively based on the current input and the attention context**, and so the **gating mechanism in the decoder is not strictly necessary**. 
+Using **vanilla RNN cells**, deep networks **cannot efficiently propagate information and gradients through mulitple layers and time steps**, hence the need for gated cells. However, *Britz et al.* hypothesised that, with an **attention-based model**, the decoder should be able to make decisions almost **exclusively based on the current input and the attention context**, and so the **gating mechanism in the decoder is not strictly necessary**. 
 
-To test this hyporthesis they added a **vanilla RNN cell in the decoder only** in their study of RNN cell variants.
+To test this hypothesis they added a **vanilla RNN cell in the decoder only** in their study of RNN cell variants.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -221,7 +221,7 @@ Additionally, for deeper networks, they experimented with **two variants of resi
 
 Contrary to their initial hypothesis, **deeper encoders and decoders did not consistently outperform their shallower counterparts**. These findings suggest that, while network depth is a **critical factor in model performance**, its **benefits are not linear** and are **highly contingent on the architectural strategies employed**, such as the **type and implementation of residual connections**. 
 
-Additionally, the **lack of clear performance improvements with incresed depth**, coupled with **training instabilities in deeper configurations**, indicates a need for **more robust optimisation techniques** and **architectural innovations** to **fully harness the potential** of **deep sequential models** in NMT.
+Additionally, the **lack of clear performance improvements with increased depth**, coupled with **training instabilities in deeper configurations**, indicates a need for **more robust optimisation techniques** and **architectural innovations** to **fully harness the potential** of **deep sequential models** in NMT.
 
 ### 4.1.4 Unidirectional vs. Bidirectional Encoder
 
@@ -229,7 +229,7 @@ For **encoder directionality**, *Britz et al.* cited literature sources where **
 
 Bidirectional encoders are able to create representations that **take into account both past and future inputs**, whereas unidirectional encoders can **only take past inputs into account**. However, the benefit of unidirectional encoders is that they can be **easily parallelized on GPUs**, allowing them to run faster than bidirectional encoders. **<sup>4</sup>**
 
-A well as investigating encoder directionality, *Britz et al.* also investigated **source input reversal**. Reversing source inputs is a **commonly used technique** that allows the encoder to **create richer representations for earlier words**. Given that **errors can on the decoder side can easily cascade**, the **correctness of early words has a disproportionate impact**. **<sup>4</sup>**
+As well as investigating encoder directionality, *Britz et al.* also investigated **source input reversal**. Reversing source inputs is a **commonly used technique** that allows the encoder to **create richer representations for earlier words**. Given that **errors can on the decoder side can easily cascade**, the **correctness of early words has a disproportionate impact**. **<sup>4</sup>**
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -283,9 +283,9 @@ A well as investigating encoder directionality, *Britz et al.* also investigated
   </p>
 </div>
 
-The investigation shows that, in genereal, **bidirectional encoders marginally outperform unidirectional encoders**, and the **introduction of reversed source inputs significantly boosts the performance of unidirectional encoders**. However, even with reversed inputs, **shallower bidirectional encoders remain competitive**, suggesting that bidirectionality provides **inherent advantages in capturing contextual information**.
+The investigation shows that, in general, **bidirectional encoders marginally outperform unidirectional encoders**, and the **introduction of reversed source inputs significantly boosts the performance of unidirectional encoders**. However, even with reversed inputs, **shallower bidirectional encoders remain competitive**, suggesting that bidirectionality provides **inherent advantages in capturing contextual information**.
 
-Noteably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
+Notably, their results **do not include a bidirectional 2-layer encoder with reversed source input**, nor a **bidirectional 4-layer encoder with and without reversed source input**. This will be an **avenue for investigation in this project.**
 
 ### 4.1.5 Attention Mechanism
 
@@ -293,7 +293,7 @@ Noteably, their results **do not include a bidirectional 2-layer encoder with re
 1. **Additive Attention**:
    * The **additive mechanism**, introduced by *Bahdanau et al.*, **<sup>6</sup>** involves **combining the encoder states and decoder states** through a **feedforward network** before computing the attention scores.
 2. **Multiplicative Attention**:
-   * The **multiplicative mechanism**, introduced by *Luond et al.*, **<sup>7</sup>** **computes attention scores using a dot product** between the **transformed encoder and decoder states**, making it less computationally expensive.
+   * The **multiplicative mechanism**, introduced by *Luong et al.*, **<sup>7</sup>** **computes attention scores using a dot product** between the **transformed encoder and decoder states**, making it less computationally expensive.
 
 They also experimented with using **no attention mechanism** by:
 1. **Initializing the decoder state with the last encoder state (None-State)**.
@@ -368,7 +368,7 @@ The investigation showed that **additive attention slightly but consistently out
 
 ### 4.1.6 Beam Search Strategies
 
-**Beam Search** is a commonly used technique aimed at **identifying the most probable target sequences** by **exploring multiple translations through tree search**. In their study, *Britz et al.* evaluated the impact of **varying beam widths**, ranging from **1 (greedy search) to 100**, and the **incorporation of length normalisation penalities** of **0.5 and 1.0** on BLEU scores (**Table 7**).
+**Beam Search** is a commonly used technique aimed at **identifying the most probable target sequences** by **exploring multiple translations through tree search**. In their study, *Britz et al.* evaluated the impact of **varying beam widths**, ranging from **1 (greedy search) to 100**, and the **incorporation of length normalisation penalties** of **0.5 and 1.0** on BLEU scores (**Table 7**).
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -429,11 +429,11 @@ The investigation shows that the **optimal beam width** appears to reside around
 
 ## 4.2 *Liu et al.* Sequence-to-Sequence Model
 
-The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the prediced molecular precursors in the same notation.
+The sequence-to-sequence (Seq2Seq) model implementation in this project was based on the model developed by *Liu at al.* **<sup>1</sup>** This model processes target molecules in **molecular-input line-entry system (SMILES)** notation and outputs the predicted molecular precursors in the same notation.
 
 ### 4.2.1 Data Preparation
 
-*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered form an open source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 8.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single product reactions**.
+*Liu at al.* used a data set of **50,000 atom-mapped reactions** that were filtered from an open-source patent database to represent typical medicinal chemistry reaction types. **<sup>2</sup>** These 50,000 reactions were **classified into 10 broad reaction types** **<sup>3</sup>** (**Table 8.**), preprocessed to **eliminate all reagents** and leave only reactants & products, and then **canonicalised**. Additionally, any reactions with multiple products were split into **multiple single-product reactions**.
 
 <br>
   <div align="center">
@@ -465,9 +465,9 @@ Additionally, a **beam search procedure is used for model inference**: **<sup>1<
 
 ### 4.2.2 Model Architecture
 
-From their analysis, *Britz et al.* released an **open source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>**
+From their analysis, *Britz et al.* released an **open-source, TensorFlow-based package** specifically designed to implement **reproducible state of the art sequence-to-sequence models**. This aim of this open-source seq2seq library is to allow researchers to explore **novel architectures** with **minimal code changes**, and **define experimental parameters in a reproducible manner**. **<sup>4</sup>**
 
-*Liu et al.* adapted this open source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 9**.
+*Liu et al.* adapted this open-source library in the design of their characterwise seq2seq model. The encoder-decoder architecture consists of **bidrectional LSTM cells for the encoder** and **unidirectional LSTM cells for the decoder**. Additionally, they utilise a an **additive attention mechanism**. The key hyperparameters are shown in **Table 9**.
 
 <br>
   <div align="center">
