@@ -80,7 +80,7 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
    * **Function**: Produces the final prediction or output for the given inputs.
    * **Structure**: Number of nodes/neurons in the output layer depends on the desired output format (e.g., classes for classification).
   
-**N.B.** Although **deep learning and neural networks are often used interchangeably**, it is worth noting that the **"deep"** in deep learning simply refers to the **depth of the layers** in a neural network. Generally, a neural network that consists of **more than three layers** (i.e. an input layer, one hidden layer, and an output layer) can be considered a **deep learning neural network** (**Fig 2**).
+**N.B.** Although **deep learning and neural networks are often used interchangeably**, it is worth noting that the **"deep"** in deep learning simply refers to the **depth of the layers** in a neural network. Generally, a neural network that consists of **more than 3 layers** (i.e. an input layer, one hidden layer, and an output layer) can be considered a **deep learning neural network** (**Fig 2**).
 
 <br>
   <div align="center">
@@ -93,7 +93,7 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
   
 ## 2.3 Feedforward Neural Networks (FNNs)
 
-**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only on direction - forward -** from the input nodes, to the hidden nodes (if any), and to the output nodes. There are **no cycles or loops** in the network.
+**Feedforward Neural Networks (FNNs)** are one of the **simplest type** of artificial neural networks. In FNNs, **data moves in only one direction - forward -** from the input nodes, to the hidden nodes (if any), and to the output nodes. There are **no cycles or loops** in the network.
 
 The first type of neural network developed was called **single-layer perceptrons**. These consisted of only an **input layer** and an **output layer** and could only recognise/predict **linear patterns** between the input and output data, as there were no hidden layers (and so no associated activation functions) to **introduce non-linearity**.
 
@@ -108,10 +108,10 @@ The training of MLP FNNs involves two main phases:
    3. This process continues **until the output layer is reached**, and a **prediction is made**.
 2. **Backpropagation Phase**:
    1. **Loss Calculation**: Once a prediction is made, the **error** (the **difference between the predicted output** and the **actual output**) is calculated using a **loss function**.
-   2. **Backwards Pass**: The **gradients of the loss with respect with weight** is then calculated by **applying the chain rule** and is **propagated back through the layers of the network**.
+   2. **Backward Pass**: The **gradients of the loss with respect to weight** is then calculated by **applying the chain rule** and is **propagated back through the layers of the network**.
    3. **Weights Update**: Using these computed gradients, the **weights are adjusted to minimize the error**, typically using a **gradient descent optimization algorithm** such as **Stochastic Gradient Descent (SGD)** or **Adam**
 
-This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached** (**Fig 3**).
+This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This process is known as **gradient descent**, and it continues until the model reaches a **point of convergence (i.e. where the loss function is at a minimum)**, or another **stop criterion is reached** (**Fig 3**).
 
 <br>
   <div align="center">
@@ -146,7 +146,7 @@ This "memory" is what **distinguishes it from FNNs** and is **passed between tim
 <br>
 
 Another characteristic of RNNs that distinguishes them from FNNs is that they **share parameters across each time step within a layer, and across each layer of the network**:
-* While FNNs have **different weights across each node**, RNNs **share the same weight parameter within each each time step and layer of the network**.
+* While FNNs have **different weights across each node**, RNNs **share the same weight parameter within each time step and layer of the network**.
 * That said, while the weight parameter is shared across layers, the weights are **still adjusted through the processes of backpropagation and gradient descent** to **facilitate reinforcement learning**. Though as we will see later, the **backpropagation strategy employed by RNNs is different** to the standard backpropagation used by FNNs.
 
 ### 2.4.1 Recurrent Neural Network Architecture
@@ -155,7 +155,7 @@ Another characteristic of RNNs that distinguishes them from FNNs is that they **
 
 The **nodes** in the graph represent **variables** which can be a **scalar, vector, matrix, tensor etc**. The **edges** in the graph correspond to **operations** that **transform one variable to another**.
 
-For **recursive or recurrent computation**, such as those in an RNN, the computational graph can be **unfolded** into another computational graph that has a **repetitive structrue**, typically corresponding to a **chain of events**. 
+For **recursive or recurrent computation**, such as those in an RNN, the computational graph can be **unfolded** into another computational graph that has a **repetitive structure**, typically corresponding to a **chain of events**. 
 
 The architectural notation of a basic RNN with **no output** is shown in **Fig 5**.
 
@@ -196,8 +196,8 @@ As with FNNs, RNNs are trained by **processing input data and refining their per
 
 The **nodes/neurons** have **weights** which give the **strength and direction** of the **connection between neurons in adjacent layers** when predicting the output. During training **these weights are adjusted to improve prediction accuracy**.
 
-However, how the weights are adjusted **differs in RNNs compated to FNNs**. In FNNs, the weights are adjusted through **backpropagation**. In RNNs, the weights are adjusted through **backpropagation through time (BPTT)**.
-   * FNNs use **standard backpropagation**, where the **gradients of the loss function are propagated backwards only in the depth dimension (i.e. between layers)**.
+However, how the weights are adjusted **differs in RNNs compared to FNNs**. In FNNs, the weights are adjusted through **backpropagation**. In RNNs, the weights are adjusted through **backpropagation through time (BPTT)**.
+   * FNNs use **standard backpropagation**, where the **gradients of the loss function are propagated backward only in the depth dimension (i.e. between layers)**.
    * In RNNs however, backpropagation is extended to **handle the temporal (sequential/time step) nature of the data** and so the gradients flow **both through the depth dimension (i.e. between layers)** and **through the temporal dimension (i.e. between time steps**).
    * In BPTT, the **loss gradients are summed/accumulated at each time step in all layers** because the **hidden states and weight parameter are shared/passed between each time step and each layer of the network**.
    * With FNNs, because they **don't share parameters across each layer**, they **do not need to sum/accumulate the loss gradients** and so **standard backpropagation** can be used.
@@ -215,7 +215,7 @@ BPTT is essential for **learning temporal dependencies and patterns** in sequent
    2. The **gradients are propagated backward through all time steps in that layer**, **accumulating the influence of the outputs, hidden states and weights across all time steps**.
    3. Simultaneously, the **gradients flow backward through the RNN layers** if the RNN has **multiple stacked layers**.
 7. **Update weights and biases**: Following gradient computation, the **weights and biases are updated** based on the **accumulated gradients from all time steps**. The weights and biases are adjusted using **optimisation methods** such as **SGD** or **Adam** to **minimise the loss function**.
-8. **Repeat Steps 3-7**: This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This continues until the model reaches a **point of convergence (i.e. where the loss funtion is at a minimum)**, or another **stop criterion is reached**.
+8. **Repeat Steps 3-7**: This is an **iterative process** where the training dataset is **passed through the network multiple times**, and each time the **weights are updated to reduce the error in prediction**. This continues until the model reaches a **point of convergence (i.e. where the loss function is at a minimum)**, or another **stop criterion is reached**.
 
 ### 2.4.4 Types of Recurrent Neural Networks
 
@@ -247,9 +247,9 @@ where:
    * **$$W_{hy}$$**: **Weight matrix multiplication** that **connects the hidden state at time step $$t$$** to the **output at time step $$t$$**
    * **$$b_y$$**: The **bias vector**
 
-The **stengths** of standard/unidirectional RNNs are:
+The **strengths** of standard/unidirectional RNNs are:
 1. **Simplicity**: They are easiest RNN to implement and understand.
-2. **Short-Term Dependencies**: They excel in **simple tasks** with **short-term dependencies**, such as **predicting the next work in a short, simple sentence**, or the **next value in a simple time series**.
+2. **Short-Term Dependencies**: They excel in **simple tasks** with **short-term dependencies**, such as **predicting the next word in a short, simple sentence**, or the **next value in a simple time series**.
 
 However, the **main limitations** of standard/unidirectional RNNs are:
 1. **Long-Term Dependencies**: They **struggle with capturing long-term dependencies** due to issues like **vanishing and exploding gradients**.
@@ -257,7 +257,7 @@ However, the **main limitations** of standard/unidirectional RNNs are:
 
 ### ii. Bidirectional Recurrent Neural Networks (BRRNs)
 
-While unidirectional RNNs can only **draw on previous inputs to make predictions about the current state**, **bidirectional RNNs (BRNNs)** enchance the standard RNN by **processing the input sequence in both forward and backward directions simultaneously**. This allows the network to **have access to both past (preceding) and future (succeeding) context at each time step**, which can **improve performance** on tasks where **context from both directions is beneficial**.
+While unidirectional RNNs can only **draw on previous inputs to make predictions about the current state**, **bidirectional RNNs (BRNNs)** enhance the standard RNN by **processing the input sequence in both forward and backward directions simultaneously**. This allows the network to **have access to both past (preceding) and future (succeeding) context at each time step**, which can **improve performance** on tasks where **context from both directions is beneficial**.
 
 The **general architecture** of a bidirectional RNN is as follows:
 1. **Processing Direction**: A BRNN has **dual hidden layers**
@@ -280,9 +280,9 @@ The **general architecture** of a bidirectional RNN is as follows:
 
    $$y_t = \phi(W_{hy} h_t + b_y)$$
 
-The **stengths** of bidirectional RNNs are:
+The **strengths** of bidirectional RNNs are:
 1. **Enhanced Contextual Understanding**: Access to **future context** can **improve predictions**.
-2. **Improved Performance**: BRNNs generally **achieve bettwe performance** on sequence tasks compared to unidirectional RNNs.
+2. **Improved Performance**: BRNNs generally **achieve better performance** on sequence tasks compared to unidirectional RNNs.
 
 However, the **main limitations** of bidirectional RNNs are:
 1. **Increased Computational Cost**: BRNNs require **processing the sequence twice** (forward and backward), effectively **doubling the computation**.
@@ -292,7 +292,7 @@ However, the **main limitations** of bidirectional RNNs are:
 
 **Long Short-Term Memory (LSTM)** is a popular RNN architecture and were designed to **overcome the limitations of standard RNNs**, particularly the problems of **vanishing and exploding gradients**. This was achieved by designing LSTMs to be **capable of learning long-term dependencies in data**.
 * With standard RNNs, if the **previous state that would be influencing the current prediction** is **not in the recent past**, a standard RNN would likely be **unable to accurately predict the current state**.
-* For example, lets sat we wanted to predict the italicized words in, “Alice is allergic to nuts. She can’t eat *peanut butter*.” The **context of a nut allergy** can help the RNN **anticipate that the food that cannot be eaten contains nuts**. However, if that **context was a few sentences prior**, then it would be **difficult or even impossible for the RNN to connect the information**.
+* For example, lets say we wanted to predict the italicized words in, “Alice is allergic to nuts. She can’t eat *peanut butter*.” The **context of a nut allergy** can help the RNN **anticipate that the food that cannot be eaten contains nuts**. However, if that **context was a few sentences prior**, then it would be **difficult or even impossible for the RNN to connect the information**.
 
 To overcome this issue with learning long-term dependencies in sequences, LSTM networks have **cells** in the **hidden layers** which have **3 gates**:
 1. **Forget Gate**
@@ -326,7 +326,7 @@ The **general architecture** of an LSTM RNN is as follows:
 
    $$h_t = o_t \odot \tanh(C_t)$$
 
-The **stengths** of LSTM RNNs are:
+The **strengths** of LSTM RNNs are:
 1. **Handling Long-Term Dependencies**: LSTMs can **maintain and utilise information over long sequences effectively**.
 2. **Mitigating Gradient Issues**: LSTM architecture helps **prevent vanishing and exploding gradients** during training.
 3. **Flexibility**: LSTMs are suitable for a **wide range of sequential tasks**.
