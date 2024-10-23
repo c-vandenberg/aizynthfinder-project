@@ -12,25 +12,25 @@ The neural network is trained on these template rules, and the trained model is 
 
 ## 2.1 What is AiZynthFinder's Expansion Policy Neural Network?
 
-As its standard template-based expantion policy, AiZynthFinder employs a type of **feedforward neural network** called a **Muti-Layer Perceptron**. **<sup>4</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
+As its standard template-based expansion policy, AiZynthFinder employs a type of **feedforward neural network** called a **Multi-Layer Perceptron**. **<sup>4</sup>** This network is designed to predict the applicability of various reaction templates to a given target molecule during retrosynthetic planning.
 
-The architecture effectively **maps molecular representations to reaction probabilities**, generating a **ranked list of reaction templates** representing the most feasbile sets of reactions.
+The architecture effectively **maps molecular representations to reaction probabilities**, generating a **ranked list of reaction templates** representing the most feasible sets of reactions.
 
 ## 2.2 Neural Networks Overview
 
-**Neural networks** are machine learning models inspired by the structure and function of **biological neural networks** in animal brains. They consist of **layers of nodes (articial neurons)** that process input data to produce an output.
+**Neural networks** are machine learning models inspired by the structure and function of **biological neural networks** in animal brains. They consist of **layers of nodes (artificial neurons)** that process input data to produce an output.
 
 Each node/neuron can be thought of as a **linear regression model**, that involves **computing a weighted sum of inputs, plus a bias**. As such, each node/neuron consists of:
 1. **Input Data**: The data the node receives.
    
 2. **Weights**: Numerical parameters that determine the **strength and direction** of the **connection between neurons in adjacent layers**. Each input is **assigned a weight** which helps to **determine the correlation of each input to the output**.
-   * **Positive Weights** indicate a **positive correlation between the input and the output**. With positive weights, as the **input increases**, the **neurons activation tends to increase**.
+   * **Positive Weights** indicate a **positive correlation between the input and the output**. With positive weights, as the **input increases**, the **neuron's activation tends to increase**.
    * **Negative Weights** indicate a **negative correlation between the input and the output**. With negative weights, as the **input increases**, the **neurons activation tends to decrease**.
      
 3. **Biases**: These **shift the activation threshold**, enabling the **neuron to activate even when all input signals are zero**. This allows the model to better fit training data by allowing neurons to **activate in a broader range of scenarios**.
    
 4. **Output data**: The output value passed to the next node/neuron in the adjacent layer if it **exceeds the activation threshold**.
-   * Once **all inputs are multipied by their respective weights and summed**, this value is **passed through an activation function**, which determines the output.
+   * Once **all inputs are multiplied by their respective weights and summed**, this value is **passed through an activation function**, which determines the output.
    * If this output **exceeds the given activation threshold**, the node/neuron **fires (or activates)**, and the **output data is passed to a node/neuron in the next layer** in the network.
    * As a result, the **output of one node/neuron** becomes the **input of the next node/neuron**.
   
@@ -77,7 +77,7 @@ The architecture of a simple neural network is shown in **Fig 1** and consists o
    * **Structure**: One or more layers with neurons applying activation functions to weighted sums of inputs.
   
 3. **Output Layer**
-   * **Function**: Produces the final prediction or outoput for the given inputs.
+   * **Function**: Produces the final prediction or output for the given inputs.
    * **Structure**: Number of nodes/neurons in the output layer depends on the desired output format (e.g., classes for classification).
   
 **N.B.** Although **deep learning and neural networks are often used interchangeably**, it is worth noting that the **"deep"** in deep learning simply refers to the **depth of the layers** in a neural network. Generally, a neural network that consists of **more than three layers** (i.e. an input layer, one hidden layer, and an output layer) can be considered a **deep learning neural network** (**Fig 2**).
