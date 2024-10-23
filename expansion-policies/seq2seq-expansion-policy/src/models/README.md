@@ -468,6 +468,11 @@ Once the model had the **majority of its optimisation features implemented**, a 
 
 Beam search is a **heuristic search algorithm** that **explores a graph** by **expanding the most promising nodes in a limited set**. In the context of seq2seq models, it is used during the **decoding phase** to **generate the most probable output sequences based on the model's predictions**.
 
+The **key characteristics** of beam search are:
+1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
+2. **Beam Width (Beam Size)** - This determines the **number of top candidate sequences to keep at each decoding step**. A larger beam width allows for a **more exhaustive search** but **increases computational complexity**.
+3. **Probablistic Approach** - Beam search **combines the probabilities of individual tokens** to **evaluate overall likelihood of entire sequences**.
+
 ### Greedy Search
 Before we consider beam search, let us consider the simple **greedy search strategy**: **<sup>9</sup>**
 - With **greedy search**, at any **time step $$t`$$**, we simply select the token with the **highest conditional probability from $$Y$$**. I.e.
@@ -594,11 +599,6 @@ $$
 
 The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\right|T')$$**. This is **between the Big-O complexities of greedy search and exhaustive search**.
   * **N.B.**: Greedy search can be thought of as a **special case of beam search arising when the beam size is set to 1**.
-
-The **key characteristics** of beam search are:
-1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
-2. **Beam Width (Beam Size)** - This determines the **number of top candidate sequences to keep at each decoding step**. A larger beam width allows for a **more exhaustive search** but **increases computational complexity**.
-3. **Probablistic Approach** - Beam search **combines the probabilities of individual tokens** to **evaluate overall likelihood of entire sequences**.
 
 ## 5.4 Model Documentation
 
