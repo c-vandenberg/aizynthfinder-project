@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 
 import tensorflow as tf
 from tensorflow.summary import SummaryWriter
@@ -17,25 +17,45 @@ CORE_LOG_METRICS_KEY_MAPPING: Dict[str, str] = {
 }
 
 
-def extract_core_log_metrics(logs: dict) -> Dict[str, float]:
-    metrics = {}
+def extract_core_log_metrics(logs: Optional[Dict[str, float]]) -> Dict[str, float]:
+    """
+    Extracts core metrics from the provided logs based on a predefined key mapping.
+
+    This function filters and renames the metrics from the training logs
+    using the `CORE_LOG_METRICS_KEY_MAPPING`.
+
+    Parameters
+    ----------
+    logs : Optional[Dict[str, float]]
+        A dictionary containing log metrics from the training process.
+        If `None`, an empty dictionary is returned.
+
+    Returns
+    -------
+    Dict[str, float]
+        A dictionary of extracted and renamed core metrics.
+    """
+    metrics: Dict[str, float] = {}
     if logs:
         metrics = {
             formatted_key: logs[log_key]
-            for log_key, formatted_key in CORE_LOG_METRICS_KEY_MAPPING.items()
-            if log_key in logs
+            for log_key, formatted_key in CORE_LOG_METRICS_KEY_MAPPING.items() if log_key in logs
         }
     return metrics
 
 def compute_metrics(
-        references: List[str],
-        hypotheses: List[str],
-        target_smiles: List[str],
-        predicted_smiles: List[str],
-        evaluation_stage: Optional[str] = None,
+    references: List[str],
+    hypotheses: List[str],
+    target_smiles: List[str],
+    predicted_smiles: List[str],
+    evaluation_stage: Optional[str] = None
 ) -> Dict[str, float]:
     """
     Compute all required metrics and return them as a dictionary.
+
+    This function calculates various evaluation metrics such as BLEU score,
+    Levenshtein distance, exact match accuracy, chemical validity score, and
+    Tanimoto similarity. Optionally, it prefixes metric names with an evaluation stage.
 
     Parameters:
     ----------
@@ -47,15 +67,24 @@ def compute_metrics(
         List of target SMILES strings per sample.
     predicted_smiles : List[str]
         List of predicted SMILES strings per sample.
-    evaluation_stage : Optional[str], optional
+    evaluation_stage : Optional[str]
         Optional prefix for metric names (e.g., 'Validation'), by default None.
 
     Returns:
     -------
     Dict[str, float]
         Dictionary of computed metrics.
+
+    Raises
+    ------
+    ValueError
+        If the lengths of `references`, `hypotheses`, `target_smiles`, and
+        `predicted_smiles` do not match.
     """
-    metrics = {
+    if not (len(references) == len(hypotheses) == len(target_smiles) == len(predicted_smiles)):
+        raise ValueError("All input lists must have the same length.")
+
+    metrics: Dict[str, float] = {
         'BLEU score': BleuScore.smoothed_corpus_bleu(references, hypotheses),
         'Average Levenshtein Distance': SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles),
         'Exact Match Accuracy': SmilesStringMetrics.smiles_exact_match(target_smiles, predicted_smiles),
@@ -73,10 +102,35 @@ def log_metrics(
     directory: str,
     epoch: Optional[Union[int, None]] = None,
     filename: Optional[str] = 'valid_metrics.txt',
-    separator: Optional[str] = '-'*40
+    separator: Optional[str] = '-' * 40
 ) -> None:
     """
     Append model metrics to a specified file.
+
+    This function logs the provided metrics by appending them to a file
+    within the specified directory. Specifies epoch number if provided.
+
+    Parameters
+    ----------
+    metrics : Dict[str, float]
+        A dictionary of metric names and their corresponding values.
+    directory : str
+        The directory path where the metrics file will be saved.
+    epoch : Optional[int], default=None
+        The current epoch number. If provided, it will be included in the log.
+    filename : Optional[str], default='valid_metrics.txt'
+        The name of the metrics file.
+    separator : Optional[str], default='----------------------------------------
+        A string separator to delineate different logging entries.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    OSError
+        If the directory cannot be created.
     """
     os.makedirs(directory, exist_ok=True)
     filepath = os.path.join(directory, filename)
