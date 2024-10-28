@@ -97,12 +97,13 @@ class BahdanauAttention(AttentionInterface):
 
         Returns
         -------
-        context_vector : tf.Tensor
-            The context vector computed as a weighted sum of encoder outputs.
-            Shape: (batch_size, seq_len_dec, enc_units)
-        attention_weights : tf.Tensor
-            The attention weights for each encoder output.
-            Shape: (batch_size, seq_len_dec, seq_len_enc)
+        Tuple[tf.Tensor, tf.Tensor]
+            - context_vector : tf.Tensor
+                The context vector computed as a weighted sum of encoder outputs.
+                Shape: (batch_size, seq_len_dec, enc_units)
+            - attention_weights : tf.Tensor
+                The attention weights for each encoder output.
+                Shape: (batch_size, seq_len_dec, seq_len_enc)
 
         Raises
         ------
@@ -150,6 +151,7 @@ class BahdanauAttention(AttentionInterface):
                 encoder_mask_expanded = tf.expand_dims(encoder_mask, axis=1)  # Shape: (batch_size, 1, seq_len_enc)
 
                 # Cast mask to float and adjust score
+                # Adding a large negative value to masked positions to nullify their effect in softmax
                 score += (1.0 - tf.cast(encoder_mask_expanded, score.dtype)) * -1e9
 
         # Compute attention weights using softmax over the encoder sequence length
@@ -179,7 +181,6 @@ class BahdanauAttention(AttentionInterface):
         None
             This method does not return any value.
         """
-        # This layer does not propagate the mask further
         return None
 
     def get_config(self) -> dict:
@@ -204,9 +205,12 @@ class BahdanauAttention(AttentionInterface):
         """
         Creates a BahdanauAttention layer from its configuration.
 
+        This class method allows the creation of a new `BahdanauAttention` instance
+        from a configuration dictionary, enabling model reconstruction from saved configurations.
+
         Parameters
         ----------
-        config : dict
+        config : Dict[str, Any]
             A dictionary containing the configuration of the layer.
 
         Returns
