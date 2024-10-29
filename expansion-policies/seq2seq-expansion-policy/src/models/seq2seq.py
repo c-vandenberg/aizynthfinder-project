@@ -1,4 +1,4 @@
-from typing import Optional, Any, Tuple, List
+from typing import Optional, Any, Tuple, List, Dict
 
 import tensorflow as tf
 from tensorflow.keras import Model
@@ -14,8 +14,12 @@ class RetrosynthesisSeq2SeqModel(Model):
     """
     Retrosynthesis Seq2Seq Model using LSTM layers.
 
-    Model consists of an encoder and a decoder with attention mechanism for predicting reaction precursors
+    The model consists of an encoder and a decoder with an attention mechanism for predicting reaction precursors
     for a target molecule.
+
+    This architecture leverages stacked Bidirectional LSTM layers in the encoder to capture contextual information
+    from both directions, enhancing the model's understanding of the input sequences. The decoder employs stacked
+    LSTM layers with attention to generate accurate and contextually relevant output sequences.
 
     Parameters
     ----------
@@ -29,19 +33,25 @@ class RetrosynthesisSeq2SeqModel(Model):
         Dimension of the embedding space for the decoder.
     units : int
         Number of units in LSTM layers.
+    attention_dim : int
+        Dimensionality of the attention mechanism.
     num_encoder_layers : int, optional
         Number of stacked layers in the encoder (default is 2).
     num_decoder_layers : int, optional
         Number of stacked layers in the decoder (default is 4).
     dropout_rate : float, optional
         Dropout rate for regularization (default is 0.2).
-    **kwargs
+    weight_decay : Optional[float], optional
+        L2 regularization factor applied to the LSTM and Dense layers (default is `None`).
+    **kwargs : Any
         Additional keyword arguments for the Model superclass.
 
     Attributes
     ----------
     units : int
         Number of units in LSTM layers.
+    attention_dim : int
+        Dimensionality of the attention mechanism.
     encoder : StackedBidirectionalLSTMEncoder
         The encoder part of the Seq2Seq model.
     decoder : StackedLSTMDecoder
@@ -54,19 +64,27 @@ class RetrosynthesisSeq2SeqModel(Model):
         Dense layer to map encoder hidden state to decoder initial hidden state.
     enc_state_c : Dense
         Dense layer to map encoder cell state to decoder initial cell state.
-    encoder_data_processor : Any
-        Data preprocessor for the encoder inputs (to be set externally).
-    decoder_data_processor : Any
-        Data preprocessor for the decoder inputs (to be set externally).
+    smiles_tokenizer : Optional[SmilesTokenizer]
+        Data preprocessor for the encoder and decoder inputs.
     dropout_rate : float
         Dropout rate for regularization.
+    weight_decay : Optional[float]
+        L2 regularization factor applied to the LSTM and Dense layers.
 
     Methods
     -------
     call(inputs, training=None)
         Forward pass of the Seq2Seq model.
+    predict_sequence(encoder_input, max_length=100, start_token_id=None, end_token_id=None)
+        Generate a single sequence prediction using greedy decoding.
+    predict_sequence_beam_search(encoder_input, beam_width=5, max_length=140, start_token_id=None, end_token_id=None)
+        Generate sequence predictions using beam search decoding.
+    _encode_and_initialize(encoder_input, start_token_id=None, end_token_id=None)
+        Helper method to encode input and initialize decoder states.
     get_config()
         Returns the configuration of the model.
+    from_config(config)
+        Creates an instance of the model from its configuration.
     """
     def __init__(
         self,
@@ -84,8 +102,8 @@ class RetrosynthesisSeq2SeqModel(Model):
     ):
         super(RetrosynthesisSeq2SeqModel, self).__init__(**kwargs)
 
-        self.units: int = units
-        self.attention_dim: int = attention_dim
+        self.units = units
+        self.attention_dim = attention_dim
 
         # Encoder layer
         self.encoder: StackedBidirectionalLSTMEncoder = StackedBidirectionalLSTMEncoder(
@@ -108,8 +126,8 @@ class RetrosynthesisSeq2SeqModel(Model):
             weight_decay=weight_decay
         )
 
-        self.input_vocab_size: int = input_vocab_size
-        self.output_vocab_size: int = output_vocab_size
+        self.input_vocab_size = input_vocab_size
+        self.output_vocab_size = output_vocab_size
 
         # Mapping encoder final states to decoder initial states
         self.enc_state_h: Dense = Dense(units, name='enc_state_h')
@@ -118,8 +136,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         # Smiles tokenizer to be set externally
         self.smiles_tokenizer: Optional[SmilesTokenizer] = None
 
-        self.dropout_rate: float = dropout_rate
-        self.weight_decay: float = weight_decay
+        self.dropout_rate = dropout_rate
+        self.weight_decay = weight_decay
 
     def call(
         self,
@@ -140,10 +158,18 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         Returns
         -------
-        tf.Tensor
+        output : tf.Tensor
             Output predictions from the decoder.
             Shape: (batch_size, seq_len_dec, vocab_size)
+
+        Raises
+        ------
+        ValueError
+            If `smiles_tokenizer` is not set.
         """
+        if self.smiles_tokenizer is None:
+            raise ValueError("smiles_tokenizer must be set before calling the model.")
+
         # Unpack inputs
         encoder_input: tf.Tensor
         decoder_input: tf.Tensor
@@ -162,14 +188,14 @@ class RetrosynthesisSeq2SeqModel(Model):
         # Map encoder final states to initial states for the decoder's first layer
         decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
         decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
-        decoder_initial_state: List[tf.Tensor, tf.Tensor] = [decoder_initial_state_h, decoder_initial_state_c]
+        decoder_initial_state: List[tf.Tensor]= [decoder_initial_state_h, decoder_initial_state_c]
 
         # Prepare initial states for all decoder layers
         decoder_initial_state = (decoder_initial_state +
                                  [tf.zeros_like(decoder_initial_state_h)] * (self.decoder.num_layers * 2 - 2))
 
         # Prepare decoder inputs
-        decoder_inputs = (
+        decoder_inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor] = (
             decoder_input,
             decoder_initial_state,
             encoder_output
@@ -191,6 +217,30 @@ class RetrosynthesisSeq2SeqModel(Model):
         start_token_id: Optional[int] = None,
         end_token_id: Optional[int] = None
     ) -> tf.Tensor:
+        """
+        Generate a single sequence prediction using greedy decoding.
+
+        Parameters
+        ----------
+        encoder_input : tf.Tensor
+            Tensor of shape `(batch_size, seq_len_enc)` containing encoder input sequences.
+        max_length : int, optional
+            Maximum length of the generated sequences (default is 100).
+        start_token_id : Optional[int], optional
+            The token ID representing the start of a sequence. If `None`, it is retrieved from the tokenizer.
+        end_token_id : Optional[int], optional
+            The token ID representing the end of a sequence. If `None`, it is retrieved from the tokenizer.
+
+        Returns
+        -------
+        sequences : tf.Tensor
+            Tensor of shape `(batch_size, generated_seq_length)` containing the generated sequences.
+
+        Raises
+        ------
+        ValueError
+            If `smiles_tokenizer` is not set.
+        """
         batch_size, encoder_output, decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
             start_token_id,
@@ -210,6 +260,7 @@ class RetrosynthesisSeq2SeqModel(Model):
             )
             # Get the predicted token id
             predicted_id = tf.argmax(decoder_output, axis=-1, output_type=tf.int32)
+
             # Append to sequences
             sequences = sequences.write(t, predicted_id[:, 0])
 
@@ -233,12 +284,38 @@ class RetrosynthesisSeq2SeqModel(Model):
 
     def predict_sequence_beam_search(
         self,
-        encoder_input,
-        beam_width=5,
-        max_length=140,
-        start_token_id=None,
-        end_token_id=None
-    ):
+        encoder_input: tf.Tensor,
+        beam_width: int = 5,
+        max_length: int = 140,
+        start_token_id: Optional[int] = None,
+        end_token_id: Optional[int] = None
+    ) -> List[List[int]]:
+        """
+        Generate sequence predictions using beam search decoding.
+
+        Parameters
+        ----------
+        encoder_input : tf.Tensor
+            Tensor of shape `(batch_size, seq_len_enc)` containing encoder input sequences.
+        beam_width : int, optional
+            The number of beams to keep during search (default is 5).
+        max_length : int, optional
+            Maximum length of the generated sequences (default is 140).
+        start_token_id : Optional[int], optional
+            The token ID representing the start of a sequence. If `None`, it is retrieved from the tokenizer.
+        end_token_id : Optional[int], optional
+            The token ID representing the end of a sequence. If `None`, it is retrieved from the tokenizer.
+
+        Returns
+        -------
+        best_sequences : List[List[int]]
+            The best decoded sequences for each item in the batch, represented as lists of token IDs.
+
+        Raises
+        ------
+        ValueError
+            If `smiles_tokenizer` is not set.
+        """
         batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
             start_token_id,
@@ -263,11 +340,46 @@ class RetrosynthesisSeq2SeqModel(Model):
         return best_sequences
 
     def _encode_and_initialize(
-            self,
-            encoder_input,
-            start_token_id=None,
-            end_token_id=None
-    ):
+        self,
+        encoder_input: tf.Tensor,
+        start_token_id: Optional[int] = None,
+        end_token_id: Optional[int] = None
+    ) -> Tuple[int, tf.Tensor, List[tf.Tensor], int, int]:
+        """
+        Helper method to encode input and initialize decoder states.
+
+        Parameters
+        ----------
+        encoder_input : tf.Tensor
+            Tensor of shape `(batch_size, seq_len_enc)` containing encoder input sequences.
+        start_token_id : Optional[int], optional
+            The token ID representing the start of a sequence. If `None`, it is retrieved from the tokenizer.
+        end_token_id : Optional[int], optional
+            The token ID representing the end of a sequence. If `None`, it is retrieved from the tokenizer.
+
+        Returns
+        -------
+        Tuple[int, tf.Tensor, List[tf.Tensor], int, int]
+            - batch_size : int
+                Number of samples in the batch.
+            - encoder_output : tf.Tensor
+                Encoder output tensor.
+            - initial_decoder_states : List[tf.Tensor]
+                Initial states for the decoder.
+            - start_token_id : int
+                Token ID representing the start of a sequence.
+            - end_token_id : int
+                Token ID representing the end of a sequence.
+
+        Raises
+        ------
+        ValueError
+            If `smiles_tokenizer` is not set.
+            If `start_token_id` or `end_token_id` cannot be found in the tokenizer.
+        """
+        if self.smiles_tokenizer is None:
+            raise ValueError("smiles_tokenizer must be set before encoding and initialization.")
+
         batch_size = tf.shape(encoder_input)[0]
 
         # Encode the input sequence
@@ -282,20 +394,27 @@ class RetrosynthesisSeq2SeqModel(Model):
         if start_token_id is None:
             start_token = self.smiles_tokenizer.start_token
             start_token_id = self.smiles_tokenizer.word_index[start_token]
+            if start_token_id is None:
+                raise ValueError(f"Start token '{start_token}' not found in tokenizer's word_index.")
+
         if end_token_id is None:
             end_token = self.smiles_tokenizer.end_token
             end_token_id = self.smiles_tokenizer.word_index[end_token]
+            if end_token_id is None:
+                raise ValueError(f"End token '{end_token}' not found in tokenizer's word_index.")
 
         return batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id
 
-    def get_config(self) -> dict:
+    def get_config(self) -> Dict[str, Any]:
         """
         Returns the configuration of the model for serialization.
 
+        This configuration can be used to re-instantiate the model with the same parameters.
+
         Returns
         -------
-        dict
-            Configuration dictionary.
+        config : Dict[str, Any]
+            Configuration dictionary containing all necessary parameters to recreate the model.
         """
         config = {
             'input_vocab_size': self.input_vocab_size,
@@ -313,18 +432,18 @@ class RetrosynthesisSeq2SeqModel(Model):
         return config
 
     @classmethod
-    def from_config(cls, config: dict) -> 'RetrosynthesisSeq2SeqModel':
+    def from_config(cls, config: Dict[str, Any]) -> 'RetrosynthesisSeq2SeqModel':
         """
         Creates an instance of the model from its configuration.
 
         Parameters
         ----------
-        config : dict
+        config : Dict[str, Any]
             Configuration dictionary.
 
         Returns
         -------
         RetrosynthesisSeq2SeqModel
-            An instance of the model.
+            An instance of the model configured as per the provided dictionary.
         """
         return cls(**config)
