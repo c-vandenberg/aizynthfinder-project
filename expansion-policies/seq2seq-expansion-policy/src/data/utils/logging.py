@@ -44,8 +44,8 @@ def extract_core_log_metrics(logs: Optional[Dict[str, float]]) -> Dict[str, floa
     return metrics
 
 def compute_metrics(
-    references: List[str],
-    hypotheses: List[str],
+    references: List[List[List[str]]],
+    hypotheses: List[List[str]],
     target_smiles: List[str],
     predicted_smiles: List[str],
     evaluation_stage: Optional[str] = None
@@ -59,9 +59,9 @@ def compute_metrics(
 
     Parameters:
     ----------
-    references : List[str]
+    references : List[List[List[str]]]
         List of reference SMILES token strings per sample.
-    hypotheses : List[str]
+    hypotheses : List[List[str]]
         List of hypothesis SMILES strings per sample.
     target_smiles : List[str]
         List of target SMILES strings per sample.
