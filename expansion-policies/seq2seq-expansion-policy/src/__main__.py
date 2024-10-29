@@ -1,19 +1,36 @@
 import logging
-
 import pydevd_pycharm
+
 from aizynthfinder.aizynthfinder import AiZynthFinder
 
-from trainers.trainer import Trainer
+# Configure logging to display debug information
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("aizynthfinder")
+logger.setLevel(logging.DEBUG)
+
 
 def main():
     # Path to the configuration file
-    config_path = 'config/training/model_v25_config.yml'
+    config_file = 'src/config.yml'
 
-    # Initialize the Trainer with the configuration
-    trainer = Trainer(config_path=config_path)
+    finder = AiZynthFinder(configfile=config_file)
+    finder.expansion_policy.select("seq2seq_policy")
+    finder.target_smiles = "O=C1NC(=O)CCC1N3C(=O)c2cccc(c2C3)N"  # Lenalidomide (Revlimid)
 
-    # Run the training pipeline
-    trainer.run()
+    # Prepare the search tree
+    finder.prepare_tree()
+
+    # Run the tree search
+    finder.tree_search()
+
+    # Build the synthesis routes
+    finder.build_routes()
+
+    # Extract statistics if needed
+    stats = finder.extract_statistics()
+
+    # Print the number of routes found
+    print(f"Number of routes found: {len(finder.routes)}")
 
 if __name__ == "__main__":
     main()
