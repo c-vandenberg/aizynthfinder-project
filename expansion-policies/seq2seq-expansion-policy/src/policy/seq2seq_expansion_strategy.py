@@ -37,6 +37,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         self.max_decoder_seq_length = int(kwargs.get("max_decoder_seq_length", 140))
         self.beam_width = int(kwargs.get("beam_width", 5))
         self.use_remote_models = bool(kwargs.get("use_remote_models", True))
+        self.return_top_n = min(int(kwargs.get("return_top_n", 1)), self.beam_width)
 
         self.model = self.load_model(model_path)
         self.smiles_tokenizer = self.load_tokenizer(tokenizer_path)
@@ -90,7 +91,15 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         priors = []
 
         smiles_list = [mol.smiles for mol in molecules]
+        self._logger.debug(f"Target molecules: {smiles_list}")
         predicted_precursors_list, probabilities_list = self.predict_precursors(smiles_list)
+
+        # Log the predictions for each molecule
+        for idx, (mol, predicted_precursors, probs) in enumerate(
+                zip(molecules, predicted_precursors_list, probabilities_list)):
+            self._logger.debug(f"Predictions for molecule {mol.smiles}:")
+            for precursor_smiles, prob in zip(predicted_precursors, probs):
+                self._logger.debug(f"  Precursor: {precursor_smiles}, Probability: {prob}")
 
         for mol, predicted_precursors, probs in zip(molecules, predicted_precursors_list, probabilities_list):
             for precursor_smiles, prob in zip(predicted_precursors, probs):
@@ -114,7 +123,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             is_input_sequence=True
         )
 
-        encoder_data_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor(
+        encoder_data_preprocessor = SmilesDataPreprocessor(
             smiles_tokenizer=self.smiles_tokenizer,
             max_seq_length=self.max_encoder_seq_length
         )
@@ -122,42 +131,53 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             tokenized_smiles_list=tokenized_smiles_list
         )
 
-        start_token = self.smiles_tokenizer.start_token
-        start_token_id = self.smiles_tokenizer.word_index[start_token]
-        end_token = self.smiles_tokenizer.end_token
-        end_token_id = self.smiles_tokenizer.word_index[end_token]
+        start_token_id = self.smiles_tokenizer.word_index[self.smiles_tokenizer.start_token]
+        end_token_id = self.smiles_tokenizer.word_index[self.smiles_tokenizer.end_token]
 
         # Use beam search to get multiple predictions per molecule
-        predicted_seqs_list = self.model.predict_sequence_beam_search(
+        predicted_seqs_list, seq_scores_list = self.model.predict_sequence_beam_search(
             encoder_input=preprocessed_smiles,
             beam_width=self.beam_width,
             max_length=self.max_decoder_seq_length,
             start_token_id=start_token_id,
-            end_token_id=end_token_id
+            end_token_id=end_token_id,
+            return_top_n=self.return_top_n
         )
 
         all_predicted_smiles = []
         all_probabilities = []
 
-        for predicted_seqs in predicted_seqs_list:
+        for idx, (predicted_seqs, seq_scores) in enumerate(zip(predicted_seqs_list, seq_scores_list)):
             # Convert token sequences to SMILES strings
             predicted_smiles = self.smiles_tokenizer.sequences_to_texts(
-                sequences=[predicted_seqs],
-                is_input_sequence=True
+                sequences=predicted_seqs,
+                is_input_sequence=False
             )
 
-            # For beam search, you can assign probabilities based on beam scores if available
-            # Here, we assign equal probabilities for simplicity
-            num_predictions = len(predicted_smiles)
-            probabilities = [1.0 / num_predictions] * num_predictions
+            # Normalize probabilities
+            total_score = sum(seq_scores)
+            probabilities = [score / total_score for score in seq_scores]
 
             # Validate and append
-            for smiles_string in predicted_smiles:
-                if self._is_valid_smiles(smiles_string):
-                    all_predicted_smiles.append([smiles_string])
-                    all_probabilities.append(probabilities)
+            valid_smiles = []
+            valid_probs = []
+            for smiles_string, prob in zip(predicted_smiles, probabilities):
+                cleaned_smiles = self._clean_sequence(
+                    smiles_string,
+                    self.smiles_tokenizer.start_token,
+                    self.smiles_tokenizer.end_token
+                )
+                if self._is_valid_smiles(cleaned_smiles):
+                    valid_smiles.append(cleaned_smiles)
+                    valid_probs.append(prob)
                 else:
-                    self._logger.warning(f"Invalid SMILES generated: {predicted_smiles}")
+                    self._logger.warning(f"Invalid SMILES generated: {cleaned_smiles}")
+
+            # Log the valid predicted SMILES
+            self._logger.debug(f"Valid predicted SMILES for molecule {idx}: {valid_smiles}")
+
+            all_predicted_smiles.append(valid_smiles)
+            all_probabilities.append(valid_probs)
 
         return all_predicted_smiles, all_probabilities
 

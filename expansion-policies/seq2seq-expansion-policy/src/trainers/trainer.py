@@ -334,7 +334,7 @@ class Trainer:
 
         for (encoder_input, decoder_input), target_sequences in test_dataset:
             # Generate sequences
-            predicted_sequences = self.model.predict_sequence_beam_search(
+            predicted_sequences_list, predicted_scores_list = self.model.predict_sequence_beam_search(
                 encoder_input=encoder_input,
                 beam_width=model_conf.get('beam_width', 5),
                 max_length=self.data_loader.max_decoder_seq_length,
@@ -342,9 +342,11 @@ class Trainer:
                 end_token_id=self.tokenizer.word_index.get(end_token)
             )
 
+            top_predicted_sequences = [seq_list[0] for seq_list in predicted_sequences_list]
+
             # Convert sequences to text
             predicted_texts = self.tokenizer.sequences_to_texts(
-                predicted_sequences,
+                top_predicted_sequences,
                 is_input_sequence=False
             )
             target_texts = self.tokenizer.sequences_to_texts(

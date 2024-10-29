@@ -237,7 +237,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         beam_width=5,
         max_length=140,
         start_token_id=None,
-        end_token_id=None
+        end_token_id=None,
+        return_top_n=1
     ):
         batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
@@ -251,16 +252,17 @@ class RetrosynthesisSeq2SeqModel(Model):
             beam_width=beam_width,
             max_length=max_length,
             start_token_id=start_token_id,
-            end_token_id=end_token_id
+            end_token_id=end_token_id,
+            return_top_n=return_top_n
         )
 
         # Perform beam search decoding
-        best_sequences = beam_search_decoder.search(
+        best_sequences, best_scores = beam_search_decoder.search(
             encoder_output=encoder_output,
             initial_decoder_states=initial_decoder_states
         )
 
-        return best_sequences
+        return best_sequences, best_scores
 
     def _encode_and_initialize(
             self,
