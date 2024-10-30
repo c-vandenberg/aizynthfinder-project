@@ -1,4 +1,4 @@
-# 4. Retrosynthesis Sequence-to-Sequence Model
+# 4. Retrosynthesis Sequence-to-Sequence Model Literature Review
 
 ## 4.1 *Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters
 
