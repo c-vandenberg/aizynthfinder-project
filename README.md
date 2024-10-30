@@ -1,4 +1,4 @@
-# AiZynthFinder Project
+# AiZynthFinder Research Project
 
 ## Contents
 
