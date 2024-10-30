@@ -321,7 +321,7 @@ class Seq2SeqModelUtils:
         """
         os.makedirs(model_save_path, exist_ok=True)
         try:
-            model.save(model_save_path, save_format='tf')
+            model.save(model_save_path)
             print(f"Model SavedModel format save successful. Save file path: {model_save_path}")
         except OSError as e:
             print(f"Failed to save model in SavedModel format: {e}")
