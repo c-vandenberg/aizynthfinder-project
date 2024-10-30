@@ -46,7 +46,7 @@
   &nbsp; &nbsp; &nbsp; &nbsp; 3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#35-references)<br>
 </details>
 <details>
-  <summary>4. Retrosynthesis Sequence-to-Sequence Model Literature</summary>
+  <summary>4. Retrosynthesis Sequence-to-Sequence Model Literature Review</summary>
 
   &nbsp; &nbsp; &nbsp; &nbsp; 4.1 [*Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#41-britz-et-al-analysis-of-neural-machine-translation-architecture-hyperparameters)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.1 [Embedding Dimensionality](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-embedding-dimensionality)<br>
@@ -104,6 +104,12 @@
 </details>
 <details>
   <summary>6. Transformer Expansion Policy</summary>
+</details>
+<details>
+  <summary>7. Retrosynthesis Transformer Model Literature Review</summary>
+</details>
+<details>
+  <summary>8. Project Retrosynthesis Transformer Model</summary>
 </details>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
