@@ -416,7 +416,8 @@ class Trainer:
                 beam_width=model_conf.get('beam_width', 5),
                 max_length=self.data_loader.max_decoder_seq_length,
                 start_token_id=self.tokenizer.word_index.get(start_token),
-                end_token_id=self.tokenizer.word_index.get(end_token)
+                end_token_id=self.tokenizer.word_index.get(end_token),
+                return_top_n=1
             )
 
             top_predicted_sequences = [seq_list[0] for seq_list in predicted_sequences_list]

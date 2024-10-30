@@ -289,7 +289,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         max_length=140,
         start_token_id=None,
         end_token_id=None,
-            return_top_n=1
+        return_top_n=1
     ) -> Tuple[List[List[List[int]]], List[List[float]]]:
         """
         Generate sequence predictions using beam search decoding.
