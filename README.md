@@ -3,7 +3,7 @@
 ## Contents
 
 <details>
-  <summary>1. Retrosynthesis with AiZynthFinder - Overview</summary>
+  <summary><b>1. Retrosynthesis with AiZynthFinder - Overview</b></summary>
   
   &nbsp; &nbsp; &nbsp; &nbsp; 1.1 [Basics of Retrosynthesis](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#11-basics-of-retrosynthesis)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 1.2 [Retrosynthetic Search Tree](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#12-retrosynthetic-search-tree)<br>
@@ -16,7 +16,7 @@
   &nbsp; &nbsp; &nbsp; &nbsp; 1.7 [References](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#17-references)<br>
 </details>
 <details>
-  <summary>2. AiZynthFinder's Expansion Policy Neural Network</summary>
+  <summary><b>2. AiZynthFinder's Expansion Policy Neural Network</b></summary>
   
   &nbsp; &nbsp; &nbsp; &nbsp; 2.1 [What is AiZynthFinder's Expansion Policy Neural Network?](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#21-what-is-aizynthfinders-expansion-policy-neural-network)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 2.2 [Neural Networks Overview](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#22-neural-networks-overview)<br>
@@ -34,7 +34,7 @@
   &nbsp; &nbsp; &nbsp; &nbsp; 2.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
 </details>
 <details>
-  <summary>3. Sequence-to-Sequence Expansion Policy</summary>
+  <summary><b>3. Sequence-to-Sequence Expansion Policy</b></summary>
   
   &nbsp; &nbsp; &nbsp; &nbsp; 3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
@@ -46,7 +46,7 @@
   &nbsp; &nbsp; &nbsp; &nbsp; 3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#35-references)<br>
 </details>
 <details>
-  <summary>4. Retrosynthesis Sequence-to-Sequence Model Literature Review</summary>
+  <summary><b>4. Retrosynthesis Sequence-to-Sequence Model Literature Review</b></summary>
 
   &nbsp; &nbsp; &nbsp; &nbsp; 4.1 [*Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#41-britz-et-al-analysis-of-neural-machine-translation-architecture-hyperparameters)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.1 [Embedding Dimensionality](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-embedding-dimensionality)<br>
@@ -63,7 +63,7 @@
   &nbsp; &nbsp; &nbsp; &nbsp; 4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
 </details>
 <details>
-  <summary>5. Project Retrosynthesis Sequence-to-Sequence Model</summary>
+  <summary><b>5. Project Retrosynthesis Sequence-to-Sequence Model</b></summary>
   
   &nbsp; &nbsp; &nbsp; &nbsp; 5.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 5.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#52-model-architecture)<br>
@@ -103,13 +103,13 @@
   &nbsp; &nbsp; &nbsp; &nbsp; 5.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#55-references)<br>
 </details>
 <details>
-  <summary>6. Transformer Expansion Policy</summary>
+  <summary><b>6. Transformer Expansion Policy</b></summary>
 </details>
 <details>
-  <summary>7. Retrosynthesis Transformer Model Literature Review</summary>
+  <summary><b>7. Retrosynthesis Transformer Model Literature Review</b></summary>
 </details>
 <details>
-  <summary>8. Project Retrosynthesis Transformer Model</summary>
+  <summary><b>8. Project Retrosynthesis Transformer Model</b></summary>
 </details>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
