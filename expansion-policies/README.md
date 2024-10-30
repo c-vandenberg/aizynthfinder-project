@@ -363,6 +363,37 @@ The **general architecture** of a GRU RNN is as follows:
 
 ### v. Encoder-Decoder RNN
 
+**Encoder-Decoder RNN Architecture** is the standard **neural machine translation (NMT)** approach and is used in models such as **sequence-to-sequence** models.
+
+There are **three main components** in the encoder-decoder architecture.
+1. **Encoder**
+2. **Hidden Vector/Hidden State**
+3. **Decoder**
+
+At a **high level**:
+* The encoder processes the **input sequence** into a **fixed-length, single-dimensional vector** called the **hidden vector**.
+* The decoder then **converts the hidden vector** into an **output sequence**.
+
+For a **lower level description**, we will use **Fig 7** as an illustration
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/33a0840e-420d-4729-ad32-74beb3d176f2", alt="encoder-decoder-architecture"/>
+    <p>
+      <b>Fig 7</b> Encoder-decoder sequence-to-sequence model. <b><sup>9</sup></b>
+    </p>
+  </div>
+<br>
+
+**Encoder**
+* **Multiple RNN cells** can be **stacked together** to form the encoder. The RNN cells **read each input token sequentially**.
+* For **every timestep (each input token) $$t$$**, the **hidden state/hidden vector $$h$$** is updated according to the **input at that timestep $$X[i]$$**.
+* After **all the inputs are read by the encoder model**, the **final hidden state** of the encoder model represents the **context/summary of the whole input sequence**. This is why the hidden vector is also known as the **context vector**.
+* For example, if we consider the input sequence **"I am a student"** to be encoded, there will be a total of **4 timesteps (4 tokens)** for the encoder model. At each timestep, the hidden state $$h$$ will be updated using the **previous hidden state** and the **current input**:
+  1. **Timestep $$t1$$** - At the **first timestep $$t1$$**, the **previous hidden state $$h0$$** will set as **zero** or will be **randomly chosen**. The **
+
+
+
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Fortunato, M.E. et al. (2020) ‘Data augmentation and pretraining for template-based retrosynthetic prediction in computer-aided synthesis planning’, Journal of Chemical Information and Modeling, 60(7), pp. 3398–3407. <br><br>
@@ -371,4 +402,5 @@ The **general architecture** of a GRU RNN is as follows:
 **[5]** Chen, J. (no date) What is a neural network?, Investopedia. Available at: https://www.investopedia.com/terms/n/neuralnetwork.asp (Accessed: 30 September 2024). <br><br>
 **[6]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024). <br><br>
 **[7]** Stryker, C.S. (2024) What is a recurrent neural network (RNN)?, IBM. Available at: https://www.ibm.com/topics/recurrent-neural-networks (Accessed: 12 October 2024). <br><br>
-**[8]** Goodfellow, I., Bendigo, Y. and Courville, A. (2016) Deep learning Ian Goodfellow, Yoshua Bengio, Aaron Courville. Cambridge ; Massachusetts ; London: MIT Press. 
+**[8]** Goodfellow, I., Bendigo, Y. and Courville, A. (2016) Deep learning Ian Goodfellow, Yoshua Bengio, Aaron Courville. Cambridge ; Massachusetts ; London: MIT Press. <br><br>
+**[9]** 
