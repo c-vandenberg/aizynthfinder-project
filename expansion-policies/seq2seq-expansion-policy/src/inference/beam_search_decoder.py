@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple, Any
 
 import tensorflow as tf
 
@@ -6,34 +6,71 @@ from decoders.decoder_interface import DecoderInterface
 
 
 class BeamSearchDecoder:
-    def __init__(
-        self,
-        decoder: 'DecoderInterface',
-        beam_width: int = 5,
-        max_length: int = 140,
-        start_token_id: int = None,
-        end_token_id: int = None,
-        length_penalty: float = 1.0,
-        return_top_n: int = 1
-    ) -> None:
-        """
-        Initializes the BeamSearchDecoder.
+    """
+    BeamSearchDecoder
 
-        Parameters:
-        -----------
-        decoder : DecoderInterface
-            The decoder instance used for generating predictions.
-        beam_width : int, optional
-            The number of beams to keep during search (default is 5).
-        max_length : int, optional
-            The maximum length of the generated sequences (default is 140).
-        start_token_id : int, optional
-            The token ID representing the start of a sequence.
-        end_token_id : int, optional
-            The token ID representing the end of a sequence.
-        length_penalty : float, optional
-            The penalty applied to longer sequences to balance between length and probability (default is 1.0).
-        """
+    Implements beam search decoding for Seq2Seq models using a specified decoder.
+
+    Beam search efficiently explores multiple potential output sequences, maintaining the top `beam_width`
+    candidates at each decoding step based on their cumulative log probabilities. This approach balances
+    exploration and exploitation, improving the quality of generated sequences compared to greedy decoding.
+
+    Architecture:
+        - Decoder Integration: Utilizes a provided `DecoderInterface` instance to generate predictions at each
+                                decoding step.
+        - Beam Width: Maintains multiple hypotheses (beams) simultaneously, allowing the exploration of diverse
+                                sequence possibilities.
+        - Length Penalty: Applies a penalty to longer sequences to balance between sequence length and overall
+                                probability, preventing the model from favoring excessively long outputs.
+        - Early Stopping: Terminates the search early if all beams have generated the end-of-sequence token,
+                                reducing unnecessary computations.
+
+    Parameters
+    ----------
+    decoder : DecoderInterface
+        The decoder instance used for generating predictions.
+    beam_width : int, optional
+        The number of beams to keep during search (default is 5).
+    max_length : int, optional
+        The maximum length of the generated sequences (default is 140).
+    start_token_id : int, optional
+        The token ID representing the start of a sequence.
+    end_token_id : int, optional
+        The token ID representing the end of a sequence.
+    length_penalty : float, optional
+        The penalty applied to longer sequences to balance between length and probability (default is 1.0).
+
+    Attributes
+    ----------
+    decoder : DecoderInterface
+        The decoder instance used for generating predictions.
+    beam_width : int
+        The number of beams to keep during search.
+    max_length : int
+        The maximum length of the generated sequences.
+    start_token_id : Optional[int]
+        The token ID representing the start of a sequence.
+    end_token_id : Optional[int]
+        The token ID representing the end of a sequence.
+    length_penalty : float
+        The penalty applied to longer sequences to balance between length and probability.
+
+    Methods
+    -------
+    search(encoder_output, initial_decoder_states)
+        Perform beam search decoding to generate the best sequences.
+    """
+
+    def __init__(
+            self,
+            decoder: 'DecoderInterface',
+            beam_width: int = 5,
+            max_length: int = 140,
+            start_token_id: int = None,
+            end_token_id: int = None,
+        length_penalty: float = 1.0,
+            return_top_n: int = 1
+    ) -> None:
         self.decoder = decoder
         self.beam_width = beam_width
         self.max_length = max_length
@@ -48,19 +85,31 @@ class BeamSearchDecoder:
         initial_decoder_states: List[tf.Tensor],
     ) -> Tuple[List[List[List[int]]], List[List[float]]]:
         """
-        Perform beam search decoding.
+        Perform beam search decoding to generate the best sequences.
 
-        Parameters:
-        -----------
+        This method generates sequences by iteratively expanding the top `beam_width` candidates at each
+        decoding step. It maintains a list of active beams and completed sequences, updating them based
+        on the decoder's predictions and applying a length penalty to balance sequence length and
+        cumulative log probabilities.
+
+        Parameters
+        ----------
         encoder_output : tf.Tensor
-            The output from the encoder (shape: [batch_size, seq_len_enc, enc_units]).
+            The output from the encoder with shape `(batch_size, seq_len_enc, enc_units)`.
         initial_decoder_states : List[tf.Tensor]
             The initial state of the decoder LSTM layers (list of tensors).
 
         Returns:
         --------
         best_sequences : List[List[int]]
-            The best decoded sequences for each item in the batch.
+            The best decoded sequences for each item in the batch. Each sequence is represented as a
+            list of token IDs.
+
+        Raises
+        ------
+        ValueError
+            If `encoder_output` is not a 3D tensor.
+            If `initial_decoder_states` is empty or contains non-tensor elements.
         """
         batch_size = tf.shape(encoder_output)[0]
 

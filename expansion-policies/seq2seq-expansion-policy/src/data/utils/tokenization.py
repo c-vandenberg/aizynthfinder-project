@@ -205,7 +205,7 @@ class SmilesTokenizer:
 
     def sequences_to_texts(
         self,
-        sequences: Union[tf.Tensor, np.ndarray, List[int]],
+        sequences: Union[tf.Tensor, np.ndarray, List[List[int]]],
         is_input_sequence = False
     ) -> List[str]:
         """
@@ -213,8 +213,8 @@ class SmilesTokenizer:
 
         Parameters
         ----------
-        sequences : Union[tf.Tensor, np.ndarray]
-            A tensor or NumPy array of token indices.
+        sequences : Union[tf.Tensor, np.ndarray, List[List[int]]]
+            A tensor, NumPy array or list of token indices.
         is_input_sequence : bool, optional
             Boolean declaring whether SMILES list is sequence input or not.
 

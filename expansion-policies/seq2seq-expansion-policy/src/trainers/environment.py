@@ -7,6 +7,16 @@ import tensorflow as tf
 
 
 class TrainingEnvironment:
+    """
+    TrainingEnvironment
+
+    Provides methods to set up the training environment for deterministic (reproducible) training.
+
+    Methods
+    -------
+    setup_environment(config)
+        Sets up the environment for deterministic training based on the provided configuration.
+    """
     @staticmethod
     def setup_environment(config: Dict[str, Any]) -> None:
         """

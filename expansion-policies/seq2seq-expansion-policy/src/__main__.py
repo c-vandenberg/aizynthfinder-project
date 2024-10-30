@@ -16,5 +16,6 @@ def main():
 
     # Run the training pipeline
     trainer.run()
+
 if __name__ == "__main__":
     main()
