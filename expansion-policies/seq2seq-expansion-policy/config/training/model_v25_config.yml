@@ -82,7 +82,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 10
+  epochs: 3
   patience: 5
   reverse_tokenized_input_sequence: True
   model_save_path: 'data/training/liu-et-al/model-v25/model/saved_model'
