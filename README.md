@@ -1,6 +1,21 @@
 # AiZynthFinder Project
 
 ## Contents
+
+<details>
+  <summary>1. Retrosynthesis with AiZynthFinder - Overview</summary>
+  
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.1 [Basics of Retrosynthesis](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#11-basics-of-retrosynthesis)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.2 [Retrosynthetic Search Tree](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#12-retrosynthetic-search-tree)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.3 [AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#13-aizynthfinder-template-based-retrosynthesis-model-define-disconnection-rules)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.4 [Monte Carlo Tree Search: Finding the Best Routes (Traverse the Retrosynthesis Search Tree Efficiently)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#14-monte-carlo-tree-search-finding-the-best-routes-traverse-the-retrosynthesis-search-tree-efficiently)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.4.1 [Heuristic Search Algorithms](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#141-heuristic-search-algorithms)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.4.2 [Monte Carlo Tree Search in AiZynthFinder](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#142-monte-carlo-tree-search-in-aizynthfinder)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.5 [AiZynthFinder Post-Processing Tools - Route Scoring](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#15-aizynthfinder-post-processing-tools---route-scoring)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.6 [Route Clustering](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#16-route-clustering)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.7 [References](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#17-references)<br>
+</details>
+
 1. [Retrosynthesis with AiZynthFinder - Overview](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#1-retrosynthesis-with-aizynthfinder---overview)<br>
   1.1 [Basics of Retrosynthesis](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#11-basics-of-retrosynthesis)<br>
   1.2 [Retrosynthetic Search Tree](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#12-retrosynthetic-search-tree)<br>
