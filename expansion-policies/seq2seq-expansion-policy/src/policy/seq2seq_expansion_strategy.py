@@ -41,6 +41,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         self.model = self.load_model(model_path)
         self.smiles_tokenizer = self.load_tokenizer(tokenizer_path)
+        self.model.smiles_tokenizer = self.smiles_tokenizer
 
         self._logger.info(f"Loaded Seq2Seq model and tokenizers for expansion policy {self.key}")
 
@@ -51,11 +52,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             'RetrosynthesisSeq2SeqModel': RetrosynthesisSeq2SeqModel,
             'StackedBidirectionalLSTMEncoder': StackedBidirectionalLSTMEncoder,
             'StackedLSTMDecoder': StackedLSTMDecoder,
-            'BahdanauAttention': BahdanauAttention,
-            'MaskedSparseCategoricalCrossentropy': MaskedSparseCategoricalCrossentropy,
-            'Perplexity': Perplexity,
-            'BestValLossCallback': BestValLossCallback,
-            'ValidationMetricsCallback': ValidationMetricsCallback
+            'BahdanauAttention': BahdanauAttention
         }
         try:
             model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)

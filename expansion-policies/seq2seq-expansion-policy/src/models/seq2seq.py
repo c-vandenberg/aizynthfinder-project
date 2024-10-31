@@ -167,9 +167,6 @@ class RetrosynthesisSeq2SeqModel(Model):
         ValueError
             If `smiles_tokenizer` is not set.
         """
-        if self.smiles_tokenizer is None:
-            raise ValueError("smiles_tokenizer must be set before calling the model.")
-
         # Unpack inputs
         encoder_input: tf.Tensor
         decoder_input: tf.Tensor
