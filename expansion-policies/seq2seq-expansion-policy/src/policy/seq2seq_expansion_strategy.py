@@ -13,10 +13,6 @@ from models.seq2seq import RetrosynthesisSeq2SeqModel
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 from attention.attention import BahdanauAttention
-from losses.losses import MaskedSparseCategoricalCrossentropy
-from metrics.perplexity import Perplexity
-from callbacks.checkpoints import BestValLossCallback
-from callbacks.validation_metrics import ValidationMetricsCallback
 
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
@@ -164,7 +160,10 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
                     self.smiles_tokenizer.start_token,
                     self.smiles_tokenizer.end_token
                 )
-                if self._is_valid_smiles(cleaned_smiles):
+                # Split the SMILES string on '.' to handle multiple reactants
+                reactant_smiles_list = cleaned_smiles.split('.')
+                is_valid = all(self._is_valid_smiles(smi) for smi in reactant_smiles_list)
+                if is_valid:
                     valid_smiles.append(cleaned_smiles)
                     valid_probs.append(prob)
                 else:
@@ -180,17 +179,26 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
     @staticmethod
     def _is_valid_smiles(smiles: str) -> bool:
-        return Chem.MolFromSmiles(smiles) is not None
+        try:
+            mol = Chem.MolFromSmiles(smiles)
+            return mol is not None
+        except:
+            # In case of any parsing exceptions
+            return False
 
     @staticmethod
     def _clean_sequence(sequence: str, start_token: str, end_token: str) -> str:
-        # Remove start token
-        if sequence.startswith(start_token):
-            sequence = sequence[len(start_token):]
-        # Remove everything after end token
-        end_idx = sequence.find(end_token)
+        # Remove start token and the following space
+        if sequence.startswith(start_token + ' '):
+            sequence = sequence[len(start_token) + 1:]
+        # Remove everything after end token and the preceding space
+        end_idx = sequence.find(' ' + end_token)
         if end_idx != -1:
             sequence = sequence[:end_idx]
+        # Remove any remaining start or end tokens
+        sequence = sequence.replace(start_token, '').replace(end_token, '')
+        # Remove all spaces
+        sequence = sequence.replace(' ', '')
         return sequence.strip()
 
     def reset_cache(self) -> None:
