@@ -98,6 +98,11 @@ class StackedLSTMDecoder(DecoderInterface):
             units=attention_dim
         )
 
+        # Projection layers for residual connection
+        self.decoder_dense = Dense(self.units, name='decoder_dense')
+        self.context_dense = Dense(self.units, name='context_dense')
+        self.output_layer_norm = LayerNormalization(name='output_layer_norm')
+
         # Output layer
         self.dense: Dense = Dense(
             vocab_size,
@@ -210,14 +215,19 @@ class StackedLSTMDecoder(DecoderInterface):
             mask=encoder_mask
         )
 
-        # Concatenate decoder outputs and context vector
-        concat_output: tf.Tensor = tf.concat(
-            [decoder_output, context_vector],
-            axis=-1
-        )  # Shape: (batch_size, seq_len_dec, units + units_enc)
+        # Transform decoder_output and context_vector for residual connections around attention mechanism
+        decoder_transformed = self.decoder_dense(decoder_output)  # Shape: (batch_size, seq_len_dec, units)
+        context_transformed = self.context_dense(context_vector)  # Shape: (batch_size, seq_len_dec, units)
+
+        # Add transformed decoder outputs and context vector together for residual connection
+        decoder_output = decoder_transformed + context_transformed # Shape: (batch_size, seq_len_dec, units)
+
+        # Apply layer normalization and activation
+        decoder_output = self.output_layer_norm(decoder_output)
+        decoder_output = tf.nn.relu(decoder_output)
 
         # Generate output probabilities
-        decoder_output: tf.Tensor = self.dense(concat_output)  # Shape: (batch_size, seq_len_dec, vocab_size)
+        decoder_output: tf.Tensor = self.dense(decoder_output)
 
         return decoder_output
 
@@ -302,11 +312,19 @@ class StackedLSTMDecoder(DecoderInterface):
             mask=None  # No mask during inference
         )
 
-        # Concatenate decoder outputs and context vector
-        concat_output = tf.concat([decoder_output, context_vector], axis=-1) # Shape: (batch_size, 1, units + enc_units)
+        # Transform decoder_output and context_vector for residual connections around attention mechanism
+        decoder_transformed = self.decoder_dense(decoder_output)  # Shape: (batch_size, 1, units)
+        context_transformed = self.context_dense(context_vector)  # Shape: (batch_size, 1, units)
+
+        # Add transformed decoder outputs and context vector together for residual connection
+        decoder_output = decoder_transformed + context_transformed  # Shape: (batch_size, 1, units)
+
+        # Apply layer normalization and activation
+        decoder_output = self.output_layer_norm(decoder_output)
+        decoder_output = tf.nn.relu(decoder_output)
 
         # Generate output probabilities
-        decoder_output = self.dense(concat_output) # Shape: (batch_size, 1, vocab_size)
+        decoder_output = self.dense(decoder_output)  # Shape: (batch_size, 1, vocab_size)
 
         return decoder_output, new_states
 
