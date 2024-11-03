@@ -7,6 +7,26 @@ from tensorflow.summary import SummaryWriter
 from metrics.bleu_score import BleuScore
 from metrics.smiles_string_metrics import SmilesStringMetrics
 
+CORE_LOG_METRICS_KEY_MAPPING: Dict[str, str] = {
+    'loss': 'Training Loss',
+    'accuracy': 'Training Accuracy',
+    'perplexity': 'Training Perplexity',
+    'val_loss': 'Validation Loss',
+    'val_accuracy': 'Validation Accuracy',
+    'val_perplexity': 'Validation Perplexity',
+}
+
+
+def extract_core_log_metrics(logs: dict) -> Dict[str, float]:
+    metrics = {}
+    if logs:
+        metrics = {
+            formatted_key: logs[log_key]
+            for log_key, formatted_key in CORE_LOG_METRICS_KEY_MAPPING.items()
+            if log_key in logs
+        }
+    return metrics
+
 def compute_metrics(
     references,
     hypotheses,
@@ -44,7 +64,7 @@ def log_metrics(
 
     with open(filepath, "a") as f:
         if epoch is not None:
-            f.write(f"Epoch {epoch + 1} Validation Metrics\n")
+            f.write(f"Epoch {epoch + 1} Metrics\n")
         else:
             f.write(f"Testing Metrics\n")
         for name, value in metrics.items():
