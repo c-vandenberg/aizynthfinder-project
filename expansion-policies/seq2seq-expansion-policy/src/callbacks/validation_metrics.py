@@ -75,7 +75,7 @@ class ValidationMetricsCallback(Callback):
         start_token = self.tokenizer.start_token
         end_token = self.tokenizer.end_token
 
-        for (encoder_input, decoder_input), target_output in self.validation_data:
+        for (encoder_input, decoder_input), target_sequences in self.validation_data:
             # Generate sequences
             predicted_sequences = self.model.predict_sequence(
                 encoder_input,
@@ -86,11 +86,11 @@ class ValidationMetricsCallback(Callback):
 
             # Convert sequences to text
             predicted_texts = self.tokenizer.sequences_to_texts(
-                predicted_sequences.numpy(),
+                predicted_sequences,
                 is_input_sequence=False
             )
             target_texts = self.tokenizer.sequences_to_texts(
-                target_output.numpy(),
+                target_sequences,
                 is_input_sequence=False
             )
 

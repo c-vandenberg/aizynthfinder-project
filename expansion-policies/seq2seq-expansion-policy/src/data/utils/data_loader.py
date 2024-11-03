@@ -105,7 +105,8 @@ class DataLoader:
         train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
         train_test_products_token_counts = Counter(train_test_products_all_tokens)
         print(
-            f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n")
+            f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n"
+        )
 
         self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(
             self.reactants_y_dataset,
@@ -114,7 +115,8 @@ class DataLoader:
 
         train_test_reactants_all_tokens = ' '.join(self.tokenized_reactants_y_dataset).split()
         train_test_reactants_token_counts = Counter(train_test_reactants_all_tokens)
-        print(f"Tokenized Train & Test Reactants y-Dataset Token Frequency Distribution: {train_test_reactants_token_counts.most_common(20)}\n")
+        print(f"Tokenized Train & Test Reactants y-Dataset Token Frequency Distribution: {train_test_reactants_token_counts.most_common(20)}\n"
+              )
 
         self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(
             self.products_x_valid_dataset,

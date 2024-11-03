@@ -1,4 +1,4 @@
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union
 
 import numpy as np
 import tensorflow as tf
@@ -48,7 +48,7 @@ class SmilesTokenizer:
         self,
         start_token: str = '<START>',
         end_token: str = '<END>',
-        oov_token: str = '<OOV>',
+        oov_token: str = '',
         max_tokens: int = 150,
         reverse_input_sequence: bool = False
     ) -> None:
@@ -105,7 +105,11 @@ class SmilesTokenizer:
         # Join tokens back into a string separated by spaces (required for TextVectorization)
         return ' '.join(tokens)
 
-    def tokenize_list(self, smiles_list: List[str], is_input_sequence = False) -> List[str]:
+    def tokenize_list(
+        self,
+        smiles_list: List[str],
+        is_input_sequence = False
+    ) -> List[str]:
         """
         Tokenizes a list of SMILES strings.
 
@@ -151,7 +155,11 @@ class SmilesTokenizer:
         """
         return self.text_vectorization(tf.constant(texts))
 
-    def sequences_to_texts(self, sequences: Union[tf.Tensor, np.ndarray], is_input_sequence = False) -> List[str]:
+    def sequences_to_texts(
+        self,
+        sequences: Union[tf.Tensor, np.ndarray],
+        is_input_sequence = False
+    ) -> List[str]:
         """
         Converts sequences of token indices back to texts.
 
@@ -172,11 +180,14 @@ class SmilesTokenizer:
         inverse_vocab = {idx: word for idx, word in enumerate(vocab)}
         texts = []
 
-        # Convert tf.Tensor to NumPy array if necessary
         if isinstance(sequences, tf.Tensor):
-            sequences = sequences.numpy()
-        elif not isinstance(sequences, np.ndarray):
-            raise TypeError("Input must be a tf.Tensor or np.ndarray")
+            sequences = sequences.numpy().tolist()
+        elif isinstance(sequences, np.ndarray):
+            sequences = sequences.tolist()
+        elif isinstance(sequences, list):
+            pass
+        else:
+            raise TypeError("Input must be a tf.Tensor, np.ndarray, or list of sequences")
 
         for sequence in sequences:
             tokens = [inverse_vocab.get(idx, self.oov_token) for idx in sequence if idx != 0]

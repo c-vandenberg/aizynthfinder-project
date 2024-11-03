@@ -28,20 +28,39 @@ def extract_core_log_metrics(logs: dict) -> Dict[str, float]:
     return metrics
 
 def compute_metrics(
-    references,
-    hypotheses,
-    target_smiles: List[str],
-    predicted_smiles: List[str],
-    evaluation_stage: Optional[str] = None,
+        references: List[str],
+        hypotheses: List[str],
+        target_smiles: List[str],
+        predicted_smiles: List[str],
+        evaluation_stage: Optional[str] = None,
 ) -> Dict[str, float]:
     """
     Compute all required metrics and return them as a dictionary.
+
+    Parameters:
+    ----------
+    references : List[str]
+        List of reference SMILES token strings per sample.
+    hypotheses : List[str]
+        List of hypothesis SMILES strings per sample.
+    target_smiles : List[str]
+        List of target SMILES strings per sample.
+    predicted_smiles : List[str]
+        List of predicted SMILES strings per sample.
+    evaluation_stage : Optional[str], optional
+        Optional prefix for metric names (e.g., 'Validation'), by default None.
+
+    Returns:
+    -------
+    Dict[str, float]
+        Dictionary of computed metrics.
     """
     metrics = {
         'BLEU score': BleuScore.smoothed_corpus_bleu(references, hypotheses),
+        'Average Levenshtein Distance': SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles),
         'Exact Match Accuracy': SmilesStringMetrics.smiles_exact_match(target_smiles, predicted_smiles),
         'Chemical Validity Score': SmilesStringMetrics.chemical_validity(predicted_smiles),
-        'Average Levenshtein Distance': SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles),
+        'Average Tanimoto Similarity': SmilesStringMetrics.average_tanimoto_similarity(target_smiles, predicted_smiles)
     }
 
     if evaluation_stage:
