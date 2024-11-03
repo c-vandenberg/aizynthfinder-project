@@ -8,14 +8,12 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("aizynthfinder")
 logger.setLevel(logging.DEBUG)
 
-pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
-
 # Path to the configuration file
 config_file = 'src/config.yml'
 
 finder = AiZynthFinder(configfile=config_file)
 finder.expansion_policy.select("seq2seq_policy")
-finder.target_smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
+finder.target_smiles = "O=C1NC(=O)CCC1N3C(=O)c2cccc(c2C3)N"  # Lenalidomide (Revlimid)
 
 # Prepare the search tree
 finder.prepare_tree()

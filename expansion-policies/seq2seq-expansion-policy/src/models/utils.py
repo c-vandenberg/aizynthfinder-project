@@ -11,8 +11,29 @@ from sklearn.model_selection import ShuffleSplit, cross_validate
 
 class Seq2SeqModelUtils:
     """
+    Seq2SeqModelUtils
+
     Utility class for handling Seq2Seq Keras models, including cross-validation,
     model inspection, and saving models in various formats.
+
+    This class provides static methods to facilitate common tasks associated with Seq2Seq models,
+    such as evaluating model performance through cross-validation, inspecting model layers for debugging
+    and analysis, and saving the model in formats suitable for deployment or further processing.
+
+    Methods
+    -------
+    seq2seq_cross_validator(n_splits, test_size, random_state, seq2seq_model, feature_matrix, target_matrix)
+        Perform cross-validation on a Seq2Seq model using ShuffleSplit.
+    inspect_model_layers(model)
+        Recursively inspect each layer and sublayer in the Keras model and print their configurations.
+    model_save_keras_format(keras_save_dir, model)
+        Save the Keras model in the native Keras `.keras` format.
+    model_save_hdf5_format(hdf5_save_dir, model)
+        Save the Keras model in HDF5 `.h5` format.
+    model_save_onnx_format(onnx_output_dir, model, max_encoder_seq_length, max_decoder_seq_length)
+        Convert and save the Keras Seq2Seq model to ONNX format.
+    save_saved_model_format(model_save_path, model)
+        Save the Keras model in the TensorFlow SavedModel format.
     """
     @staticmethod
     def seq2seq_cross_validator(
@@ -26,6 +47,9 @@ class Seq2SeqModelUtils:
         """
         Perform cross-validation on a Seq2Seq model using ShuffleSplit.
 
+        This method evaluates the performance of a Seq2Seq model by performing multiple train-test splits
+        using ShuffleSplit. It calculates various metrics to assess the model's generalization capabilities.
+
         Parameters
         ----------
         n_splits : int
@@ -35,7 +59,7 @@ class Seq2SeqModelUtils:
         random_state : int
             Controls the randomness of the training and testing indices.
         seq2seq_model : Any
-            The Seq2Seq model to be evaluated. This should be compatible with scikit-learn's cross_validate.
+            The Seq2Seq model to be evaluated. This should be compatible with scikit-learn's `cross_validate`.
         feature_matrix : Union[np.ndarray, List[Any]]
             Feature data for the model.
         target_matrix : Union[np.ndarray, List[Any]]
@@ -45,7 +69,18 @@ class Seq2SeqModelUtils:
         -------
         Dict[str, Any]
             Dictionary containing cross-validation results, including scores for each metric.
+
+        Raises
+        ------
+        ValueError
+            If `n_splits` is less than 2.
+            If `test_size` is not between 0.0 and 1.0.
         """
+        if n_splits < 2:
+            raise ValueError("n_splits must be at least 2.")
+        if not (0.0 < test_size < 1.0):
+            raise ValueError("test_size must be between 0.0 and 1.0.")
+
         cross_validator: ShuffleSplit = ShuffleSplit(
             n_splits=n_splits,
             test_size=test_size,
@@ -66,6 +101,10 @@ class Seq2SeqModelUtils:
     def inspect_model_layers(model: Model) -> None:
         """
         Recursively inspect each layer and sublayer in the Keras model and print their configurations.
+
+        This method is useful for debugging and understanding the architecture of custom models.
+        It traverses through all layers and sub-layers, printing their names and configurations in a structured
+        and indented format.
 
         Parameters
         ----------
@@ -114,6 +153,9 @@ class Seq2SeqModelUtils:
         """
         Save the Keras model in the native Keras `.keras` format.
 
+        This method saves the entire model, including architecture, weights, and training configuration,
+        in a single `.keras` file. The saved model can be loaded later for inference or further training.
+
         Parameters
         ----------
         keras_save_dir : str
@@ -125,17 +167,28 @@ class Seq2SeqModelUtils:
         -------
         None
             The function saves the model to the specified directory and prints a confirmation message.
+
+        Raises
+        ------
+        OSError
+            If the directory cannot be created or the model cannot be saved.
         """
         os.makedirs(keras_save_dir, exist_ok=True)
         keras_save_path: str = os.path.join(keras_save_dir, 'seq2seq_model.keras')
-        model.save(keras_save_path)
-
-        print(f"Model Keras V3 format save successful. Save file path: {keras_save_path}.")
+        try:
+            model.save(keras_save_path)
+            print(f"Model Keras V3 format save successful. Save file path: {keras_save_path}.")
+        except OSError as e:
+            print(f"Failed to save model in Keras format: {e}")
+            raise
 
     @staticmethod
     def model_save_hdf5_format(hdf5_save_dir: str, model:Model) -> None:
         """
         Save the Keras model in HDF5 `.h5` format.
+
+        This method saves the entire model, including architecture, weights, and training configuration,
+        in a single `.h5` file. The saved model can be loaded later for inference or further training.
 
         Parameters
         ----------
@@ -148,12 +201,20 @@ class Seq2SeqModelUtils:
         -------
         None
             The function saves the model to the specified directory and prints a confirmation message.
+
+        Raises
+        ------
+        OSError
+            If the directory cannot be created or the model cannot be saved.
         """
         os.makedirs(hdf5_save_dir, exist_ok=True)
         hdf5_save_path: str = os.path.join(hdf5_save_dir, 'seq2seq_model.h5')
-        model.save(hdf5_save_path)
-
-        print(f"Model HDF5 format save successful. Save file path: {hdf5_save_path}.")
+        try:
+            model.save(hdf5_save_path)
+            print(f"Model HDF5 format save successful. Save file path: {hdf5_save_path}.")
+        except OSError as e:
+            print(f"Failed to save model in HDF5 format: {e}")
+            raise
 
     @staticmethod
     def model_save_onnx_format(
@@ -164,6 +225,10 @@ class Seq2SeqModelUtils:
     ) -> None:
         """
         Convert and save the Keras Seq2Seq model to ONNX format.
+
+        This method converts the TensorFlow Keras model to ONNX (Open Neural Network Exchange) format,
+        which is an open standard for representing machine learning models. ONNX models can be used
+        across different frameworks and platforms, facilitating deployment and interoperability.
 
         Parameters
         ----------
@@ -180,6 +245,13 @@ class Seq2SeqModelUtils:
         -------
         None
             The function converts the model to ONNX format, saves it, and prints a confirmation message.
+
+        Raises
+        ------
+        ValueError
+            If the conversion fails due to incompatible model architectures or unsupported operations.
+        OSError
+            If the directory cannot be created or the model cannot be saved.
         """
         os.makedirs(onnx_output_dir, exist_ok=True)
         onnx_save_path: str = os.path.join(onnx_output_dir, 'seq2seq_model.onnx')
@@ -226,6 +298,10 @@ class Seq2SeqModelUtils:
         """
         Save the Keras model in the TensorFlow SavedModel format.
 
+        This method saves the entire model, including architecture, weights, and training configuration,
+        in the SavedModel directory format. SavedModel is the standard serialization format for TensorFlow
+        models and is suitable for serving and deployment.
+
         Parameters
         ----------
         model_save_path : str
@@ -237,7 +313,16 @@ class Seq2SeqModelUtils:
         -------
         None
             The function saves the model to the specified directory and prints a confirmation message.
+
+        Raises
+        ------
+        OSError
+            If the directory cannot be created or the model cannot be saved.
         """
         os.makedirs(model_save_path, exist_ok=True)
-        model.export(model_save_path)
-        print(f"Model SavedModel format save successful. Save file path: {model_save_path}")
+        try:
+            model.export(model_save_path)
+            print(f"Model SavedModel format save successful. Save file path: {model_save_path}")
+        except OSError as e:
+            print(f"Failed to save model in SavedModel format: {e}")
+            raise

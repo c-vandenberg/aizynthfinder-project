@@ -1,15 +1,16 @@
 import os
 import json
-from typing import Dict, Any, List, Union, Optional
+from typing import Dict, Any, List, Tuple, Union, Callable, Optional
 
 import yaml
-import numpy as np
-import pydevd_pycharm
-from keras.src.utils.module_utils import tensorflow
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import (Callback, EarlyStopping,
-                                        TensorBoard, ReduceLROnPlateau)
+from tensorflow.keras.callbacks import (
+    Callback,
+    EarlyStopping,
+    TensorBoard,
+    ReduceLROnPlateau
+)
 from tensorflow.train import Checkpoint, CheckpointManager
 
 from trainers.environment import TrainingEnvironment
@@ -41,6 +42,10 @@ class Trainer:
         ----------
         config_path : str
             Path to the configuration YAML file.
+
+        Returns
+        -------
+        None
         """
         self.config:Dict[str, Any] = self.load_config(config_path)
 
@@ -71,9 +76,22 @@ class Trainer:
         -------
         Dict[str, Any]
             Configuration dictionary.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the configuration file does not exist.
+        yaml.YAMLError
+            If there is an error parsing the YAML file.
         """
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"Configuration file not found at: {config_path}")
+
         with open(config_path, 'r') as file:
-            config = yaml.safe_load(file)
+            try:
+                config: Dict[str, Any] = yaml.safe_load(file)
+            except yaml.YAMLError as e:
+                raise yaml.YAMLError(f"Error parsing YAML file: {e}")
         return config
 
     def initialize_components(self) -> None:
@@ -83,6 +101,11 @@ class Trainer:
         Returns
         -------
         None
+
+        Raises
+        ------
+        KeyError
+            If required configuration keys are missing.
         """
         # Retrieve configurations
         data_conf: Dict[str, Any] = self.config.get('data', {})
@@ -135,43 +158,20 @@ class Trainer:
         Returns
         -------
         None
+
+        Raises
+        ------
+        IOError
+            If the tokenizer cannot be saved to the specified path.
         """
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
-        with open(tokenizer_path, 'w') as f:
-            json.dump(self.tokenizer.word_index, f, indent=4)
-        print(f"Tokenizer vocabulary saved to {tokenizer_path}")
-
-    @staticmethod
-    def load_tokenizer(tokenizer_path: str, reverse_input_sequence: bool = False) -> SmilesTokenizer:
-        """
-        Loads the tokenizer's vocabulary from a JSON file.
-
-        Parameters
-        ----------
-        tokenizer_path : str
-            Path to the tokenizer vocabulary JSON file.
-        reverse_input_sequence : bool, optional
-            Boolean dictating whether input sequence should be reversed
-
-        Returns
-        -------
-        SmilesTokenizer
-            An instance of SmilesTokenizer with the loaded vocabulary.
-        """
-        with open(tokenizer_path, 'r') as f:
-            word_index = json.load(f)
-
-        # Initialize a new SmilesTokenizer instance
-        smiles_tokenizer = SmilesTokenizer(
-            start_token='<START>',
-            end_token='<END>',
-            oov_token='<OOV>',
-            reverse_input_sequence=reverse_input_sequence
-        )
-        # Manually set the vocabulary
-        smiles_tokenizer.text_vectorization.set_vocabulary(list(word_index.keys()))
-
-        return smiles_tokenizer
+        try:
+            with open(tokenizer_path, 'w') as f:
+                json.dump(self.tokenizer.word_index, f, indent=4)
+            print(f"Tokenizer vocabulary saved to {tokenizer_path}")
+        except IOError as e:
+            print(f"Failed to save tokenizer to {tokenizer_path}: {e}")
+            raise
 
     def setup_model(self) -> None:
         """
@@ -180,8 +180,13 @@ class Trainer:
         Returns
         -------
         None
+
+        Raises
+        ------
+        KeyError
+            If required model configuration keys are missing.
         """
-        model_conf: dict[str, Any] = self.config.get('model', {})
+        model_conf: Dict[str, Any] = self.config.get('model', {})
 
         # Retrieve model parameters with defaults
         encoder_embedding_dim: int = model_conf.get('encoder_embedding_dim', 256)
@@ -233,19 +238,27 @@ class Trainer:
         Returns
         -------
         None
+
+        Raises
+        ------
+        StopIteration
+            If the training dataset is empty.
         """
         print("Building the model with sample data to initialize variables...")
 
         # Get a batch from the training dataset
         train_dataset = self.data_loader.get_train_dataset()
-        sample_batch = next(iter(train_dataset))
+        try:
+            sample_batch = next(iter(train_dataset))
+        except StopIteration:
+            raise StopIteration("Training dataset is empty. Cannot build the model.")
+
         (sample_encoder_input, sample_decoder_input), _ = sample_batch
 
         # Run the model on sample data
         self.model([sample_encoder_input, sample_decoder_input])
 
         print("Model built successfully.\n")
-
 
     def setup_callbacks(self) -> None:
         """
@@ -254,8 +267,13 @@ class Trainer:
         Returns
         -------
         None
+
+        Raises
+        ------
+        KeyError
+            If required training configuration keys are missing.
         """
-        training_conf: dict[str, Any] = self.config.get('training', {})
+        training_conf: Dict[str, Any] = self.config.get('training', {})
 
         # Early Stopping
         early_stopping: EarlyStopping = EarlyStopping(
@@ -329,11 +347,22 @@ class Trainer:
         Returns
         -------
         None
+
+        Raises
+        ------
+        ValueError
+            If dataloader or training/validation datasets are not initialised.
         """
         training_conf: Dict[str, Any] = self.config.get('training', {})
 
+        if self.data_loader is None:
+            raise ValueError("DataLoader is not initialised.")
+
         train_dataset = self.data_loader.get_train_dataset()
         valid_dataset = self.data_loader.get_valid_dataset()
+
+        if train_dataset is None or valid_dataset is None:
+            raise ValueError("Training or validation datasets are not available.")
 
         self.model.fit(
             train_dataset,
@@ -346,47 +375,66 @@ class Trainer:
         """
         Evaluates the trained model on the test dataset.
 
+        Computes various metrics including loss, accuracy, perplexity, BLEU score, chemical validity,
+        Tanimoto similarity, and Levenshtein distance. Results are logged and printed.
+
         Returns
         -------
         None
+
+        Raises
+        ------
+        ValueError
+            If tokenizer is not set or if required metrics functions are not available.
         """
+        if self.tokenizer is None:
+            raise ValueError("Tokenizer is not initialized.")
+
         test_dataset = self.data_loader.get_test_dataset()
         training_conf: Dict[str, Any] = self.config.get('training', {})
         model_conf: Dict[str, Any] = self.config.get('model', {})
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
 
-        test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
+        # Evaluate the model on the test dataset
+        evaluation_results: List[float] = self.model.evaluate(test_dataset)
+        if len(evaluation_results) < 3:
+            raise ValueError("Expected at least three evaluation metrics (loss, accuracy, perplexity).")
 
-        references = []
-        hypotheses = []
-        target_smiles = []
-        predicted_smiles = []
-        start_token = self.tokenizer.start_token
-        end_token = self.tokenizer.end_token
+        test_loss, test_accuracy, test_perplexity = evaluation_results[:3]
+
+        references: List[List[List[str]]] = []
+        hypotheses: List[List[str]] = []
+        target_smiles: List[str] = []
+        predicted_smiles: List[str] = []
+        start_token: str = self.tokenizer.start_token
+        end_token: str = self.tokenizer.end_token
 
         for (encoder_input, decoder_input), target_sequences in test_dataset:
             # Generate sequences
-            predicted_sequences = self.model.predict_sequence_beam_search(
+            predicted_sequences_list, predicted_scores_list = self.model.predict_sequence_beam_search(
                 encoder_input=encoder_input,
                 beam_width=model_conf.get('beam_width', 5),
                 max_length=self.data_loader.max_decoder_seq_length,
                 start_token_id=self.tokenizer.word_index.get(start_token),
-                end_token_id=self.tokenizer.word_index.get(end_token)
+                end_token_id=self.tokenizer.word_index.get(end_token),
+                return_top_n=1
             )
 
+            top_predicted_sequences = [seq_list[0] for seq_list in predicted_sequences_list]
+
             # Convert sequences to text
-            predicted_texts = self.tokenizer.sequences_to_texts(
-                predicted_sequences,
+            predicted_texts: List[str]  = self.tokenizer.sequences_to_texts(
+                top_predicted_sequences,
                 is_input_sequence=False
             )
-            target_texts = self.tokenizer.sequences_to_texts(
+            target_texts: List[str]  = self.tokenizer.sequences_to_texts(
                 target_sequences,
                 is_input_sequence=False
             )
 
             for ref, hyp in zip(target_texts, predicted_texts):
-                ref_tokens = ref.split()
-                hyp_tokens = hyp.split()
+                ref_tokens: List[str]  = ref.split()
+                hyp_tokens: List[str]  = hyp.split()
                 references.append([ref_tokens])
                 hypotheses.append(hyp_tokens)
                 target_smiles.append(ref)
@@ -435,11 +483,19 @@ class Trainer:
 
     def save_model(self) -> None:
         """
-        Saves the trained model in TensorFlow SavedModel format and Onnx format.
+        Saves the trained model in TensorFlow SavedModel format and ONNX format.
+
+        The method inspects the model layers, saves the model in Keras, HDF5, ONNX, and SavedModel formats.
+        It ensures that the model is saved in multiple formats for compatibility and deployment purposes.
 
         Returns
         -------
         None
+
+        Raises
+        ------
+        Exception
+            If any of the model saving processes fail.
         """
         Seq2SeqModelUtils.inspect_model_layers(model=self.model)
         training_conf: Dict[str, Any] = self.config.get('training', {})
@@ -450,49 +506,129 @@ class Trainer:
         onnx_save_dir: str = os.path.join(model_save_dir, 'onnx')
         saved_model_save_dir: str = os.path.join(model_save_dir, 'saved_model')
 
-        Seq2SeqModelUtils.model_save_keras_format(
-            keras_save_dir=keras_save_dir,
-            model=self.model
-        )
+        try:
+            Seq2SeqModelUtils.model_save_keras_format(
+                keras_save_dir=keras_save_dir,
+                model=self.model
+            )
+        except Exception as e:
+            print(f"Error saving model in Keras format: {e}")
 
-        Seq2SeqModelUtils.model_save_hdf5_format(
-            hdf5_save_dir=hdf5_save_dir,
-            model=self.model
-        )
+        try:
+            Seq2SeqModelUtils.model_save_hdf5_format(
+                hdf5_save_dir=hdf5_save_dir,
+                model=self.model
+            )
+        except Exception as e:
+            print(f"Error saving model in HDF5 format: {e}")
 
-        Seq2SeqModelUtils.model_save_onnx_format(
-            onnx_output_dir=onnx_save_dir,
-            model=self.model,
-            max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
-            max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140)
-        )
+        try:
+            Seq2SeqModelUtils.model_save_onnx_format(
+                onnx_output_dir=onnx_save_dir,
+                model=self.model,
+                max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
+                max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140)
+            )
+        except Exception as e:
+            print(f"Error saving model in ONNX format: {e}")
 
-        Seq2SeqModelUtils.save_saved_model_format(
-            model_save_path=saved_model_save_dir,
-            model=self.model
-        )
+        try:
+            Seq2SeqModelUtils.save_saved_model_format(
+                model_save_path=saved_model_save_dir,
+                model=self.model
+            )
+        except Exception as e:
+            print(f"Error saving model in SavedModel format: {e}")
 
     def run(self):
         """
         Executes the full training pipeline.
 
+        The pipeline includes:
+        1. Setting up the training environment.
+        2. Setting up and compiling the model.
+        3. Building the model by initializing weights.
+        4. Setting up training callbacks.
+        5. Training the model.
+        6. Saving the trained model.
+        7. Evaluating the model on the test dataset.
+
         Returns
         -------
         None
+
+        Raises
+        ------
+        Exception
+            If any step in the training pipeline fails.
         """
-        TrainingEnvironment.setup_environment(self.config)
-        self.setup_model()
-        self.build_model()
-        self.setup_callbacks()
-        self.train()
-        self.model.summary()
-        self.save_model()
-        self.evaluate()
+        try:
+            TrainingEnvironment.setup_environment(self.config)
+            self.setup_model()
+            self.build_model()
+            self.setup_callbacks()
+            self.train()
+            self.model.summary()
+            self.save_model()
+            self.evaluate()
+        except Exception as e:
+            print(f"An error occurred during the training pipeline: {e}")
+            raise
 
+def custom_train_step(
+    model: tf.keras.Model,
+    optimizer: tf.keras.optimizers.Optimizer,
+    loss_fn: Callable[[tf.Tensor, tf.Tensor], tf.Tensor],
+    gradient_callback: Any
+) -> Callable[[Tuple[tf.Tensor, tf.Tensor]], tf.Tensor]:
+    """
+    Creates a custom training step function.
 
-def custom_train_step(model, optimizer, loss_fn, gradient_callback):
+    This function defines a custom training step that computes the loss, calculates gradients,
+    applies them using the optimizer, and invokes a gradient callback for monitoring or logging.
+
+    Parameters
+    ----------
+    model : tf.keras.Model
+        The Keras model to be trained.
+    optimizer : tf.keras.optimizers.Optimizer
+        The optimizer used to apply gradients.
+    loss_fn : Callable[[tf.Tensor, tf.Tensor], tf.Tensor]
+        A function that computes the loss given true and predicted values.
+    gradient_callback : Any
+        An object that has an `on_gradients_computed` method to handle gradient-related operations
+        (e.g., logging, monitoring).
+
+    Returns
+    -------
+    Callable[[Tuple[tf.Tensor, tf.Tensor]], tf.Tensor]
+        A TensorFlow function that performs a single training step.
+
+    Raises
+    ------
+    AttributeError
+        If `gradient_callback` does not have an `on_gradients_computed` method.
+    """
+    if not hasattr(gradient_callback, 'on_gradients_computed'):
+        raise AttributeError("gradient_callback must have an 'on_gradients_computed' method.")
+
     @tf.function
-    def train_step(inputs):
+    def train_step(inputs: Tuple[tf.Tensor, tf.Tensor]) -> tf.Tensor:
+        """
+        Performs a single training step.
+
+        Parameters
+        ----------
+        inputs : Tuple[tf.Tensor, tf.Tensor]
+            A tuple containing input features and target labels:
+            - inputs[0]: tf.Tensor representing input features.
+            - inputs[1]: tf.Tensor representing target labels.
+
+        Returns
+        -------
+        tf.Tensor
+            The computed loss for the training step.
+        """
         x, y = inputs
         with tf.GradientTape() as tape:
             y_pred = model(x, training=True)
