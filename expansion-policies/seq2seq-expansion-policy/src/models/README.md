@@ -18,7 +18,7 @@ Additionally, the sources and target datasets were **combined** so that they cou
 
 ## 5.2 Model Architecture
 
-As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**), to act as a **baseline** for future model iterations.
+As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**). This model was **iteratively optimised** over the course of the research project.
 
 <br>
   <div align="center">
@@ -62,7 +62,7 @@ In an attempt to resolve this issue, various new analytics and debugging tactics
 ### i. DeepChem Tokenizer
 The initial tokenizer **fitted the tokenized SMILES list** on a `tensorflow.keras.preprocessing.text.Tokenizer` instance for **character-level tokenization**. This had the advantage of being **simple to implement**, and didn't introduce much **computational overhead** in the model training/inference runs.
 
-However, not only was this resulting in spaec characters being tokenized, but it would also result in **loss of chemical semantic meaning** as there was no mechanism in place to account for **multi-character tokens** such as `Cl`, `Br` etc. As a result, these would be split into `C`, `l` and `B` `r` etc.
+However, not only was this resulting in space characters being tokenized, but it would also result in **loss of chemical semantic meaning** as there was no mechanism in place to account for **multi-character tokens** such as `Cl`, `Br` etc. As a result, these would be split into `C`, `l` and `B` `r` etc.
 
 An alternative tokenizer was found in the documentation of (DeepChem)[https://deepchem.readthedocs.io/en/latest/]. This `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the list of tokenized SMILES strings** while **preserving chemical information**,
 
@@ -84,9 +84,9 @@ When deciding on a loss function, both **Sparse Categorical Cross-Entropy** and 
   * The **true probability distribution** represents the **actual labels of the training (and validation) examples**, typically in the form of **one-hot encoded vectors**.
 2. **Sparse categorical cross-entropy**:
   * Sparse categorical cross-entropy loss is another variant of the **cross-entropy loss function** used for **multi-class classification tasks**.
-  * In contract to categorical cross-entropy loss, where the **true labels are represented as one-hit encoded vectors**, sparse categorical cross-entropy loss expects the **target labels to be integers indicating the class indices directly**.
+  * In contrast to categorical cross-entropy loss, where the **true labels are represented as one-hot encoded vectors**, sparse categorical cross-entropy loss expects the **target labels to be integers indicating the class indices directly**.
   * The sparse categorical cross-entropy loss function works by **first converting the true labels into one-hot encoded vectors internally**, and then applying the **regular categorical cross-entropy loss calculation**.
-  * Mathematically, this has the **same formula as cross-entropy loss**, it just **converts the true labels to one-hot encoded vecots first**.
+  * Mathematically, this has the **same formula as cross-entropy loss**, it just **converts the true labels to one-hot encoded vectors first**.
   * Additionally, sparse cross-entropy loss takes the true labels as a **1D vector of integers**. For example **`[1,2,1,5]`**, not **`[[1], [2], [1], [5]]`**. **<sup>4</sup>**
  
 The chosen preprocessing approach in `data.utils.preprocessing.SmilesDataPreprocessor` was to **map characters tokenized smiles strings** in the tokenized_smiles_list to **the integers that they correspond to in the smiles_tokenizers word index**. Given that this would give a **1D vector of integers**, a **sparse categorical cross-entropy loss function** was the appropriate choice.
@@ -103,7 +103,7 @@ For the **optimiser**, the **Adaptive Moment Estimation (Adam) optimiser** was c
 **Weight decay** is a fundamental technique used in deep learning to **improve model performance**. It acts as a **regulariser** that **penalises large weights** in the network. This can lead to several benefits: **<sup>5</sup>**
 1. **Reducing Overfitting**
    * Large weights can **lead to the model memorising the training data** and **failing to generalise to unseen examples**.
-   * Weight decay **penalises large weights**, encouraging the model to **learn smaller weights** that **capture the undelying patterns in the data** rather than **memorising specific details**.
+   * Weight decay **penalises large weights**, encouraging the model to **learn smaller weights** that **capture the underlying patterns in the data** rather than **memorising specific details**.
    * This leads to **better generalisation performance on unseen data**.
 2. **Improving model stability**
    * Large weights can make training process **unstable** and **sensitive to noise** in the data.
@@ -135,7 +135,7 @@ However, choosing the right weight decay **depends on various factors**, such as
 
 ### 5.3.4 Callbacks Optimisation
 
-**Callbacks** are powerful tools in **TensorFlow's Keras API** that allow you to customize and control the training process of your models. They are **Python objects** with methods that are **executed during training at given stages of the training procedure**, allowing you to **exectute specific actions** at various stages of training (e.g. at the **end of an epoch**, **after a batch**, or **before training begins**).
+**Callbacks** are powerful tools in **TensorFlow's Keras API** that allow you to customize and control the training process of your models. They are **Python objects** with methods that are **executed during training at given stages of the training procedure**, allowing you to **execute specific actions** at various stages of training (e.g. at the **end of an epoch**, **after a batch**, or **before training begins**).
 
 Callbacks can be used for a wide range of purposes, such as:
 1. **Monitoring training progress**
@@ -213,7 +213,7 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
   </p>
 </div>
 
-### i. Early Stopping (EarlyStopping)
+### i. EarlyStopping
 
 **EarlyStopping** is a built-in callback in Keras (`tensorflow.keras.callbacks.EarlyStopping`) that **monitors a specific metric** and **stops training when it stops improving**. 
 
@@ -247,7 +247,7 @@ In this model, for greater customisability, a custom callback integrated with `f
 
 ### iv. Visualisation in TensorBoard (TensorBoard)
 
-**TensorBoard** is TensorFlow's **comprehensive visualisation toolket**, enabling developers to **gain insights into their machine learning model's training processes**. It provides tools to **visualise metrics** such as loss and accuracy, **analyse model architectures**, and **debug training processes**.
+**TensorBoard** is TensorFlow's **comprehensive visualisation toolkit**, enabling developers to **gain insights into their machine learning model's training processes**. It provides tools to **visualise metrics** such as loss and accuracy, **analyse model architectures**, and **debug training processes**.
 
 By **leveraging TensorBoard**, a developer can:
 1. **Monitor Training Metrics**: Track how metrics evolve over time.
@@ -260,7 +260,7 @@ By **leveraging TensorBoard**, a developer can:
 
 ### v. Validation Metrics (ValidationMetricsCallback)
 
-For a **more granular analysis** of model performance, specifically for **SMILES string predictions**, a custom **`callbacks.validation_metrics.ValidationMetricsCallback`** class was created, that would **handle a series of computations on the validation data predictions**. It was designed so that **further valdiation metrics could be easily integrated** in the future if needed.
+For a **more granular analysis** of model performance, specifically for **SMILES string predictions**, a custom **`callbacks.validation_metrics.ValidationMetricsCallback`** class was created, that would **handle a series of computations on the validation data predictions**. It was designed so that **further validation metrics could be easily integrated** in the future if needed.
 
 As of the **latest model version (V 21)**, the following validation metric analytics have been added to the callback:
 1. **Perplexity**
@@ -271,9 +271,9 @@ As of the **latest model version (V 21)**, the following validation metric analy
 
 ### i. Perplexity
 
-**Perplexity** is a widely used evaluation metric in **natural langauge processing (NLP)** and serves as an **indicator of how well the model predicts a sample**. It quantifies the **uncertainty of the model in predicting (i.e. assigning probabilities to) the next token in a sequence**.
+**Perplexity** is a widely used evaluation metric in **natural language processing (NLP)** and serves as an **indicator of how well the model predicts a sample**. It quantifies the **uncertainty of the model in predicting (i.e. assigning probabilities to) the next token in a sequence**.
 
-In simpler terms, perplexity **evalautes the model's ability to assign high probabilities to the actual sequences it aims to predict**. A **lower perplexity value** indicates **better predictive performance**, meaning the model is **more confident and accurate in its predictions**.
+In simpler terms, perplexity **evaluates the model's ability to assign high probabilities to the actual sequences it aims to predict**. A **lower perplexity value** indicates **better predictive performance**, meaning the model is **more confident and accurate in its predictions**.
 
 A **custom `metrics.perplexity.Perplexity` metric** was passed to the model's `metrics` argument during **model compilation**.
 
@@ -283,10 +283,10 @@ The **Bilingual Evaluation Understudy (BLEU) score** is a metric for assessing t
 
 In this model a **custom `metrics.bleu_score.BLEUScore` metric** was integrated into the **`callbacks.validation_metrics.ValidationMetricsCallback`** class, allowing for BLEU score calculation on the validation data predictions, and was integrated in to the model's **test data evaluation**. The BLEU score implementation chosen was **`nltk.translate.bleu_score.corpus_bleu`** with a **`SmoothingFunction`**.
 
-While BLEU score useful metric for **quanitfying how closely the predicted SMILES match the reference reactants** due to the **ease of computation**, it is important to **consider its limitations** in the context of **SMILES-based retrosynthesis prediction**:
+While BLEU score useful metric for **quantifying how closely the predicted SMILES match the reference reactants** due to the **ease of computation**, it is important to **consider its limitations** in the context of **SMILES-based retrosynthesis prediction**:
 1. **SMILES Syntax Sensitivity** - Due to the **strict syntax rules** that SMILES strings have, even a **minor error can represent a different molecule entirely**, **rendering a SMILES string invalid**.
 2. **Chemical Correctness** - BLEU measures **surface-level similarity** and does not assess whether the predicted reactants can be used to **synthesise the target molecule**. Additionally, there is **no emphasis on functional group importance**.
-3. **Multiple Valid Representations** - A single molecule can have **mutiple valid SMILES representations**, which can **complicate BLEU's n-gram overlap assessment**. However, by **canonicalising SMILES during data preprocessing**, this can be accounted for.
+3. **Multiple Valid Representations** - A single molecule can have **multiple valid SMILES representations**, which can **complicate BLEU's n-gram overlap assessment**. However, by **canonicalising SMILES during data preprocessing**, this can be accounted for.
 
 ### iii. SMILES String Metrics (Exact Match, Chemical Validity, Tanimoto Similarity, Levenshtein Distance)
 
@@ -327,24 +327,24 @@ $$
      * **Insertion**: Adding a character.
      * **Deletion**: Removing a character.
      * **Substitution**: Replacing one character with another.
-   * Unlike other metrics such as BLEU, Levenshtein distance accouts for the **order of characters**, giving a **more granular view of sequence differences**.
+   * Unlike other metrics such as BLEU, Levenshtein distance accounts for the **order of characters**, giving a **more granular view of sequence differences**.
    * This **sequential error quantification** is beneficial for tasks **requiring high precision**, such as **generating chemically valid SMILES strings**.
    * Additionally, Levenshtein distance gives **error type identification**. This helps in understanding whether the errors are primarily due to **insertions**, **deletions**, or **substitutions**, which can **inform model improvements**.
 
 ### 5.3.6 Encoder Optimisation
 
-Intial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
+Initial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-The first siginificant encoder change implemented during the optimisation process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
+The first significant encoder change implemented during the optimisation process was to **test 4 bidirectional LSTM layers**, as this was **missing in the analysis** by *Britz et al.*. This resulted in **marginal improvement**, but a **significant increase in computation**.
 
 ### i. Residual Connections
 The second significant encoder change was the implementation of **residual connections**. 
 * Residual connections are **direct pathways** that allow the **output of one layer to be added to the output of a deeper layer in the network**.
-* Instead of data flowing **strictly through a sequence of layers**, residual connections provide **shortcuts that bypasss one or more layers**.
+* Instead of data flowing **strictly through a sequence of layers**, residual connections provide **shortcuts that bypass one or more layers**.
 
 The benefits of residual connections include:
 * **Mitigating the Vanishing/Exploding Gradient Problem**: Residual connections help this by **providing alternative pathways** for gradients to **flow backward through the network**, ensuring that gradients **remain sufficiently large** (mitigating vanishing gradients), while being **stable** (mitigating exploding gradients).
-* **Enabling Identity Mappings**: Residual connections **apply identity mappings**, making it easier for **layers to learn identity functions** if necessary. This flexibility allows the network to **adaptively utilize or bypass certain layers**, enchancing its capacity to **model complex data**.
+* **Enabling Identity Mappings**: Residual connections **apply identity mappings**, making it easier for **layers to learn identity functions** if necessary. This flexibility allows the network to **adaptively utilize or bypass certain layers**, enhancing its capacity to **model complex data**.
 
 <br>
   <div align="center">
@@ -362,7 +362,7 @@ The third significant change was to incorporate **layer normalisation** into the
   * **Stabilise training**: By **standardising inputs to layers**, they help to **maintain consistent activation scales**.
   * **Accelerate Convergence**: This enables the use of **higher learning rates** without the **risk of divergence**.
   * **Improve generalisation**: By acting as a form of **regularisation**, reducing overfitting.
-  * **Mitigate Internal Coveriate Shift**: By **reducing the change in the distribution of network activations** during training.
+  * **Mitigate Internal Covariate Shift**: By **reducing the change in the distribution of network activations** during training.
 
 The first normalisation technique to consider is **batch normalisation**. In batch normalisation, the **inputs in each batch are scaled** so that they have a **mean of 0 (zero mean)** and a **standard deviation of 1 (unit standard deviation)**. Batch normalisation is applied **between the hidden layers of the encoder and/or decoder**.
 
@@ -410,12 +410,12 @@ Normalising **across all features of each input removes the dependence on batche
 
 ### 5.3.7 Decoder Optimisation
 
-Initial baseline model decoder architecture consisited of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
+Initial baseline model decoder architecture consisted of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
 ### i. Residual Connections and Layer Normalisation
 As with the encoder, the most significant decoder changes were the **addition of residual connections** (**Fig 2**) and the **incorporation of layer normalisation** (**Fig 4**). These changes resulted in an **improvement in both accuracy and loss** for training, validation and testing. 
 
-Regarding residual connection, this improvement in model performance was at odds to what was reported by *Britz et al.* (sections **[4.1.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-encoder-and-decoder-depth)** and **[4.1.4](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#414-unidirectional-vs-bidirectional-encoder)**). This need for residual connections between layers is likley due to the increased semantic complexity of SMILES strings.
+Regarding residual connection, this improvement in model performance was at odds to what was reported by *Britz et al.* (sections **[4.1.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-encoder-and-decoder-depth)** and **[4.1.4](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#414-unidirectional-vs-bidirectional-encoder)**). This need for residual connections between layers is likely due to the increased semantic complexity of SMILES strings.
 
 ### 5.3.8 Attention Mechanism Optimisation
 
@@ -440,14 +440,14 @@ where:
 
 Given the improvement in model performance after **integrating residual connections and applying layer normalisation into the encoder and decoder**, a further avenue for optimisation was to **integrate residual connections and applying layer normalisation around the attention mechanism**.
 
-There is precedent for this in the literature; **Transformers heavily rely on residual connections and layer normalization** around their **multi-head attention mechanisms**. Given that transformers have achieved **state-of-the-art results** in various NPL tasks, this provides **strong emperical evidence** for the effectiveness of this approach.
+There is precedent for this in the literature; **Transformers heavily rely on residual connections and layer normalization** around their **multi-head attention mechanisms**. Given that transformers have achieved **state-of-the-art results** in various NPL tasks, this provides **strong empirical evidence** for the effectiveness of this approach.
 
 By **integrating residual connections around attention**, in theory, the model is able to:
 1. **Preserve Information Flow**:
    * The **original decoder output (`decoder_output`) is directly added to the attention-enhanced output (`context_vector`)**, ensuring that **essential information is not lost or distorted** through the attention layers.
-2. **Facilitate Leaning Complex Representations**:
+2. **Facilitate Learning Complex Representations**:
    * Residual connections allow the model to **combine both raw (`decoder_output`)** and **attention-processed (`context_vector`) features**, leading to **richer and more nuanced representations**.
-3. **Enchance Gradient Propagation**:
+3. **Enhance Gradient Propagation**:
    * A with the encoder and decoder, **gradients flow through the attention layers during backpropagation through time (BPTT)**.
    * As such, residual connections **facilitate efficient gradient flow** by **providing alternative pathways** for gradients to **flow backward through the network**.
    * This ensures that gradients **remain sufficiently large** (mitigating vanishing gradients), while being **stable** (mitigating exploding gradients).
@@ -467,6 +467,11 @@ By **applying layer normalisation around attention**, in theory, the model is ab
 Once the model had the **majority of its optimisation features implemented**, a **beam search** was implemented with a **beam width of 5**, in line with *Liu et al.* **<sup>1</sup>**.
 
 Beam search is a **heuristic search algorithm** that **explores a graph** by **expanding the most promising nodes in a limited set**. In the context of seq2seq models, it is used during the **decoding phase** to **generate the most probable output sequences based on the model's predictions**.
+
+The **key characteristics** of beam search are:
+1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
+2. **Beam Width (Beam Size)** - This determines the **number of top candidate sequences to keep at each decoding step**. A larger beam width allows for a **more exhaustive search** but **increases computational complexity**.
+3. **Probabilistic Approach** - Beam search **combines the probabilities of individual tokens** to **evaluate overall likelihood of entire sequences**.
 
 ### Greedy Search
 Before we consider beam search, let us consider the simple **greedy search strategy**: **<sup>9</sup>**
@@ -511,16 +516,97 @@ $$
 
 ### Exhaustive Search
 
-If the goal is to obtain the **most likely sequence**, we may consider using **exhaustive search**
+If the goal is to obtain the **most likely sequence**, we may consider using **exhaustive search**. This involves **enumerating all the possible output sequences with their conditional probabilities**, and then output the one that **scores the highest probability**.
 
-The **key characteristics** of beam search are:
-1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
-2. **Beam Width (Beam Size)** - This determines the **number of top candidate sequences to keep at each decoding step**. A larger beam width allows for a **more exhaustive search** but **increases computational complexity**.
-3. **Probablistic Approach** - Beam search **combines the probabilities of individual tokens** to **evaluate overall likelihood of entire sequences**.
+While this would certainly work, it comes at a **prohibitive computational cost**. The **Big-O complexity** of an exhaustive search would be:
+
+**$$
+  \mathcal{O}(\left|\mathcal{Y}\right|^{T'})
+$$**
+
+where:
+* **$$\mathcal{Y}$$** is the **entire vocabulary set**
+* **$$T'$$** is the **number of timesteps/the max output sequence length**
+
+For example, even for a sequence with a **small vocabulary set $$\mathcal{Y}$$ = 10,000**, and **short max output sequence length $$T'$$ = 10**, an exhaustive search algorithm would need to evaluate **$$10000^10 = 10^40$$ sequences**. Even for this small, non-complex sequence, an exhaustive search is **beyond the capabilities of most/all computers**.
+
+On the other hand, **Big-O complexity of greedy search** is:
+
+**$$
+   \mathcal{O}(\left|\mathcal{Y}\right|T')
+$$**
+
+As you can see, despite **not being optimal**, it is **computationally cheap**. For example for the **same sequence as earlier**, a greedy search algorithm would only need to evaluate **$$10000 \times 10 = 10^5$$ sequences**.
+
+### Beam Search
+
+If **sequence decoding strategies lay on a spectrum**, with **greedy search on one end** (**least computationally demanding**, but **least optimal**), and **exhaustive search on the other end** (**most computationally expensive**, but **most optimal**), then **beam search would lie in the middle**, striking a **compromise between greedy search and exhaustive search**.
+
+The most straightforward version of beam search is **characterised by a single hyperparameter**, the **beam size $$k$$**, and works as follows:
+1. **Time Step 1**:
+   * At time step 1, we select the **$$k$$ tokens with the highest predicted probabilities**.
+3. **Time Step 2**:
+   * Each of these **$$k$$ candidates tokens from time step 1** will be the **first token of $$k$$ candidate output sequences** in **time step 2**.
+   * Because **each tokens conditional probability at each time step are dependent on the output sequences of all prior time steps (temporal dependency)**, these tokens will **determine the conditional probabilies of all tokens in the $$k$$ candidate output sequences** in time step 2.
+   * In time step 2, the **token chosen at each $$k$$ candidate output sequence** is the one that **gives the highest total conditional probability for that candidate sequence** (i.e. the **token with the highest conditional probability at that time step**)
+5. **Iterative Process**: This process is **repeated for $$T'$$** time steps (the **max output sequence length**).
+6. **Candidate Output Sequence Comparison**: At the end of the beam search, the **output sequence candidate with the highest conditional probability $$k|\mathcal{Y}|$$** is chosen as the **predicted sequence**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/da15729e-cfbf-464d-a213-bc2c6223ee1e", alt="beam-search"/>
+    <p>
+      <b>Fig 8</b> Beam search with <b>beam width, k = 2</b> and a <b>max sequence = 3</b>. The candidate output sequences chosen by beam search are <b>A, C, AB, CE, ABD</b> and <b>CED</b> <b><sup>9</sup></b>
+    </p>
+  </div>
+<br>
+
+**Fig 8** illustrates an example of beam search with an example. In this example, the **output vocabulary contains only five elements**: **$$Y = {A, B, C, D, E}$$** (where **one of them is `<eos>`**), a **beam width, $$k = 2$$** and a **maximum output sequence = 3**.
+1. At **time step 1**, suppose that the **tokens with the highest conditional probabilities $$P(y_1 \mid \mathbf{c})$$** are **$$A$$** and **$$C$$**. Because we have a beam width = 2, these tokens are **chosen for each of the two beams**.
+2. At **time step 2**, for all **$$y_2 \in \mathcal{Y},$$** (**tokens in output vocabulary set at time step 2**), we compute the below and **pick the largest two amount these ten value**. In **Fig 8** this is **$$P(A, B \mid \mathbf{c})$$** and **$$P(C, E \mid \mathbf{c})$$**:
+
+$$
+  \begin{split}\begin{aligned}P(A, y_2 \mid \mathbf{c}) = P(A \mid \mathbf{c})P(y_2 \mid A, \mathbf{c}),\end{aligned}\end{split}
+$$
+$$
+   \begin{split}\begin{aligned}P(C, y_2 \mid \mathbf{c}) = P(C \mid \mathbf{c})P(y_2 \mid C, \mathbf{c}),\end{aligned}\end{split}
+$$
+
+3. At **time step 3**, for all **$$y_3 \in \mathcal{Y},$$** (**tokens in output vocabulary set at time step 2**), we compute the below and, again, **pick the largest two amount these ten value**. In **Fig 8** this is **$$P(A, B, D \mid \mathbf{c})$$** and **$$P(C, E, D \mid \mathbf{c})$$**:
+
+$$
+  \begin{split}\begin{aligned}P(A, B, y_3 \mid \mathbf{c}) = P(A, B \mid \mathbf{c})P(y_3 \mid A, B, \mathbf{c}),\end{aligned}\end{split}
+$$
+$$
+   \begin{split}\begin{aligned}P(C, E, y_3 \mid \mathbf{c}) = P(C, E \mid \mathbf{c})P(y_3 \mid C, E, \mathbf{c}),\end{aligned}\end{split}
+$$
+
+4. As a result, we get **six candidate output sequences**:
+   1. **$$A$$**
+   2. **$$C$$**
+   3. **$$A, B$$**
+   4. **$$C, E$$**
+   5. **$$A, B, D$$**
+   6. **$$C, E, D$$**
+5. At the **end of the beam search**, the algorithm **discards portions of these output sequences** (e.g. the **`<eos>` token** and **any tokens after it**) to obtain the **set of final six candidate output sequences**.
+6. The algorithm then **chooses the output sequence** which **maximises the following score**;
+
+$$
+  \frac{1}{L^\alpha} \log P(y_1, \ldots, y_{L}\mid \mathbf{c}) = \frac{1}{L^\alpha} \sum_{t'=1}^L \log P(y_{t'} \mid y_1, \ldots, y_{t'-1}, \mathbf{c});
+$$
+  * Here, **$$L$$** is the **length of the final candidate sequence** and **$$\alpha$$** is usually set to **$$0.75$$**.
+  * Since **longer sequences have more logarithmic terms in the summation**, the term **$$L^\alpha$$** in the denominator **penalises long sequences**.
+
+The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\right|T')$$**. This is **between the Big-O complexities of greedy search and exhaustive search**.
+  * **N.B.**: Greedy search can be thought of as a **special case of beam search arising when the beam size is set to 1**.
 
 ## 5.4 Model Documentation
 
-### 5.4.1 Model Debugging
+### 5.4.1 TensorFlow Graph
+
+### 5.4.2 Results and Discussion
+
+### 5.4.3 Debugging
 
 ### i. Data Tokenization and Preprocessing Debugging
 1. **Analyse Data Set Token Frequency Distribution**:

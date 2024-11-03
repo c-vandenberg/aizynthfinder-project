@@ -1,76 +1,122 @@
-# AiZynthFinder Project
+# AiZynthFinder Research Project
 
 ## Contents
-1. [Retrosynthesis with AiZynthFinder - Overview](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#1-retrosynthesis-with-aizynthfinder---overview)<br>
-  1.1 [Basics of Retrosynthesis](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#11-basics-of-retrosynthesis)<br>
-  1.2 [Retrosynthetic Search Tree](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#12-retrosynthetic-search-tree)<br>
-  1.3 [AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#13-aizynthfinder-template-based-retrosynthesis-model-define-disconnection-rules)<br>
-  1.4 [Monte Carlo Tree Search: Finding the Best Routes (Traverse the Retrosynthesis Search Tree Efficiently)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#14-monte-carlo-tree-search-finding-the-best-routes-traverse-the-retrosynthesis-search-tree-efficiently)<br>
-  &nbsp; &nbsp; 1.4.1 [Heuristic Search Algorithms](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#141-heuristic-search-algorithms)<br>
-  &nbsp; &nbsp; 1.4.2 [Monte Carlo Tree Search in AiZynthFinder](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#142-monte-carlo-tree-search-in-aizynthfinder)<br>
-  1.5 [AiZynthFinder Post-Processing Tools - Route Scoring](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#15-aizynthfinder-post-processing-tools---route-scoring)<br>
-  1.6 [Route Clustering](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#16-route-clustering)<br>
-  1.7 [References](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#17-references)<br>
-2. [AiZynthFinder's Expansion Policy Neural Network](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#2-aizynthfinders-expansion-policy-neural-network)<br>
-  2.1 [What is AiZynthFinder's Expansion Policy Neural Network?](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#21-what-is-aizynthfinders-expansion-policy-neural-network)<br>
-  2.2 [Neural Networks Overview](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#22-neural-networks-overview)<br>
-  2.3 [Feedforward Neural Networks (FNNs)](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#23-feedforward-neural-networks-fnns)<br>
-  2.4 [Recurrent Neural Networks (RNNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#24-recurrent-neural-networks-rnns)<br>
-  &nbsp; &nbsp; 2.4.1 [Recurrent Neural Network Architecture](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#241-recurrent-neural-network-architecture)<br>
-  &nbsp; &nbsp; 2.4.2 [Backpropagation vs Backpropagation Through Time](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-backpropagation-vs-backpropagation-through-time)<br>
-  &nbsp; &nbsp; 2.4.3 [Recurrent Neural Network Training](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-recurrent-neural-network-training)<br>
-  &nbsp; &nbsp; 2.4.4 [Types of Recurrent Neural Networks](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#244-types-of-recurrent-neural-networks)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Standard RNNs](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#i-standard-rnns)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Bidirectional Recurrent Neural Networks (BRRNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#ii-bidirectional-recurrent-neural-networks-brrns)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Long Short-Term Memory (LSTM)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#iii-long-short-term-memory-lstm)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Gated Recurrent Units (GNUs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#iv-gated-recurrent-units-gnus)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Encoder-Decoder RNN](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#v-encoder-decoder-rnn)<br>
-  2.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
-3. [Sequence-to-Sequence Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#3-sequence-to-sequence-expansion-policy)<br>
-  3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
-  3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
-  3.3 [Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-sequence-to-sequence-model)<br>
-  3.4 [Architecture of Sequence-to-Sequence Models](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#34-architecture-of-sequence-to-sequence-models)<br>
-  &nbsp; &nbsp; 3.4.1 [Encoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#341-encoder)<br>
-  &nbsp; &nbsp; 3.4.2 [Decoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#342-decoder)<br>
-  &nbsp; &nbsp; 3.4.3 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism)<br>
-  3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#35-references)<br>
-4. [Retrosynthesis Sequence-to-Sequence Model Literature](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy/src#4-retrosynthesis-sequence-to-sequence-model)<br>
-  4.1 [*Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#41-britz-et-al-analysis-of-neural-machine-translation-architecture-hyperparameters)<br>
-   &nbsp; &nbsp; 4.1.1 [Embedding Dimensionality](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-embedding-dimensionality)<br>
-   &nbsp; &nbsp; 4.1.2 [Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-encoder-and-decoder-recurrent-neural-network-rnn-cell-variant)<br>
-   &nbsp; &nbsp; 4.1.3 [Encoder and Decoder Depth](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-encoder-and-decoder-depth)<br>
-   &nbsp; &nbsp; 4.1.4 [Unidirectional vs. Bidirectional Encoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#414-unidirectional-vs-bidirectional-encoder)<br>
-   &nbsp; &nbsp; 4.1.5 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#415-attention-mechanism)<br>
-   &nbsp; &nbsp; 4.1.6 [Beam Search Strategies](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#416-beam-search-strategies)<br>
-  4.2 [*Liu et al.* Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#42-liu-et-al-sequence-to-sequence-model)<br>
-   &nbsp; &nbsp; 4.1.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-data-preparation)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Training](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#i-training)<br>
-   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Testing](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-testing)<br>
-   &nbsp; &nbsp; 4.1.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-model-architecture)<br>
-  4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
-5. [Project Retrosynthesis Sequence-to-Sequence Model]()<br>
-   5.1 [Data Preparation]()<br>
-   5.2 [Model Architecture]()<br>
-   5.3 [Model Optimization]()<br>
-   &nbsp; &nbsp; 5.3.1 [Deterministic Training Environment]()<br>
-   &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.4 [Callbacks Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.5 [Metrics Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.6 [Encoder Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.7 [Decoder Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation]()<br>
-   &nbsp; &nbsp; 5.3.9 [Inference Optimisation]()<br>
-   5.4 [Model Documentation]()<br>
-   5.5 [References]()<br>
- 5. [Transformer Expansion Policy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/transformer-expansion-policy/README.md#5-transformer-expansion-policy)<br>
+
+<details>
+  <summary><b>1. Retrosynthesis with AiZynthFinder - Overview</b></summary>
+  
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.1 [Basics of Retrosynthesis](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#11-basics-of-retrosynthesis)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.2 [Retrosynthetic Search Tree](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#12-retrosynthetic-search-tree)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.3 [AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#13-aizynthfinder-template-based-retrosynthesis-model-define-disconnection-rules)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.4 [Monte Carlo Tree Search: Finding the Best Routes (Traverse the Retrosynthesis Search Tree Efficiently)](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#14-monte-carlo-tree-search-finding-the-best-routes-traverse-the-retrosynthesis-search-tree-efficiently)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.4.1 [Heuristic Search Algorithms](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#141-heuristic-search-algorithms)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 1.4.2 [Monte Carlo Tree Search in AiZynthFinder](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#142-monte-carlo-tree-search-in-aizynthfinder)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.5 [AiZynthFinder Post-Processing Tools - Route Scoring](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#15-aizynthfinder-post-processing-tools---route-scoring)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.6 [Route Clustering](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#16-route-clustering)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 1.7 [References](https://github.com/c-vandenberg/aizynthfinder-project?tab=readme-ov-file#17-references)<br>
+</details>
+<details>
+  <summary><b>2. AiZynthFinder's Expansion Policy Neural Network</b></summary>
+  
+  &nbsp; &nbsp; &nbsp; &nbsp; 2.1 [What is AiZynthFinder's Expansion Policy Neural Network?](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#21-what-is-aizynthfinders-expansion-policy-neural-network)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 2.2 [Neural Networks Overview](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#22-neural-networks-overview)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 2.3 [Feedforward Neural Networks (FNNs)](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#23-feedforward-neural-networks-fnns)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 2.4 [Recurrent Neural Networks (RNNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#24-recurrent-neural-networks-rnns)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2.4.1 [Recurrent Neural Network Architecture](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#241-recurrent-neural-network-architecture)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2.4.2 [Backpropagation vs Backpropagation Through Time](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-backpropagation-vs-backpropagation-through-time)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2.4.3 [Recurrent Neural Network Training](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#242-recurrent-neural-network-training)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2.4.4 [Types of Recurrent Neural Networks](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#244-types-of-recurrent-neural-networks)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Standard RNNs](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#i-standard-rnns)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Bidirectional Recurrent Neural Networks (BRRNs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#ii-bidirectional-recurrent-neural-networks-brrns)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Long Short-Term Memory (LSTM)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#iii-long-short-term-memory-lstm)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Gated Recurrent Units (GNUs)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#iv-gated-recurrent-units-gnus)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Encoder-Decoder RNN](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/README.md#v-encoder-decoder-rnn)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 2.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies#24-references)<br>
+</details>
+<details>
+  <summary><b>3. Sequence-to-Sequence Expansion Policy</b></summary>
+  
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.3 [Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#33-sequence-to-sequence-model)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.4 [Architecture of Sequence-to-Sequence Models](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#34-architecture-of-sequence-to-sequence-models)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3.4.1 [Encoder](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#341-encoder)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3.4.2 [Decoder](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#342-decoder)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3.4.3 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#343-attention-mechanism)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#35-references)<br>
+</details>
+<details>
+  <summary><b>4. Retrosynthesis Sequence-to-Sequence Model Literature Review</b></summary>
+
+  &nbsp; &nbsp; &nbsp; &nbsp; 4.1 [*Britz et al.* Analysis of Neural Machine Translation Architecture Hyperparameters](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#41-britz-et-al-analysis-of-neural-machine-translation-architecture-hyperparameters)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.1 [Embedding Dimensionality](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-embedding-dimensionality)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.2 [Encoder and Decoder Recurrent Neural Network (RNN) Cell Variant](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-encoder-and-decoder-recurrent-neural-network-rnn-cell-variant)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.3 [Encoder and Decoder Depth](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#413-encoder-and-decoder-depth)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.4 [Unidirectional vs. Bidirectional Encoder](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#414-unidirectional-vs-bidirectional-encoder)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.5 [Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#415-attention-mechanism)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.6 [Beam Search Strategies](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#416-beam-search-strategies)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 4.2 [*Liu et al.* Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#42-liu-et-al-sequence-to-sequence-model)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#411-data-preparation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Training](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#i-training)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Testing](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#ii-testing)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 4.1.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#412-model-architecture)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 4.3 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#43-references)<br>
+</details>
+<details>
+  <summary><b>5. Project Retrosynthesis Sequence-to-Sequence Model</b></summary>
+  
+  &nbsp; &nbsp; &nbsp; &nbsp; 5.1 [Data Preparation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 5.2 [Model Architecture](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#52-model-architecture)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 5.3 [Model Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#53-model-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.1 [Deterministic Training Environment](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#531-deterministic-training-environment)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.2 [Data Tokenization and Preprocessing Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#532-data-tokenization-and-preprocessing-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [DeepChem Tokenizer](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-deepchem-tokenizer)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [TensorFlow TextVectorisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-tensorflow-textvectorisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.3 [Loss Function Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#533-loss-function-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Categorical Cross-Entropy vs Sparse Categorical Cross-Entropy](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-categorical-cross-entropy-vs-sparse-categorical-cross-entropy)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Optimiser - Adam](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-optimiser---adam)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Weight Decay (L2 Regularisation)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#iii-weight-decay-l2-regularisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.4 [Callbacks Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#534-callbacks-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [EarlyStopping](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-earlystopping)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Dynamic Learning Rate (ReduceLROnPlateau)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-dynamic-learning-rate-reducelronplateau)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [Checkpoints (ModelCheckpoint)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#iii-checkpoints-modelcheckpoint)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iv. [Visualisation in TensorBoard (TensorBoard)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#iv-visualisation-in-tensorboard-tensorboard)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; v. [Validation Metrics (ValidationMetricsCallback)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#v-validation-metrics-validationmetricscallback)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.5 [Metrics Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#535-metrics-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Perplexity](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-perplexity)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [BLEU Score](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-bleu-score)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; iii. [SMILES String Metrics (Exact Match, Chemical Validity, Tanimoto Similarity, Levenshtein Distance)](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#iii-smiles-string-metrics-exact-match-chemical-validity-tanimoto-similarity-levenshtein-distance)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.6 [Encoder Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#536-encoder-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Residual Connections](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-residual-connections)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Layer Normalisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#iii-layer-normalisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.7 [Decoder Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#537-decoder-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Residual Connections and Layer Normalisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-residual-connections-and-layer-normalisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.8 [Attention Mechanism Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#538-attention-mechanism-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Bahdanau Attention Mechanism](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-bahdanau-attention-mechanism)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ii. [Residual Connections and Layer Normalisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#ii-residual-connections-and-layer-normalisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.3.9 [Inference Optimisation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#539-inference-optimisation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; i. [Greedy Decoding vs Beam Search](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#i-greedy-decoding-vs-beam-search)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 5.4 [Model Documentation](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#54-model-documentation)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.4.1 [TensorFlow Graph](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#541-tensorflow-graph)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.4.2 [Results and Discussion](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#542-results-and-discussion)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.4.2 [Debugging](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#543-debugging)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 5.5 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#55-references)<br>
+</details>
+<details>
+  <summary><b>6. Transformer Expansion Policy</b></summary>
+</details>
+<details>
+  <summary><b>7. Retrosynthesis Transformer Model Literature Review</b></summary>
+</details>
+<details>
+  <summary><b>8. Project Retrosynthesis Transformer Model</b></summary>
+</details>
 
 # 1. Retrosynthesis with AiZynthFinder - Overview
 
 **AiZynthFinder** is a **computer-aided synthesis planning (CASP)** tool developed by **AstraZeneca's MolecularAI department**. Specifically, it is a **computer-assisted synthesis prediction tool** that seeks to identify the **optimal sequence of chemical reaction steps** capable of transforming a set of **commercially available starting materials** into a **desired chemical compound**. **<sup>1</sup>**  **<sup>2</sup>**
 
-AiZynthfinder leverages recent advancements in **machine learning techniques**, specifically **deep neural networks**, to **predict synthetic pathways via retrosynthetic analysis** with **minimal human intervention**. **<sup>1</sup>**  **<sup>3</sup>**
+AiZynthFinder leverages recent advancements in **machine learning techniques**, specifically **deep neural networks**, to **predict synthetic pathways via retrosynthetic analysis** with **minimal human intervention**. **<sup>1</sup>**  **<sup>3</sup>**
 
 ## 1.1 Basics of Retrosynthesis 
 
@@ -100,7 +146,7 @@ Retrosynthesis involves:
   </div>
 <br>
 
-   * However, other times the disconnection will give **neutral fragments**. Classical examples of this are **pericyclic reactions** such as **Diels-Alder reactions**.
+   * However, other times the disconnection will give **neutral fragments**. Classical examples of this are **pericyclic reactions**, such as **Diels-Alder reactions**.
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/0715c148-cbb2-4ba2-b1f3-ece94738276c", alt="retrosynthesis-synthons-neutral"/>
@@ -116,7 +162,7 @@ Retrosynthesis involves:
 
 4. **Functional Group Interconversion (FGI)**:
    * If a **disconnection is not possible** at a given site, **FGI can be used**.
-   * A FGI is an operation whereby **one functional group is converted into another** so that a **disconnection becomes possible**.
+   * An FGI is an operation whereby **one functional group is converted into another** so that a **disconnection becomes possible**.
    * A common FGI is the **oxidation of an alcohol to a carbonyl, or amine to nitro group**
 <br>
   <div align="center">
@@ -140,7 +186,7 @@ Retrosynthesis involves:
 
 ## 1.2 Retrosynthetic Search Tree
 
-Typically, the retrosynthetic analysis of a target molecule is an **iterative process** whereby the **subsequent fragments are themselves broken down** until we **reach a stop criterion**. This stop criterion is typically when we reach **precursors that are commerically available/in stock**.
+Typically, the retrosynthetic analysis of a target molecule is an **iterative process** whereby the **subsequent fragments are themselves broken down** until we **reach a stop criterion**. This stop criterion is typically when we reach **precursors that are commercially available/in stock**.
 
 <br>
   <div align="center">
@@ -151,29 +197,29 @@ Typically, the retrosynthetic analysis of a target molecule is an **iterative pr
   </div>
 <br>
 
-This iterative process results in a **retrosynthesis tree** where the **bredth is incredibly large**, but the **depth is quite small/shallow**. In comparison to the search trees for games such as chess and Go (**Fig 6**), the **bredth of a retrosynthesis search tree is incredibly large** because you could **theoretically break any bonds** in the target molecule, and the subsequent fragments. This leads to an **explosion in child nodes** from the **first few substrees**.
+This iterative process results in a **retrosynthesis tree** where the **breadth is incredibly large**, but the **depth is quite small/shallow**. In comparison to the search trees for games such as chess and Go (**Fig 6**), the **breadth of a retrosynthesis search tree is incredibly large** because you could **theoretically break any bonds** in the target molecule, and the subsequent fragments. This leads to an **explosion in child nodes** from the **first few subtrees**.
 
 The **depth** of a retrosynthesis search tree is **small/shallow** on the other hand, as it only takes a **few disconnections before viable precursors are found**. This is ideal since we don't want **linear synthetic reactions** with an **excessive number of steps**.
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/6c3efa40-bf2c-4124-bd13-4ad9f5a5d6b0", alt="retrosynthetic-search-tree-bredth-depth"/>
+    <img src="https://github.com/user-attachments/assets/6c3efa40-bf2c-4124-bd13-4ad9f5a5d6b0", alt="retrosynthetic-search-tree-breadth-depth"/>
     <p>
-      <b>Fig 7</b> Retrosynthesis search tree bredth and depth compared to the search trees in chess and Go. <b><sup>5</sup></b>
+      <b>Fig 7</b> Retrosynthesis search tree breadth and depth compared to the search trees in chess and Go. <b><sup>5</sup></b>
     </p>
   </div>
 <br>
 
 For **effective retrosynthetic analysis**, a retrosynthesis program must:
-1. **Define the disconnection rules clearly and efficiently** in order to **reduce the bredth** of the retrosynthesis search tree.
+1. **Define the disconnection rules clearly and efficiently** in order to **reduce the breadth** of the retrosynthesis search tree.
 2. **Traverse the retrosynthesis search tree efficiently** using an **effective search algorithm**.
 
 ### 1.3 AiZynthFinder Template-Based Retrosynthesis Model (Define Disconnection Rules)
 
 AiZynthFinder uses a **template-based retrosynthesis model** to **define the disconnection rules**. This approach utilises a **curated database** of **transformation rules** that are **extracted from external reaction databases** that are then **encoded computationally into reaction templates** as **SMIRKS**. 
-* **SMIRKS** is a form of **linear notation** used for **molecular reaction representation**. It was developed by **Daylight** and can be thought of as a hybrid between **SMILES** and **SMARTS**
+* **SMIRKS** is a form of **linear notation** used for **molecular reaction representation**. It was developed by **Daylight** and can be thought of as a hybrid between **SMILES** and **SMARTS**.
 
-These reaction templates can then used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
+These reaction templates can then be used as the **disconnection rules** for decomposing the target molecule into simpler, commercially available precursors.
 
 However, before they are used, AiZynthFinder uses a **simple neural network (Expansion policy)** to **predict the probability for each template given a molecule** **<sup>6</sup>** (**Fig 8**).
 
@@ -191,7 +237,7 @@ This **expansion policy neural network template ranking** works as follows:
 2. **Expansion policy neural network**: The ECFP4 fingerprints are then **fed into a simple neural network**, called an **expansion policy**. The **output of this neural network** is a **ranked list of templates**.
 3. **Keep top-ranked templates and apply to target molecule**: The top-ranked templates are kept (typically the **top 50**), and are **applied to the target molecule**, producing **different sets of precursors**
 
-However, because the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
+However, the expansion policy **doesn't know much about chemistry** and **doesn't take all of the reaction environment into consideration**. As a result, it can **rank unfeasible reactions highly**.
 
 Therefore, AiZynthFinder has **another trained neural network** called **filter policy** that is used to **filter and remove unfeasible reactions** (**Fig 9**). **<sup>8</sup>**
 
@@ -208,11 +254,11 @@ Therefore, AiZynthFinder has **another trained neural network** called **filter 
 
 ### 1.4.1 Heuristic Search Algorithms
 
-**Monte Carlo Tree Search (MCTS)** **<sup>9</sup>** is a powerful search algorithm that uses **heuristics** (i.e. **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
+**Monte Carlo Tree Search (MCTS)** **<sup>9</sup>** is a powerful search algorithm that uses **heuristics** (i.e., **rules of thumb**) for **decision-making processes**, particularly in **complex search spaces**.
 
   * Like with other **heuristic search algorithms**, the goal of MCTS is to **find a good enough solution within a reasonable amount of time**, rather than **guaranteeing the optimal solution** by **examining all possible outcomes**.
   * Heuristic search algorithms like MCTS are guided by a **heuristic function**, which is a mathematical function used to estimate the **cost, distance or likelihood of reaching the goal from a given state or node**. This function helps **prioritse which paths or options to explore**, based on their likelihood of **leading to an optimal or near-optimal solution**.
-  * Heuristic search algorithms aim to **reduce the search space**, making them **more efficient than exhaustive search methods**. By **focusing on promised paths**, they can often **find solutions faster**, especially in complex or large problem spaces. Although these solutions **may not be optimal**, they are **usually good enough for practical purposes**.
+  * Heuristic search algorithms aim to **reduce the search space**, making them **more efficient than exhaustive search methods**. By **focusing on promising paths**, they can often **find solutions faster**, especially in complex or large problem spaces. Although these solutions **may not be optimal**, they are **usually good enough for practical purposes**.
 
 ### 1.4.2 Monte Carlo Tree Search in AiZynthFinder
 
@@ -220,13 +266,13 @@ In AiZynthFinder, MCTS plays a crucial role in **effectively navigating the vast
 
 To recap, the **retrosynthesis tree structure representation** consists of:
 * **Nodes**: Each node in the tree represents **a state of the retrosynthesis problem**. In AiZynthFinder, a node corresponds to **a set of one or more intermediate molecules** that can be used to **synthesise the molecule(s)** in the **current node's parent node**.
-* **Edges**: The edges between the nodes represent the **application of a specific reaction template (disconnection rule)** to **decompose the molecule set in the parent node** into **simpler precursor molecules in the child node**
+* **Edges**: The edges between the nodes represent the **application of a specific reaction template (disconnection rule)** to **decompose the molecule set in the parent node** into **simpler precursor molecules in the child node**.
 
 In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<sup>10</sup>** to explore potential synthetic routes as follows:
 
 **1. Selection**
 * Starting at the **root node** (target molecule), the MCTS algorithm selects the **most promising node for expansion** based on a balance of **exploration (trying new reactions)**, and **exploitation (further exploring known good reactions)**
-* This is goverened by a **Upper Confidence Bound (UCB) score formula** (**Fig 10**) and is how AiZynthFinder **selects and scores routes**.
+* This is governed by a **Upper Confidence Bound (UCB) score formula** (**Fig 10**) and is how AiZynthFinder **selects and scores routes**.
 
 <br>
   <div align="center">
@@ -238,21 +284,20 @@ In AiZynthFinder, MCTS uses **iterative/sequential Monte Carlo simulations** **<
 <br>
 
 **2. Expansion**
-* Once a node has been selected, the MCTS algorithm **expands it** by applying a **new reaction template** from the **expansion policy** and **filter policy**, generating **new precursor molecules** (i.e. **new child nodes**).
+* Once a node has been selected, the MCTS algorithm **expands it** by applying a **new reaction template** from the **expansion policy** and **filter policy**, generating **new precursor molecules** (i.e., **new child nodes**).
 * At **each expansion step**, the **expansion policy and filter policy** are used to **filter out unfeasible reactions**, ensuring that the search **focuses on viable synthetic routes**.
 
 **3. Rollout/Iteration**
 * This process of **selection and expansion** is then **repeated for each resulting precursor molecule** until the **stop criterion is met** and we reach a **terminal node**.
-* The stop criterion is usually either when the search reaches **commercially available precursors**, or it reaches a **pre-defined tree depth/number of disconnections**.
-* Once
+* The stop criterion is usually either when the search reaches **commercially available precursors**, or when it reaches a **pre-defined tree depth/number of disconnections**.
 
 **4. Update/Backpropagation**
 * Once the **terminal node is reached**, the **Monte Carlo simulation** is complete and a **complete synthetic route is generated**. This completed simulation/synthetic route is known as a **playout**.
 * The **score of the terminal node** (and hence the **score of the playout/synthetic route**) is then **propagated up through the tree**.
-* This score of the terminal node is the **accumulated reward (Q)** in the **UCB Score formula** (**Fig 10**), which is s function of the **tree depth** at the terminal node (i.e. **how many synthesis steps** between it and the target molecule), and the **fraction of the precursor molecules in that route that are in stock**.
+* This score of the terminal node is the **accumulated reward (Q)** in the **UCB Score formula** (**Fig 10**), which is a function of the **tree depth** at the terminal node (i.e., **how many synthesis steps** between it and the target molecule), and the **fraction of the precursor molecules in that route that are in stock**.
 * This gives a quantitative analysis of the **quality of the synthetic route**.
 
-Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The number of itertations is governed by a **predefined limit**, or a **predefined search time**. This iterative process is illustrated in **Fig 11**.
+Steps 1 - 4 are then repeated in **iterative Monte Carlo simulations**. The number of iterations is governed by a **predefined limit**, or a **predefined search time**. This iterative process is illustrated in **Fig 11**.
 
 <br>
   <div align="center">
@@ -281,8 +326,8 @@ AiZynthFinder also uses a number of **scoring algorithms** to **score routes dur
 AiZynthFinder also has the ability to **cluster routes** in order to perform a **cluster analysis** via **hierarchical clustering**. **<sup>11</sup>**
 
 The specific type of hierarchical clustering that AiZynthFinder uses is **agglomerative ("bottom-up") hierarchical clustering** **<sup>9</sup>**. This involves:
-1. Creating a **dendrogram** (a common visualisation tookis from the `scipy.cluster.hierarchy` package), to represent the **hierarchy of clusters of routes formed at different levels of distance**.
-2. Using a **linkage matrix** (`linkage_matrix`) to  **calculate the Euclidean distance between the clusters** at **each step of the clustering process**. This gives a **measure of similarity or dissimilarity** between the clusters of routes. This `linkage_matrix` is generated by the `ClusterHelper` class, which uses the agglomerative clustering algorithm implemented in **Scikit-learn**
+1. Creating a **dendrogram** (a common visualisation tookit from the `scipy.cluster.hierarchy` package), to represent the **hierarchy of clusters of routes formed at different levels of distance**.
+2. Using a **linkage matrix** (`linkage_matrix`) to  **calculate the Euclidean distance between the clusters** at **each step of the clustering process**. This gives a **measure of similarity or dissimilarity** between the clusters of routes. This `linkage_matrix` is generated by the `ClusterHelper` class, which uses the agglomerative clustering algorithm implemented in **scikit-learn**
 
 ## 1.7 References
 
