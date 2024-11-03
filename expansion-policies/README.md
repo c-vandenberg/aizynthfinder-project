@@ -380,19 +380,65 @@ For a **lower level description**, we will use **Fig 7** as an illustration
   <div align="center">
     <img src="https://github.com/user-attachments/assets/33a0840e-420d-4729-ad32-74beb3d176f2", alt="encoder-decoder-architecture"/>
     <p>
-      <b>Fig 7</b> Encoder-decoder sequence-to-sequence model. <b><sup>9</sup></b>
+      <b>Fig 7</b> Encoder-decoder sequence-to-sequence model. Both the encoder and decoder have a single layer of stacked RNN cells. <b><sup>9</sup></b>
     </p>
   </div>
 <br>
 
 **Encoder**
-* **Multiple RNN cells** can be **stacked together** to form the encoder. The RNN cells **read each input token sequentially**.
 * For **every timestep (each input token) $$t$$**, the **hidden state/hidden vector $$h$$** is updated according to the **input at that timestep $$X[i]$$**.
 * After **all the inputs are read by the encoder model**, the **final hidden state** of the encoder model represents the **context/summary of the whole input sequence**. This is why the hidden vector is also known as the **context vector**.
 * For example, if we consider the input sequence **"I am a student"** to be encoded, there will be a total of **4 timesteps (4 tokens)** for the encoder model. At each timestep, the hidden state $$h$$ will be updated using the **previous hidden state** and the **current input**:
-  1. **Timestep $$t1$$** - At the **first timestep $$t1$$**, the **previous hidden state $$h0$$** will set as **zero** or will be **randomly chosen**. The **
+  
+1. **Timestep $$t_1$$**:
+     * At the **first timestep $$t_1$$**, the **previous hidden state $$h_0$$** will set as **zero** or will be **randomly chosen**.
+     * The **first RNN cell** will **update the current hidden state** with the **first input** and **$$h_0$$**.
+     * Each layer outputs two things - the **updated hidden state** and the **output for each stage**.
+     * The outputs at each stage are **rejected** and **only the hidden states** are propagated to the next layer.
+     * At a given timestep, the hidden state is computed using the formula:
+       
+ $$
+   h_t = f(W^{(hh)}h_{t-1} + W^{hx}x_t)
+ $$
 
+2. **Timestep $$t_2$$**:
+   * At the **second timestep $$t_2$$**, the **hidden state $$h_1$$** and the **second input $$x_2$$** will be **given as input**, to the **next RNN cell in the layer**, and the **hidden state $$h_2$$** will be computed using these inputs and the formula above.
+   * This is **repeated over multiple RNN cells** until either the **entire sequence has been processed**, or the **maximum sequence length is reached**.
+  
+3. **Single vs Stacked RNN Layers**
+   * Typically, the encoder can be a **single layer**, or have **multiple, stacked layers**:
+   * In a **single layer**, there is **one RNN cell type (e.g. **LSTM**), that is **reused across all time steps**. The hidden state is **passed from one time step to the next** within this single layer.
+   * **Stacked RNN layers** however on the other hand involves stacking **mulitple RNN layers vertically** (i.e. in the **depth dimension**), to allow the model to **learn more complex representations**.
+      * In stacked layers, **each layer processes the entire input sequence**, but they **operate on the output of the layer below them**.
+      * Using the **"I am a student"** example, a **2-layer stacked RNN encoder** would look like:
+```
+Input Sequence: I → am → a → student
 
+Layer 1 (Bottom Layer):
+Time Step 1: I → H1_1
+Time Step 2: am → H1_2
+Time Step 3: a → H1_3
+Time Step 4: student → H1_4
+
+Layer 2 (Top Layer):
+Time Step 1: H1_1 → H2_1
+Time Step 2: H1_2 → H2_2
+Time Step 3: H1_3 → H2_3
+Time Step 4: H1_4 → H2_4
+```
+   * **Layer 1 (Bottom Layer)** processes each word sequentially, updating its hidden state at each time step.
+   * **Layer 2 (Top Layer)** takes the hidden states from Layer 1 as its inputs at each time step and updates its own hidden states accordingly.
+   * **Final Hidden State**: The hidden state from Layer 2 at the last time step **(H2_4)** serves as the **context vector for the decoder**.
+
+**Encoder Vector**
+* This is the **final hidden state** produced from the **encoder layer** using the above formula.
+* This **hidden state vector** aims to **encapsulate the information for all input elements** in order to help the **decoder make accurate predictions**.
+* The encoder vector acts as the **initial hidden state of the decoder**.
+
+**Decoder**
+* The decoder generates the output sequence by **predicting the next output $$y_t$$**, give the **hidden state $$h_t$$**.
+* The **initial input** for the decoder is the **final hidden vector of the encoder**.
+* At **each time step**, there will be **three inputs**, the **hidden state from the previous timestep $$h_{t-1}$$**, the **output from the previous timestep $$y_{t-1}$$**, and the **original hidden vector $$h$$**.
 
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
