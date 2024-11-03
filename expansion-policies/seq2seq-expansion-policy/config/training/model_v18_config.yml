@@ -2,7 +2,7 @@
 # -
 #
 # Training run metrics:
-#   - Epochs: 5
+#   - Epochs: 100 (95 run as EarlyStopping callback triggered)
 #
 #   - Train Loss (Smoothed):
 #   - Train Accuracy (Smoothed):

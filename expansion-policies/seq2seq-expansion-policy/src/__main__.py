@@ -3,13 +3,11 @@ import pydevd_pycharm
 
 import tensorflow as tf
 
-pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
-
 from trainers.trainer import Trainer
 
 def main():
     # Path to the configuration file
-    config_path = 'config/training/model_v18_config.yml'
+    config_path = 'config/training/model_v20_config.yml'
 
     # Initialize the Trainer with the configuration
     trainer = Trainer(config_path=config_path)

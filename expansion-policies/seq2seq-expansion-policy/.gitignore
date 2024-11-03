@@ -94,6 +94,9 @@ cython_debug/
 # TensorFlow Saved Models
 /data/training/liu-et-al/**/model/
 
+# TensorBoard Metrics
+/data/training/liu-et-al/**/tensorboard/
+
 # Model Validation Metrics
 /data/training/liu-et-al/**/validation-metrics/
 

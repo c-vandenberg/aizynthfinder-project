@@ -18,9 +18,14 @@ from callbacks.checkpoints import BestValLossCallback
 from callbacks.validation_metrics import ValidationMetricsCallback
 from losses.losses import MaskedSparseCategoricalCrossentropy
 from metrics.perplexity import Perplexity
+from metrics.bleu_score import BleuScore
+from metrics.smiles_string_metrics import SmilesStringMetrics
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
 from data.utils.preprocessing import SmilesDataPreprocessor
+from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
+                                log_sample_predictions, print_sample_predictions,
+                                log_to_tensorboard)
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from models.utils import Seq2SeqModelUtils
 
@@ -251,7 +256,6 @@ class Trainer:
         None
         """
         training_conf: dict[str, Any] = self.config.get('training', {})
-        log_dir: str = training_conf.get('log_dir', './logs')
 
         # Early Stopping
         early_stopping: EarlyStopping = EarlyStopping(
@@ -291,17 +295,18 @@ class Trainer:
 
         # Validation metrics callback
         valid_metrics_dir: str = training_conf.get('valid_metrics_dir', './validation-metrics')
+        tensorboard_dir: str = training_conf.get('tensorboard_dir', './tensorboard')
         validation_metrics_callback: ValidationMetricsCallback = ValidationMetricsCallback(
             tokenizer=self.tokenizer,
             validation_data=self.data_loader.get_valid_dataset(),
             validation_metrics_dir=valid_metrics_dir,
-            log_dir=os.path.join(log_dir, 'validation_metrics'),
+            tensorboard_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
             max_length=self.data_loader.max_encoder_seq_length
         )
 
         # TensorBoard
-        tensorboard_callback: EarlyStopping = TensorBoard(
-            log_dir=log_dir
+        tensorboard_callback: TensorBoard = TensorBoard(
+            log_dir=tensorboard_dir
         )
 
         self.callbacks = [
@@ -344,51 +349,83 @@ class Trainer:
         training_conf: Dict[str, Any] = self.config.get('training', {})
         model_conf: Dict[str, Any] = self.config.get('model', {})
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
-        os.makedirs(test_metrics_dir, exist_ok=True)
 
         test_loss, test_accuracy, test_perplexity = self.model.evaluate(test_dataset)
 
         references = []
         hypotheses = []
-        beam_width = training_conf.get('beam_width', 5)
+        target_smiles = []
+        predicted_smiles = []
         start_token = self.tokenizer.start_token
-        start_token_id = self.tokenizer.word_index.get(start_token)
         end_token = self.tokenizer.end_token
-        end_token_id = self.tokenizer.word_index.get(end_token)
 
         for (encoder_input, decoder_input), target_output in test_dataset:
-            predicted_sequences = self.model.predict_sequence_beam_search(
+            # Generate sequences
+            predicted_sequences = self.model.predict_sequence(
                 encoder_input,
-                beam_width=beam_width,
-                start_token_id=start_token_id,
-                end_token_id=end_token_id
+                max_length=self.data_loader.max_encoder_seq_length,
+                start_token_id=self.tokenizer.word_index.get(start_token),
+                end_token_id=self.tokenizer.word_index.get(end_token)
             )
 
-            if isinstance(predicted_sequences, list):
-                predicted_sequences = np.array(predicted_sequences)
-
-            predicted_texts = self.tokenizer.sequences_to_texts(predicted_sequences)
-            target_texts = self.tokenizer.sequences_to_texts(target_output.numpy())
+            # Convert sequences to text
+            predicted_texts = self.tokenizer.sequences_to_texts(
+                predicted_sequences.numpy(),
+                is_input_sequence=False
+            )
+            target_texts = self.tokenizer.sequences_to_texts(
+                target_output.numpy(),
+                is_input_sequence=False
+            )
 
             for ref, hyp in zip(target_texts, predicted_texts):
                 ref_tokens = ref.split()
                 hyp_tokens = hyp.split()
                 references.append([ref_tokens])
                 hypotheses.append(hyp_tokens)
+                target_smiles.append(ref)
+                predicted_smiles.append(hyp)
 
-        smoothing_function = SmoothingFunction().method1
-        bleu_score = corpus_bleu(references, hypotheses, smoothing_function=smoothing_function)
+        metrics: Dict[str, float] = {
+            'Test Loss': test_loss,
+            'Test Accuracy': test_accuracy,
+            'Test Perplexity': test_perplexity,
+        }
 
-        with open(os.path.join(test_metrics_dir, 'test_metrics.txt'), "w") as f:
-            f.write(f"Test Loss: {test_loss}\n")
-            f.write(f"Test Accuracy: {test_accuracy}\n")
-            f.write(f"Test Perplexity: {test_perplexity}\n")
-            f.write(f"Test BLEU Score: {bleu_score}\n")
+        additional_metrics: Dict[str, float] = compute_metrics(
+            references=references,
+            hypotheses=hypotheses,
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            evaluation_stage='Test'
+        )
 
-        print(f"Test Loss: {test_loss}")
-        print(f"Test Accuracy: {test_accuracy}")
-        print(f"Test Perplexity: {test_perplexity}")
-        print(f"Test BLEU Score: {bleu_score}")
+        metrics.update(additional_metrics)
+
+        log_metrics(
+            metrics=metrics,
+            directory=test_metrics_dir,
+            filename='test_metrics.txt',
+            separator='-' * 40
+        )
+
+        print_metrics(metrics=metrics)
+
+        log_sample_predictions(
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            directory=test_metrics_dir,
+            filename='test_sample_predictions.txt',
+            num_samples=5,
+            separator_length=153
+        )
+
+        print_sample_predictions(
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            num_samples=5,
+            separator_length=153
+        )
 
     def save_model(self) -> None:
         """

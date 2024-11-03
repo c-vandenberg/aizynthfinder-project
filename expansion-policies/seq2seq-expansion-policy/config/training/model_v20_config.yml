@@ -2,7 +2,7 @@
 # -
 #
 # Training run metrics:
-#   - Epochs: 10
+#   - Epochs: 5
 #
 #   - Train Loss (Smoothed):
 #   - Train Accuracy (Smoothed):
@@ -57,7 +57,7 @@ data:
   reactants_file: 'data/raw/liu-et-al/reactants_smiles'
   products_valid_file: 'data/raw/liu-et-al/validation_products_smiles'
   reactants_valid_file: 'data/raw/liu-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/liu-et-al/model-v19/tokenizer/model_v19_tokenizer.json'
+  tokenizer_save_path: 'data/training/liu-et-al/model-v20/tokenizer/model_v20_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -82,17 +82,17 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 10
+  epochs: 2
   patience: 5
   reverse_tokenized_input_sequence: True
-  model_save_path: 'data/training/liu-et-al/model-v19/model/saved_model'
-  model_save_dir: 'data/training/liu-et-al/model-v19/model'
-  valid_metrics_dir: 'data/training/liu-et-al/model-v19/validation-metrics'
-  test_metrics_dir: 'data/training/liu-et-al/model-v19/testing-metrics'
-  tensorboard_dir: 'data/training/liu-et-al/model-v19/tensorboard'
-  log_dir: 'logs/liu-et-al/model-v19'
-  checkpoint_dir: 'data/training/liu-et-al/model-v19/checkpoints'
-  num_samples: null # Number of samples to use for debugging model
+  model_save_path: 'data/training/liu-et-al/model-v20/model/saved_model'
+  model_save_dir: 'data/training/liu-et-al/model-v20/model'
+  valid_metrics_dir: 'data/training/liu-et-al/model-v20/validation-metrics'
+  test_metrics_dir: 'data/training/liu-et-al/model-v20/testing-metrics'
+  tensorboard_dir: 'data/training/liu-et-al/model-v20/tensorboard'
+  log_dir: 'logs/liu-et-al/model-v20'
+  checkpoint_dir: 'data/training/liu-et-al/model-v20/checkpoints'
+  num_samples: 100 # Number of samples to use for debugging model
 
 # Environment Configuration
 env:

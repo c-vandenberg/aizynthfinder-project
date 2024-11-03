@@ -1,11 +1,13 @@
-from typing import Iterable, Optional, Tuple, Any
-
 import os
+from typing import Iterable, Optional, Union, Tuple, List, Any
+
 import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
+from tensorflow.summary import SummaryWriter
 
-from metrics.bleu_score import BleuScore
-from metrics.smiles_string_metrics import SmilesStringMetrics
+from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
+                                log_sample_predictions, print_sample_predictions,
+                                log_to_tensorboard)
 
 class ValidationMetricsCallback(Callback):
     """
@@ -18,8 +20,8 @@ class ValidationMetricsCallback(Callback):
         The tokenizer used to convert sequences to text.
     validation_data : Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]]
         The validation dataset.
-    log_dir : str, optional
-        Directory where to save the TensorBoard logs, by default None.
+    tensorboard_dir : str, optional
+        Directory to save the TensorBoard logs, by default None.
     max_length : int, optional
         The maximum length of the generated sequences, by default 140.
 
@@ -29,8 +31,8 @@ class ValidationMetricsCallback(Callback):
         The tokenizer used to convert sequences to text.
     validation_data : Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]]
         The validation dataset.
-    log_dir : Optional[str]
-        Directory where to save the TensorBoard logs.
+    tensorboard_dir : Optional[str]
+        Directory to save the TensorBoard logs.
     max_length : int
         The maximum length of the generated sequences.
     file_writer : Optional[tf.summary.SummaryWriter]
@@ -41,18 +43,18 @@ class ValidationMetricsCallback(Callback):
         tokenizer: Any,
         validation_data: Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]],
         validation_metrics_dir: str,
-        log_dir: str,
+        tensorboard_dir: str,
         max_length: int = 140
     ) -> None:
         super(ValidationMetricsCallback, self).__init__()
         self.tokenizer = tokenizer
         self.validation_data = validation_data
         self.validation_metrics_dir = validation_metrics_dir
-        self.log_dir = log_dir
+        self.tensorboard_dir = tensorboard_dir
         self.max_length = max_length
 
-        os.makedirs(self.log_dir, exist_ok=True)
-        self.file_writer = tf.summary.create_file_writer(self.log_dir)
+        os.makedirs(self.tensorboard_dir, exist_ok=True)
+        self.file_writer = tf.summary.create_file_writer(self.tensorboard_dir)
 
     def on_epoch_end(self, epoch: int, logs: Optional[dict] = None) -> None:
         """
@@ -70,10 +72,17 @@ class ValidationMetricsCallback(Callback):
         hypotheses = []
         target_smiles = []
         predicted_smiles = []
+        start_token = self.tokenizer.start_token
+        end_token = self.tokenizer.end_token
 
         for (encoder_input, decoder_input), target_output in self.validation_data:
             # Generate sequences
-            predicted_sequences = self.model.predict_sequence(encoder_input, max_length=self.max_length)
+            predicted_sequences = self.model.predict_sequence(
+                encoder_input,
+                max_length=self.max_length,
+                start_token_id=self.tokenizer.word_index.get(start_token),
+                end_token_id=self.tokenizer.word_index.get(end_token)
+            )
 
             # Convert sequences to text
             predicted_texts = self.tokenizer.sequences_to_texts(
@@ -93,47 +102,38 @@ class ValidationMetricsCallback(Callback):
                 target_smiles.append(ref)
                 predicted_smiles.append(hyp)
 
-        bleu_score = BleuScore.smoothed_corpus_bleu(references, hypotheses)
-        exact_accuracy = SmilesStringMetrics.smiles_exact_match(target_smiles, predicted_smiles)
-        validity_score = SmilesStringMetrics.chemical_validity(predicted_smiles)
-        ave_levenshtein_distance = SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles)
+        self.validation(
+            epoch=epoch,
+            references=references,
+            hypotheses=hypotheses,
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            validation_metrics_dir=self.validation_metrics_dir,
+            tensorboard_dir=self.tensorboard_dir,
+            file_writer=self.file_writer
+        )
 
-        os.makedirs(self.validation_metrics_dir, exist_ok=True)
-        with open(os.path.join(self.validation_metrics_dir, 'valid_metrics.txt'), "a") as f:
-            f.write(f"Epoch {epoch + 1} Validation Metrics\n")
-            f.write(f"BLEU score: {bleu_score:.4f}\n")
-            f.write(f"Exact Match Accuracy: {exact_accuracy:.4f}\n")
-            f.write(f"Chemical Validity Score: {validity_score:.4f}\n")
-            f.write(f"Average Levenshtein Distance: {ave_levenshtein_distance:.4f}\n")
-            f.write(f"{'-' * 40}\n")
-            f.write(f"\n \n")
+    @staticmethod
+    def validation(
+        epoch: int,
+        references,
+        hypotheses,
+        target_smiles: List[str],
+        predicted_smiles: List[str],
+        validation_metrics_dir: str,
+        tensorboard_dir: Optional[str] = None,
+        file_writer: Optional[SummaryWriter] = None
+    ) -> None:
+        metrics = compute_metrics(references, hypotheses, target_smiles, predicted_smiles)
+        log_metrics(metrics=metrics, directory=validation_metrics_dir, epoch=epoch)
+        print_metrics(metrics=metrics, epoch=epoch)
+        log_sample_predictions(
+            target_smiles=target_smiles,
+            predicted_smiles=predicted_smiles,
+            directory=validation_metrics_dir,
+            epoch=epoch,
+        )
+        print_sample_predictions(target_smiles=target_smiles, predicted_smiles=predicted_smiles)
 
-        print(f'Epoch {epoch + 1}: BLEU score: {bleu_score:.4f}')
-        print(f'Epoch {epoch + 1}: Exact Match Accuracy: {exact_accuracy:.4f}')
-        print(f'Epoch {epoch + 1}: Chemical Validity Score: {validity_score:.4f}')
-        print(f'Epoch {epoch + 1}: Average Levenshtein Distance: {ave_levenshtein_distance:.4f}')
-
-        num_samples = min(5, len(target_smiles))
-        with open(os.path.join(self.validation_metrics_dir, 'sample_predictions.txt'), "a") as f:
-            f.write(f"Epoch {epoch + 1} Sample Predictions\n")
-            for i in range(num_samples):
-                f.write(f"Sample {i + 1}:\n")
-                f.write(f"  Target:    {target_smiles[i]}\n")
-                f.write(f"  Predicted: {predicted_smiles[i]}\n")
-                f.write(f"{'-' * 153}\n")
-            f.write(f"\n \n")
-
-        print("\nSample Predictions:")
-        for i in range(num_samples):
-            print(f"Sample {i + 1}:")
-            print(f"  Target:    {target_smiles[i]}")
-            print(f"  Predicted: {predicted_smiles[i]}")
-            print("-" * 153)
-
-        # Log Metrics to TensorBoard
-        if self.log_dir and self.file_writer:
-            with self.file_writer.as_default():
-                tf.summary.scalar('bleu_score', bleu_score, step=epoch)
-                tf.summary.scalar('exact_match', exact_accuracy, step=epoch)
-                tf.summary.scalar('chem_validity', validity_score, step=epoch)
-                tf.summary.scalar('ave_levenshtein_dist', ave_levenshtein_distance, step=epoch)
+        if tensorboard_dir and file_writer:
+            log_to_tensorboard(file_writer, metrics, epoch)
