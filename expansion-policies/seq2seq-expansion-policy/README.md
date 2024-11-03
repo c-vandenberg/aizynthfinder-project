@@ -33,6 +33,15 @@ Seq2seq models are especially useful for tasks where the **input and output are 
 
 ## 3.4 Architecture of Sequence-to-Sequence Models
 
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/33a0840e-420d-4729-ad32-74beb3d176f2", alt="encoder-decoder-architecture"/>
+    <p>
+      <b>Fig 1</b> Encoder-decoder sequence-to-sequence model. Both the encoder and decoder have a single layer of stacked RNN cells. <b><sup>9</sup></b>
+    </p>
+  </div>
+<br>
+
 At its core, a Seq2Seq model consists of two main components: an **encoder** and a **decoder**. These components **work in tandem** to **process input sequences** and **generate corresponding output sequences**.
 
 Both the encoder and decoder are neural networks, specifically a type of **recurrent neural network (RNN)** called **Long Short-Term Memory (LSTM)** models (or sometimes **Gated Recurrent Unit (GRU)** models)
@@ -53,7 +62,7 @@ Using the example of an LSTM RNN, an LSTM unit maintains **two types of internal
   <div align="center">
     <img src="https://github.com/user-attachments/assets/2bef59f1-672e-41e6-a211-dd25c8a8b412", alt="seq2seq-model-encoder"/>
     <p>
-      <b>Fig 1</b> LSTM encoder architecture in a Seq2Seq model <b><sup>4</sup></b>
+      <b>Fig 2</b> LSTM encoder architecture in a Seq2Seq model <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -76,7 +85,7 @@ In **Fig 1**, we can see that the **LSTM encoder reads the input data, one token
   <div align="center">
     <img src="https://github.com/user-attachments/assets/93afac63-7dc2-42d6-a307-6c1e3cf71c04", alt="seq2seq-lstm-encoder-decoder-internal-state-transfer"/>
     <p>
-      <b>Fig 2</b> Encoder final internal state vectors are used as the initial state of the decoder <b><sup>5</sup></b>
+      <b>Fig 2</b> Encoder final internal state vectors are used as the initial state of the decoder <b><sup>6</sup></b>
     </p>
   </div>
 <br>
@@ -87,7 +96,7 @@ An LSTM decoder uses the **final internal state vectors of the LSTM encoder** as
   <div align="center">
     <img src="https://github.com/user-attachments/assets/4a366c6d-b7ff-4876-a73c-1cdb53e35b24", alt="seq2seq-model-decoder"/>
     <p>
-      <b>Fig 3</b> LSTM decoder architecture in a Seq2Seq model <b><sup>4</sup></b>
+      <b>Fig 3</b> LSTM decoder architecture in a Seq2Seq model <b><sup>5</sup></b>
     </p>
   </div>
 <br>
@@ -136,7 +145,7 @@ One of the **main limitations** of basic Seq2Seq models is that relying on the *
 
 The attention mechanism was introduced to **mitigate the limitations of the fixed-size context vector** by allowing the decoder to **access different parts of the input sequence dynamically during each time step of the output generation**. Therefore, instead of **summarising the entire input into a single vector**, attention enables the model to **create a context vector tailored to each output token**.
 
-The **key aspects of the attention mechanism** include: **<sup>4</sup>** 
+The **key aspects of the attention mechanism** include: **<sup>5</sup>** 
 1. **Dynamic Weighting**
    * Instead of relying on a **fixed-length context vector** to encode the entire input sequence, attention mechanisms **assign different weights** to **different parts of the input sequence** based on their **relevance to the current step of the output sequence**.
    * This dynamic weighting enables the model's decoder to focus more on **relevant information** and **ignore irrelevant parts**.
@@ -194,5 +203,6 @@ At a high-level, the **attention mechanism's role within the decoder** is as fol
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
 **[2]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
 **[3]** Nam, J., Kim, J. (2016) ‘Linking the Neural Machine Translation and the Prediction of Organic Chemistry Reactions’. 1612.09529. <br><br>
-**[4]** Introduction to seq2seq models (2024) Analytics Vidhya. Available at: https://www.analyticsvidhya.com/blog/2020/08/a-simple-introduction-to-sequence-to-sequence-models/ (Accessed: 30 September 2024). <br><br>
-**[5]** Chollet, F. (no date) The keras blog, The Keras Blog ATOM. Available at: https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html (Accessed: 30 September 2024). <br><br>
+**[4]** Encoders-decoders, sequence to sequence architecture. (2024) Medium. Available at: https://medium.com/analytics-vidhya/encoders-decoders-sequence-to-sequence-architecture-5644efbb3392 (Accessed: 03 November 2024). <br><br>
+**[5]** Introduction to seq2seq models (2024) Analytics Vidhya. Available at: https://www.analyticsvidhya.com/blog/2020/08/a-simple-introduction-to-sequence-to-sequence-models/ (Accessed: 30 September 2024). <br><br>
+**[6]** Chollet, F. (no date) The keras blog, The Keras Blog ATOM. Available at: https://blog.keras.io/a-ten-minute-introduction-to-sequence-to-sequence-learning-in-keras.html (Accessed: 30 September 2024). <br><br>
