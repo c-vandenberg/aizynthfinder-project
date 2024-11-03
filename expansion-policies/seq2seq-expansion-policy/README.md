@@ -37,7 +37,7 @@ Seq2seq models are especially useful for tasks where the **input and output are 
   <div align="center">
     <img src="https://github.com/user-attachments/assets/33a0840e-420d-4729-ad32-74beb3d176f2", alt="encoder-decoder-architecture"/>
     <p>
-      <b>Fig 1</b> Encoder-decoder sequence-to-sequence model. Both the encoder and decoder have a single layer of stacked RNN cells. <b><sup>9</sup></b>
+      <b>Fig 1</b> Encoder-decoder sequence-to-sequence model. Both the encoder and decoder have a single layer of stacked RNN cells. <b><sup>4</sup></b>
     </p>
   </div>
 <br>
