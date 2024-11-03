@@ -388,7 +388,7 @@ For a **lower level description**, we will use **Fig 7** as an illustration
 **Encoder**
 * For **every timestep (each input token) $$t$$**, the **hidden state/hidden vector $$h$$** is updated according to the **input at that timestep $$X[i]$$**.
 * After **all the inputs are read by the encoder model**, the **final hidden state** of the encoder model represents the **context/summary of the whole input sequence**. This is why the hidden vector is also known as the **context vector**.
-* For example, if we consider the input sequence **"I am a student"** to be encoded, there will be a total of **4 timesteps (4 tokens)** for the encoder model. At each timestep, the hidden state $$h$$ will be updated using the **previous hidden state** and the **current input**:
+* For example, if we consider the input sequence **"I am a student"** to be encoded, there will be a total of **4 timesteps (4 tokens)** for the encoder model. At each timestep, the hidden state $$h$$ will be updated using the **previous hidden state** and the **current input**: <sup>9</sup>
   
 1. **Timestep $$t_1$$**:
      * At the **first timestep $$t_1$$**, the **previous hidden state $$h_0$$** will set as **zero** or will be **randomly chosen**.
@@ -403,11 +403,13 @@ For a **lower level description**, we will use **Fig 7** as an illustration
 
 2. **Timestep $$t_2$$**:
    * At the **second timestep $$t_2$$**, the **hidden state $$h_1$$** and the **second input $$x_2$$** will be **given as input**, to the **next RNN cell in the layer**, and the **hidden state $$h_2$$** will be computed using these inputs and the formula above.
-   * This is **repeated over multiple RNN cells** until either the **entire sequence has been processed**, or the **maximum sequence length is reached**.
+
+3. **Timestep $$t_n$$**:
+   * This process is **repeated using the same RNN cell type** until either the **entire sequence has been processed**, or the **maximum sequence length is reached**.
   
-3. **Single vs Stacked RNN Layers**
+4. **Single vs Stacked Encoder RNN Layers**
    * Typically, the encoder can be a **single layer**, or have **multiple, stacked layers**:
-   * In a **single layer**, there is **one RNN cell type (e.g. **LSTM**), that is **reused across all time steps**. The hidden state is **passed from one time step to the next** within this single layer.
+   * In a **single layer**, there is **one RNN cell type (e.g. LSTM)**, that is **reused across all time steps**. The hidden state is **passed from one time step to the next** within this single layer.
    * **Stacked RNN layers** however on the other hand involves stacking **mulitple RNN layers vertically** (i.e. in the **depth dimension**), to allow the model to **learn more complex representations**.
       * In stacked layers, **each layer processes the entire input sequence**, but they **operate on the output of the layer below them**.
       * Using the **"I am a student"** example, a **2-layer stacked RNN encoder** would look like:
@@ -426,19 +428,80 @@ Time Step 2: H1_2 → H2_2
 Time Step 3: H1_3 → H2_3
 Time Step 4: H1_4 → H2_4
 ```
-   * **Layer 1 (Bottom Layer)** processes each word sequentially, updating its hidden state at each time step.
-   * **Layer 2 (Top Layer)** takes the hidden states from Layer 1 as its inputs at each time step and updates its own hidden states accordingly.
-   * **Final Hidden State**: The hidden state from Layer 2 at the last time step **(H2_4)** serves as the **context vector for the decoder**.
+   1. **Layer 1 (Bottom Layer)**:
+      * Processes each word **sequentially**, updating its hidden state at **each time step**.
+   2. **Layer 2 (Top Layer)**:
+      * Takes the **hidden states from layer 1** as its **inputs at each time step** and **updates its own hidden states accordingly**.
+   3. **Final Hidden State**:
+      * The **hidden state from layer 2 at the last time step (H2_4)** serves as the **context vector for the decoder**.
 
 **Encoder Vector**
 * This is the **final hidden state** produced from the **encoder layer** using the above formula.
 * This **hidden state vector** aims to **encapsulate the information for all input elements** in order to help the **decoder make accurate predictions**.
-* The encoder vector acts as the **initial hidden state of the decoder**.
+* The encoder vector acts as the **initial hidden state of the decoder**. <sup>9</sup>
 
 **Decoder**
 * The decoder generates the output sequence by **predicting the next output $$y_t$$**, give the **hidden state $$h_t$$**.
 * The **initial input** for the decoder is the **final hidden vector of the encoder**.
-* At **each time step**, there will be **three inputs**, the **hidden state from the previous timestep $$h_{t-1}$$**, the **output from the previous timestep $$y_{t-1}$$**, and the **original hidden vector $$h$$**.
+* At **each time step**, there will be **three inputs**, the **hidden state from the previous timestep $$h_{t-1}$$**, the **output from the previous timestep $$y_{t-1}$$**, and the **original hidden vector $$h$$ (i.e. the final hidden state of the encoder)**: <sup>9</sup>
+
+1. **Timestep $$t_1$$**:
+   * At the **first timestep $$t_1$$**, the **inputs** are an **empty hidden state $$h_{t-1}$$**, a **start token e.g. (`<START>`)**, and the **final hidden state of the encoder**.
+   * The **outputs** are the **first token prediction $$y_1$$**, and **hidden state $$h_1$$**.
+  
+2. **Timestep $$t_2$$**:
+   * At the **second timestep $$t_2$$**, the **inputs** are the **previous timestep hidden state $$h_{t-1}$$**, the **previous timestep output $$y_{t-1}$$**, and the **final hidden state of the encoder**.
+   * The **outputs** are the **second token prediction $$y_2$$**, and **hidden state $$h_2$$**.
+  
+3. **Timestep $$t_n$$**:
+   * This process is **repeated using the same RNN cell type** until either the **end token (e.g. `<END>`) is reached**, or the **maximum sequence length is reached**.
+  
+4. **Single vs Stacked Decoder RNN Layers**
+   * Typically, the decoder can be a **single layer**, or have **multiple, stacked layers**:
+   * In a **single layer**, there is **one RNN cell type (e.g. LSTM)**, that is **reused across all time steps**. The hidden state is **passed from one time step to the next** within this single layer.
+   * **Stacked RNN layers** however on the other hand involves stacking **mulitple RNN layers vertically** (i.e. in the **depth dimension**), to allow the model to **learn more complex representations**.
+      * In stacked layers, **each layer processes the entire input sequence**, but they **operate on the output of the layer below them**.
+      * Using the **"I am a student"** example, a **2-layer stacked RNN decoder** that **predicts the French translation** of the sentence would look like:
+```
+Decoder:
+
+Layer 1 (Bottom Layer):
+Time Step 1: <SOS>  → H1_1
+Time Step 2: "Je"   → H1_2
+Time Step 3: "suis" → H1_3
+Time Step 4: "étudiant" → H1_4
+Time Step 5: <EOS>  → H1_5
+
+Layer 2 (Top Layer):
+Time Step 1: H1_1 → H2_1
+Time Step 2: H1_2 → H2_2
+Time Step 3: H1_3 → H2_3
+Time Step 4: H1_4 → H2_4
+Time Step 5: H1_5 → H2_5
+
+Output:
+Time Step 1: H2_1 → "Je"
+Time Step 2: H2_2 → "suis"
+Time Step 3: H2_3 → "étudiant"
+Time Step 4: H2_4 → <EOS>
+```
+   1. **Layer 1 (Bottom Layer)**:
+      * **Sequentially processes each input token**, updating its hidden states at each timestep
+   2. **Layer 2 (Top Layer)**:
+      * Takes the **hidden states from layer 1** at **each corresponding timestep** to update **its own hidden state**.
+   3. **Output Layer**
+      * The output generation at each time step **relies solely on the top layer's hidden state**.
+     
+**Output Layer**
+* **Encoder-Decoder architecture** typically uses a **Softmax activation function** at the **output layer**.
+* This is used to **produce the probability distribution** from a **vector of values**.
+* The **output $$y_t$$** at **timestep $$t$$** is computed using the **hidden state at that timestep** together with the **respective weight $$W^S$$** using the formula:
+
+$$
+   y_t = \text{Softmax}(W^Sh_t)
+$$
+
+* Softmax is used to **create a probability vector** that will help in **determining the final output** (e.g. the **translated word**).
 
 ## 2.5 References
 **[1]** Saigiridharan, L. et al. (2024) ‘AiZynthFinder 4.0: Developments based on learnings from 3 years of industrial application’, Journal of Cheminformatics, 16(1). <br><br>
@@ -449,4 +512,4 @@ Time Step 4: H1_4 → H2_4
 **[6]** Ibm (2024) What is a neural network?, IBM. Available at: https://www.ibm.com/topics/neural-networks (Accessed: 30 September 2024). <br><br>
 **[7]** Stryker, C.S. (2024) What is a recurrent neural network (RNN)?, IBM. Available at: https://www.ibm.com/topics/recurrent-neural-networks (Accessed: 12 October 2024). <br><br>
 **[8]** Goodfellow, I., Bendigo, Y. and Courville, A. (2016) Deep learning Ian Goodfellow, Yoshua Bengio, Aaron Courville. Cambridge ; Massachusetts ; London: MIT Press. <br><br>
-**[9]** 
+**[9]** Encoders-decoders, sequence to sequence architecture. (2024) Medium. Available at: https://medium.com/analytics-vidhya/encoders-decoders-sequence-to-sequence-architecture-5644efbb3392 (Accessed: 03 November 2024). 
