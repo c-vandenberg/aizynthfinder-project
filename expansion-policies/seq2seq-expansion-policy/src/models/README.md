@@ -627,16 +627,26 @@ Within this method, the **`Dataloader` class is initialised** by passing in rele
 
 Within the same `Trainer.initialize_components()` method, the **`Dataloader.load_and_prepare_data()` method is then called**. This method **orchestrates the entire data preparation pipeline**, including:
 1. **Loading Raw Data**:
-   * **Train and Test Data**
-     * **`products_file`**: Contains SMILES strings of product molecules (input sequences).
-     * **`reactants_file`**: Contains SMILES strings of corresponding reactant molecules (output sequences).
-  * **Validation Data**
-    * **`products_valid_file`**: Contains SMILES strings for validation.
-    * **`reactants_valid_file`**: Contains corresponding reactant SMILES strings for validation.
-    * Validation is carried out at the **end of each epoch**.
-  * Additional logic is present to **limit the number of samples** if specified, and to **ensure product and reactant data sets are of equal length**.
+    * **Train and Test Data**
+      * **`products_file`**: Contains SMILES strings of product molecules (input sequences).
+      * **`reactants_file`**: Contains SMILES strings of corresponding reactant molecules (output sequences).
+    * **Validation Data**
+      * **`products_valid_file`**: Contains SMILES strings for validation.
+      * **`reactants_valid_file`**: Contains corresponding reactant SMILES strings for validation.
+      * Validation is carried out at the **end of each epoch**.
+    * Additional logic is present to **limit the number of samples** if specified, and to **ensure product and reactant data sets are of equal length**.
 2. **Data Tokenization**:
-  * 
+    * **SMILES Tokenizer Initialisation**
+      * Initialise a custom `SmilesTokenizer` class that handles the tokenization of SMILES strings
+      * Default special tokens include **`<START>`**, denoting the **beginning of a sequence**, **`<END>`**, denoting the **end of a sequence**, and **`''`**, representing an **out-of-vocabulary token**.
+    * **Tokenization Process**
+      * For **input sequences (products)**, optionally **reverse the sequence** (commonly used to **improve performance of LSTM layers**), and add `<START>` and `<END>` tokens to each sequence.
+      * For **output sequences (products)**, **do not reverse the sequence**, and add `<START>` and `<END>` tokens to each sequence.
+    * **Vocabulary Building**
+      * The `SmilesTokenizer` has a **Tensorflow `TextVectorization` layer** which is **adapted to the combined tokenized training data (products and reactants) to build the vocabulary**.
+      * This ensures that **all tokens in the training data** are **recognised by the tokenizer**.
+      * The `TextVectorization` layer is **not adapted to either the testing or validation data** to **prevent data leakage**.
+      * This is not an issue for the testing data as it **comes from the same sourec as the training data**, but **additional steps** are carried out to **ensure the validation data does not contain tokens that aren't present in the training data**.
 
 ### iii. Training Environment Setup
 
