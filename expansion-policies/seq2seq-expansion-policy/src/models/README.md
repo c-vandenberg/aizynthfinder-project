@@ -615,7 +615,7 @@ The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\rig
 
 ### i. Configuration and Hyperparameter Loading
 
-The training pipeline starts with the **initialisation of the `Trainer` class**. 
+The training pipeline starts with the **initialisation of the `Trainer` class** in the `training.py` script. 
 
 During initialisation, the training environment configuration and model hyperparameters are loaded from a **YAML file** via the **`Trainer.load_config()` method**, which is invoked in the **class constructor**. This data is stored in the `Trainer` class **`config` instance attribute**.
 
@@ -675,6 +675,20 @@ Within the same `Trainer.initialize_components()` method, the **`Dataloader.load
       * Utilise **`tf.data.Dataset.prefetch(tf.data.AUTOTUNE)`** to **prefetch data for optimised performance**. This enables TensorFlow to **prepare data for the next training step** while the **current step is still executing**.
 
 ### iii. Training Environment Setup
+
+Once the `Trainer` class has been initialised, the `Trainer.run()` method is invoked in the `training.py` script. 
+
+This is the **entry point into the model training pipeline** and calls the following **`Trainer` class methods**:
+1. **`TrainingEnvironment.setup_environment(Trainer.config)`**
+2. **`Trainer.setup_model()`**
+3. **`Trainer.build_model()`**
+4. **`Trainer.setup_callbacks()`**
+5. **`Trainer.train()`**
+6. **`Trainer.model.summary()`**
+7. **`Trainer.save_model()`**
+8. **`Trainer.evaluate()`**
+
+The `TrainingEnvironment.setup_environment()` method is used to **set up the training environment for deterministic (reproducible) training**. This is discussed in detail in [Section 5.3.1](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#531-deterministic-training-environment).
 
 ### iv. Model Initialisation and Compilation
 
