@@ -659,6 +659,20 @@ Within the same `Trainer.initialize_components()` method, the **`Dataloader.load
       * **Decoder Input**: Padded sequences of reactant SMILES tokens **shifted by one position to the right**.
       * **Decoder Target**: Actual reactant SMILES tokens used for **calculating loss** and for **teacher forcing**.
       * By **shifting the decoder input** compared to the **decoder target**, we **facilitate teacher forcing** by **providing the correct previous token (from the ground truth) as input**. This allows the model to **focus on learning the mapping from the current input to the next token**.
+4. **Data Splitting** - Split the data into **training, validation, and test data sets**
+    * **Train and Test Split**
+      * Use **scikit-learn's `train_test_split()` method** to divide the data into training and test data sets based on the specified **`test_size`** from the **configuration YAML file**.
+      * Ensure that the **splitting is random** but **reproducible** by passing a **`random_state`** parameter to `train_test_split()`.
+    * **Validatino Data Set**
+      * The validation files have **already been split** prior to the training pipeline.
+5. **TensorFlow Dataset Creation** - Create **TensorFlow datasets** for **efficient data loading** during training.
+    * **Dataset Construction**
+      * Convert the **preprocessed data** into **`tf.data.Dataset`** objects.
+      * **Pair encoder and decoder inputs** with **decoder targets**.
+    * **Shuffling and Batching**
+      * Shuffle the training dataset to **ensure randomisation**.
+      * **Batch the data sets** with a specified **`batch_size`** from the **configuration YAML file**.
+      * Utilise **`tf.data.Dataset.prefetch(tf.data.AUTOTUNE)`** to **prefetch data for optimised performance**. This enables TensorFlow to **prepare data for the next training step** while the **current step is still executing**.
 
 ### iii. Training Environment Setup
 
