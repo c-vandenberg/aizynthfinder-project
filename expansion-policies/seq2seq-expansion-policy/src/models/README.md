@@ -746,6 +746,12 @@ Once the **data sets have been tokenized, preprocessed and prepared**, and the *
 
 ### vii. Model Saving
 
+Before the model is **evaluated with the test data**, it is **saved** using the **`Trainer.save_model()`** method. This method utilises **utility functions** to save the model in the following formats:
+1. **Keras Format (.keras)**: Save model TensorFlow's **native Keras format**.
+2. **HDF5 Format (.h5)**: Save **weights and architecture** in **HDF5 format for compatibility**.
+3. **ONNX Format (.onnx)**: Export the model to **ONNX format** for **interoperability with other frameworks**.
+4. **SavedModel Format**: Save the model in TensorFlow's historic **SavedModel format**.
+
 ### viii. Model Evaluation
 
 ### 5.4.2 TensorFlow Graph
