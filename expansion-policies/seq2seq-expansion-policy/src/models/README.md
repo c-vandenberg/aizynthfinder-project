@@ -737,6 +737,13 @@ The **`Trainer.setup_callbacks()` method** is used to **configure the various ca
 
 ### vi. Model Training
 
+Once the **data sets have been tokenized, preprocessed and prepared**, and the **model initialised and compiled**, the model is trained via the **`Trainer.train()` method.
+* **Training Procedure**:
+  * The procedure uses the `tf.keras.Model.fit()` method with the **training and validation data sets** passed as arguments, along with the **callbacks**.
+  * Additionally, the **number of epochs** is given as specified in the **configuration YAML file**.
+* **Progress Monitoring**:
+  * Both **training and validation accuracy, loss and metrics** are monitored, and the **callbacks** are used to **adjust training dynamically**.
+
 ### vii. Model Saving
 
 ### viii. Model Evaluation
