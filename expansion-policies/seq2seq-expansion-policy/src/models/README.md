@@ -602,11 +602,22 @@ The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\rig
 
 ## 5.4 Model Documentation
 
-### 5.4.1 TensorFlow Graph
+### 5.4.1 Training Pipeline
 
-### 5.4.2 Results and Discussion
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/61bd29c1-9792-406b-95b7-a0824ac41072", alt="seq2seq-model-train-pipeline"/>
+    <p>
+      <b>Fig 9</b> Retrosynthesis seq2seq model training pipeline.
+    </p>
+  </div>
+<br>
 
-### 5.4.3 Debugging
+### 5.4.2 TensorFlow Graph
+
+### 5.4.3 Results and Discussion
+
+### 5.4.4 Debugging
 
 ### i. Data Tokenization and Preprocessing Debugging
 1. **Analyse Data Set Token Frequency Distribution**:
