@@ -725,13 +725,15 @@ The **`Trainer.setup_model()`** method **orchestrates the initialisation and com
     * Use core metrics specified in the **configuration YAML file** such as `accuracy`.
     * Use a custom **`Perplexity`** metric based on the **loss function**.
 
-The **`Trainer.build_model()`** method is used to **initialise the model's weights and variables** by **running a sample input through the model**. 
+The **`Trainer.build_model()` method** is used to **initialise the model's weights and variables** by **running a sample input through the model**. 
   * When using **subclassed models**, the model's variables and weights are **not fully initialised until the model is called on some input data**.
   * This is because the **shapes and structures of the internal variables depend on the input data's shape**.
 
 Therefore by **running a sample input through the model**, all of the **weights and variables are initialised** and the **computational graph is set up**, ensuring the model is **fully built and ready for training**.
 
 ### v. Callbacks Setup
+
+The **`Trainer.setup_callbacks()` method** is used to **configure the various callbacks** specified in [**Section 5.3.4**](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#534-callbacks-optimisation).
 
 ### vi. Model Training
 
