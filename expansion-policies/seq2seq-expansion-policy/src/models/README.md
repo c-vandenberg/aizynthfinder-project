@@ -4,7 +4,7 @@
 
 The training, validation, and testing data for developing the seq2seq model in this project were derived from the *Liu et al.* model codebase. **<sup>1</sup>**
 
-These data sets had already been processed as per the process described in [**4.2.1**](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#421-data-preparation), and split into:
+These data sets had already been processed as per the process described in [**Section 4.2.1**](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#421-data-preparation), and split into:
 1. **Train sources** (products)
 2. **Train targets** (reactants)
 3. **Validation sources** (products)
@@ -688,9 +688,32 @@ This is the **entry point into the model training pipeline** and calls the follo
 7. **`Trainer.save_model()`**
 8. **`Trainer.evaluate()`**
 
-The `TrainingEnvironment.setup_environment()` method is used to **set up the training environment for deterministic (reproducible) training**. This is discussed in detail in [Section 5.3.1](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#531-deterministic-training-environment).
+The `TrainingEnvironment.setup_environment()` method is used to **set up the training environment for deterministic (reproducible) training**. This is discussed in detail in [**Section 5.3.1**](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#531-deterministic-training-environment).
 
 ### iv. Model Initialisation and Compilation
+
+The **`Trainer.setup_model()`** method **orchestrates the initialisation and compilation** of the seq2seq model via:
+1. **Model Initialisation** - Set up the Seq2Seq model encoder-decoder architecture with attention mechanisms.
+  * **Model Architecture**
+    * **Encoder**:
+      * **Embedding layer** to **map each encoder input token** to a **dense embedding vectors** of a **fixed size (`encoder_embedding_dim`)**.
+      * **LSTM recurrent neural network** to process the encoder input sequence.
+      * Configurable **embedding dimension** and **number of layers and units**.
+    * **Decoder**:
+      * **Embedding layer** to **map each decoder input token** to a **dense embedding vectors** of a **fixed size (`decoder_embedding_dim`)**.
+      * **LSTM recurrent neural network** with **attention mechanism** to process the decoder input sequence.
+      * Configurable **embedding dimension**and **number of layers and units**.
+    * **Attention Mechanism**:
+      * Allows the decoder to **focus on different parts of the input sequence** at **each decoding step**.
+      * Configurable **number of units**
+  * **Hyperparameters**
+    * **`encoder_embedding_dim`**: Dimension of the encoder's embedding layer.
+    * **`decoder_embedding_dim`**: Dimension of the decoder's embedding layer.
+    * **`units`**: Number of **units/neurons** in the **LSTM layers**.
+    * **`attention_dim`**: Dimension of the attention layer (**number of units/neurons**).
+    * **`encoder_num_layers`** and **`decoder_num_layers`**: Number of **encoder and decoder layers** respectively.
+    * **`dropout_rate`**: Rate for **dropout regularization**.
+    * **`weight_decay`**: Optional **weight decay for regularization**.
 
 ### v. Callbacks Setup
 
