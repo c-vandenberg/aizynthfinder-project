@@ -692,28 +692,44 @@ The `TrainingEnvironment.setup_environment()` method is used to **set up the tra
 
 ### iv. Model Initialisation and Compilation
 
-The **`Trainer.setup_model()`** method **orchestrates the initialisation and compilation** of the seq2seq model via:
+The **`Trainer.setup_model()`** method **orchestrates the initialisation and compilation** of the Seq2Seq model via:
 1. **Model Initialisation** - Set up the Seq2Seq model encoder-decoder architecture with attention mechanisms.
-  * **Model Architecture**
-    * **Encoder**:
-      * **Embedding layer** to **map each encoder input token** to a **dense embedding vectors** of a **fixed size (`encoder_embedding_dim`)**.
-      * **LSTM recurrent neural network** to process the encoder input sequence.
-      * Configurable **embedding dimension** and **number of layers and units**.
-    * **Decoder**:
-      * **Embedding layer** to **map each decoder input token** to a **dense embedding vectors** of a **fixed size (`decoder_embedding_dim`)**.
-      * **LSTM recurrent neural network** with **attention mechanism** to process the decoder input sequence.
-      * Configurable **embedding dimension**and **number of layers and units**.
-    * **Attention Mechanism**:
-      * Allows the decoder to **focus on different parts of the input sequence** at **each decoding step**.
-      * Configurable **number of units**
-  * **Hyperparameters**
-    * **`encoder_embedding_dim`**: Dimension of the encoder's embedding layer.
-    * **`decoder_embedding_dim`**: Dimension of the decoder's embedding layer.
-    * **`units`**: Number of **units/neurons** in the **LSTM layers**.
-    * **`attention_dim`**: Dimension of the attention layer (**number of units/neurons**).
-    * **`encoder_num_layers`** and **`decoder_num_layers`**: Number of **encoder and decoder layers** respectively.
-    * **`dropout_rate`**: Rate for **dropout regularization**.
-    * **`weight_decay`**: Optional **weight decay for regularization**.
+    * **Model Architecture**
+      * **Encoder**:
+        * **Embedding layer** to **map each encoder input token** to a **dense embedding vectors** of a **fixed size (`encoder_embedding_dim`)**.
+        * **LSTM recurrent neural network** to process the encoder input sequence.
+        * Configurable **embedding dimension** and **number of layers and units**.
+      * **Decoder**:
+        * **Embedding layer** to **map each decoder input token** to a **dense embedding vectors** of a **fixed size (`decoder_embedding_dim`)**.
+        * **LSTM recurrent neural network** with **attention mechanism** to process the decoder input sequence.
+        * Configurable **embedding dimension**and **number of layers and units**.
+      * **Attention Mechanism**:
+        * Allows the decoder to **focus on different parts of the input sequence** at **each decoding step**.
+        * Configurable **number of units**
+    * **Hyperparameters**
+      * **`encoder_embedding_dim`**: Dimension of the encoder's embedding layer.
+      * **`decoder_embedding_dim`**: Dimension of the decoder's embedding layer.
+      * **`units`**: Number of **units/neurons** in the **LSTM layers**.
+      * **`attention_dim`**: Dimension of the attention layer (**number of units/neurons**).
+      * **`encoder_num_layers`** and **`decoder_num_layers`**: Number of **encoder and decoder layers** respectively.
+      * **`dropout_rate`**: Rate for **dropout regularization**.
+      * **`weight_decay`**: Optional **weight decay for regularization**.
+2. **Model Compliation** - Compile the Seq2Seq model with the **appropriate optimiser, loss function, and metrics**.
+  * **Optimiser**
+    * Use the **`Adam` optimiser** with a specified **`learning_rate` from the **configuration YAML file**.
+    * Set **`clipnorm`** to **prevent gradient explosion**.
+  * **Loss Function**
+    * Use core **`tf.keras.losses.SparseCategoricalCrossentropy()` loss function**.
+    * Ensure that **padded elements in the sequences** are **not taken into account in loss calculation**.
+  * **Metrics**
+    * Use core metrics specified in the **configuration YAML file** such as `accuracy`.
+    * Use a custom **`Perplexity`** metric based on the **loss function**.
+
+The **`Trainer.build_model()`** method is used to **initialise the model's weights and variables** by **running a sample input through the model**. 
+  * When using **subclassed models**, the model's variables and weights are **not fully initialised until the model is called on some input data**.
+  * This is because the **shapes and structures of the internal variables depend on the input data's shape**.
+
+Therefore by **running a sample input through the model**, all of the **weights and variables are initialised** and the **computational graph is set up**, ensuring the model is **fully built and ready for training**.
 
 ### v. Callbacks Setup
 
