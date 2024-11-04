@@ -626,7 +626,7 @@ Another method that is **invoked in the `Trainer` class constructor**, is the **
 Within this method, the **`Dataloader` class is initialised** by passing in relevant data from the **`config` instance attribute** to the **constructor of the `Dataloader` class**. Once initialised, the `Dataloader` instance is stored in the `Trainer` class **`data_loader` instance attribute**.
 
 Within the same `Trainer.initialize_components()` method, the **`Dataloader.load_and_prepare_data()` method is then called**. This method **orchestrates the entire data preparation pipeline**, including:
-1. **Loading Raw Data**:
+1. **Loading Raw Data** - Load **product and reactant SMILES sequences** from the specified data files.
     * **Train and Test Data**
       * **`products_file`**: Contains SMILES strings of product molecules (input sequences).
       * **`reactants_file`**: Contains SMILES strings of corresponding reactant molecules (output sequences).
@@ -635,7 +635,7 @@ Within the same `Trainer.initialize_components()` method, the **`Dataloader.load
       * **`reactants_valid_file`**: Contains corresponding reactant SMILES strings for validation.
       * Validation is carried out at the **end of each epoch**.
     * Additional logic is present to **limit the number of samples** if specified, and to **ensure product and reactant data sets are of equal length**.
-2. **Data Tokenization**:
+2. **Data Tokenization** - Converting SMILES strings into **tokenized sequences** suitable for **neural network input**.
     * **SMILES Tokenizer Initialisation**
       * Initialise a custom `SmilesTokenizer` class that handles the tokenization of SMILES strings
       * Default special tokens include **`<START>`**, denoting the **beginning of a sequence**, **`<END>`**, denoting the **end of a sequence**, and **`''`**, representing an **out-of-vocabulary token**.
@@ -647,6 +647,18 @@ Within the same `Trainer.initialize_components()` method, the **`Dataloader.load
       * This ensures that **all tokens in the training data** are **recognised by the tokenizer**.
       * The `TextVectorization` layer is **not adapted to either the testing or validation data** to **prevent data leakage**.
       * This is not an issue for the testing data as it **comes from the same sourec as the training data**, but **additional steps** are carried out to **ensure the validation data does not contain tokens that aren't present in the training data**.
+3. **Data Preprocessing** - Convert tokenized SMILES strings into **padded sequences of integers** and **prepare input-output pairs**.
+    * **Sequence Conversion**
+      * Use the tokenizer to **convert tokenized SMILES strings** into **sequences of integer tokens**.
+      * **Map each token** to its **corresponding index in the vocabulary**.
+    * **Padding and Truncation**
+      * **Pad sequences** to a **fixed maximum length** (`max_seq_length`) for **uniformity**.
+      * **Truncate sequences** longer than the maximum length.
+    * **Input-Output Pair Preparation**
+      * **Encoder Input**: Padded sequences of product SMILES tokens.
+      * **Decoder Input**: Padded sequences of reactant SMILES tokens **shifted by one position to the right**.
+      * **Decoder Target**: Actual reactant SMILES tokens used for **calculating loss** and for **teacher forcing**.
+      * By **shifting the decoder input** compared to the **decoder target**, we **facilitate teacher forcing** by **providing the correct previous token (from the ground truth) as input**. This allows the model to **focus on learning the mapping from the current input to the next token**.
 
 ### iii. Training Environment Setup
 
