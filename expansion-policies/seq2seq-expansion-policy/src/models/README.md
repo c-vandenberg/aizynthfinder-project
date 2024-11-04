@@ -606,12 +606,49 @@ The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\rig
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/61bd29c1-9792-406b-95b7-a0824ac41072", alt="seq2seq-model-train-pipeline"/>
+    <img src="https://github.com/user-attachments/assets/9bbf0643-76d8-4d9d-a080-60025852a4da", alt="seq2seq-model-train-pipeline"/>
     <p>
       <b>Fig 9</b> Retrosynthesis seq2seq model training pipeline.
     </p>
   </div>
 <br>
+
+### i. Configuration and Hyperparameter Loading
+
+The training pipeline starts with the **initialisation of the `Trainer` class**. 
+
+During initialisation, the training environment configuration and model hyperparameters are loaded from a **YAML file** via the **`Trainer.load_config()` method**, which is invoked in the **class constructor**. This data is stored in the `Trainer` class **`config` instance attribute**.
+
+### ii. Data Loading, Tokenization, Preprocessing and Splitting
+
+Another method that is **invoked in the `Trainer` class constructor**, is the **`Trainer.initialize_components()` method**. 
+
+Within this method, the **`Dataloader` class is initialised** by passing in relevant data from the **`config` instance attribute** to the **constructor of the `Dataloader` class**. Once initialised, the `Dataloader` instance is stored in the `Trainer` class **`data_loader` instance attribute**.
+
+Within the same `Trainer.initialize_components()` method, the **`Dataloader.load_and_prepare_data()` method is then called**. This method **orchestrates the entire data preparation pipeline**, including:
+1. **Loading Raw Data**:
+   * **Train and Test Data**
+     * **`products_file`**: Contains SMILES strings of product molecules (input sequences).
+     * **`reactants_file`**: Contains SMILES strings of corresponding reactant molecules (output sequences).
+  * **Validation Data**
+    * **`products_valid_file`**: Contains SMILES strings for validation.
+    * **`reactants_valid_file`**: Contains corresponding reactant SMILES strings for validation.
+    * Validation is carried out at the **end of each epoch**.
+  * Additional logic is present to **limit the number of samples** if specified, and to **ensure product and reactant data sets are of equal length**.
+2. **Data Tokenization**:
+  * 
+
+### iii. Training Environment Setup
+
+### iv. Model Initialisation and Compilation
+
+### v. Callbacks Setup
+
+### vi. Model Training
+
+### vii. Model Saving
+
+### viii. Model Evaluation
 
 ### 5.4.2 TensorFlow Graph
 
