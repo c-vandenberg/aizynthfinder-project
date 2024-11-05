@@ -765,6 +765,8 @@ The **final step** in the model training pipeline is to use the **`Trainer.evalu
 
 ### 5.4.2 Model Architecture ONNX Graph
 
+The **flow of data** through the model's **encoder-decoder architecture** is shown in **Fig 10**.
+
 <br>
   <div align="center">
     <a href="https://github.com/user-attachments/assets/94d3b08d-f39e-411a-b0cd-37d5f91a51e5" target="_blank">
@@ -775,6 +777,45 @@ The **final step** in the model training pipeline is to use the **`Trainer.evalu
     </p>
   </div>
 <br>
+
+### i. Flow of Data Through Encoder
+1. **Input Processing**
+    * **Input:** Sequences of **token indices** (**`encoder_input`**) with **shape `(batch_size, sequence_length)`**.
+    * **Validation:** Checks that **`encoder_input`** is **not `None`** and is a **2D tensor**.
+2. **Embedding Layer**
+    * **Operation:** Converts/maps **input tokens to embeddings**.
+    * **Output:** Outputs **`encoder_output`** with **shape (`batch_size, sequence_length, encoder_embedding_dim`)**
+    * **Mask**: A mask (**`encoder_mask`**) is generated to **identify padding tokens**.
+3. **Initialisation**
+    * **Residual Connections**: Initialise **`previous_output`** with **`encoder_output`** for residual connections later.
+    * **Forward & Backward State Concatenation:** Initialise **final hidden state** (**`final_state_h`**) and **final cell state** (**`final_state_h`**) variables as **`None`** for later **concatenation of forward and backward hidden and cell states**.
+4. **Stacked Bidirectional LSTM Layers Loop - For each layer (`i` from 0 to `num_layers - 1`)**
+    * **Bidirectional LSTM Layer**
+      * **Input:** The **`encoder_input`** from the **previous layer**
+      * **Outputs:**
+        * **Encoder Output:** The **updated sequence representations** (**`encoder_output`**).
+          * **Shape:** **`(batch_size, sequence_length, units * 2)`**.
+        * **Hidden States:** The **forward and backwards hidden states** (**`forward_h, backward_h`**).
+          * **Shape:** **`(batch_size, units)`**.
+        * **Cell States:** The **forward and backwards cell states** (**`forward_c, backward_c`**).
+          * **Shape:** **`(batch_size, units)`**.
+    * **Concatenate Hidden and Cell States**
+      * **Forward & Backward Hidden States:** The `[forward_h, backward_h]`** variables are **concatenated along the last axis** to give the updated **`final_state_h`**.
+        * **Shape:** **`(batch_size, units * 2)`**.
+      * **Forward & Backward Cell States:** The `[forward_c, backward_c]`** variables are **concatenated along the last axis** to give the updated **`final_state_c`**.
+        * **Shape:** **`(batch_size, units * 2)`**.
+    * **Layer Normalisation**
+      * Apply a **`tensorflow.keras.layers.LayerNormalization` layer** to **`encoder_output`**.
+    * **Residual Connections**
+      * For **layers beyond the first layer (`i > 0`)**, add **`previous_output`** to **`encoder_output`** for **residual connections between layers**.
+    * **Dropout**
+      * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`encoder_output`**.
+    * **Update `previous_output`**
+      * Set **`previous_output`** to **current `encoder_output`** for **use in the next layer**.
+4. **Final Outputs:**
+  * **`encoder_output`:** The **final sequence representations** after all layers.
+  * **`final_state_h`:** The **last hidden states concatenated** from the **forward and backward directions**.
+  * **`final_state_c`:** The **last cell states concatenated** from the **forward and backward directions**. 
 
 ### 5.4.3 Results and Discussion
 
