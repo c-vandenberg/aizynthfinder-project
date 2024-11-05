@@ -642,6 +642,7 @@ Within the same `Trainer.initialize_components()` method, the **`Dataloader.load
       * Initialise a custom `SmilesTokenizer` class that handles the tokenization of SMILES strings
       * Default special tokens include **`<START>`**, denoting the **beginning of a sequence**, **`<END>`**, denoting the **end of a sequence**, and **`''`**, representing an **out-of-vocabulary token**.
     * **Tokenization Process**
+      * Tokenize sequences using **`deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer`** tokenizer.
       * For **input sequences (products)**, optionally **reverse the sequence** (commonly used to **improve performance of LSTM layers**), and add `<START>` and `<END>` tokens to each sequence.
       * For **output sequences (products)**, **do not reverse the sequence**, and add `<START>` and `<END>` tokens to each sequence.
     * **Vocabulary Building**
@@ -762,7 +763,7 @@ The **final step** in the model training pipeline is to use the **`Trainer.evalu
   * **Generate predictions** on the test data set using **beam search decoding** as the **inference method**.
   * Convert predicted token sequences **back to SMILES strings** and **compute same metrics as validation metrics** listed in [**Section 5.3.5**](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#535-metrics-optimisation).
 
-### 5.4.2 TensorFlow Graph
+### 5.4.2 Model Architecture ONNX Graph
 
 <br>
   <div align="center">
