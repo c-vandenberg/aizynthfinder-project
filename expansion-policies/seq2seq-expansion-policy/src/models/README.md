@@ -602,7 +602,9 @@ The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\rig
 
 ## 5.4 Model Documentation
 
-### 5.4.1 Training Pipeline
+### 5.4.1 Model Training Pipeline
+
+A **high-level overview** of the **main steps** in the model training pipeline is illustrated in **Fig 9**.
 
 <br>
   <div align="center">
@@ -737,22 +739,28 @@ The **`Trainer.setup_callbacks()` method** is used to **configure the various ca
 
 ### vi. Model Training
 
-Once the **data sets have been tokenized, preprocessed and prepared**, and the **model initialised and compiled**, the model is trained via the **`Trainer.train()` method.
+Once the **data sets have been tokenized, preprocessed and prepared**, and the **model initialised and compiled**, the model is trained via the **`Trainer.train()` method**.
 * **Training Procedure**:
-  * The procedure uses the `tf.keras.Model.fit()` method with the **training and validation data sets** passed as arguments, along with the **callbacks**.
+  * The procedure uses the **`tf.keras.Model.fit()` method** with the **training and validation data sets** passed as arguments, along with the **callbacks**.
   * Additionally, the **number of epochs** is given as specified in the **configuration YAML file**.
 * **Progress Monitoring**:
   * Both **training and validation accuracy, loss and metrics** are monitored, and the **callbacks** are used to **adjust training dynamically**.
 
 ### vii. Model Saving
 
-Before the model is **evaluated with the test data**, it is **saved** using the **`Trainer.save_model()`** method. This method utilises **utility functions** to save the model in the following formats:
+Before the model is **evaluated with the test data**, it is **saved** using the **`Trainer.save_model()` method**. This method utilises **utility functions** to save the model in the following formats:
 1. **Keras Format (.keras)**: Save model TensorFlow's **native Keras format**.
 2. **HDF5 Format (.h5)**: Save **weights and architecture** in **HDF5 format for compatibility**.
 3. **ONNX Format (.onnx)**: Export the model to **ONNX format** for **interoperability with other frameworks**.
 4. **SavedModel Format**: Save the model in TensorFlow's historic **SavedModel format**.
 
 ### viii. Model Evaluation
+
+The **final step** in the model training pipeline is to use the **`Trainer.evaluate()` method** to **evaluate the model on unseen (test) data**.
+* **Evaluation Procedure**:
+  * Use the **`tf.keras.Model.evaluate()` method** to compute **loss, accuracy and perplexity**.
+  * **Generate predictions** on the test data set using **beam search decoding** as the **inference method**.
+  * Convert predicted token sequences **back to SMILES strings** and **compute same metrics as validation metrics** listed in [**Section 5.3.5**](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#535-metrics-optimisation).
 
 ### 5.4.2 TensorFlow Graph
 
