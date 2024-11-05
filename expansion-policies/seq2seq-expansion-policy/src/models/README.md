@@ -764,6 +764,17 @@ The **final step** in the model training pipeline is to use the **`Trainer.evalu
 
 ### 5.4.2 TensorFlow Graph
 
+<br>
+  <div align="center">
+    <a href="https://github.com/user-attachments/assets/94d3b08d-f39e-411a-b0cd-37d5f91a51e5" target="_blank">
+      <img src="https://github.com/user-attachments/assets/94d3b08d-f39e-411a-b0cd-37d5f91a51e5", alt="retro_seq2seq_model_graph"/>
+    </a>
+    <p>
+      <b>Fig 10</b> Retrosynthesis Seq2Seq Model Graph. Encoder operations are in red, decoder operations are in blue, and attention mechanism operations are in green (click to expand view).
+    </p>
+  </div>
+<br>
+
 ### 5.4.3 Results and Discussion
 
 ### 5.4.4 Debugging
