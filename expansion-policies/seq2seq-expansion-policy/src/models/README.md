@@ -812,7 +812,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       * Set **`previous_output`** to **current `encoder_output`** for **use in the next layer**.
     * **Dropout**
       * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`encoder_output`**.
-4. **Encoder Final Outputs:**
+5. **Encoder Final Outputs:**
     * **`encoder_output`:** The **final sequence representations** after all layers.
     * **`final_state_h`:** The **last hidden states concatenated** from the **forward and backward directions**.
     * **`final_state_c`:** The **last cell states concatenated** from the **forward and backward directions**. 
@@ -850,26 +850,26 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
     * **Dropout**
       * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`decoder_output`**.
 5. **Attention Mechanism**
-  * **Compute Context Vector and Attention Weights**
-    * **Inputs:** **`encoder_outout`** and **`decoder_output`**.
-    * **Outputs:**
-      * **Context Vector:** Vector that represents the **relevant encoder outputs for each decoder time step** (**`context_vector`**).
-        * **Shape:** **`(batch_size, sequence_length_dec, enc_units)`**
-      * **Attention Weights:** The **alignment scores** (**`attention_weights`**).
-        * **Shape:** **`(batch_size, sequence_length_dec, sequence_length_enc)`**.
+    * **Compute Context Vector and Attention Weights**
+      * **Inputs:** **`encoder_outout`** and **`decoder_output`**.
+      * **Outputs:**
+        * **Context Vector:** Vector that represents the **relevant encoder outputs for each decoder time step** (**`context_vector`**).
+          * **Shape:** **`(batch_size, sequence_length_dec, enc_units)`**
+        * **Attention Weights:** The **alignment scores** (**`attention_weights`**).
+          * **Shape:** **`(batch_size, sequence_length_dec, sequence_length_enc)`**.
 6. **Residual Connections and Layer Normalisation Around Attention**
-  * **Projection Layers**
-    * **Dense Decoder Output**: Pass **`decoder_output`** through a **`tensorflow.keras.layers.Dense` layer (**`decoder_dense`**) to give **`decoder_transformed`**.
-    * **Dense Context Vector**: Pass **`context_vector`** through a **`tensorflow.keras.layers.Dense` layer (**`context_dense`**) to give **`context_transformed`**.
-  * **Addition for Residual Connection**
-    * Sum the **`decoder_transformed`** and **`context_transformed`** to give **`decoder_output`**.
-  * **Layer Normalisation and Activation**
-    * Apply a **`tensorflow.keras.layers.LayerNormalization` layer (`layer_norm_layer()`)**.
-    * Use **`tensorflow.nn.relu`** on **`decoder_output`** for **activation**.
+    * **Projection Layers**
+      * **Dense Decoder Output**: Pass **`decoder_output`** through a **`tensorflow.keras.layers.Dense` layer (**`decoder_dense`**) to give **`decoder_transformed`**.
+      * **Dense Context Vector**: Pass **`context_vector`** through a **`tensorflow.keras.layers.Dense` layer (**`context_dense`**) to give **`context_transformed`**.
+    * **Addition for Residual Connection**
+      * Sum the **`decoder_transformed`** and **`context_transformed`** to give **`decoder_output`**.
+    * **Layer Normalisation and Activation**
+      * Apply a **`tensorflow.keras.layers.LayerNormalization` layer (`layer_norm_layer()`)**.
+      * Use **`tensorflow.nn.relu`** on **`decoder_output`** for **activation**.
 7. **Decoder Output Layer**
-  * **Generate Output Probabilities**
-    * Pass **`decoder_output`** through the **final Dense layer** with **softmax activation** to give **final `decoder_output`**.
-      * **Shape:** **`(batch_size, sequence_length_dec, vocab_size)`**.
+    * **Generate Output Probabilities**
+      * Pass **`decoder_output`** through the **final Dense layer** with **softmax activation** to give **final `decoder_output`**.
+        * **Shape:** **`(batch_size, sequence_length_dec, vocab_size)`**.
 
 ### 5.4.3 Results and Discussion
 
