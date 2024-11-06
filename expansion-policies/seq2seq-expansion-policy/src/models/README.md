@@ -16,7 +16,7 @@ As the ultimate goal of this project is to **incorporate this model into AiZynth
 
 Additionally, the sources and target datasets were **combined** so that they could be **split before each training run**. This would allow us to **control the split ratio** during the model development process.
 
-## 5.2 Model Architecture
+## 5.2 Model Optimisation
 
 As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**). This model was **iteratively optimised** over the course of the research project.
 
@@ -29,9 +29,7 @@ As this project is to be an introduction to seq2seq models, the model architectu
   </div>
 <br>
 
-## 5.3 Model Optimisation
-
-### 5.3.1 Deterministic Training Environment
+### 5.2.1 Deterministic Training Environment
 
 **Determinism** when using machine learning frameworks is to have **exact reproducibility from run to run**, with a model's training run **yielding the same weights**, and a model's inference run **yielding the same prediction**. **<sup>3</sup>**
 
@@ -48,7 +46,7 @@ It is this asynchronous parallelism that can introduce random noise, and hence, 
 
 Setting up a custom deterministic training environment was used as an introduction to determinism in machine learning. Future models will use the [machine learning reproducibility framework package](https://github.com/NVIDIA/framework-reproducibility/tree/master) developed by NVIDIA.
 
-### 5.3.2 Data Tokenization and Preprocessing Optimisation
+### 5.2.2 Data Tokenization and Preprocessing Optimisation
 
 Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
 
@@ -73,7 +71,7 @@ Therefore, an alternative strategy was employed whereby the **list of tokenized 
 
 Analysis using the metrics described above showed that this new approach was vastly superior, with an **improvement of BLEU score to ~17%** even with **throttled hyperparameters**.
 
-### 5.3.3 Loss Function Optimisation
+### 5.2.3 Loss Function Optimisation
 
 ### i. Categorical Cross-Entropy vs Sparse Categorical Cross-Entropy
 When deciding on a loss function, both **Sparse Categorical Cross-Entropy** and **Categorical Cross-Entropy** were considered.
@@ -133,7 +131,7 @@ However, choosing the right weight decay **depends on various factors**, such as
 2. **Random Search**
 3. **Bayesian Optimisation**
 
-### 5.3.4 Callbacks Optimisation
+### 5.2.4 Callbacks Optimisation
 
 **Callbacks** are powerful tools in **TensorFlow's Keras API** that allow you to customize and control the training process of your models. They are **Python objects** with methods that are **executed during training at given stages of the training procedure**, allowing you to **execute specific actions** at various stages of training (e.g. at the **end of an epoch**, **after a batch**, or **before training begins**).
 
@@ -267,7 +265,7 @@ As of the **latest model version (V 21)**, the following validation metric analy
 2. **BleuScore**
 3. **SmilesStringMetrics**
 
-### 5.3.5 Metrics Optimisation
+### 5.2.5 Metrics Optimisation
 
 ### i. Perplexity
 
@@ -331,7 +329,7 @@ $$
    * This **sequential error quantification** is beneficial for tasks **requiring high precision**, such as **generating chemically valid SMILES strings**.
    * Additionally, Levenshtein distance gives **error type identification**. This helps in understanding whether the errors are primarily due to **insertions**, **deletions**, or **substitutions**, which can **inform model improvements**.
 
-### 5.3.6 Encoder Optimisation
+### 5.2.6 Encoder Optimisation
 
 Initial baseline model encoder architecture consisted of **2 bidirectional LSTM layers**, with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However the **attention, encoder and decoder embedding dimensions**, as well as the **units** were all decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
@@ -408,7 +406,7 @@ Normalising **across all features of each input removes the dependence on batche
   </div>
 <br>
 
-### 5.3.7 Decoder Optimisation
+### 5.2.7 Decoder Optimisation
 
 Initial baseline model decoder architecture consisted of **4 unidirectional LSTM layers** with hyperparameters matching those outlined by *Liu et al.* **<sup>1</sup>** (**Table 1**). However, **decoder embedding dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
@@ -460,7 +458,7 @@ By **applying layer normalisation around attention**, in theory, the model is ab
 3. **Enhancing Generalisation**:
    * **Normalised features tend to generalise better**, reducing overfitting and improving performance on unseen data.
 
-### 5.3.9 Inference Optimisation
+### 5.2.9 Inference Optimisation
 
 ### i. Greedy Decoding vs Beam Search
 
@@ -599,6 +597,77 @@ $$
 
 The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\right|T')$$**. This is **between the Big-O complexities of greedy search and exhaustive search**.
   * **N.B.**: Greedy search can be thought of as a **special case of beam search arising when the beam size is set to 1**.
+
+## 5.3 Model Architecture
+
+### 5.3.1 Optimised Encoder Architecture
+
+The encoder is a **custom TensorFlow Keras Layer** named **`StackedBidirectionalLSTMEncoder`**. The **bidirectional LSTM layers** are designed to **process input sequences** (**tokenized SMILES strings**), and convery them into **rich, context-aware representations** that capture **both past and future information** in the sequence.
+
+The **key components** of the encoder are:
+1. **Embedding Layer**
+2. **Masking Support**
+3. **Stacked Bidirectional LSTM Layers**
+4. **Layer Normalisation Layers**
+5. **Dropout Layers**
+6. **Residual Connections**
+7. **Weight Decay (L2 Regularisation)**
+
+### 1. Embedding Layer
+  * **Purpose:** Converts **input token indices** into **dense vector embeddings**.
+  * **Functionality:**
+    * The embedding layer **transforms/maps each token** in the input sequence into a **continuous vector space** of a **specified dimension (`encoder_embedding_dim`)**.
+    * Handles **padding tokens (`mask_zero=True`)** to prevent the model from considering them during training.
+  * **Output Shape:** **`(batch_size, sequence_length, encoder_embedding_dim)`**.
+
+### 2. Masking Support
+  * **Purpose:** Handles **variable-length sequences with padding**.
+  * **Functionality:**
+    * The **embedding layer generates a mask (`encoder_mask`)** that **identifies padding tokens**.
+    * The mask is **propagated through the LSTM layers** to **prevent the model from considering padded positions** during training.
+
+### 3. Stacked Bidirectional LSTM Layers
+  * **Purpose:** Captures **complex sequential dependencies** and **contextual information** from both **past (forward direction)** and **future (backward direction) tokens**.
+  * **Functionality:**
+    * Multiple **Bidirectional LSTM layers are stacked (`num_layers`)**, allowing the model to **learn hierarchical representations** of the input sequence.
+    * Each Bidirectional LSTM layer consists of **two LSTMs**:
+      * **Forward LSTM:** Processes the sequence from **start to end**.
+      * **Backward LSTM:** Processes the sequence from **end to start.**
+    * The outputs from both directions are **concatenated, doubling the number of units (`units * 2`)**.
+  * **Outputs:**
+    * **Encoder Output:** Sequence representations at **each time step**.
+      * **Shape:** **`(batch_size, sequence_length, units * 2)`**.
+    * **Final Hidden States (`final_state_h`):** Concatenated **forward and backward hidden states** from the last LSTM layer.
+      * **Shape:** **`(batch_size, units * 2)`**.
+    * **Final Cell States (`final_state_c`):** Concatenated **forward and backward cell states** from the last LSTM layer.
+      * **Shape:** **`(batch_size, units * 2)`**
+     
+### 4. Layer Normalisation Layers
+  * **Purpose:** Stabilizes and accelerates training by normalizing the outputs of each layer.
+  * **Functionality:**
+    * Applied **after each Bidirectional LSTM layer**.
+    * **Normalises the activations** to have **zero mean and unit variance**, independently for **each sample in a batch**.
+  * **Effect:** Reduces **internal covariate shift**, leading to **faster convergence**.
+     
+### 5. Dropout Layers
+  * **Purpose:** **Prevents overfitting** by **randomly deactivating a subset of neurons** during training.
+  * **Functionality:**
+    * Applied **after each Bidirectional LSTM layer** (after layer normalisation).
+    * The dropout rate is specified by the **`dropout_rate` hyperparameter** (default is **0.2**).
+  * **Effect:** Helps the model **generalise better** by **reducing reliance on specific neurons**.
+
+### 6. Residual Connections
+  * **Purpose:** Facilitates **better gradient flow** and **mitigates vanishing gradient issues** in deep networks.
+  * **Functionality:**
+    * From the **second LSTM layer onwards**, a residual connection **adds the output of the previous layer** to the **current layer's output**.
+    * This helps **preserve information from earlier layers**.
+  * **Effect:** Allows the model to **learn identity mappings**, improving training of **deeper networks**.
+
+### 7. Weight Decay (L2 Regularisation)
+  * **Purpose:** Adds **regularisation to prevent overfitting**.
+  * **Functionality:**
+    * **L2 regularisation (`weight_decay`)** is applied to the **kernel weights** of the LSTM layers.
+    * Encourages **smaller weights**, leading to **simpler models**.
 
 ## 5.4 Model Documentation
 
@@ -763,7 +832,7 @@ The **final step** in the model training pipeline is to use the **`Trainer.evalu
   * **Generate predictions** on the test data set using **beam search decoding** as the **inference method**.
   * Convert predicted token sequences **back to SMILES strings** and **compute same metrics as validation metrics** listed in [**Section 5.3.5**](https://github.com/c-vandenberg/aizynthfinder-project/edit/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#535-metrics-optimisation).
 
-### 5.4.2 Model Architecture ONNX Graph
+### 5.4.2 Model Data Flow - ONNX Graph
 
 The **flow of data** through the model's **encoder-decoder architecture** is shown in **Fig 10**.
 
