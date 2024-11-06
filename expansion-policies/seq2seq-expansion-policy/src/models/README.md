@@ -779,17 +779,17 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 <br>
 
 ### i. Flow of Data Through Encoder
-1. **Input Processing**
+1. **Encoder Input Processing**
     * **Input:** Sequences of **token indices** (**`encoder_input`**) with **shape `(batch_size, sequence_length)`**.
     * **Validation:** Checks that **`encoder_input`** is **not `None`** and is a **2D tensor**.
-2. **Embedding Layer**
-    * **Operation:** Converts/maps **input tokens to embeddings**.
+2. **Encoder Embedding Layer**
+    * **Operation:** Converts/maps **encoder input (`encoder_input`) tokens** to **embeddings**.
     * **Output:** Outputs **`encoder_output`** with **shape (`batch_size, sequence_length, encoder_embedding_dim`)**
     * **Mask**: A mask (**`encoder_mask`**) is generated to **identify padding tokens**.
-3. **Initialisation**
+3. **Encoder Variable Initialisation**
     * **Residual Connections**: Initialise **`previous_output`** with **`encoder_output`** for residual connections later.
     * **Forward & Backward State Concatenation:** Initialise **final hidden state** (**`final_state_h`**) and **final cell state** (**`final_state_h`**) variables as **`None`** for later **concatenation of forward and backward hidden and cell states**.
-4. **Stacked Bidirectional LSTM Layers Loop - For each layer (`i` from 0 to `num_layers - 1`)**
+4. **Encoder Stacked Bidirectional LSTM Layers Loop - For each layer (`i` from 0 to `num_layers - 1`)**
     * **Bidirectional LSTM Layer**
       * **Input:** The **`encoder_input`** from the **previous layer**
       * **Outputs:**
@@ -812,10 +812,29 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`encoder_output`**.
     * **Update `previous_output`**
       * Set **`previous_output`** to **current `encoder_output`** for **use in the next layer**.
-4. **Final Outputs:**
+4. **Encoder Final Outputs:**
   * **`encoder_output`:** The **final sequence representations** after all layers.
   * **`final_state_h`:** The **last hidden states concatenated** from the **forward and backward directions**.
   * **`final_state_c`:** The **last cell states concatenated** from the **forward and backward directions**. 
+
+### ii. Flow of Data Through Decoder
+1. **Decoder Input Processing**
+    * **Inputs:**
+      * **Decoder Input:** Sequences of **target token indices** that have been **shifted for teacher forcing**.
+        * **Shape:** **`(batch_size, sequence_length_dec)`**.
+      * **Encoder Final States:** The **final hidden and cell states** from the encoder.
+      * **Encoder Output**: Outputs from the encoder, used for attention.
+        * **Shape:** **`(batch_size, sequence_length_enc, enc_units)`**
+2. **Decoder Layer State Initialisation**
+    * **First LSTM Layer State**
+      * **Initial Hidden State**: The first LSTM layer hidden state (**`decoder_initial_state_h`**) is obtained by passing the encoder's final hidden state through a **`tensorflow.keras.layers.Dense` layer** (**`enc_state_h`**), and **mapping this to `decoder_initial_state_h`**.
+      * **Initial Cell State**: The first LSTM layer cell state (**`decoder_initial_state_c`**) is obtained by passing the encoder's final cell state through a **`tensorflow.keras.layers.Dense` layer** (**`enc_state_c`**), and **mapping this to `decoder_initial_state_c`**.
+    * **Subsquent LSTM Layer States**
+      * Subsequent LSTM layer states are **initialised to zeros**.
+3. **Decoder Embedding Layer**
+    * **Operation:** Converts/maps **decoder input (`decoder_input`) tokens** to **embeddings**
+    * **Output:** Outputs **`decoder_output`** with **shape (`(batch_size, sequence_length_dec, decoder_embedding_dim)`)**
+    * **Mask**: A mask (**`decoder_mask`**) is generated to **identify padding tokens**.
 
 ### 5.4.3 Results and Discussion
 
