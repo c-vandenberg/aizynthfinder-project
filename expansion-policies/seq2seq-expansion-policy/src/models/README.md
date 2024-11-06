@@ -675,17 +675,17 @@ The decoder is a **custom TensorFlow Keras layer** named **`StackedLSTMDecoder`*
 
 Within the Seq2Seq model, the decoder is used in the **following phases:**
 1. **Traning Phase (Teacher Forcing)**
-  * The decoder **receives the ground truth previous tokens** as input (**`decoder_input`**).
-  * It uses the **encoder outputs** and its **own hidden states** to generate the **next token probabilities**.
-  * The **loss is computed** between the **predicted probabilities** and the **actual target tokens**.
+    * The decoder **receives the ground truth previous tokens** as input (**`decoder_input`**).
+    * It uses the **encoder outputs** and its **own hidden states** to generate the **next token probabilities**.
+    * The **loss is computed** between the **predicted probabilities** and the **actual target tokens**.
 2. **Inference Phase**
-  * The decoder **generates one token at a time**.
-  * Starts with the **`<START>` token**.
-  * At **each time step**, the decoder's **previous prediction** is used as the **next input**.
-  * The **`single_step()`** method is utilised for **timestep-by-timestep decoding**.
+    * The decoder **generates one token at a time**.
+    * Starts with the **`<START>` token**.
+    * At **each time step**, the decoder's **previous prediction** is used as the **next input**.
+    * The **`single_step()`** method is utilised for **timestep-by-timestep decoding**.
 3. **Attention Mechanism**
-  * The attention mechanism **enhances the decoder's ability** to **focus on relevant parts of the input sequence** when **generating each token**.
-  * This helps in **handling long sequences** and **complex dependencies**.
+    * The attention mechanism **enhances the decoder's ability** to **focus on relevant parts of the input sequence** when **generating each token**.
+    * This helps in **handling long sequences** and **complex dependencies**.
 
 The **key components** of the encoder are:
 1. **Embedding Layer**
@@ -700,79 +700,79 @@ The **key components** of the encoder are:
 10. **Output Dense Layer**
 
 ### 1. Embedding Layer
-  * Purpose: Transforms target token indices (decoder inputs) into dense vector embeddings.
-  * Functionality:
-    * Converts each token in the decoder input sequence into a continuous vector space of a specified dimension (decoder_embedding_dim).
-    * Handles padding tokens (mask_zero=True) to prevent the model from considering them during training.
-  * Output Shape: (batch_size, sequence_length_dec, decoder_embedding_dim)
+  * **Purpose:** Transforms **decoder input token indices** (**`decoder_input`**) into **dense vector embeddings**.
+  * **Functionality:**
+    * **Converts each token** in the decoder input sequence into a **continuous vector space of a specified dimension** (**`decoder_embedding_dim`**).
+    * Handles **padding tokens** (**`mask_zero=True`**) to **prevent the model from considering them during training**.
+  * **Output Shape:** **`(batch_size, sequence_length_dec, decoder_embedding_dim)`**
 
 ### 2. Masking Support
-  * Purpose: Handles variable-length sequences with padding.
-  * Functionality:
-    * The embedding layer generates a mask (decoder_mask) that identifies padding tokens.
-    * The mask is propagated through the LSTM layers and attention mechanism to prevent the model from considering padded positions.
+  * **Purpose:** Handles **variable-length sequences with padding**.
+  * **Functionality:**
+    * The embedding layer **generates a mask (`decoder_mask`)** that **identifies padding tokens**.
+    * The mask is **propagated through the LSTM layers** and **attention mechanism** to prevent the model from considering **padded positions**.
    
 ### 3. Stacked LSTM Layers
-  * Purpose: Captures sequential dependencies and patterns in the target sequences.
-  * Functionality:
-    * Multiple LSTM layers are stacked (num_layers), allowing the decoder to learn complex representations of the output sequence.
-    * Each LSTM layer processes the embeddings and produces hidden states that encapsulate information up to the current time step.
-  * Outputs:
-    * Decoder Output: Updated sequence representations at each time step.
-  * Shape: (batch_size, sequence_length_dec, units)
-  * New States: Hidden and cell states for each LSTM layer, used for maintaining context across time steps.
+  * **Purpose:** Captures **sequential dependencies** and **patterns** in the target sequences.
+  * **Functionality:**
+    * **Multiple LSTM layers are stacked** (**`num_layers`**), allowing the decoder to **learn complex representations** of the output sequence.
+    * Each LSTM layer **processes the embeddings** and **produces hidden states** that **encapsulate information** up to the **current time step**.
+  * **Outputs:**
+    * **Decoder Output:** Updated sequence representations at **each time step**.
+  * **Shape:** **`(batch_size, sequence_length_dec, units)`**
+  * **New States:** **Hidden and cell states** for each LSTM layer, used for **maintaining context across time steps**.
 
 ### 4. Layer Normalisation Layers
-  * Purpose: Stabilizes and accelerates training by normalizing the outputs of each layer.
-  * Functionality:
-    * Applied after each LSTM layer (before dropout).
-    * Normalizes the activations to have zero mean and unit variance, independently for each sample in a batch.
-  * Effect: Reduces internal covariate shift, leading to faster convergence.
+  * **Purpose:** **Stabilises and accelerates training** by **normalising the outputs** of each layer.
+  * **Functionality:**
+    * Applied **after each LSTM layer**.
+    * **Normalises the activations** to have **zero mean** and **unit variance**, independently for each sample in a batch.
+  * **Effect:** Reduces **internal covariate shift**, leading to **faster convergence**.
 
 ### 5. Dropout Layers
-  * Purpose: Prevents overfitting by randomly deactivating a subset of neurons during training.
-  * Functionality:
-    * Applied after each LSTM layer.
-    * The dropout rate is specified by dropout_rate (default is 0.2).
-  * Effect: Helps the model generalize better by reducing reliance on specific neurons.
+  * **Purpose:** **Prevents overfitting** by **randomly deactivating a subset of neurons** during training.
+  * **Functionality:**
+    * Applied **after each LSTM layer** (**after layer normalisation**).
+    * The dropout rate is specified by the **`dropout_rate` hyperparameter** (default is **0.2**).
+  * **Effect:** Helps the model **generalize better** by **reducing reliance on specific neurons**.
 
 ### 6. Residual Connections
-  * Purpose: Facilitates better gradient flow and mitigates vanishing gradient issues in deep networks.
-  * Functionality:
-    * From the second LSTM layer onwards, a residual connection adds the output of the previous layer to the current layer's output.
-    * This helps preserve information from earlier layers.
-  * Effect: Allows the model to learn identity mappings, improving training of deeper networks.
+  * **Purpose:** Facilitates **better gradient flow** and **mitigates vanishing gradient issues** in deep networks.
+  * **Functionality:**
+    * From the **second LSTM layer onwards**, a residual connection **adds the output of the previous layer** to the **current layer's output**.
+    * This helps **preserve information from earlier layers**.
+  * **Effect:** Allows the model to **learn identity mappings**, improving training of **deeper networks**.
 
 ### 7. Weight Decay (L2 Regularisation)
-  * Purpose: Adds regularization to prevent overfitting.
-  * Functionality:
-    * L2 regularization (weight_decay) is applied to the kernel weights of the LSTM and Dense layers.
-    * Encourages smaller weights, leading to simpler models.
+  * **Purpose:** Adds **regularization to prevent overfitting**.
+  * **Functionality:**
+    * **L2 regularization** (**`weight_decay`**) is applied to the **kernel weights** of the LSTM and Dense layers.
+    * Encourages **smaller weights**, leading to **simpler models**.
 
 ### 8. Attention Mechanism (Bahdanau Attention)
-  * Purpose: Allows the decoder to focus on specific parts of the encoder's outputs when generating each token, enhancing the model's ability to handle long sequences and complex dependencies.
-  * Functionality:
-    * Computes a context vector for each decoder time step by attending over the encoder's outputs.
-    * The context vector represents a weighted sum of encoder outputs, where the weights are determined by the relevance of each encoder output to the current decoding step.
-  * Outputs:
-    * Context Vector: Provides relevant information from the encoder outputs for each decoding step.
-      * Shape: (batch_size, sequence_length_dec, enc_units)
-    * Attention Weights: The alignment scores between the decoder hidden states and encoder outputs.
-      * Shape: (batch_size, sequence_length_dec, sequence_length_enc)
+  * **Purpose:** Allows the decoder to **focus on specific parts of the encoder's outputs** when generating each token, enhancing the model's ability to **handle long sequences** and **complex dependencies**.
+  * **Functionality:**
+    * Computes a **context vector** for **each decoder time step** using the **encoder's outputs**.
+    * The context vector represents a **weighted sum of encoder outputs**, where the **weights are determined by the relevance of each encoder output to the current decoding step**.
+  * **Outputs:**
+    * **Context Vector:** Provides **relevant information** from the **encoder outputs** for **each decoding step**.
+      * **Shape:** **`(batch_size, sequence_length_dec, enc_units)`**.
+    * **Attention Weights:** The **alignment scores** between the **decoder hidden states** and **encoder outputs**.
+      * **Shape:** **`(batch_size, sequence_length_dec, sequence_length_enc)`**.
 
 ### 9. Residual Connection (Projection Layers) & Layer Normalisation Around Attention
-  * Purpose: Transforms the decoder outputs and context vectors to have matching dimensions before adding them together in a residual connection. Transformed decoder outputs are then normalised.
-  * Functionality:
-    * decoder_dense: A Dense layer that projects the decoder outputs.
-    * context_dense: A Dense layer that projects the context vectors.
-  * Effect: Ensures that the addition of decoder outputs and context vectors is dimensionally compatible.
+  * **Purpose:** **Transforms the decoder outputs and context vectors** to have **matching dimensions** before **adding them together in a residual connection**. Transformed decoder outputs are then **normalised**.
+  * **Functionality:**
+    * **`decoder_dense`:** A Dense layer that **projects the decoder outputs**.
+    * **`context_dense`:** A Dense layer that **projects the context vectors**.
+  * **Effect:** Ensures that the addition of decoder outputs and context vectors is **dimensionally compatible**, and then **normalises** the new transformed output.
 
 ### 10. Output Dense Layer
-  * Purpose: Generates probability distributions over the target vocabulary for each time step.
-  * Functionality:
-    * A Dense layer with a softmax activation function.
-    * Maps the transformed decoder outputs to logits over the vocabulary, which are then converted to probabilities.
-  * Output Shape: (batch_size, sequence_length_dec, vocab_size)
+  * **Purpose:** Generates **probability distributions** over the target vocabulary for **each time step**.
+  * **Functionality:**
+    * A **Dense layer** with a **softmax activation function**.
+    * **Maps the transformed decoder outputs** to **logits** over the vocabulary, which are then **converted to probabilities**.
+  * **Output Shape:** **`(batch_size, sequence_length_dec, vocab_size)`**.
 
 ## 5.4 Model Documentation
 
