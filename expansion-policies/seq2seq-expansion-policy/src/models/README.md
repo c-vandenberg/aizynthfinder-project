@@ -784,7 +784,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
     * **Validation:** Checks that **`encoder_input`** is **not `None`** and is a **2D tensor**.
 2. **Encoder Embedding Layer**
     * **Operation:** Converts/maps **encoder input (`encoder_input`) tokens** to **embeddings**.
-    * **Output:** Outputs **`encoder_output`** with **shape (`batch_size, sequence_length, encoder_embedding_dim`)**
+    * **Output:** Outputs **`encoder_output`** with **shape `(batch_size, sequence_length, encoder_embedding_dim)`**
     * **Mask**: A mask (**`encoder_mask`**) is generated to **identify padding tokens**.
 3. **Encoder Variable Initialisation**
     * **Residual Connections**: Initialise **`previous_output`** with **`encoder_output`** for residual connections later.
@@ -805,17 +805,17 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       * **Forward & Backward Cell States:** The `[forward_c, backward_c]`** variables are **concatenated along the last axis** to give the updated **`final_state_c`**.
         * **Shape:** **`(batch_size, units * 2)`**.
     * **Layer Normalisation**
-      * Apply a **`tensorflow.keras.layers.LayerNormalization` layer** to **`encoder_output`**.
+      * Apply a **`tensorflow.keras.layers.LayerNormalization` layer (`layer_norm_layer()`)** to **`encoder_output`**.
     * **Residual Connections**
       * For **layers beyond the first layer (`i > 0`)**, add **`previous_output`** to **`encoder_output`** for **residual connections between layers**.
-    * **Dropout**
-      * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`encoder_output`**.
     * **Update `previous_output`**
       * Set **`previous_output`** to **current `encoder_output`** for **use in the next layer**.
+    * **Dropout**
+      * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`encoder_output`**.
 4. **Encoder Final Outputs:**
-  * **`encoder_output`:** The **final sequence representations** after all layers.
-  * **`final_state_h`:** The **last hidden states concatenated** from the **forward and backward directions**.
-  * **`final_state_c`:** The **last cell states concatenated** from the **forward and backward directions**. 
+    * **`encoder_output`:** The **final sequence representations** after all layers.
+    * **`final_state_h`:** The **last hidden states concatenated** from the **forward and backward directions**.
+    * **`final_state_c`:** The **last cell states concatenated** from the **forward and backward directions**. 
 
 ### ii. Flow of Data Through Decoder
 1. **Decoder Input Processing**
@@ -828,13 +828,48 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 2. **Decoder Layer State Initialisation**
     * **First LSTM Layer State**
       * **Initial Hidden State**: The first LSTM layer hidden state (**`decoder_initial_state_h`**) is obtained by passing the encoder's final hidden state through a **`tensorflow.keras.layers.Dense` layer** (**`enc_state_h`**), and **mapping this to `decoder_initial_state_h`**.
-      * **Initial Cell State**: The first LSTM layer cell state (**`decoder_initial_state_c`**) is obtained by passing the encoder's final cell state through a **`tensorflow.keras.layers.Dense` layer** (**`enc_state_c`**), and **mapping this to `decoder_initial_state_c`**.
+      * **Initial Cell State**: The first LSTM layer cell state **`(decoder_initial_state_c)`** is obtained by passing the encoder's final cell state through a **`tensorflow.keras.layers.Dense` layer** (**`enc_state_c`**), and **mapping this to `decoder_initial_state_c`**.
     * **Subsquent LSTM Layer States**
       * Subsequent LSTM layer states are **initialised to zeros**.
 3. **Decoder Embedding Layer**
     * **Operation:** Converts/maps **decoder input (`decoder_input`) tokens** to **embeddings**
-    * **Output:** Outputs **`decoder_output`** with **shape (`(batch_size, sequence_length_dec, decoder_embedding_dim)`)**
+    * **Output:** Outputs **`decoder_output`** with **shape `(batch_size, sequence_length_dec, decoder_embedding_dim)`**
     * **Mask**: A mask (**`decoder_mask`**) is generated to **identify padding tokens**.
+4. **Decoder Stacked Bidirectional LSTM Layers Loop - For each layer (`i` from 0 to `num_layers - 1`)**
+    * **LSTM Layer**
+      * **Input:** The **`decoder_input`** from the **previous layer**.
+      * **Initial States:** The **hidden and cell states** (`state_h`, `state_c`) for the current layer.
+      * **Outputs:**
+        * **Decoder Output:** The **updated sequence representations** (**`decoder_output`**).
+          * **Shape:** **`(batch_size, sequence_length_dec, units)`**.
+        * **Updated States:** The **updated hidden and cell states (`state_h`, `state_c`)** for the current layer.
+    * **Layer Normalisation**
+      * Apply a **`tensorflow.keras.layers.LayerNormalization` layer (`layer_norm_layer()`)** to **`decoder_output`**.
+    * **Update `previous_output`**
+      * Set **`previous_output`** to **current `decoder_output`** for **use in the next layer**.
+    * **Dropout**
+      * Apply a **`tensorflow.keras.layers.Dropout` layer** to **`decoder_output`**.
+5. **Attention Mechanism**
+  * **Compute Context Vector and Attention Weights**
+    * **Inputs:** **`encoder_outout`** and **`decoder_output`**.
+    * **Outputs:**
+      * **Context Vector:** Vector that represents the **relevant encoder outputs for each decoder time step** (**`context_vector`**).
+        * **Shape:** **`(batch_size, sequence_length_dec, enc_units)`**
+      * **Attention Weights:** The **alignment scores** (**`attention_weights`**).
+        * **Shape:** **`(batch_size, sequence_length_dec, sequence_length_enc)`**.
+6. **Residual Connections and Layer Normalisation Around Attention**
+  * **Projection Layers**
+    * **Dense Decoder Output**: Pass **`decoder_output`** through a **`tensorflow.keras.layers.Dense` layer (**`decoder_dense`**) to give **`decoder_transformed`**.
+    * **Dense Context Vector**: Pass **`context_vector`** through a **`tensorflow.keras.layers.Dense` layer (**`context_dense`**) to give **`context_transformed`**.
+  * **Addition for Residual Connection**
+    * Sum the **`decoder_transformed`** and **`context_transformed`** to give **`decoder_output`**.
+  * **Layer Normalisation and Activation**
+    * Apply a **`tensorflow.keras.layers.LayerNormalization` layer (`layer_norm_layer()`)**.
+    * Use **`tensorflow.nn.relu`** on **`decoder_output`** for **activation**.
+7. **Decoder Output Layer**
+  * **Generate Output Probabilities**
+    * Pass **`decoder_output`** through the **final Dense layer** with **softmax activation** to give **final `decoder_output`**.
+      * **Shape:** **`(batch_size, sequence_length_dec, vocab_size)`**.
 
 ### 5.4.3 Results and Discussion
 
