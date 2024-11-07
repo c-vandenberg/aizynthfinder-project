@@ -420,7 +420,7 @@ Regarding residual connection, this improvement in model performance was at odds
 ### i. Bahdanau Attention Mechanism
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-As with all attention mechanisms, the Bahdanau attention mechanism enables the seq2seq model to **dynamically focus on different parts of the input sequence** when **generating each element of the output sequence**. The high-level breakdown of this process is described in section [3.4.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism). 
+As with all attention mechanisms, the Bahdanau attention mechanism enables the seq2seq model to **dynamically focus on different parts of the input sequence** when **generating each element of the output sequence**. The high-level breakdown of this process is described in section [Section 3.4.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism). 
 
 The mechanism by which Bahdanau attention does this though is as follows:
 1. **Mechanism**: Computes **alignment scores** by using a **feedforward neural network (FNN)** that **jointly considers the encoder hidden states** and the **decoder's previous hidden state**.
@@ -774,6 +774,84 @@ The **key components** of the encoder are:
     * **Maps the transformed decoder outputs** to **logits** over the vocabulary, which are then **converted to probabilities**.
   * **Output Shape:** **`(batch_size, sequence_length_dec, vocab_size)`**.
 
+### 5.3.3 Optimised Attention Mechanism (Bahdanau Attention) Architecture
+
+The attention mechanism is (**`BahdanauAttention`**) is an implementation of the **Bahdanau attention mechanism** proposed by **Dzmitry Bahdanau et al** in their 2014 paper. **<sup>10</sup>**
+
+This attention mechanism allows the decoder to **dynamically focus on different parts of the encoder's outputs** by providing a **context vector** at **each decoding step**. By doing so, it helps the **model capture relevant contextual information** from the input sequence, improving the **quality and accuracy** of the generated output sequences.
+
+The attention mechanism is **integrated within the Seq2Seq model's decoder** as follows:
+1. **Decoder's Use of Attention**
+  * At **each decoding time step**, the decoder uses the **context vector** to **inform its next prediction**.
+  * The context vector provides a **summary of the encoder outputs** that are **most relevant to the current decoder state**.
+2. **Flow within the Decoder**
+  * **Before Attention:**
+    * The decoder **processes its input tokens** through **embedding** and **stacked LSTM layers**.
+  * **Applying Attention:**
+    * The **decoder outputs** (**`decoder_output`**) and **encoder outputs** (**`encoder_output`**) are **passed to the attention mechanism**.
+    * The attention mechanism computes the **context vector and attention weights**.
+  * **After Attention:**
+    * The context vector and decoder output are **transformed to a Dense layer** and **combined** for a **residual connection**, and then **normalised**.
+
+The **key components** of the Bahdanau attention mechanism are:
+1. **Dense Layers for Transformations**
+2. **Score Calculation**
+3. **Attention Weights Computation**
+4. **Mask Handling**
+5. **Context Vector Computation**
+
+### 1. Dense Layers for Transformations
+  * **Purpose:** Transform the **encoder and decoder outputs** into a **common feature space** to **compute attention scores**.
+  * **Functionality:**
+    * **`attention_dense1`:** A **Dense layer** that **processes the encoder outputs**.
+      * Transforms the **encoder outputs** from **shape `(batch_size, seq_len_enc, enc_units)`** to **`(batch_size, seq_len_enc, units)`**.
+    * **`attention_dense2`:** A **Dense layer** that **processes the decoder outputs**.
+      * Transforms the **decoder outputs** from **shape `(batch_size, seq_len_dec, dec_units)`** to **`(batch_size, seq_len_dec, units)`**.
+  * **Parameters:**
+    * **units:** The **number of units** in the attention mechanism, determining the **dimensionality of the transformed features**.
+
+### 2. Score Calculation
+  * **Purpose:** Compute the **alignment scores** between the **encoder and decoder outputs**.
+  * **Functionality:**
+    * The transformed encoder and decoder outputs are **combined using a non-linear activation function (`tanh`)** to **capture the relevance** between **each encoder time step** and **each decoder time step**.
+    * **Broadcasting and Expansion:**
+      * The **encoder transformed outputs** are **expanded along the decoder time step dimension**.
+        * **Shape:** **`(batch_size, 1, seq_len_enc, units)`**
+      * The **decoder transformed outputs** are **expanded along the encoder time step dimension**.
+        * **Shape:** **`(batch_size, seq_len_dec, 1, units)`**
+  * **Combined Score Calculation:**
+    * The **expanded encoder and decoder transformed outputs** are **added** and **passed through tanh activation**.
+    * **Resulting shape:** **`(batch_size, seq_len_dec, seq_len_enc, units)`**
+  * **Final Score Computation:**
+    * **`attention_v`:** A **Dense layer** that **projects the combined scores** to a **scalar value** for **each encoder-decoder time step pair**.
+    * **`Resulting shape`:** **`(batch_size, seq_len_dec, seq_len_enc, 1)`**
+    * The **last dimension is squeezed** to get the **final score tensor**.
+      * **Shape:** **`(batch_size, seq_len_dec, seq_len_enc)`**
+     
+### 3. Attention Weights Computation
+  * **Purpose:** Convert the **alignment scores** into **normalized attention weights**.
+  * **Functionality:**
+    * **Softmax Activation:**
+      * The alignment scores are **passed through a softmax function** along the **encoder time step axis (`axis=-1`)**.
+      * This **converts the scores into probabilities** that **sum to 1** for **each decoder time step**.
+      * **Shape:** **`(batch_size, seq_len_dec, seq_len_enc)`**
+
+### 4. Mask Handling
+  * **Purpose:** Ensure that the attention mechanism **does not consider padded positions in the encoder outputs**.
+  * **Functionality:**
+    * If an **encoder mask is provided** (**`encoder_mask`**), it is **expanded and applied to the alignment scores before softmax**.
+    * **Masked positions** receive a **large negative value (`-1e9`)**, effectively **zeroing out their attention weights after softmax**.
+     
+### 5. Context Vector Computation
+  * **Purpose:** Compute a context vector for **each decoder time step** as a **weighted sum of the encoder outputs**.
+  * **Functionality:**
+    * **Weighted Sum:**
+      * The **attention weights** are used to **compute a weighted sum over the encoder outputs**
+      * **Matrix Multiplication:**
+        * **`context_vector = tf.matmul(attention_weights, encoder_output)`**
+        * **Shape:** **`(batch_size, seq_len_dec, enc_units)`**
+      * Each context vector **encapsulates relevant information** from the encoder outputs **specific to each decoder time step**.
+
 ## 5.4 Model Documentation
 
 ### 5.4.1 Model Training Pipeline
@@ -840,7 +918,7 @@ Within the same `Trainer.initialize_components()` method, the **`Dataloader.load
     * **Train and Test Split**
       * Use **scikit-learn's `train_test_split()` method** to divide the data into training and test data sets based on the specified **`test_size`** from the **configuration YAML file**.
       * Ensure that the **splitting is random** but **reproducible** by passing a **`random_state`** parameter to `train_test_split()`.
-    * **Validatino Data Set**
+    * **Validation Data Set**
       * The validation files have **already been split** prior to the training pipeline.
 5. **TensorFlow Dataset Creation** - Create **TensorFlow datasets** for **efficient data loading** during training.
     * **Dataset Construction**
@@ -947,7 +1025,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       <img src="https://github.com/user-attachments/assets/94d3b08d-f39e-411a-b0cd-37d5f91a51e5", alt="retro_seq2seq_model_graph"/>
     </a>
     <p>
-      <b>Fig 10</b> Retrosynthesis Seq2Seq Model Graph. Netron model visualisation tool <b><sup>10</sup></b> shows ONNX graph with nodes and operations for encoder (red), decoder (blue), and attention mechanism (green) (click to expand view).
+      <b>Fig 10</b> Retrosynthesis Seq2Seq Model Graph. Netron model visualisation tool <b><sup>11</sup></b> shows ONNX graph with nodes and operations for encoder (red), decoder (blue), and attention mechanism (green) (click to expand view).
     </p>
   </div>
 <br>
@@ -1111,4 +1189,5 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 **[7]** Priya, B. (2023) Build better deep learning models with batch and layer normalization, Pinecone. Available at: https://www.pinecone.io/learn/batch-layer-normalization/ (Accessed: 18 October 2024). <br><br>
 **[8]** Kalra, R. (2024) Introduction to transformers and attention mechanisms, Medium. Available at: https://medium.com/@kalra.rakshit/introduction-to-transformers-and-attention-mechanisms-c29d252ea2c5 (Accessed: 21 October 2024). <br><br>
 **[9]** Modern Recurrent Neural Networks - Beam Search (2020) 10.8. Beam Search - Dive into Deep Learning 1.0.3 documentation. Available at: https://d2l.ai/chapter_recurrent-modern/beam-search.html (Accessed: 21 October 2024). <br><br>
-**[10]** Roeder, L. (2021) Lutzroeder/netron: Visualizer for Neural Network, Deep Learning and Machine Learning Models, GitHub. Available at: https://github.com/lutzroeder/netron (Accessed: 05 November 2024). <br><br>
+**[10]** Bahdanau, D. et al. (2014) ‘Neural Machine Translation by Jointly Learning to Align and Translate’, International Conference on Learning Representations.<br><br>
+**[11]** Roeder, L. (2021) Lutzroeder/netron: Visualizer for Neural Network, Deep Learning and Machine Learning Models, GitHub. Available at: https://github.com/lutzroeder/netron (Accessed: 05 November 2024). <br><br>
