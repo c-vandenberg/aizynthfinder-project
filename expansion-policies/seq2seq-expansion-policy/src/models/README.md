@@ -353,7 +353,7 @@ The benefits of residual connections include:
   </div>
 <br>
 
-### iii. Layer Normalisation
+### ii. Layer Normalisation
 The third significant change was to incorporate **layer normalisation** into the encoder.
 * **Normalisation** works by **mapping all the values of a feature** to be in the **range [0,1]**.
 * Normalisation techniques are employed in neural networks to:
