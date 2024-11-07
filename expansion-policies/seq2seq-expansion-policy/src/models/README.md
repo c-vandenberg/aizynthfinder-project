@@ -1122,6 +1122,53 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
     * **Generate Output Probabilities**
       * Pass **`decoder_output`** through the **final Dense layer** with **softmax activation** to give **final `decoder_output`**.
         * **Shape:** **`(batch_size, sequence_length_dec, vocab_size)`**.
+       
+### iii. Flow of Data Through Attention Mechanism
+1. **Inputs**
+    * **Encoder Output:** Outputs from the encoder (**`encoder_output`**).
+      * **Shape:** **`(batch_size, seq_len_enc, enc_units)`**.
+    * **Decoder Output:** Outputs from the decoder prior to attention (**`decoder_output`**).
+      * **Shape:** **`(batch_size, seq_len_dec, dec_units)`**.
+    * **Mask (optional):** A mask (**`encoder_mask`**) is optionally used to **handle padding tokens**.
+      * **Shape:** **`(batch_size, seq_len_enc)`**.
+2. **Transformation of Encoder and Decoder Outputs**
+    * **Encoder Transformation**
+      * Pass **`encoder_output`** through a **`tensorflow.keras.layers.Dense` layer (**`self.attention_dense1`**) to give **`score_enc`**.
+        * **Shape:** **`(batch_size, seq_len_enc, units)`**.
+    * **Decoder Transformation**
+      * Pass **`decoder_output`** through a **`tensorflow.keras.layers.Dense` layer (**`self.attention_dense2`**) to give **`score_dec`**.
+        * **Shape:** **`(batch_size, seq_len_dec, units)`**.
+3. **Expansion of Transformed Encoder and Decoder Outputs**
+    * **Transformed Encoder Output Expansion**
+      * Pass **`score_enc`** to **`tensorflow.expand_dims()`** to give **`score_enc_expanded`**.
+        * **Shape:** **`(batch_size, 1, seq_len_enc, units)`**.
+    * **Transformed Decoder Output Expansion**
+      * Pass **`score_dec`** to **`tensorflow.expand_dims()`** to give **`score_dec_expanded`**.
+        * **Shape:** **`(batch_size, seq_len_dec, 1, units)`**.
+4. **Combined Score Calculation**
+    * **Addition and Activation**
+      * **Add `score_enc_expanded` and `score_dec_expanded` together** and pass to **`tensorflow.nn.tanh()`** for **activation** to give `score_combined`.
+        * **Shape:** **`(batch_size, seq_len_dec, seq_len_enc, units)`**.
+    * **Projection to Scalar Score**
+      * Pass **`score_combined`** through a **`tensorflow.keras.layers.Dense` layer (**`self.attention_v`**) to give **`score`**.
+        * **Shape:** **`(batch_size, seq_len_dec, seq_len_enc, 1)`**.
+    * **Squeeze Out Last Dimension**
+      * Pass **`score`** to **`tensorflow.squeeze()`** to **remove last dimension** and give final **`score`**.
+        * **Shape:** **`(batch_size, seq_len_dec, seq_len_enc)`**.
+5. **Applying Mask (if provided)**
+    * **Expand Mask Dimensions to Match `score` Tensor**
+      * Pass `encoder_mask` to `tensorflow.expand_dims()` to give `encoder_mask_expanded`.
+        * **Shape:** **`(batch_size, 1, seq_len_enc)`**.
+    * **Adjust Scores**
+      * Add a **large negative value to masked positions** to **nullify their effect in softmax** via **`score += (1.0 - tf.cast(encoder_mask_expanded, score.dtype)) * -1e9`**.
+6. **Attention Mechanism Computation**
+    * **Softmax Over Encoder Sequence Length/Time Steps**
+      * Pass **`score`** to **`tensorflow.nn.softmax()`** to give **`attention_weights`**.
+        * **Shape:** **`(batch_size, seq_len_dec, seq_len_enc)`**.
+7. **Context Vector Computation**
+    * **Weighted Sum**
+      * Compute context vector as **weighted sum of encoder outputs** by passing both **`attention_weights`** and **`encoder_output`** to **`tensorflow.matmul()`** to give **`context_vector`**.
+        * **Shape:** **`(batch_size, seq_len_dec, enc_units)`**.
 
 ### 5.4.3 Results and Discussion
 
