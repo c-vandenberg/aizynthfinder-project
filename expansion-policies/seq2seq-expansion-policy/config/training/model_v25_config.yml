@@ -70,7 +70,7 @@ model:
   output_vocab_size: null  # To be set dynamically based on tokenizer
   attention_dim: 256
   encoder_embedding_dim: 256
-  decoder_embedding_dim: 2256
+  decoder_embedding_dim: 256
   units: 256
   encoder_num_layers: 2
   decoder_num_layers: 4

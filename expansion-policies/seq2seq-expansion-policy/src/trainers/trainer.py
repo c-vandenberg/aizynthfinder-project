@@ -199,7 +199,7 @@ class Trainer:
         weight_decay: Union[float, None] = model_conf.get('weight_decay', None)
         learning_rate: float = model_conf.get('learning_rate', 0.0001)
 
-        # Initialize the model
+        # Initialise the model
         self.model: RetrosynthesisSeq2SeqModel = RetrosynthesisSeq2SeqModel(
             input_vocab_size=self.vocab_size,
             output_vocab_size=self.vocab_size,
@@ -216,7 +216,7 @@ class Trainer:
         # Set encoder and decoder preprocessors
         self.model.smiles_tokenizer = self.tokenizer
 
-        # Set up the optimizer
+        # Set up the optimiser
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
