@@ -129,7 +129,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.input_vocab_size = input_vocab_size
         self.output_vocab_size = output_vocab_size
 
-        # Mapping encoder final states to decoder initial states
+        # Initialise Dense layers to pass encoder final states through
         self.enc_state_h: Dense = Dense(units, name='enc_state_h')
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
@@ -182,7 +182,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         encoder_mask:Optional[tf.Tensor]  = self.encoder.compute_mask(encoder_input)
         decoder_mask: Optional[tf.Tensor]  = self.decoder.compute_mask([decoder_input, None, None])
 
-        # Map encoder final states to initial states for the decoder's first layer
+        # Pass encoder final states through Dense layers
+        # and map encoder final states to initial states for the decoder's first layer
         decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
         decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
         decoder_initial_state: List[tf.Tensor] = [decoder_initial_state_h, decoder_initial_state_c]
