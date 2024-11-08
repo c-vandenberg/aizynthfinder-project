@@ -129,7 +129,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.input_vocab_size = input_vocab_size
         self.output_vocab_size = output_vocab_size
 
-        # Mapping encoder final states to decoder initial states
+        # Initialise Dense layers to pass encoder final states through
         self.enc_state_h: Dense = Dense(units, name='enc_state_h')
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
@@ -167,9 +167,6 @@ class RetrosynthesisSeq2SeqModel(Model):
         ValueError
             If `smiles_tokenizer` is not set.
         """
-        if self.smiles_tokenizer is None:
-            raise ValueError("smiles_tokenizer must be set before calling the model.")
-
         # Unpack inputs
         encoder_input: tf.Tensor
         decoder_input: tf.Tensor
@@ -185,10 +182,11 @@ class RetrosynthesisSeq2SeqModel(Model):
         encoder_mask:Optional[tf.Tensor]  = self.encoder.compute_mask(encoder_input)
         decoder_mask: Optional[tf.Tensor]  = self.decoder.compute_mask([decoder_input, None, None])
 
-        # Map encoder final states to initial states for the decoder's first layer
+        # Pass encoder final states through Dense layers
+        # and map encoder final states to initial states for the decoder's first layer
         decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
         decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
-        decoder_initial_state: List[tf.Tensor]= [decoder_initial_state_h, decoder_initial_state_c]
+        decoder_initial_state: List[tf.Tensor] = [decoder_initial_state_h, decoder_initial_state_c]
 
         # Prepare initial states for all decoder layers
         decoder_initial_state = (decoder_initial_state +
@@ -284,12 +282,13 @@ class RetrosynthesisSeq2SeqModel(Model):
 
     def predict_sequence_beam_search(
         self,
-        encoder_input: tf.Tensor,
-        beam_width: int = 5,
-        max_length: int = 140,
-        start_token_id: Optional[int] = None,
-        end_token_id: Optional[int] = None
-    ) -> List[List[int]]:
+        encoder_input,
+        beam_width=5,
+        max_length=140,
+        start_token_id=None,
+        end_token_id=None,
+        return_top_n=1
+    ) -> Tuple[List[List[List[int]]], List[List[float]]]:
         """
         Generate sequence predictions using beam search decoding.
 
@@ -328,16 +327,17 @@ class RetrosynthesisSeq2SeqModel(Model):
             beam_width=beam_width,
             max_length=max_length,
             start_token_id=start_token_id,
-            end_token_id=end_token_id
+            end_token_id=end_token_id,
+            return_top_n=return_top_n
         )
 
         # Perform beam search decoding
-        best_sequences = beam_search_decoder.search(
+        best_sequences, best_scores = beam_search_decoder.search(
             encoder_output=encoder_output,
             initial_decoder_states=initial_decoder_states
         )
 
-        return best_sequences
+        return best_sequences, best_scores
 
     def _encode_and_initialize(
         self,

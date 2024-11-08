@@ -170,7 +170,7 @@ class StackedLSTMDecoder(DecoderInterface):
         inputs : Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor]
             A tuple containing:
                 - decoder_input : tf.Tensor
-                    Tensor of shape (batch_size, seq_len_dec) containing target token indices.
+                    Tensor of shape (batch_size, seq_len_dec) containing input token indices.
                 - initial_state : List[tf.Tensor]
                     List of tensors representing the initial hidden and cell states for each LSTM layer.
                 - encoder_output : tf.Tensor

@@ -235,7 +235,7 @@ class DataLoader:
         """
         Splits the datasets into training and test sets.
 
-        Utilizes scikit-learn's `train_test_split` to partition the tokenized
+        Utilizes scikit-learn's `train_test_split()` method to partition the tokenized
         product and reactant datasets into training and testing subsets based on
         the specified test size and random state. Adapts the tokenizer only on
         the training data to prevent data leakage.
@@ -304,7 +304,8 @@ class DataLoader:
         self,encoder_data: List[str],
         decoder_data: List[str]
     ) -> Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]:
-        """Preprocesses a pair of encoder and decoder data.
+        """
+        Preprocesses a pair of encoder and decoder data.
 
         Parameters
         ----------
@@ -343,7 +344,7 @@ class DataLoader:
             The data to create the dataset from.
         training : bool, optional
             Whether the dataset is for training (default is True). If True, shuffling
-            and dropping the remainder of batches are applied to ensure consistent
+            and dropping the remainder of batches is applied to ensure consistent
             batch sizes.
 
         Returns

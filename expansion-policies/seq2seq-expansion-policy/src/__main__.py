@@ -1,11 +1,11 @@
-import logging
+#!/usr/bin/env python3
+
+import os
+import pydevd_pycharm
+
+import tensorflow as tf
+
 from trainers.trainer import Trainer
-
-# Configure logging to display debug information
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("aizynthfinder")
-logger.setLevel(logging.DEBUG)
-
 
 def main():
     # Path to the configuration file

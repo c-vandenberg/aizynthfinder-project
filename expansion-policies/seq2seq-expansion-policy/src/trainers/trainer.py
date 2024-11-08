@@ -199,7 +199,7 @@ class Trainer:
         weight_decay: Union[float, None] = model_conf.get('weight_decay', None)
         learning_rate: float = model_conf.get('learning_rate', 0.0001)
 
-        # Initialize the model
+        # Initialise the model
         self.model: RetrosynthesisSeq2SeqModel = RetrosynthesisSeq2SeqModel(
             input_vocab_size=self.vocab_size,
             output_vocab_size=self.vocab_size,
@@ -216,7 +216,7 @@ class Trainer:
         # Set encoder and decoder preprocessors
         self.model.smiles_tokenizer = self.tokenizer
 
-        # Set up the optimizer
+        # Set up the optimiser
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics
@@ -410,28 +410,31 @@ class Trainer:
         end_token: str = self.tokenizer.end_token
 
         for (encoder_input, decoder_input), target_sequences in test_dataset:
-            # Generate sequences using beam search
-            predicted_sequences: List[List[int]] = self.model.predict_sequence_beam_search(
+            # Generate sequences
+            predicted_sequences_list, predicted_scores_list = self.model.predict_sequence_beam_search(
                 encoder_input=encoder_input,
                 beam_width=model_conf.get('beam_width', 5),
                 max_length=self.data_loader.max_decoder_seq_length,
                 start_token_id=self.tokenizer.word_index.get(start_token),
-                end_token_id=self.tokenizer.word_index.get(end_token)
+                end_token_id=self.tokenizer.word_index.get(end_token),
+                return_top_n=1
             )
 
+            top_predicted_sequences = [seq_list[0] for seq_list in predicted_sequences_list]
+
             # Convert sequences to text
-            predicted_texts: List[str] = self.tokenizer.sequences_to_texts(
-                predicted_sequences,
+            predicted_texts: List[str]  = self.tokenizer.sequences_to_texts(
+                top_predicted_sequences,
                 is_input_sequence=False
             )
-            target_texts: List[str] = self.tokenizer.sequences_to_texts(
+            target_texts: List[str]  = self.tokenizer.sequences_to_texts(
                 target_sequences,
                 is_input_sequence=False
             )
 
             for ref, hyp in zip(target_texts, predicted_texts):
-                ref_tokens: List[str] = ref.split()
-                hyp_tokens: List[str] = hyp.split()
+                ref_tokens: List[str]  = ref.split()
+                hyp_tokens: List[str]  = hyp.split()
                 references.append([ref_tokens])
                 hypotheses.append(hyp_tokens)
                 target_smiles.append(ref)

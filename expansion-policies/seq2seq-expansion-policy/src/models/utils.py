@@ -210,7 +210,7 @@ class Seq2SeqModelUtils:
         os.makedirs(hdf5_save_dir, exist_ok=True)
         hdf5_save_path: str = os.path.join(hdf5_save_dir, 'seq2seq_model.h5')
         try:
-            model.save(hdf5_save_path, save_format='h5')
+            model.save(hdf5_save_path)
             print(f"Model HDF5 format save successful. Save file path: {hdf5_save_path}.")
         except OSError as e:
             print(f"Failed to save model in HDF5 format: {e}")
@@ -321,7 +321,7 @@ class Seq2SeqModelUtils:
         """
         os.makedirs(model_save_path, exist_ok=True)
         try:
-            model.save(model_save_path, save_format='tf')
+            model.export(model_save_path)
             print(f"Model SavedModel format save successful. Save file path: {model_save_path}")
         except OSError as e:
             print(f"Failed to save model in SavedModel format: {e}")
