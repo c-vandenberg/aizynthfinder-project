@@ -37,7 +37,7 @@
   <summary><b>3. Sequence-to-Sequence Expansion Policy</b></summary>
   
   &nbsp; &nbsp; &nbsp; &nbsp; 3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; 3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.2 [Alternative SMILES-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#32-alternative-smiles-based-retrosynthetic-methods)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 3.3 [Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#33-sequence-to-sequence-model)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 3.4 [Architecture of Sequence-to-Sequence Models](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#34-architecture-of-sequence-to-sequence-models)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3.4.1 [Encoder](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#341-encoder)<br>
