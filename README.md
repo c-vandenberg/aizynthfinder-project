@@ -2,6 +2,8 @@
 
 ## Abstract
 
+**Retrosynthetic analysis** and **reaction prediction** are cornerstones of efficient chemical synthesis and drug discovery. As such, **computer assisted synthesis prediction** (**CASP**) tools have been at the forefront of research and development to identify the **optimal sequence of chemical reaction steps** to transform **commercially viable starting materials** into a **desired chemical compound**. <sup>**1**</sup>
+
 ## Contents
 
 <details>
