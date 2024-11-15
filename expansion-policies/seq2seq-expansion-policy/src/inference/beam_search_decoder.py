@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Any
+from typing import List, Optional, Tuple
 
 import tensorflow as tf
 
