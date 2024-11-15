@@ -6,7 +6,7 @@
 
 A leading CASP tool, **AiZynthFinder**, achieves retrosynthesis prediction by generating a **retrosynthetic search tree** using a **template-based, feedforward neural network (FNN) model**, known as the **expansion policy**, to give a **ranked list of reaction templates**. This process is followed by **another neural network**, the **filter policy**, which **removes unfeasible reactions**. Once the retrosynthesis search tree is constructed, a **Monte Carlo Tree Search (MCTS) algorithm traverses the search tree** to **identify the best synthetic routes**.
 
-This study focuses enhancing AiZynthFinder by integrating **SMILES-based sequence-to-sequence (Seq2Seq)** and **transformer** models into its **expansion policy**. By leveraging these advanced neural network architectures with **SMILES-based chemical representations**, we aim to overcome the inherent limitations of template-based retrosynthetic methods. The integration seeks to **broaden accurate predictions beyond the rule-based knowledge base**, ensure that predictions **consider the entire molecular environment**, and **account for stereochemistry**.
+This study focuses on enhancing AiZynthFinder by integrating **SMILES-based sequence-to-sequence (Seq2Seq)** and **transformer** models into its **expansion policy**. By leveraging these advanced neural network architectures with **SMILES-based chemical representations**, we aim to overcome the inherent limitations of template-based retrosynthetic methods. The integration seeks to **broaden accurate predictions beyond the rule-based knowledge base**, ensure that predictions **consider the entire molecular environment**, and **account for stereochemistry**.
 
 ## Contents
 
