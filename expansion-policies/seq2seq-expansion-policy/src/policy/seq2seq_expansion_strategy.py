@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from rdkit import Chem
 from aizynthfinder.context.policy.expansion_strategies import ExpansionStrategy
@@ -134,6 +135,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             max_length=self.max_decoder_seq_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id,
+            vocab_size=self.smiles_tokenizer.vocab_size,
             return_top_n=self.return_top_n
         )
 
@@ -147,9 +149,14 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
                 is_input_sequence=False
             )
 
+            # Convert negative log probabilities to probabilities
+            # First, convert seq_scores to a numpy array
+            seq_scores = np.array(seq_scores)
+            # Since seq_scores are negative log probabilities, we can compute probabilities as follows:
+            # prob = exp(-score)
+            exp_neg_scores = np.exp(-seq_scores)
             # Normalize probabilities
-            total_score = sum(seq_scores)
-            probabilities = [score / total_score for score in seq_scores]
+            probabilities = exp_neg_scores / np.sum(exp_neg_scores)
 
             # Validate and append
             valid_smiles = []
@@ -165,7 +172,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
                 is_valid = all(self._is_valid_smiles(smi) for smi in reactant_smiles_list)
                 if is_valid:
                     valid_smiles.append(cleaned_smiles)
-                    valid_probs.append(prob)
+                    valid_probs.append(float(prob))  # Ensure prob is a float, not numpy type
                 else:
                     self._logger.warning(f"Invalid SMILES generated: {cleaned_smiles}")
 
