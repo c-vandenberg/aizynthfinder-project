@@ -176,29 +176,6 @@ class BeamSearchDecoder:
                 log_probs
             )
 
-            # **Print decoder output probabilities for debugging**
-            # Reshape decoder_output for printing
-            decoder_output_reshaped = tf.reshape(decoder_output, [batch_size, self.beam_width, -1])
-
-            # For each batch item and beam, get the top k tokens and their probabilities
-            k = 5  # Number of top tokens to inspect
-            for i in range(batch_size):
-                for j in range(self.beam_width):
-                    probs = decoder_output_reshaped[i, j]  # Shape: [vocab_size]
-                    topk_probs, topk_indices = tf.math.top_k(probs, k=k)
-                    topk_probs_np = topk_probs.numpy()
-                    topk_indices_np = topk_indices.numpy()
-                    # Map indices to tokens if possible
-                    # Ensure that the decoder has access to the tokenizer's index_word mapping
-                    if hasattr(self.decoder, 'tokenizer') and hasattr(self.decoder.tokenizer, 'index_word'):
-                        tokens = [self.decoder.tokenizer.index_word.get(idx, '<UNK>') for idx in topk_indices_np]
-                    else:
-                        tokens = [str(idx) for idx in topk_indices_np]  # Fallback to indices if tokenizer not available
-                    print(f"Time step {t}, Batch {i}, Beam {j}")
-                    for token, prob in zip(tokens, topk_probs_np):
-                        print(f"  Token: {token}, Probability: {prob:.4f}")
-            # **End of print statements**
-
             # Initialize lists to collect group results
             all_topk_scores = []
             all_topk_indices = []

@@ -1,9 +1,8 @@
 import os
-import random
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple, Optional
 
-from collections import Counter
 import tensorflow as tf
+from rdkit import Chem
 from sklearn.model_selection import train_test_split
 
 from data.utils.tokenization import SmilesTokenizer
@@ -203,6 +202,12 @@ class DataLoader:
             self.reactants_y_dataset = self.reactants_y_dataset[:self.num_samples]
             self.products_x_valid_dataset = self.products_x_valid_dataset[:self.num_samples]
             self.reactants_y_valid_dataset = self.reactants_y_valid_dataset[:self.num_samples]
+
+        # Canonicalize SMILES strings
+        self.products_x_dataset = [self._canonicalize_smiles(smi) for smi in self.products_x_dataset]
+        self.reactants_y_dataset = [self._canonicalize_smiles(smi) for smi in self.reactants_y_dataset]
+        self.products_x_valid_dataset = [self._canonicalize_smiles(smi) for smi in self.products_x_valid_dataset]
+        self.reactants_y_valid_dataset = [self._canonicalize_smiles(smi) for smi in self.reactants_y_valid_dataset]
 
     def _tokenize_datasets(self) -> None:
         """
@@ -444,3 +449,40 @@ class DataLoader:
             smiles_list = [line.strip() for line in file if line.strip()]
 
         return smiles_list
+
+    @staticmethod
+    def _canonicalize_smiles(smiles: str) -> str:
+        """
+        Canonicalises SMILES strings using `rdkit.Chem.MolFromSmiles()`.
+
+        Correctly handles reactant SMILES separated by `.` by canonicalising separately and re-concatenating the
+        reassembling in the same order by concatenating with a `.` separator.
+
+        Parameters
+        ----------
+        smiles : str
+            The single SMILES string or multiple, `.` separated SMILES strings to canonicalise.
+
+        Returns
+        -------
+        str
+        str
+             The single canonicalised SMILES string or multiple, `.` separated canonicalised SMILES strings.
+
+        Raises
+        ------
+        ValueError
+            If any of the SMILES components are invalid.
+        """
+        # Split the SMILES string on '.' to get individual components
+        smiles_components = smiles.split('.')
+        canonical_components = []
+        for smi in smiles_components:
+            mol = Chem.MolFromSmiles(smi)
+            if mol is None:
+                raise ValueError(f"Invalid SMILES: {smi}")
+            canonical_smi = Chem.MolToSmiles(mol, canonical=True)
+            canonical_components.append(canonical_smi)
+        # Reassemble the components in the same order, separated by '.'
+        canonical_smiles = '.'.join(canonical_components)
+        return canonical_smiles

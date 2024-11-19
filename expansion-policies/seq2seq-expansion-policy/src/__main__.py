@@ -1,35 +1,19 @@
-import logging
+import os
 import pydevd_pycharm
 
-from aizynthfinder.aizynthfinder import AiZynthFinder
+import tensorflow as tf
 
-# Configure logging to display debug information
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("aizynthfinder")
-logger.setLevel(logging.DEBUG)
+from trainers.trainer import Trainer
 
 def main():
     # Path to the configuration file
-    config_file = 'src/config.yml'
+    config_path = 'config/training/model_v27_config.yml'
 
-    finder = AiZynthFinder(configfile=config_file)
-    finder.expansion_policy.select("seq2seq_policy")
-    finder.target_smiles = "CC(=O)Nc1ccc(cc1)O"  # Acetaminophen/Paracetamol
+    # Initialize the Trainer with the configuration
+    trainer = Trainer(config_path=config_path)
 
-    # Prepare the search tree
-    finder.prepare_tree()
-
-    # Run the tree search
-    finder.tree_search()
-
-    # Build the synthesis routes
-    finder.build_routes()
-
-    # Extract statistics if needed
-    stats = finder.extract_statistics()
-
-    # Print the number of routes found
-    print(f"Number of routes found: {len(finder.routes)}")
+    # Run the training pipeline
+    trainer.run()
 
 if __name__ == "__main__":
     main()
