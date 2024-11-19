@@ -6,6 +6,7 @@ expansion:
     max_encoder_seq_length: 140
     max_decoder_seq_length: 140
     beam_width: 5
+    return_top_n: 5
 filter:
   uspto: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/public-model-data/uspto_filter_model.onnx
 stock:

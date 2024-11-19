@@ -125,6 +125,8 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             tokenized_smiles_list=tokenized_smiles_list
         )
 
+        raise ValueError
+
         start_token_id = self.smiles_tokenizer.word_index[self.smiles_tokenizer.start_token]
         end_token_id = self.smiles_tokenizer.word_index[self.smiles_tokenizer.end_token]
 
@@ -135,7 +137,6 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             max_length=self.max_decoder_seq_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id,
-            vocab_size=self.smiles_tokenizer.vocab_size,
             return_top_n=self.return_top_n
         )
 

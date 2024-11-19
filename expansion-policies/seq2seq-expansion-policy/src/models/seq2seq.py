@@ -328,7 +328,6 @@ class RetrosynthesisSeq2SeqModel(Model):
             decoder=self.decoder,
             start_token_id=start_token_id,
             end_token_id=end_token_id,
-            vocab_size=vocab_size,
             beam_width=beam_width,
             max_length=max_length,
             return_top_n=return_top_n

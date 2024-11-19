@@ -31,6 +31,10 @@ class BeamSearchDecoder:
         The decoder instance used for generating predictions.
     beam_width : int, optional
         The number of beams to keep during search (default is 5).
+    num_groups : int, optional
+        The number of groups to divide beams into for diversity (default is 1).
+    diversity_strength : float, optional
+        The strength of the diversity penalty (lambda) (default is 0.5).
     max_length : int, optional
         The maximum length of the generated sequences (default is 140).
     start_token_id : int, optional
@@ -39,7 +43,8 @@ class BeamSearchDecoder:
         The token ID representing the end of a sequence.
     length_penalty : float, optional
         The penalty applied to longer sequences to balance between length and probability (default is 1.0).
-
+    return_top_n : int, optional
+        The number of top sequences to return (default is 1).
     Attributes
     ----------
     decoder : DecoderInterface
@@ -64,211 +69,255 @@ class BeamSearchDecoder:
     def __init__(
         self,
         decoder: 'DecoderInterface',
-        start_token_id: int,
-        end_token_id: int,
-        vocab_size: int,
         beam_width: int = 5,
+        num_groups: int = 1,
+        diversity_strength: float = 2.0,
         max_length: int = 140,
+        start_token_id: int = None,
+        end_token_id: int = None,
         length_penalty: float = 1.0,
         return_top_n: int = 1
     ) -> None:
         self.decoder = decoder
+        self.beam_width = beam_width
+        self.num_groups = num_groups
+        self.group_size = beam_width // num_groups
+        self.diversity_strength = diversity_strength
+        self.max_length = max_length
         self.start_token_id = start_token_id
         self.end_token_id = end_token_id
-        self.vocab_size = vocab_size
-        self.beam_width = beam_width
-        self.max_length = max_length
         self.length_penalty = length_penalty
         self.return_top_n = return_top_n
 
     def search(
-            self,
-            encoder_output: tf.Tensor,
-            initial_decoder_states: List[tf.Tensor],
+        self,
+        encoder_output: tf.Tensor,
+        initial_decoder_states: List[tf.Tensor],
     ) -> Tuple[List[List[List[int]]], List[List[float]]]:
         batch_size = tf.shape(encoder_output)[0]
 
         # Initialize sequences with the start token
-        start_tokens = tf.fill([batch_size], self.start_token_id)  # Shape: [batch_size]
-        sequences = tf.expand_dims(start_tokens, axis=1)  # Shape: [batch_size, 1]
+        start_tokens = tf.fill([batch_size, 1], self.start_token_id)
+        sequences = tf.tile(start_tokens, [1, self.beam_width])
 
         # Initialize scores with zeros
-        scores = tf.zeros([batch_size], dtype=tf.float32)  # Shape: [batch_size]
-
-        # Initialize lengths (after first token)
-        lengths = tf.ones([batch_size], dtype=tf.int32)  # Shape: [batch_size]
+        scores = tf.zeros([batch_size, self.beam_width], dtype=tf.float32)
 
         # Initialize completed sequences and their scores
         completed_sequences = [[] for _ in range(batch_size)]
         completed_scores = [[] for _ in range(batch_size)]
 
-        # Initial decoder states
-        decoder_states = initial_decoder_states  # List of tensors, each of shape [batch_size, units]
+        # Initialize finished flags
+        finished = tf.zeros([batch_size, self.beam_width], dtype=tf.bool)
 
-        # First time step (t = 0)
-        t = 0
+        # Expand encoder outputs for beam search
+        encoder_outputs = tf.expand_dims(encoder_output, axis=1)
+        encoder_outputs = tf.tile(encoder_outputs, [1, self.beam_width, 1, 1])
+        flat_encoder_outputs = tf.reshape(
+            encoder_outputs,
+            [batch_size * self.beam_width, -1, encoder_output.shape[-1]]
+        )
 
-        # Run decoder single step
-        decoder_input = tf.expand_dims(start_tokens, axis=1)  # Shape: [batch_size, 1]
-        decoder_output, decoder_states = self.decoder.single_step(
-            decoder_input,
-            decoder_states,
-            encoder_output
-        )  # decoder_output: [batch_size, 1, vocab_size]
+        # Tile the initial decoder states for beam search
+        tiled_initial_states = []
+        for state in initial_decoder_states:
+            tiled_state = tf.expand_dims(state, axis=1)
+            tiled_state = tf.tile(
+                tiled_state,
+                [1, self.beam_width, 1]
+            )
+            tiled_initial_states.append(tf.reshape(tiled_state, [batch_size * self.beam_width, -1]))
 
-        # Squeeze the time dimension
-        decoder_output = tf.squeeze(decoder_output, axis=1)  # Shape: [batch_size, vocab_size]
+        # Flatten initial decoder states
+        flat_decoder_states = tiled_initial_states
 
-        # Compute log probabilities
-        log_probs = tf.math.log(decoder_output + 1e-10)  # Shape: [batch_size, vocab_size]
+        for t in range(self.max_length):
+            # Initialize per-batch, per-group tokens to keep track of tokens selected in each group at current time step
+            group_tokens = [ [ [] for _ in range(batch_size) ] for _ in range(self.num_groups) ]
 
-        # Expand scores to add log_probs
-        scores_expanded = tf.expand_dims(scores, axis=1)  # Shape: [batch_size, 1]
+            # Reshape current sequences to [batch_size * beam_width, current_seq_length]
+            flat_sequences = tf.reshape(sequences, [batch_size * self.beam_width, -1])
 
-        # Compute cumulative log probabilities
-        adjusted_scores = scores_expanded + log_probs  # Shape: [batch_size, vocab_size]
-
-        # Increment lengths (for the next step)
-        lengths = lengths + 1  # Lengths become 2
-
-        # Apply length penalty
-        penalties = tf.pow((5.0 + tf.cast(lengths, tf.float32)) / 6.0, self.length_penalty)
-        penalties = tf.expand_dims(penalties, axis=1)  # Shape: [batch_size, 1]
-        total_scores = adjusted_scores / penalties  # Shape: [batch_size, vocab_size]
-
-        # Get the top k scores and their indices
-        topk_scores, topk_indices = tf.math.top_k(total_scores, k=self.beam_width, sorted=True)
-        # Shapes: [batch_size, beam_width]
-
-        # Expand sequences
-        sequences = tf.expand_dims(sequences, axis=1)  # Shape: [batch_size, 1, seq_length]
-        sequences = tf.tile(sequences, [1, self.beam_width, 1])  # Shape: [batch_size, beam_width, seq_length]
-        sequences = tf.concat([sequences, tf.expand_dims(topk_indices, axis=2)], axis=2)  # Append new tokens
-        sequences = tf.reshape(sequences,
-                               [batch_size * self.beam_width, -1])  # Shape: [batch_size * beam_width, seq_length]
-
-        # Update scores
-        scores = tf.reshape(topk_scores, [-1])  # Shape: [batch_size * beam_width]
-
-        # Update decoder states
-        # For each layer in decoder_states, select the corresponding states for the top beams
-        decoder_states = [tf.expand_dims(state, axis=1) for state in
-                          decoder_states]  # Each state: [batch_size, 1, units]
-        decoder_states = [tf.tile(state, [1, self.beam_width, 1]) for state in
-                          decoder_states]  # [batch_size, beam_width, units]
-        decoder_states = [tf.reshape(state, [batch_size * self.beam_width, -1]) for state in decoder_states]
-
-        # Expand lengths to match beams
-        lengths = tf.expand_dims(lengths, axis=1)  # Shape: [batch_size, 1]
-        lengths = tf.tile(lengths, [1, self.beam_width])  # Shape: [batch_size, beam_width]
-        lengths = tf.reshape(lengths, [batch_size * self.beam_width])  # Shape: [batch_size * beam_width]
-
-        # Encoder outputs are repeated for each beam
-        encoder_outputs = tf.repeat(encoder_output, repeats=self.beam_width,
-                                    axis=0)  # Shape: [batch_size * beam_width, seq_len_enc, enc_units]
-
-        # Debugging: Print initial sequences and scores
-        print(f"\nTime step {t}:")
-        print(f"Sequences shape: {sequences.shape}")
-        print(f"Sequences: {sequences.numpy().tolist()}")
-        print(f"Scores: {scores.numpy().tolist()}")
-        print(f"Lengths: {lengths.numpy().tolist()}")
-
-        # Limit the number of time steps to print for debugging
-        max_print_time_steps = 5
-
-        for t in range(1, self.max_length):
             # Get the last token from each sequence
-            last_tokens = sequences[:, -1]  # Shape: [batch_size * beam_width]
+            last_tokens = flat_sequences[:, -1]
 
             # Prepare decoder input
-            decoder_input = tf.expand_dims(last_tokens, axis=1)  # Shape: [batch_size * beam_width, 1]
+            decoder_input = tf.expand_dims(last_tokens, axis=1)
 
             # Run decoder single step
             decoder_output, new_states = self.decoder.single_step(
                 decoder_input,
-                decoder_states,
-                encoder_outputs
-            )  # decoder_output: [batch_size * beam_width, 1, vocab_size]
+                flat_decoder_states,
+                flat_encoder_outputs
+            )
 
             # Squeeze the time dimension
             decoder_output = tf.squeeze(decoder_output, axis=1)  # Shape: [batch_size * beam_width, vocab_size]
 
             # Compute log probabilities
-            log_probs = tf.math.log(decoder_output + 1e-10)  # Shape: [batch_size * beam_width, vocab_size]
+            log_probs = tf.math.log(decoder_output + 1e-10)
 
-            # Expand scores to add log_probs
-            scores_expanded = tf.expand_dims(scores, axis=1)  # Shape: [batch_size * beam_width, 1]
+            # Apply temperature scaling to log_probs
+            temperature = 2.0  # Adjust as needed
+            log_probs = log_probs / temperature
 
-            # Compute cumulative log probabilities
-            adjusted_scores = scores_expanded + log_probs  # Shape: [batch_size * beam_width, vocab_size]
+            # Reshape log_probs to [batch_size, beam_width, vocab_size]
+            log_probs = tf.reshape(log_probs, [batch_size, self.beam_width, -1])
 
-            # Apply length penalty
-            penalties = tf.pow((5.0 + tf.cast(lengths, tf.float32)) / 6.0, self.length_penalty)
-            penalties = tf.expand_dims(penalties, axis=1)  # Shape: [batch_size * beam_width, 1]
-            total_scores = adjusted_scores / penalties
+            # Add random noise to promote diversity
+            epsilon = 1e-1  # Increased epsilon
+            noise = tf.random.uniform(tf.shape(log_probs), minval=0, maxval=epsilon)
+            log_probs = log_probs + noise
 
-            # Reshape for top_k selection
-            total_scores = tf.reshape(total_scores, [batch_size, self.beam_width * self.vocab_size])
+            # Set log_probs of finished beams to -inf to prevent further expansion
+            log_probs = tf.where(
+                tf.expand_dims(finished, axis=2),
+                tf.fill(tf.shape(log_probs), float('-inf')),
+                log_probs
+            )
 
-            # Get the top k scores and their indices
-            topk_scores, topk_indices = tf.math.top_k(total_scores, k=self.beam_width, sorted=True)
+            # **Print decoder output probabilities for debugging**
+            # Reshape decoder_output for printing
+            decoder_output_reshaped = tf.reshape(decoder_output, [batch_size, self.beam_width, -1])
 
-            # Calculate beam indices and token indices
-            beam_indices = topk_indices // self.vocab_size  # Shape: [batch_size, beam_width]
-            token_indices = topk_indices % self.vocab_size  # Shape: [batch_size, beam_width]
+            # For each batch item and beam, get the top k tokens and their probabilities
+            k = 5  # Number of top tokens to inspect
+            for i in range(batch_size):
+                for j in range(self.beam_width):
+                    probs = decoder_output_reshaped[i, j]  # Shape: [vocab_size]
+                    topk_probs, topk_indices = tf.math.top_k(probs, k=k)
+                    topk_probs_np = topk_probs.numpy()
+                    topk_indices_np = topk_indices.numpy()
+                    # Map indices to tokens if possible
+                    # Ensure that the decoder has access to the tokenizer's index_word mapping
+                    if hasattr(self.decoder, 'tokenizer') and hasattr(self.decoder.tokenizer, 'index_word'):
+                        tokens = [self.decoder.tokenizer.index_word.get(idx, '<UNK>') for idx in topk_indices_np]
+                    else:
+                        tokens = [str(idx) for idx in topk_indices_np]  # Fallback to indices if tokenizer not available
+                    print(f"Time step {t}, Batch {i}, Beam {j}")
+                    for token, prob in zip(tokens, topk_probs_np):
+                        print(f"  Token: {token}, Probability: {prob:.4f}")
+            # **End of print statements**
 
-            # Flatten indices for gathering
-            batch_offsets = tf.range(batch_size) * self.beam_width  # Shape: [batch_size]
-            beam_indices_flat = beam_indices + tf.expand_dims(batch_offsets, axis=1)  # Shape: [batch_size, beam_width]
-            beam_indices_flat = tf.reshape(beam_indices_flat, [-1])  # Shape: [batch_size * beam_width]
+            # Initialize lists to collect group results
+            all_topk_scores = []
+            all_topk_indices = []
+            all_beam_indices = []
 
-            # Gather sequences and append new tokens
-            sequences = tf.gather(sequences, beam_indices_flat)
-            sequences = tf.concat([sequences, tf.reshape(token_indices, [-1, 1])], axis=1)
+            for group_idx in range(self.num_groups):
+                # Compute group offsets
+                group_start = group_idx * self.group_size
+                group_end = group_start + self.group_size
 
-            # Gather decoder states
-            decoder_states = [tf.gather(state, beam_indices_flat) for state in new_states]
+                # Extract log_probs and scores for this group
+                group_log_probs = log_probs[:, group_start:group_end, :]
+                group_scores = scores[:, group_start:group_end]
 
-            # Update scores
-            scores = tf.reshape(topk_scores, [-1])
+                # Add current scores to log_probs
+                group_scores_expanded = tf.expand_dims(group_scores, axis=2)
+                adjusted_scores = group_scores_expanded + group_log_probs
 
-            # Update lengths
-            lengths = tf.gather(lengths, beam_indices_flat)
-            # Check for end token to prevent increasing length after EOS
-            is_finished = tf.equal(token_indices, self.end_token_id)  # Shape: [batch_size, beam_width]
-            is_finished_flat = tf.reshape(is_finished, [-1])
-            lengths = tf.where(is_finished_flat, lengths, lengths + 1)
+                # Build penalty mask
+                penalty_mask = tf.zeros_like(adjusted_scores)
+                if group_idx > 0:
+                    for batch_idx in range(batch_size):
+                        penalized_tokens = []
+                        for prev_group_idx in range(group_idx):
+                            penalized_tokens.extend(group_tokens[prev_group_idx][batch_idx])
 
-            # Debugging: Print sequences and scores at current time step
-            if t <= max_print_time_steps:
-                print(f"\nTime step {t}:")
-                print(f"Sequences shape: {sequences.shape}")
-                sequences_list = sequences.numpy().tolist()
-                print(f"Sequences: {sequences_list}")
-                print(f"Scores: {scores.numpy().tolist()}")
-                print(f"Lengths: {lengths.numpy().tolist()}")
+                        if penalized_tokens:
+                            penalized_tokens = tf.constant(penalized_tokens, dtype=tf.int32)
+                            updates = tf.ones_like(penalized_tokens, dtype=tf.float32) * self.diversity_strength
 
-            # Handle completed sequences
-            for i in range(batch_size * self.beam_width):
-                if is_finished_flat[i]:
-                    seq = sequences[i].numpy().tolist()
-                    score = scores[i].numpy()
-                    length = lengths[i].numpy()
-                    batch_idx = i // self.beam_width
-                    # Adjust score with final length penalty
-                    final_penalty = tf.pow((5.0 + tf.cast(length, tf.float32)) / 6.0, self.length_penalty)
-                    final_score = scores[i].numpy() / final_penalty.numpy()
-                    completed_sequences[batch_idx].append(seq)
-                    completed_scores[batch_idx].append(final_score)
-                    scores = tf.tensor_scatter_nd_update(
-                        scores,
-                        [[i]],
-                        [float('-inf')]
-                    )
+                            # Build indices
+                            indices = tf.stack(
+                                [
+                                    tf.repeat(tf.range(self.group_size), len(penalized_tokens)),
+                                    tf.tile(penalized_tokens, [self.group_size])
+                                ],
+                                axis=-1
+                            )
 
-            # Early stopping if all sequences are completed
-            if all(len(completed_sequences[i]) >= self.return_top_n for i in range(batch_size)):
+                            # Create penalty mask using scatter_nd
+                            penalty_mask[batch_idx] = tf.tensor_scatter_nd_add(
+                                penalty_mask[batch_idx],
+                                indices,
+                                updates
+                            )
+
+                # Subtract diversity penalty
+                adjusted_scores -= penalty_mask
+
+                # Apply length penalty
+                adjusted_scores = adjusted_scores / tf.pow(tf.cast(t + 1, tf.float32), self.length_penalty)
+
+                # Reshape to [batch_size, group_size * vocab_size]
+                adjusted_scores_flat = tf.reshape(adjusted_scores, [batch_size, -1])
+
+                # Get the top k scores and their indices for this group
+                topk_scores, topk_indices = tf.math.top_k(adjusted_scores_flat, k=self.group_size, sorted=True)
+
+                # Map topk_indices back to beam and token indices
+                vocab_size = adjusted_scores.shape[2]
+                beam_indices = topk_indices // vocab_size
+                token_indices = topk_indices % vocab_size
+
+                # Adjust beam indices to account for group offset
+                beam_indices += group_start
+
+                # Append to all beams
+                all_topk_scores.append(topk_scores)
+                all_topk_indices.append(token_indices)
+                all_beam_indices.append(beam_indices)
+
+                # Update group tokens
+                for batch_idx in range(batch_size):
+                    tokens = token_indices[batch_idx].numpy().tolist()
+                    group_tokens[group_idx][batch_idx].extend(tokens)
+
+            # Concatenate group results
+            scores = tf.concat(all_topk_scores, axis=1)
+            token_indices = tf.concat(all_topk_indices, axis=1)
+            beam_indices = tf.concat(all_beam_indices, axis=1)
+
+            # Gather the sequences corresponding to beam_indices
+            batch_offsets = tf.range(batch_size)[:, None] * self.beam_width
+            beam_indices_flat = beam_indices + batch_offsets
+            beam_indices_flat = tf.reshape(beam_indices_flat, [batch_size * self.beam_width])
+
+            # Gather the new sequences
+            selected_sequences = tf.gather(flat_sequences, beam_indices_flat)
+            new_tokens = tf.reshape(token_indices, [batch_size * self.beam_width, 1])
+            new_sequences = tf.concat([selected_sequences, new_tokens], axis=1)
+
+            # Update the finished mask
+            is_finished = tf.equal(new_tokens, self.end_token_id)
+            is_finished = tf.reshape(is_finished, [batch_size, self.beam_width])
+            finished = tf.logical_or(finished, is_finished)
+
+            # Update completed sequences and their scores
+            for i in range(batch_size):
+                for j in range(self.beam_width):
+                    idx = i * self.beam_width + j
+                    if is_finished[i, j]:
+                        seq = new_sequences[idx].numpy().tolist()
+                        score = scores[i, j].numpy()
+                        if seq not in completed_sequences[i]:
+                            completed_sequences[i].append(seq)
+                            completed_scores[i].append(score)
+
+            # Update sequences
+            sequences = tf.reshape(new_sequences, [batch_size, self.beam_width, -1])
+
+            # Update decoder states
+            flat_decoder_states = []
+            for state in new_states:
+                state = tf.reshape(state, [batch_size * self.beam_width, -1])
+                selected_states = tf.gather(state, beam_indices_flat)
+                flat_decoder_states.append(selected_states)
+
+            # Early stopping if all beams have finished
+            if tf.reduce_all(finished):
                 break
 
         # Collect top sequences
@@ -276,27 +325,15 @@ class BeamSearchDecoder:
         best_scores = []
         for i in range(batch_size):
             seq_score_pairs = list(zip(completed_sequences[i], completed_scores[i]))
-            # If there are not enough completed sequences, fill with current sequences
             if len(seq_score_pairs) < self.return_top_n:
                 remaining = self.return_top_n - len(seq_score_pairs)
-                # Get current sequences and scores for this batch item
-                start_idx = i * self.beam_width
-                end_idx = start_idx + self.beam_width
-                current_seqs = sequences[start_idx:end_idx].numpy().tolist()
-                current_scores = scores[start_idx:end_idx].numpy().tolist()
-                current_lengths = lengths[start_idx:end_idx].numpy().tolist()
-                # Adjust current scores with length penalty
-                for idx in range(len(current_scores)):
-                    final_penalty = tf.pow((5.0 + tf.cast(current_lengths[idx], tf.float32)) / 6.0, self.length_penalty)
-                    current_scores[idx] = current_scores[idx] / final_penalty.numpy()
+                current_seqs = sequences[i].numpy().tolist()
+                current_scores = scores[i].numpy().tolist()
                 current_seq_score_pairs = list(zip(current_seqs, current_scores))
-                # Sort current sequences by score
-                current_seq_score_pairs.sort(key=lambda x: x[1], reverse=True)
-                seq_score_pairs.extend(current_seq_score_pairs[:remaining])
-
-            # Sort all sequences by score
+                seq_score_pairs.extend(current_seq_score_pairs)
             seq_score_pairs.sort(key=lambda x: x[1], reverse=True)
-            best_sequences.append([seq for seq, _ in seq_score_pairs[:self.return_top_n]])
-            best_scores.append([score for _, score in seq_score_pairs[:self.return_top_n]])
+            top_n = min(self.return_top_n, len(seq_score_pairs))
+            best_sequences.append([seq for seq, _ in seq_score_pairs[:top_n]])
+            best_scores.append([score for _, score in seq_score_pairs[:top_n]])
 
         return best_sequences, best_scores

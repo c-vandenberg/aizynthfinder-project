@@ -13,7 +13,7 @@ config_file = 'src/config.yml'
 
 finder = AiZynthFinder(configfile=config_file)
 finder.expansion_policy.select("seq2seq_policy")
-finder.target_smiles = "CC(=O)Nc1ccc(O)cc1"  # Acetaminophen/Paracetamol
+finder.target_smiles = "CC(=O)Nc1ccc(cc1)O"  # Acetaminophen/Paracetamol
 
 # Prepare the search tree
 finder.prepare_tree()
