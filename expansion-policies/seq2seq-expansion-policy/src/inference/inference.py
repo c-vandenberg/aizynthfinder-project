@@ -13,7 +13,7 @@ config_file = 'src/config.yml'
 
 finder = AiZynthFinder(configfile=config_file)
 finder.expansion_policy.select("seq2seq_policy")
-finder.target_smiles = "O=C1NC(=O)CCC1N3C(=O)c2cccc(c2C3)N"  # Lenalidomide (Revlimid)
+finder.target_smiles = "CC(=O)Nc1ccc(cc1)O"  # Acetaminophen/Paracetamol
 
 # Prepare the search tree
 finder.prepare_tree()

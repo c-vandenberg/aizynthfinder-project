@@ -227,6 +227,7 @@ class SmilesStringMetrics:
         """
         if not isinstance(smiles, str):
             raise ValueError("smiles must be a string.")
+
         # Suppress RDKit error messages. Invalid SMILES errors overload logs early in training.
         RDLogger.DisableLog('rdApp.error')
 

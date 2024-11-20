@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from rdkit import Chem
 from aizynthfinder.context.policy.expansion_strategies import ExpansionStrategy
@@ -87,7 +88,6 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         self._logger.debug(f"Target molecules: {smiles_list}")
         predicted_precursors_list, probabilities_list = self.predict_precursors(smiles_list)
 
-        # Log the predictions for each molecule
         for idx, (mol, predicted_precursors, probs) in enumerate(
                 zip(molecules, predicted_precursors_list, probabilities_list)):
             self._logger.debug(f"Predictions for molecule {mol.smiles}:")
@@ -147,11 +147,15 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
                 is_input_sequence=False
             )
 
-            # Normalize probabilities
-            total_score = sum(seq_scores)
-            probabilities = [score / total_score for score in seq_scores]
+            # Convert negative log probabilities to probabilities
+            # First, convert seq_scores to a numpy array
+            seq_scores = np.array(seq_scores)
 
-            # Validate and append
+            # Since seq_scores are negative log probabilities, we can compute probabilities as `prob = exp(-score)`
+            exp_neg_scores = np.exp(-seq_scores)
+            # Normalize probabilities
+            probabilities = exp_neg_scores / np.sum(exp_neg_scores)
+
             valid_smiles = []
             valid_probs = []
             for smiles_string, prob in zip(predicted_smiles, probabilities):
@@ -160,16 +164,14 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
                     self.smiles_tokenizer.start_token,
                     self.smiles_tokenizer.end_token
                 )
-                # Split the SMILES string on '.' to handle multiple reactants
                 reactant_smiles_list = cleaned_smiles.split('.')
                 is_valid = all(self._is_valid_smiles(smi) for smi in reactant_smiles_list)
                 if is_valid:
                     valid_smiles.append(cleaned_smiles)
-                    valid_probs.append(prob)
+                    valid_probs.append(float(prob))
                 else:
                     self._logger.warning(f"Invalid SMILES generated: {cleaned_smiles}")
 
-            # Log the valid predicted SMILES
             self._logger.debug(f"Valid predicted SMILES for molecule {idx}: {valid_smiles}")
 
             all_predicted_smiles.append(valid_smiles)
@@ -183,23 +185,18 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             mol = Chem.MolFromSmiles(smiles)
             return mol is not None
         except:
-            # In case of any parsing exceptions
             return False
 
     @staticmethod
     def _clean_sequence(sequence: str, start_token: str, end_token: str) -> str:
-        # Remove start token and the following space
         if sequence.startswith(start_token + ' '):
             sequence = sequence[len(start_token) + 1:]
-        # Remove everything after end token and the preceding space
         end_idx = sequence.find(' ' + end_token)
         if end_idx != -1:
             sequence = sequence[:end_idx]
-        # Remove any remaining start or end tokens
         sequence = sequence.replace(start_token, '').replace(end_token, '')
-        # Remove all spaces
         sequence = sequence.replace(' ', '')
         return sequence.strip()
 
     def reset_cache(self) -> None:
-        pass  # Implement caching if necessary
+        pass

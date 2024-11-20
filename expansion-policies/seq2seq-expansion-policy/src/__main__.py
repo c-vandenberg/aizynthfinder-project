@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import pydevd_pycharm
 
@@ -9,7 +7,7 @@ from trainers.trainer import Trainer
 
 def main():
     # Path to the configuration file
-    config_path = 'config/training/model_v25_config.yml'
+    config_path = 'config/training/model_v27_config.yml'
 
     # Initialize the Trainer with the configuration
     trainer = Trainer(config_path=config_path)

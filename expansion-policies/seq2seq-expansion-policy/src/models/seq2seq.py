@@ -239,7 +239,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         ValueError
             If `smiles_tokenizer` is not set.
         """
-        batch_size, encoder_output, decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
+        batch_size, encoder_output, decoder_states, start_token_id, end_token_id, vocab_size = self._encode_and_initialize(
             encoder_input,
             start_token_id,
             end_token_id
@@ -283,10 +283,11 @@ class RetrosynthesisSeq2SeqModel(Model):
     def predict_sequence_beam_search(
         self,
         encoder_input,
-        beam_width=5,
-        max_length=140,
-        start_token_id=None,
-        end_token_id=None,
+        beam_width: int = 5,
+        max_length: int = 140,
+        start_token_id: Optional[int] = None,
+        end_token_id: Optional[int] = None,
+        vocab_size: Optional[int] = None,
         return_top_n=1
     ) -> Tuple[List[List[List[int]]], List[List[float]]]:
         """
@@ -315,19 +316,20 @@ class RetrosynthesisSeq2SeqModel(Model):
         ValueError
             If `smiles_tokenizer` is not set.
         """
-        batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
+        batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id, vocab_size = self._encode_and_initialize(
             encoder_input,
             start_token_id,
-            end_token_id
+            end_token_id,
+            vocab_size
         )
 
         # Initialize BeamSearchDecoder
         beam_search_decoder = BeamSearchDecoder(
             decoder=self.decoder,
-            beam_width=beam_width,
-            max_length=max_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id,
+            beam_width=beam_width,
+            max_length=max_length,
             return_top_n=return_top_n
         )
 
@@ -343,8 +345,9 @@ class RetrosynthesisSeq2SeqModel(Model):
         self,
         encoder_input: tf.Tensor,
         start_token_id: Optional[int] = None,
-        end_token_id: Optional[int] = None
-    ) -> Tuple[int, tf.Tensor, List[tf.Tensor], int, int]:
+        end_token_id: Optional[int] = None,
+        vocab_size: Optional[int] = None,
+    ) -> Tuple[int, tf.Tensor, List[tf.Tensor], int, int, int]:
         """
         Helper method to encode input and initialize decoder states.
 
@@ -403,7 +406,10 @@ class RetrosynthesisSeq2SeqModel(Model):
             if end_token_id is None:
                 raise ValueError(f"End token '{end_token}' not found in tokenizer's word_index.")
 
-        return batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id
+        if vocab_size is None:
+            vocab_size = self.smiles_tokenizer.vocab_size
+
+        return batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id, vocab_size
 
     def get_config(self) -> Dict[str, Any]:
         """

@@ -2,7 +2,7 @@
 # -
 #
 # Training run metrics:
-#   - Epochs: 5
+#   - Epochs: 10
 #
 #   - Train Loss (Smoothed):
 #   - Train Accuracy (Smoothed):
@@ -57,7 +57,7 @@ data:
   reactants_file: 'data/raw/liu-et-al/reactants_smiles'
   products_valid_file: 'data/raw/liu-et-al/validation_products_smiles'
   reactants_valid_file: 'data/raw/liu-et-al/validation_reactants_smiles'
-  tokenizer_save_path: 'data/training/liu-et-al/model-v26/tokenizer/model_v26_tokenizer.json'
+  tokenizer_save_path: 'data/training/liu-et-al/model-v27/tokenizer/model_v27_tokenizer.json'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -68,10 +68,10 @@ data:
 model:
   input_vocab_size: null  # To be set dynamically based on tokenizer
   output_vocab_size: null  # To be set dynamically based on tokenizer
-  attention_dim: 512
-  encoder_embedding_dim: 512
-  decoder_embedding_dim: 512
-  units: 512
+  attention_dim: 256
+  encoder_embedding_dim: 256
+  decoder_embedding_dim: 256
+  units: 256
   encoder_num_layers: 2
   decoder_num_layers: 4
   beam_width: 5
@@ -85,13 +85,13 @@ training:
   epochs: 100
   patience: 5
   reverse_tokenized_input_sequence: True
-  model_save_path: 'data/training/liu-et-al/model-v26/model/saved_model'
-  model_save_dir: 'data/training/liu-et-al/model-v26/model'
-  valid_metrics_dir: 'data/training/liu-et-al/model-v26/validation-metrics'
-  test_metrics_dir: 'data/training/liu-et-al/model-v26/testing-metrics'
-  tensorboard_dir: 'data/training/liu-et-al/model-v26/tensorboard'
-  log_dir: 'logs/liu-et-al/model-v26'
-  checkpoint_dir: 'data/training/liu-et-al/model-v26/checkpoints'
+  model_save_path: 'data/training/liu-et-al/model-v27/model/saved_model'
+  model_save_dir: 'data/training/liu-et-al/model-v27/model'
+  valid_metrics_dir: 'data/training/liu-et-al/model-v27/validation-metrics'
+  test_metrics_dir: 'data/training/liu-et-al/model-v27/testing-metrics'
+  tensorboard_dir: 'data/training/liu-et-al/model-v27/tensorboard'
+  log_dir: 'logs/liu-et-al/model-v27'
+  checkpoint_dir: 'data/training/liu-et-al/model-v27/checkpoints'
   num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
