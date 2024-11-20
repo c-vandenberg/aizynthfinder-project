@@ -1,5 +1,15 @@
 # AiZynthFinder Research Project
 
+## Abstract
+
+Retrosynthetic analysis and reaction prediction are fundamental for efficient chemical synthesis and drug discovery. Consequently, computer-assisted synthesis prediction (CASP) tools have been at the forefront of research and development, striving to computationally identify the optimal sequence of chemical reaction steps that transform commercially viable starting materials into desired chemical compounds. <sup>**1**</sup> 
+
+A leading CASP tool, AiZynthFinder, achieves retrosynthesis prediction by generating a retrosynthetic search tree using a template-based, feedforward neural network (FNN) model known as the expansion policy to give a ranked list of reaction templates. This process is followed by another neural network, the filter policy, which removes unfeasible reactions. Once the retrosynthesis search tree is constructed, a Monte Carlo Tree Search (MCTS) algorithm traverses the search tree to identify the best synthetic routes.
+
+To enhance AiZynthFinder, this study integrates SMILES-based sequence-to-sequence (Seq2Seq) and transformer models into its expansion policy. By leveraging these advanced neural network architectures with SMILES-based chemical representations, we aim to overcome the inherent limitations of template-based retrosynthetic methods. The integration seeks to broaden accurate predictions beyond the rule-based knowledge base, and ensure that predictions consider the entire molecular environment and account for stereochemistry.
+
+This study is ongoing, involving continuous model optimisations and research. The results and discussion for the latest Seq2Seq model are available [here](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#543-results-and-discussion). Development of the transformer model is currently in progress.
+
 ## Contents
 
 <details>
@@ -37,7 +47,7 @@
   <summary><b>3. Sequence-to-Sequence Expansion Policy</b></summary>
   
   &nbsp; &nbsp; &nbsp; &nbsp; 3.1 [Limitations of Template-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#31-limitations-of-template-based-retrosynthetic-methods)<br>
-  &nbsp; &nbsp; &nbsp; &nbsp; 3.2 [Alternative SMILES-Based Retrosynthetic Method](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#32-alternative-smiles-based-retrosynthetic-method)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; 3.2 [Alternative SMILES-Based Retrosynthetic Methods](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#32-alternative-smiles-based-retrosynthetic-methods)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 3.3 [Sequence-to-Sequence Model](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#33-sequence-to-sequence-model)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 3.4 [Architecture of Sequence-to-Sequence Models](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#34-architecture-of-sequence-to-sequence-models)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 3.4.1 [Encoder](https://github.com/c-vandenberg/aizynthfinder-project/tree/master/expansion-policies/seq2seq-expansion-policy#341-encoder)<br>

@@ -17,7 +17,7 @@ A template-based retrosynthetic method is based on a predefined set of rules, an
    
 4. Finally, a rules-based system **does not fully account for stereochemistry**. **<sup>2</sup>**
 
-## 3.2 Alternative SMILES-Based Retrosynthetic Method
+## 3.2 Alternative SMILES-Based Retrosynthetic Methods
 
 A deep learning approach that **avoids a template-based/rule-based approach** could **avoid the above limitations**.
 
