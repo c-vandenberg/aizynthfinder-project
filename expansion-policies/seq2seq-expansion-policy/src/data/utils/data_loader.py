@@ -483,6 +483,7 @@ class DataLoader:
                 raise ValueError(f"Invalid SMILES: {smi}")
             canonical_smi = Chem.MolToSmiles(mol, canonical=True)
             canonical_components.append(canonical_smi)
+
         # Reassemble the components in the same order, separated by '.'
         canonical_smiles = '.'.join(canonical_components)
         return canonical_smiles
