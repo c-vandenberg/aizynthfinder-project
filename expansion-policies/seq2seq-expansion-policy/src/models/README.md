@@ -2,7 +2,7 @@
 
 ## 5.1 Data Preparation
 
-The training, validation, and testing data for developing the seq2seq model in this project were derived from the *Liu et al.* model codebase. **<sup>1</sup>**
+The training, validation, and testing data for developing the Seq2Seq model in this project were derived from the *Liu et al.* model codebase. **<sup>1</sup>**
 
 These data sets had already been processed as per the process described in [**Section 4.2.1**](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/README.md#421-data-preparation), and split into:
 1. **Train sources** (products)
@@ -18,13 +18,13 @@ Additionally, the sources and target datasets were **combined** so that they cou
 
 ## 5.2 Model Optimisation
 
-As this project is to be an introduction to seq2seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**). This model was **iteratively optimised** over the course of the research project.
+As this project is to be an introduction to Seq2Seq models, the model architecture was **not based on the open source library** provided by *Britz et al.*. Instead, a **custom model** was implemented based on the architecture and hyperparameters described by *Liu et al.* (**Table 1**). This model was **iteratively optimised** over the course of the research project.
 
 <br>
   <div align="center">
     <img src="https://github.com/user-attachments/assets/999ae54c-1d80-4f0a-8411-cb5d9391766e", alt="liu-et-al-model-hyperparameters"/>
     <p>
-      <b>Table 1</b> Key hyperparameters of the seq2seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
+      <b>Table 1</b> Key hyperparameters of the Seq2Seq model by <i>Liu at al.</i> <b><sup>1</sup></b>
     </p>
   </div>
 <br>
@@ -48,7 +48,7 @@ Setting up a custom deterministic training environment was used as an introducti
 
 ### 5.2.2 Data Tokenization and Preprocessing Optimisation
 
-Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the seq2seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
+Despite promising training, validation and test accuracy (~68%) and loss (~0.10) for a full training run of an early model version, BLEU score remained very low (~2%). Additionally, once the Seq2Seq model was integrated into AiZynthFinder, analysis of the retrosynthesis predictions showed that they were converging on SMILES strings containing **all carbons** (either `C` or `c`).
 
 Debugging of tokenizer showed that space characters between the individual chemical characters were also being tokenized. This explains the relatively **high token-level accuracy**, but very **low sequence-level accuracy** (BLEU score). This also may explain why the model was **overfitting to the most frequent tokens (i.e. `C` and `c`)**.
 
@@ -393,7 +393,7 @@ In reality, forcing all pre-activations to have a **zero mean** and **unit stand
 **Layer normalisation** is a normalisation technique introduced to address some of the limitations of **batch normalisation**. In layer normalisation, **all neurons in a particular layer** effectively have the **same distribution across all features for a given input**.
 * For example, if each input has **`d` features**, it is a **d-dimensional vector**. If there are **`B` elements** in a batch, the normalisation is done **along the length of the d-dimensional vector** and **not across the batch of size `B`**. **<sup>7</sup>**
 
-Normalising **across all features of each input removes the dependence on batches/batch statistics**. This makes layer normalisation **well suited for sequence models** such as seq2seq models, RNNs and transformers.
+Normalising **across all features of each input removes the dependence on batches/batch statistics**. This makes layer normalisation **well suited for sequence models** such as Seq2Seq models, RNNs and transformers.
 
 **Fig 5** illustrates the same example as earlier, but with **layer normalisation instead of batch normalisation**.
 
@@ -420,7 +420,7 @@ Regarding residual connection, this improvement in model performance was at odds
 ### i. Bahdanau Attention Mechanism
 Initial baseline model used an **additive (Bahdanau) attention mechanism** in line with the mechanism used by *Liu et al.* **<sup>1</sup>**, with the **same dimension** (**Table 8**). However, **attention dimension** and **units** were decreased first to **256**, then to **128** for efficient hardware usage while testing subsequent model versions.
 
-As with all attention mechanisms, the Bahdanau attention mechanism enables the seq2seq model to **dynamically focus on different parts of the input sequence** when **generating each element of the output sequence**. The high-level breakdown of this process is described in section [Section 3.4.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism). 
+As with all attention mechanisms, the Bahdanau attention mechanism enables the Seq2Seq model to **dynamically focus on different parts of the input sequence** when **generating each element of the output sequence**. The high-level breakdown of this process is described in section [Section 3.4.3](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/README.md#343-attention-mechanism). 
 
 The mechanism by which Bahdanau attention does this though is as follows:
 1. **Mechanism**: Computes **alignment scores** by using a **feedforward neural network (FNN)** that **jointly considers the encoder hidden states** and the **decoder's previous hidden state**.
@@ -464,7 +464,7 @@ By **applying layer normalisation around attention**, in theory, the model is ab
 
 Once the model had the **majority of its optimisation features implemented**, a **beam search** was implemented with a **beam width of 5**, in line with *Liu et al.* **<sup>1</sup>**.
 
-Beam search is a **heuristic search algorithm** that **explores a graph** by **expanding the most promising nodes in a limited set**. In the context of seq2seq models, it is used during the **decoding phase** to **generate the most probable output sequences based on the model's predictions**.
+Beam search is a **heuristic search algorithm** that **explores a graph** by **expanding the most promising nodes in a limited set**. In the context of Seq2Seq models, it is used during the **decoding phase** to **generate the most probable output sequences based on the model's predictions**.
 
 The **key characteristics** of beam search are:
 1. **Breadth-First Exploration** - Unlike **greedy decoding**, which **selects the most probable token at each step**, beam search **maintains multiple hypotheses (beams) simultaneously**.
@@ -862,7 +862,7 @@ A **high-level overview** of the **main steps** in the model training pipeline i
   <div align="center">
     <img src="https://github.com/user-attachments/assets/9bbf0643-76d8-4d9d-a080-60025852a4da", alt="seq2seq-model-train-pipeline"/>
     <p>
-      <b>Fig 9</b> Retrosynthesis seq2seq model training pipeline.
+      <b>Fig 9</b> Retrosynthesis Seq2Seq model training pipeline.
     </p>
   </div>
 <br>
@@ -1171,6 +1171,134 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
         * **Shape:** **`(batch_size, seq_len_dec, enc_units)`**.
 
 ### 5.4.3 Results and Discussion
+
+As of **21/11/24**, the current **top model architecture** has been evaluated using **two sets of hyperparameters**, resulting in the designations **model V27** and **model V28**. 
+
+Model V27 is configured with:
+* **Units**: 256
+* **Attention Dimension**: 256
+* **Encoder Embedding Dimension**: 256
+* **Decoder Embedding Dimension**: 256
+
+Model V28 is configured with:
+* **Units**: 512
+* **Attention Dimension**: 512
+* **Encoder Embedding Dimension**: 512
+* **Decoder Embedding Dimension**: 512
+
+All other hyperparameters are **consistent between the two models**.
+
+Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefor, for **performance comparison**, Model V27 was configured with the **number of hidden layers (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
+
+Both models were trained with using identical product and reactant datasets consisting of approximately **XXXX reactions**. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation), and split into training and testing data in a ratio of 7:3.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Hyperparameter</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Batch Size</td>
+            <td>32</td>
+        </tr>
+        <tr>
+            <td>Units</td>
+            <td>256</td>
+        </tr>
+        <tr>
+            <td>Encoder Embedding Dimension</td>
+            <td>256</td>
+        </tr>
+        <tr>
+            <td>Decoder Embedding Dimension</td>
+            <td>256</td>
+        </tr>
+        <tr>
+            <td>Number of Encoder Layers</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td>Number of Decoder Layers</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Max Encoder Sequence Length</td>
+            <td>140</td>
+        </tr>
+        <tr>
+            <td>Max Decoder Sequence Length</td>
+            <td>140</td>
+        </tr>
+        <tr>
+            <td>Dropout Rate</td>
+            <td>0.8</td>
+        </tr>
+        <tr>
+            <td>Learning Rate</td>
+            <td>1e-4</td>
+        </tr>
+        <tr>
+            <td>Beam Width</td>
+            <td>5</td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 1</b> Model V27 hyperparameters.
+  </p>
+</div>
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Evalutaion Metric</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Loss</td>
+            <td>0.157</td>
+        </tr>
+        <tr>
+            <td>Accuracy</td>
+            <td>0.984</td>
+        </tr>
+        <tr>
+            <td>Perplexity</td>
+            <td>1.170</td>
+        </tr>
+        <tr>
+            <td>BLEU Score</td>
+            <td>0.665</td>
+        </tr>
+        <tr>
+            <td>Average Levenshtein Distance</td>
+            <td>32.163</td>
+        </tr>
+        <tr>
+            <td>Exact Match Accuracy</td>
+            <td>0.105</td>
+        </tr>
+        <tr>
+            <td>Chemical Validity Score</td>
+            <td>1.000</td>
+        </tr>
+        <tr>
+            <td>Average Tanimoto Similarity</td>
+            <td>0.869</td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table </b> Performance metrics of model V27 on test dataset.
+  </p>
+</div>
 
 ### 5.4.4 Debugging
 
