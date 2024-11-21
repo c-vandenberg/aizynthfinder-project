@@ -1192,7 +1192,17 @@ All other hyperparameters are **consistent between the two models**.
 
 Both models were trained with using identical product and reactant datasets consisting of approximately **50,000 reactions**, derived from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. The validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
 
-When evaluating the performance metrics of the two models, it became evident that **Model V28 significantly outperformed Model V27**, particularly in the **sequence-based metrics** (**Table 3**). This resulted in **vastly superior retrosynthetic SMILES predictions** when **incorportated as the AiZynthFinder expansion policy**.
+When evaluating the performance metrics of the two models, it became evident that **Model V28 significantly outperformed Model V27**, particularly in **sequence-based metrics** (**Table 3**). This improvement can be attributed to several factors:
+1. **Greater Model Capacity**
+    * **More units and larger embeddings** allow the model to **capture complex patterns** by **learning intricate dependencies**.
+    * **Higher-dimensional embeddings** for the encoder and decoder enable the model to **capture more semantic information about the tokens**.
+2. **Improved Generalisation**
+    * The **larger capacity** of Model V28 **reduces the likelihood of underfitting**, potentially **enhancing validation and test performance** (**up to a point**).
+3. **Enhanced Attention Mechanism**
+    * A **larger attention vector** allows for **more precise computation of alignment scores between the encoder and decoder states**.
+    * This improvement enables the attention mechanism to **focus more effectively on relevant parts of the input** when generating each output token.
+
+As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced significantly superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
