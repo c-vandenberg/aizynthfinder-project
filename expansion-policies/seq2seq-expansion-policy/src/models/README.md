@@ -1192,6 +1192,8 @@ Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu 
 
 Both models were trained with using identical product and reactant datasets consisting of approximately **XXXX reactions**. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation), and split into training and testing data in a ratio of 7:3.
 
+### Model V27
+
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
