@@ -1302,6 +1302,116 @@ Both models were trained with using identical product and reactant datasets cons
   </p>
 </div>
 
+### Model V28
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Hyperparameter</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Batch Size</td>
+            <td>32</td>
+        </tr>
+        <tr>
+            <td>Units</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Encoder Embedding Dimension</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Decoder Embedding Dimension</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Number of Encoder Layers</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td>Number of Decoder Layers</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Max Encoder Sequence Length</td>
+            <td>140</td>
+        </tr>
+        <tr>
+            <td>Max Decoder Sequence Length</td>
+            <td>140</td>
+        </tr>
+        <tr>
+            <td>Dropout Rate</td>
+            <td>0.8</td>
+        </tr>
+        <tr>
+            <td>Learning Rate</td>
+            <td>1e-4</td>
+        </tr>
+        <tr>
+            <td>Beam Width</td>
+            <td>5</td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 5</b> Model V28 hyperparameters.
+  </p>
+</div>
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Evalutaion Metric</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Loss</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Accuracy</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Perplexity</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>BLEU Score</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Average Levenshtein Distance</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Exact Match Accuracy</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Chemical Validity Score</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Average Tanimoto Similarity</td>
+            <td></td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 6</b> Performance metrics of model V28 on test dataset.
+  </p>
+</div>
+
 ### 5.4.4 Debugging
 
 ### i. Data Tokenization and Preprocessing Debugging
