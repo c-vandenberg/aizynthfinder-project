@@ -233,7 +233,7 @@ Learning rate ($$\eta$$) is a **scalar hyperparameter** that controls the **size
 
 **ReduceLROnPlateau** is another built-in callback in Keras (`tensorflow.keras.callbacks.ReduceLROnPlateau`) that **monitors a specific metric**, and **reduces the learning rate by a specified factor when it stops improving**. 
 
-In this model `tensorflow.keras.callbacks.ReduceLROnPlateau` was used to **monitor validation loss**, and **reduce learning rate by a factor of 0.1** when validation loss **hadn't improved over 3 epochs**.
+In this model `tensorflow.keras.callbacks.ReduceLROnPlateau` was used to **monitor validation loss**. It would **reduce learning rate by a factor of 0.1** if the validation loss **didn't improve over 3 consecutive epochs**.
 
 ### iii. Checkpoints (ModelCheckpoint)
 
@@ -1172,7 +1172,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.4.3 Results and Discussion
 
-As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**, resulting in the designations **model V27** and **model V28**. 
+As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**, resulting in the designations **Model V27** and **Model V28**. 
 
 Model V27 is configured with:
 * **Units**: 256
@@ -1190,9 +1190,13 @@ All other hyperparameters are **consistent between the two models**.
 
 Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefor, for **performance comparison**, Model V27 was configured with the **number of hidden layers (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
 
-Both models were trained with using identical product and reactant datasets consisting of approximately **XXXX reactions**. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation), and split into training and testing data in a ratio of 7:3.
+Both models were trained with using identical product and reactant datasets consisting of approximately **XXXX reactions**. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. Additionally, the validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
 
 ### Model V27
+
+**Model V27** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **51 epochs**. 
+
+Additionally, a **dynamic learning rate** strategy was employed using **TensorFlow's `ReduceLROnPlateau` callback**. This also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs**. This resulted in a **learning rate of `1e-6`** by epoch 51.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
