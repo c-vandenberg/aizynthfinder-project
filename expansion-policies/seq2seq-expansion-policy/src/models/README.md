@@ -1250,7 +1250,7 @@ Both models were trained with using identical product and reactant datasets cons
     </tbody>
   </table>
   <p>
-    <b>Table 1</b> Model V27 hyperparameters.
+    <b>Table 3</b> Model V27 hyperparameters.
   </p>
 </div>
 
@@ -1298,7 +1298,7 @@ Both models were trained with using identical product and reactant datasets cons
     </tbody>
   </table>
   <p>
-    <b>Table </b> Performance metrics of model V27 on test dataset.
+    <b>Table 4</b> Performance metrics of model V27 on test dataset.
   </p>
 </div>
 
