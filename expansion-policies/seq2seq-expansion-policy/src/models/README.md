@@ -142,7 +142,7 @@ Callbacks can be used for a wide range of purposes, such as:
 4. **Generate logs**
 5. **Create a TensorBoard**
 
-TensorFlow Keras provides a **set of built-in callbacks**, but you can also **create custom callbacks** by **subclassing the `tf.keras.callbacks.Callback` class**. During training, Keras **calls specific methods of these callback objects** at different points. **Table 1** shows the methods within the  `tf.keras.callbacks.Callback` class.
+TensorFlow Keras provides a **set of built-in callbacks**, but you can also **create custom callbacks** by **subclassing the `tf.keras.callbacks.Callback` class**. During training, Keras **calls specific methods of these callback objects** at different points. **Table 2** shows the methods within the  `tf.keras.callbacks.Callback` class.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -207,7 +207,7 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
     </tbody>
   </table>
   <p>
-    <b>Table 1</b> Lifecycle methods of the `tf.keras.callbacks.Callback` class.
+    <b>Table 2</b> Lifecycle methods of the `tf.keras.callbacks.Callback` class.
   </p>
 </div>
 
