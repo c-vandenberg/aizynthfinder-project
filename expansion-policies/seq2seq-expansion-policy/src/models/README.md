@@ -1190,7 +1190,7 @@ Model V28:
 
 All other hyperparameters are **consistent between the two models**.
 
-Both models were trained with using identical product and reactant datasets consisting of approximately **50,000 reactions**, derived from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. Additionally, the validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
+Both models were trained with using identical product and reactant datasets consisting of approximately **50,000 reactions**, derived from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. The validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
 
 When evaluating the performance metrics of the two models, it became evident that **Model V28 significantly outperformed Model V27**, particularly in the **sequence-based metrics** (**Table 3**). This resulted in **vastly superior retrosynthetic SMILES predictions** when **incorportated as the AiZynthFinder expansion policy**.
 
