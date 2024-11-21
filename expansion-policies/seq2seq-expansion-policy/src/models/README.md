@@ -1172,7 +1172,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.4.3 Results and Discussion
 
-As of **21/11/24**, the current **top model architecture** has been evaluated using **two sets of hyperparameters**, resulting in the designations **model V27** and **model V28**. 
+As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**, resulting in the designations **model V27** and **model V28**. 
 
 Model V27 is configured with:
 * **Units**: 256
