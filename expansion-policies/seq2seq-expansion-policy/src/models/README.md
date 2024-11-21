@@ -1196,7 +1196,7 @@ Both models were trained with using identical product and reactant datasets cons
 
 **Model V27** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **51 epochs**. 
 
-Additionally, a **dynamic learning rate** strategy was employed using **TensorFlow's `ReduceLROnPlateau` callback**. This also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs**. This resulted in a **learning rate of `1e-6`** by epoch 51.
+Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs** This resulted in a **final learning rate of `1e-6` by epoch 51**, compared to a **starting learning rate of `1e-4`** (**Table 3**).
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1258,6 +1258,12 @@ Additionally, a **dynamic learning rate** strategy was employed using **TensorFl
   </p>
 </div>
 
+**Model V27** was evaluated against the **test dataset** using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**. 
+
+However, since these metrics **do not account for the chemical properties of the SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
+
+Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
+
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -1296,7 +1302,7 @@ Additionally, a **dynamic learning rate** strategy was employed using **TensorFl
             <td>1.000</td>
         </tr>
         <tr>
-            <td>Average Tanimoto Similarity</td>
+            <td>Average Tanimoto Coefficient</td>
             <td>0.869</td>
         </tr>
     </tbody>
