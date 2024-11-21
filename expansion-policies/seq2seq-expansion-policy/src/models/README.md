@@ -62,7 +62,7 @@ The initial tokenizer **fitted the tokenized SMILES list** on a `tensorflow.kera
 
 However, not only was this resulting in space characters being tokenized, but it would also result in **loss of chemical semantic meaning** as there was no mechanism in place to account for **multi-character tokens** such as `Cl`, `Br` etc. As a result, these would be split into `C`, `l` and `B` `r` etc.
 
-An alternative tokenizer was found in the documentation of (DeepChem)[https://deepchem.readthedocs.io/en/latest/]. This `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the list of tokenized SMILES strings** while **preserving chemical information**,
+An alternative tokenizer was found in the documentation of [DeepChem](https://deepchem.readthedocs.io/en/latest/). This `deepchem.feat.smiles_tokenizer.BasicSmilesTokenizer` would be used to **generate the list of tokenized SMILES strings** while **preserving chemical information**,
 
 ### ii. TensorFlow TextVectorisation
 During debugging, further research into the **TensorFlow Keras documentation** found that the `tensorflow.keras.preprocessing` module was **deprecated**. A more modern preprocessing TensorFlow module is the `tensorflow.keras.layers.TextVectorization` layer.
@@ -1172,15 +1172,17 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.4.3 Results and Discussion
 
-As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**, resulting in the designations **Model V27** and **Model V28**. 
+As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
-Model V27 is configured with:
+Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of hidden layers (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
+
+Model V27:
 * **Units**: 256
 * **Attention Dimension**: 256
 * **Encoder Embedding Dimension**: 256
 * **Decoder Embedding Dimension**: 256
 
-Model V28 is configured with:
+Model V28:
 * **Units**: 512
 * **Attention Dimension**: 512
 * **Encoder Embedding Dimension**: 512
@@ -1188,131 +1190,78 @@ Model V28 is configured with:
 
 All other hyperparameters are **consistent between the two models**.
 
-Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefor, for **performance comparison**, Model V27 was configured with the **number of hidden layers (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
+Both models were trained with using identical product and reactant datasets consisting of approximately **50,000 reactions**, derived from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. Additionally, the validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
 
-Both models were trained with using identical product and reactant datasets consisting of approximately **XXXX reactions**. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. Additionally, the validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
-
-### Model V27
-
-**Model V27** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **51 epochs**. 
-
-Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs** This resulted in a **final learning rate of `1e-6` by epoch 51**, compared to a **starting learning rate of `1e-4`** (**Table 3**).
+When evaluating the performance metrics of the two models, it became evident that **Model V28 significantly outperformed Model V27**, particularly in the **sequence-based metrics** (**Table 3**). This resulted in **vastly superior retrosynthetic SMILES predictions** when **incorportated as the AiZynthFinder expansion policy**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
         <tr>
-            <th>Hyperparameter</th>
-            <th>Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Batch Size</td>
-            <td>32</td>
-        </tr>
-        <tr>
-            <td>Units</td>
-            <td>256</td>
-        </tr>
-        <tr>
-            <td>Encoder Embedding Dimension</td>
-            <td>256</td>
-        </tr>
-        <tr>
-            <td>Decoder Embedding Dimension</td>
-            <td>256</td>
-        </tr>
-        <tr>
-            <td>Number of Encoder Layers</td>
-            <td>2</td>
-        </tr>
-        <tr>
-            <td>Number of Decoder Layers</td>
-            <td>4</td>
-        </tr>
-        <tr>
-            <td>Max Encoder Sequence Length</td>
-            <td>140</td>
-        </tr>
-        <tr>
-            <td>Max Decoder Sequence Length</td>
-            <td>140</td>
-        </tr>
-        <tr>
-            <td>Dropout Rate</td>
-            <td>0.8</td>
-        </tr>
-        <tr>
-            <td>Learning Rate</td>
-            <td>1e-4</td>
-        </tr>
-        <tr>
-            <td>Beam Width</td>
-            <td>5</td>
-        </tr>
-    </tbody>
-  </table>
-  <p>
-    <b>Table 3</b> Model V27 hyperparameters.
-  </p>
-</div>
-
-**Model V27** was evaluated against the **test dataset** using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**. 
-
-However, since these metrics **do not account for the chemical properties of the SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
-
-Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
-
-<div style="display: flex;" align="center">
-  <table border="1" cellspacing="0" cellpadding="5">
-    <thead>
-        <tr>
-            <th>Evalutaion Metric</th>
-            <th>Value</th>
+            <th>Evaluation Metric</th>
+            <th>Model V27</th>
+            <th>Model V28</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>Loss</td>
             <td>0.157</td>
+            <td></td>
         </tr>
         <tr>
             <td>Accuracy</td>
             <td>0.984</td>
+            <td></td>
         </tr>
         <tr>
             <td>Perplexity</td>
             <td>1.170</td>
+            <td></td>
         </tr>
         <tr>
             <td>BLEU Score</td>
             <td>0.665</td>
+            <td></td>
         </tr>
         <tr>
             <td>Average Levenshtein Distance</td>
             <td>32.163</td>
+            <td></td>
         </tr>
         <tr>
             <td>Exact Match Accuracy</td>
             <td>0.105</td>
+            <td></td>
         </tr>
         <tr>
             <td>Chemical Validity Score</td>
             <td>1.000</td>
+            <td></td>
         </tr>
         <tr>
             <td>Average Tanimoto Coefficient</td>
             <td>0.869</td>
+            <td></td>
         </tr>
     </tbody>
   </table>
   <p>
-    <b>Table 4</b> Performance metrics of model V27 on test dataset.
+    <b>Table 3</b> Performance metrics of Model V27 and Model V28 on test datasets.
   </p>
 </div>
 
+Both models were evaluated against test datasets using a **variety of metrics** (**Table 3**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
+
+However, since these metrics **do not account for the chemical properties of the SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
+
+Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
+
 ### Model V28
+
+**Model V28** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **XXXX epochs**. 
+
+Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs** This resulted in a **final learning rate of `XXXX` by epoch 51**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1370,59 +1319,31 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
     </tbody>
   </table>
   <p>
-    <b>Table 5</b> Model V28 hyperparameters.
+    <b>Table 4</b> Model V28 hyperparameters.
   </p>
 </div>
 
-<div style="display: flex;" align="center">
-  <table border="1" cellspacing="0" cellpadding="5">
-    <thead>
-        <tr>
-            <th>Evalutaion Metric</th>
-            <th>Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Loss</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Accuracy</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Perplexity</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>BLEU Score</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Average Levenshtein Distance</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Exact Match Accuracy</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Chemical Validity Score</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Average Tanimoto Similarity</td>
-            <td></td>
-        </tr>
-    </tbody>
-  </table>
-  <p>
-    <b>Table 6</b> Performance metrics of model V28 on test dataset.
-  </p>
-</div>
+### Analysis of Validation and Test Loss
 
-### 5.4.4 Debugging
+### Analysis of Validation and Test Accuracy
+
+### Analysis of Validation and Test Perplexity
+
+### Analysis of Validation and Test BLEU Score
+
+### Analysis of Validation and Test Average Levenshtein Distance
+
+### Analysis of Validation and Test Exact Match Accuracy
+
+### Analysis of Validation and Test Chemical Validity Score
+
+### Analysis of Validation and Test Average Tanimoto Coefficient
+
+
+### 5.4.4 Future Model Optimisations
+
+
+### 5.4.5 Debugging
 
 ### i. Data Tokenization and Preprocessing Debugging
 1. **Analyse Data Set Token Frequency Distribution**:
@@ -1488,3 +1409,4 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
 **[9]** Modern Recurrent Neural Networks - Beam Search (2020) 10.8. Beam Search - Dive into Deep Learning 1.0.3 documentation. Available at: https://d2l.ai/chapter_recurrent-modern/beam-search.html (Accessed: 21 October 2024). <br><br>
 **[10]** Bahdanau, D. et al. (2014) ‘Neural Machine Translation by Jointly Learning to Align and Translate’, International Conference on Learning Representations.<br><br>
 **[11]** Roeder, L. (2021) Lutzroeder/netron: Visualizer for Neural Network, Deep Learning and Machine Learning Models, GitHub. Available at: https://github.com/lutzroeder/netron (Accessed: 05 November 2024). <br><br>
+**[12]** Lowe, D. M. (2012) ‘Extraction of Chemical Structures and Reactions from the Literature’; University of Cambridge. <br><br>
