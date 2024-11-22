@@ -1407,7 +1407,7 @@ Additionally, a **dynamic learning rate** strategy was implemented using **Tenso
 
 ### 5.5.3 Model V28 Retrosynthetic Reaction Predictions
 
-### 5.6 Future Model Optimisations
+## 5.6 Future Model Optimisations
 
 Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are two features to add that could improve the performance of **both the Seq2Seq model**, and a **future transformer model**:
 1. **Layer-wise Learning Rate Decay**
