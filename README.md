@@ -123,6 +123,8 @@ This study is ongoing, involving continuous model optimisations and research. Th
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.5.2 [Model V28 Analysis](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#552-model-v28-analysis)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.5.3 [Model V28 Retrosynthetic Reaction Predictions](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#553-model-v28-retrosynthetic-reaction-predictions)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 5.6 [Future Model Optimisations](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#56-future-model-optimisations)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.6.1 [Layer-wise Learning Rate Decay](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#561-layer-wise-learning-rate-decay)<br>
+  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5.6.2 [Scheduled Sampling](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#562-scheduled-sampling)<br>
   &nbsp; &nbsp; &nbsp; &nbsp; 5.7 [References](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#57-references)<br>
 </details>
 <details>
