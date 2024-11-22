@@ -1,6 +1,6 @@
 # AiZynthFinder Research Project
 
-## Abstract
+# Abstract
 
 Retrosynthetic analysis and reaction prediction are fundamental for efficient chemical synthesis and drug discovery. Consequently, computer-assisted synthesis prediction (CASP) tools have been at the forefront of research and development, striving to computationally identify the optimal sequence of chemical reaction steps that transform commercially viable starting materials into desired chemical compounds. <sup>**1**</sup> 
 
@@ -10,7 +10,7 @@ To enhance AiZynthFinder, this study integrates SMILES-based sequence-to-sequenc
 
 This study is ongoing, involving continuous model optimisations and research. The results and discussion for the latest Seq2Seq model are available [here](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#55-results-and-discussion). Development of the transformer model is currently in progress.
 
-## Contents
+# Contents
 
 <details>
   <summary><b>1. Retrosynthesis with AiZynthFinder - Overview</b></summary>
