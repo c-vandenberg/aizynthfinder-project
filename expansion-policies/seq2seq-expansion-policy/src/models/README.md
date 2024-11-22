@@ -1170,9 +1170,63 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       * Compute context vector as **weighted sum of encoder outputs** by passing both **`attention_weights`** and **`encoder_output`** to **`tensorflow.matmul()`** to give **`context_vector`**.
         * **Shape:** **`(batch_size, seq_len_dec, enc_units)`**.
 
-### 5.4.3 Results and Discussion
+### 5.4.3 Model Debugging
 
-### i. Comparison of Model V27 and Model V28
+### i. Data Tokenization and Preprocessing Debugging
+1. **Analyse Data Set Token Frequency Distribution**:
+   * Add `tensorflow.print()` statement **immediately after data set tokenization** in `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._tokenize_datasets`. For example, to check **tokenized products (input) data set**:
+     
+      ```
+      train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
+      train_test_products_token_counts = Counter(train_test_products_all_tokens)
+      print(
+        f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n"
+      )
+      ```
+    
+2. **Analyse Tokenizer Functionality**:
+  * Check that tokenizer **reverses only the product (input/x-data) data set** by printing/logging random tokenized data set samples. For example:
+    
+      ```
+      secure_random = random.SystemRandom()
+      print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_dataset)}")
+      print(f"Tokenized Reactants y-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_dataset)}")
+      print(f"Tokenized Products Validation x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_valid_dataset)}")
+      print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_valid_dataset)}")
+      ```
+    
+  * Check tokenizer word index **before and after adapting** with `tensorflow.print()` statement. Tokenizer is adapted to **tokenized products only** to prevent data leakage. This is carried **immediately after splitting data** in data loader class `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._split_datasets()`. For example:
+    
+      ```
+      combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
+      tf.print(f"Tokenizer Word Index Before Adapting: \n{self.smiles_tokenizer.word_index}\n")
+      self.smiles_tokenizer.adapt(combined_tokenized_train_data)
+      tf.print(f"Tokenizer Word Index After Adapting: \n{self.smiles_tokenizer.word_index}\n")
+      ```
+    
+  * **N.B.** Because environment setup has **set seeds for `random` psuedorandom number generator**, you will get the **same 'random' samples each time**.
+3. **Analyse Data Preprocesser Functionality**:
+  * Print/log random preprocessed data set samples and **cross reference integers with adapted tokenizer word index**. For example:
+    
+      ```
+      secure_random = random.SystemRandom()
+      tf.print(f"Preprocessed Training Data Sample: {secure_random.choice(self.train_data)}\n")
+      tf.print(f"Preprocessed Testing Data Sample: {secure_random.choice(self.test_data)}\n")
+      tf.print(f"Preprocessed Validation Data Sample: {secure_random.choice(self.valid_data)}\n")
+      ```
+
+### ii. General TensorFlow Debugging
+1. **Analyse Tensor Shape**:
+   * Add `tensorflow.print()` statement to print/log to **dynamically check tensor dimensions/shape**. For example:
+     
+       ```
+       encoder_output: tf.Tensor = self.embedding(encoder_input)
+       tf.print(encoder_output.shape) # Shape: (batch_size, seq_len, embedding_dim)
+       ```
+
+## 5.5 Results and Discussion
+
+### 5.5.1 Comparison of Model V27 and Model V28
 
 As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
@@ -1269,11 +1323,11 @@ However, since these metrics **do not account for the chemical properties of the
 
 Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
 
-### ii. Model V28 Analysis
+### 5.5.2 Model V28 Analysis
 
 **Model V28** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **XXXX epochs**. 
 
-Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs** This resulted in a **final learning rate of `XXXX` by epoch 51**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
+Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs** This resulted in a **final learning rate of `XXXX` by epoch XXXX**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1353,7 +1407,7 @@ Additionally, a **dynamic learning rate** strategy was implemented using **Tenso
 
 ### iii. Model V28 Retrosynthetic Reaction Predictions
 
-### 5.4.4 Future Model Optimisations
+### 5.6 Future Model Optimisations
 
 Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are two features to add that could improve the performance of **both the Seq2Seq model**, and a **future transformer model**:
 1. **Layer-wise Learning Rate Decay**
@@ -1364,61 +1418,7 @@ Given that Seq2Seq models have **largely been superseded by transformer architec
     * Instead of **always using the ground truth tokens as inputs to the decoder during training**, the model **occasionally uses its own predictions as inputs** for the next time step.
     * This strategy helps the model become **more robust to its own errors during inference**.
 
-### 5.4.5 Debugging
-
-### i. Data Tokenization and Preprocessing Debugging
-1. **Analyse Data Set Token Frequency Distribution**:
-   * Add `tensorflow.print()` statement **immediately after data set tokenization** in `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._tokenize_datasets`. For example, to check **tokenized products (input) data set**:
-     
-      ```
-      train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
-      train_test_products_token_counts = Counter(train_test_products_all_tokens)
-      print(
-        f"Tokenized Train & Test Products x-Dataset Token Frequency Distribution: {train_test_products_token_counts.most_common(20)}\n"
-      )
-      ```
-    
-2. **Analyse Tokenizer Functionality**:
-  * Check that tokenizer **reverses only the product (input/x-data) data set** by printing/logging random tokenized data set samples. For example:
-    
-      ```
-      secure_random = random.SystemRandom()
-      print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_dataset)}")
-      print(f"Tokenized Reactants y-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_dataset)}")
-      print(f"Tokenized Products Validation x-Dataset Sample: {secure_random.choice(self.tokenized_products_x_valid_dataset)}")
-      print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_valid_dataset)}")
-      ```
-    
-  * Check tokenizer word index **before and after adapting** with `tensorflow.print()` statement. Tokenizer is adapted to **tokenized products only** to prevent data leakage. This is carried **immediately after splitting data** in data loader class `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._split_datasets()`. For example:
-    
-      ```
-      combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
-      tf.print(f"Tokenizer Word Index Before Adapting: \n{self.smiles_tokenizer.word_index}\n")
-      self.smiles_tokenizer.adapt(combined_tokenized_train_data)
-      tf.print(f"Tokenizer Word Index After Adapting: \n{self.smiles_tokenizer.word_index}\n")
-      ```
-    
-  * **N.B.** Because environment setup has **set seeds for `random` psuedorandom number generator**, you will get the **same 'random' samples each time**.
-3. **Analyse Data Preprocesser Functionality**:
-  * Print/log random preprocessed data set samples and **cross reference integers with adapted tokenizer word index**. For example:
-    
-      ```
-      secure_random = random.SystemRandom()
-      tf.print(f"Preprocessed Training Data Sample: {secure_random.choice(self.train_data)}\n")
-      tf.print(f"Preprocessed Testing Data Sample: {secure_random.choice(self.test_data)}\n")
-      tf.print(f"Preprocessed Validation Data Sample: {secure_random.choice(self.valid_data)}\n")
-      ```
-
-### ii. General TensorFlow Debugging
-1. **Analyse Tensor Shape**:
-   * Add `tensorflow.print()` statement to print/log to **dynamically check tensor dimensions/shape**. For example:
-     
-       ```
-       encoder_output: tf.Tensor = self.embedding(encoder_input)
-       tf.print(encoder_output.shape) # Shape: (batch_size, seq_len, embedding_dim)
-       ```
-
-## 5.5 References
+## 5.7 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
 **[2]** Pandegroup (2017) ‘Pandegroup/reaction_prediction_seq2seq’, GitHub. Available at: https://github.com/pandegroup/reaction_prediction_seq2seq/tree/master (Accessed: 09 October 2024). <br><br>
 **[3]** Determinism (2023) NVIDIA Docs. Available at: https://docs.nvidia.com/clara/clara-train-archive/3.1/nvmidl/additional_features/determinism.html (Accessed: 17 October 2024). <br><br>
