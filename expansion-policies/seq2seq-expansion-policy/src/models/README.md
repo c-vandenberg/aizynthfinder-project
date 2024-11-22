@@ -1172,17 +1172,19 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.4.3 Results and Discussion
 
+### i. Comparison of Model V27 and Model V28
+
 As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
-Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of hidden layers (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
+Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
 
-Model V27:
+**Model V27:**
 * **Units**: 256
 * **Attention Dimension**: 256
 * **Encoder Embedding Dimension**: 256
 * **Decoder Embedding Dimension**: 256
 
-Model V28:
+**Model V28:**
 * **Units**: 512
 * **Attention Dimension**: 512
 * **Encoder Embedding Dimension**: 512
@@ -1267,7 +1269,7 @@ However, since these metrics **do not account for the chemical properties of the
 
 Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
 
-### Model V28 Analysis
+### ii. Model V28 Analysis
 
 **Model V28** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **XXXX epochs**. 
 
@@ -1349,6 +1351,7 @@ Additionally, a **dynamic learning rate** strategy was implemented using **Tenso
 
 ### Analysis of Validation and Test Average Tanimoto Coefficient
 
+### iii. Model V28 Retrosynthetic Reaction Predictions
 
 ### 5.4.4 Future Model Optimisations
 
