@@ -1405,7 +1405,7 @@ Additionally, a **dynamic learning rate** strategy was implemented using **Tenso
 
 ### Analysis of Validation and Test Average Tanimoto Coefficient
 
-### iii. Model V28 Retrosynthetic Reaction Predictions
+### 5.5.3 Model V28 Retrosynthetic Reaction Predictions
 
 ### 5.6 Future Model Optimisations
 
