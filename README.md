@@ -8,7 +8,7 @@ A leading CASP tool, AiZynthFinder, achieves retrosynthesis prediction by genera
 
 To enhance AiZynthFinder, this study integrates SMILES-based sequence-to-sequence (Seq2Seq) and transformer models into its expansion policy. By leveraging these advanced neural network architectures with SMILES-based chemical representations, we aim to overcome the inherent limitations of template-based retrosynthetic methods. The integration seeks to broaden accurate predictions beyond the rule-based knowledge base, and ensure that predictions consider the entire molecular environment and account for stereochemistry.
 
-This study is ongoing, involving continuous model optimisations and research. The results and discussion for the latest Seq2Seq model are available [here](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#543-results-and-discussion). Development of the transformer model is currently in progress.
+This study is ongoing, involving continuous model optimisations and research. The results and discussion for the latest Seq2Seq model are available [here](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#55-results-and-discussion). Development of the transformer model is currently in progress.
 
 ## Contents
 
