@@ -1273,42 +1273,42 @@ As a result, when **incorporated as the AiZynthFinder expansion policy**, Model 
         <tr>
             <td>Loss</td>
             <td>0.157</td>
-            <td></td>
+            <td>0.157</td>
         </tr>
         <tr>
             <td>Accuracy</td>
             <td>0.984</td>
-            <td></td>
+            <td>0.985</td>
         </tr>
         <tr>
             <td>Perplexity</td>
             <td>1.170</td>
-            <td></td>
+            <td>1.170</td>
         </tr>
         <tr>
             <td>BLEU Score</td>
             <td>0.665</td>
-            <td></td>
+            <td>0.688</td>
         </tr>
         <tr>
             <td>Average Levenshtein Distance</td>
             <td>32.163</td>
-            <td></td>
+            <td>30.46</td>
         </tr>
         <tr>
             <td>Exact Match Accuracy</td>
             <td>0.105</td>
-            <td></td>
+            <td>0.138</td>
         </tr>
         <tr>
             <td>Chemical Validity Score</td>
             <td>1.000</td>
-            <td></td>
+            <td>1.000</td>
         </tr>
         <tr>
             <td>Average Tanimoto Coefficient</td>
             <td>0.869</td>
-            <td></td>
+            <td>0.874</td>
         </tr>
     </tbody>
   </table>
@@ -1325,9 +1325,9 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
 
 ### 5.5.2 Model V28 Analysis
 
-**Model V28** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **XXXX epochs**. 
+**Model V28** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback**. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **XXXX epochs**. 
 
-Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs** This resulted in a **final learning rate of `XXXX` by epoch XXXX**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
+Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs**. This resulted in a **final learning rate of `XXXX` by epoch XXXX**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
