@@ -1523,14 +1523,18 @@ As a result, when **incorporated as the AiZynthFinder expansion policy**, Model 
 
 Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and the **future transformer model**.
 
-### 5.6.1 Layer-wise Learning Rate Decay
+### 5.6.1 Increased Training Dataset Size
+
+### 5.6.2 Layer-wise Learning Rate Decay
   * Layer-wise learning rate decay **adjusts the learning rate for different layers**, typically using **smaller learning rates for lower layers** and **larger ones for higher layers**. This approach can help **stabilise training**, especially in **very deep networks**.
   * Given that this Seq2Seq model has an **2-layer encoder** and a **4-layer decoder**, it is classified as a **deep neural network** and thus **could benefit from layer-wise learning rate decay**.
 
-### 5.6.2 Scheduled Sampling
+### 5.6.3 Scheduled Sampling
   * Scheduled Sampling is a technique used to **mitigate exposure bias during training** in NLP models.
   * Instead of **always using the ground truth tokens as inputs to the decoder during training**, the model **occasionally uses its own predictions as inputs** for the next time step.
   * This strategy helps the model become **more robust to its own errors during inference**.
+
+### 5.6.4 High Throughput Testing of Model Expansion Policy Performance
 
 ## 5.7 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
