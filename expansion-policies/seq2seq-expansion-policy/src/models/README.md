@@ -1429,14 +1429,99 @@ When evaluating the performance metrics of the two models, it became evident tha
     * A **larger attention vector** allows for **more precise computation of alignment scores between the encoder and decoder states**.
     * This improvement enables the attention mechanism to **focus more effectively on relevant parts of the input** when generating each output token.
 
-However, when each model was **incorporated into AiZynthFinder** as the **expansion policy**.
+However, when each model was **incorporated into AiZynthFinder** as the **expansion policy**, **Model V28 predicted correct precursors less frequently than Model V27**. Additionally, **Model V28 did not account for stereochemistry in its predictions** when tested with **chiral molecules**, whereas **Model V27 did**. Finally, **Model V27 provided more route options more consisitently during inference** than Model V28.
+
+There are **two related explanations** for the is discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
+1. **Overfitting of Model V28**
+  * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than generalisable patterns**.
+  * To **mitigate overfitting**, the training regime utilises **TensorFlows Early Stopping Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This would **terminate training early** if the **validation loss did not improve over five consecutive epochs**
+  * Model V28 has **significantly more parameters** than Model V27, due to its **larger units, as well as embedding and attention dimensions**. This **increases the risk of overfitting**, especially if the **training data is not sufficiently large or diverse**.
+2. **Model Complexity vs Dataset Size**
+  * Model V28 has **significantly more parameters** than Model V27 (**Table 5**), due to its **larger units, as well as embedding and attention dimensions**.
+  * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not increase relative to the complexity of the model**, there is a **significant risk of overfitting**.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Layer (Type)</th>
+            <th>Model V27 Parameters</th>
+            <th>Model V28 Parameters</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>stacked_bdirectional_lstm_encoder (StackedBidirectionalLSTMEncoder)</td>
+            <td>2,650,368</td>
+            <td>10,543,616</td>
+        </tr>
+        <tr>
+            <td>stacked_lstm_decoder (StackedLSTMDecoder)</td>
+            <td>2,543,962</td>
+            <td>10,068,570</td>
+        </tr>
+        <tr>
+            <td>enc_state_h (Dense)</td>
+            <td>131,328</td>
+            <td>524,800</td>
+        </tr>
+        <tr>
+            <td>enc_state_c (Dense)</td>
+            <td>131,328</td>
+            <td>524,800</td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 5</b> Number of parameters in each layer type for Models V27 and V28.
+  </p>
+</div>
+
+**Table 5** gives the **number of parameters in each layer type** for both Model V27 and Model V28. However, when considering **model complexity vs dataset size**, we **mainly need to focus on trainable parameters**.
+* Trainable parameters are the parameters in a neural network that are **learned and updated during the training process through backpropagation/backproagation through time**.
+* They include **weights and biases** of the layers in the model.
+* These parameters are **adjusted to minimise the loss function** by **optimising the network's performance on the training data**.
+
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Model</th>
+            <th>Trainable Parameters</th>
+            <th>Non-Trainable Parameters</th>
+            <th>Optimiser Parameters</th>
+            <th>Total Parameters</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Model V27</td>
+            <td>5,456,986</td>
+            <td>0</td>
+            <td>10,913,974</td>
+            <td>16,370,960</td>
+        </tr>
+        <tr>
+            <td>Model V28</td>
+            <td>21,661,786</td>
+            <td>0</td>
+            <td>43,323,574</td>
+            <td>64,985,360</td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 6</b> Comparison of the number of trainable parameters, non-trainable parameters, optimizer parameters, and total parameters for Models V27 and V28.
+  </p>
+</div>
+
+As you can see from **Table 6**,
 
 As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
 
 ## 5.6 Future Model Optimisations
 
 Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and the **future transformer model**.
-
 
 ### 5.6.1 Layer-wise Learning Rate Decay
   * Layer-wise learning rate decay **adjusts the learning rate for different layers**, typically using **smaller learning rates for lower layers** and **larger ones for higher layers**. This approach can help **stabilise training**, especially in **very deep networks**.
