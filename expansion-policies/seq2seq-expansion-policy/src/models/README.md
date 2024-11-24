@@ -1350,7 +1350,7 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
         <tr>
             <td>Average Levenshtein Distance</td>
             <td>32.163</td>
-            <td>30.46</td>
+            <td>30.461</td>
         </tr>
         <tr>
             <td>Exact Match Accuracy</td>
@@ -1375,16 +1375,47 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
 </div>
 
 For **test loss**:
-* Test loss represents the **average error between the predicted sequences and the target sequences** on the **test dataset**. This is calculated using Tensorflow's **sparse categorical cross entropy loss function** (**`tf.keras.losses.SparseCategoricalCrossentropy`**).
-* Both Model V27 and Model V28 have a loss of **$$0.157$$** which is **relatively low**, indicating that both model's predictions are **close to the target sequences** in terms of loss function.
+* Test loss represents the **average error between the predicted sequences and the target sequences** on the **test dataset**.
+* This metric is calculated using Tensorflow's **Sparse Categorical Cross Entropy Loss Function** (**`tf.keras.losses.SparseCategoricalCrossentropy`**), which measures the **discrepancy between the predicted probability distribution** and the **actual distribution of the target sequences**.
+* Both **Model V27** and **Model V28** achieved a **test loss of 0.157**, which is **relatively low**. This indicates that the predictions made by both models are **closely aligned with the target sequences in terms of the loss function**, reflecting **high accuracy** and **effective learning** during training.
 
 For **test accuracy**:
-* Test accuracy refers to the **token-level accuracy**, measuring the **percentage of individual tokens predicted correctly**, typically compared to the **ground truth token** for that timestep.
-* Both models **essentially have the same accuracy**, with Model V27 having an accruacy of **98.4%** and Model V28 having an accuracy of **98.5%**.
-* These accuracies are **very high**, suggesting the models **predict individual tokens correctly ~98.5% of timesteps**.
+* Test accuracy refers to the **token-level accuracy**, measuring the **percentage of individual tokens predicted correctly** compared to the **ground truth tokens** at each timestep.
+* Both **Model V27** and **Model V28** achieved **nearly identical test accuracies**, with Model V27 attaining an accuracy of **~98.4%** and Model V28 achieving **~98.5%**.
+* These high accuracies suggest that the models **correctly predict individual tokens in approximately 98.4–98.5% of timesteps**, indicating **robust performance in token prediction** and **effective learning** during training.
 
 For **test perplexity**:
-* Perplexity is a measure of **how well a probability model predicts a sample**, calculated as the **exponential of the cross-entropy loss**.
+* Perplexity is a measure of **how well a probability model predicts a sample**, calculated as the **exponential of the cross-entropy loss**. A **lower perplexity** indicates **better predictive performance**.
+* In the context of retrosynthetic SMILES predictions, low perplexity signifies that the model can **accurately predict the sequence of tokens representing valid retrosynthetic transformations**.
+* Both **Model V27** and **Model V28** achieved a **test perplexity of 1.170**, which is **excellent**. This demonstrates that both models are **highly confident and accurate in their token predictions**, effectively **capturing the underlying patterns** in the data.
+
+For **test BLEU score**:
+* The **BLEU (Bilingual Evaluation Understudy) score** measures the **similarity between the predicted sequences and the reference sequences**, focusing on **matching n-grams**. Scores **range from 0 to 1**, with **higher scores indicating closer matches**.
+* In the context of retrosynthetic SMILES predictions, a higher BLEU score signifies that the model's generated sequences **exhibit substantial n-gram overlap with the target sequences**.
+* **Model V27** achieved a **BLEU score of 0.665**, while **Model V28** attained a **BLEU score of 0.688**. These scores indicate that the predictions made by both models **share substantial n-gram overlap with the target sequences**.
+* **Model V28's slightly better BLEU score** suggets its predictions are **marginally more similar to the targets** in terms of **n-gram overlap**. This improvement, although modest, highlights the **enhanced capability of Model V28** in generating sequences that **more closely align with the reference data**.
+
+For **test Average Levenshtein Distance**:
+* Levenshtein Distance measures the **minimum number of single-character edits** required to **change one sequence into another**.
+* **Model V27** has an **average Levenshtein Distance of 32.163**, while **Model V28** achieved an **average distance of 30.461**.
+* This indicates that, on average, approximately **32 edits** are needed to **convert Model V27's predicted sequences into the target sequences**, compared to **~30 edits for Model V28**.
+* A **lower average Levenshtein Distance** suggests that **Model V28's predictions are closer to the target sequences** with **fewer edits required**, highlighting its **superior performance** in generating accurate retrosynthetic SMILES predictions.
+
+For **test exact match accuracy**:
+* Exact match accuracy measures the **percentage of predictions that exactly match the target sequences in their entirety**.
+* **Model V27** achieved an **exact match accuracy of ~10.50%**, while **Model V28** attained an **exact match accuracy of ~13.80%**. These **relatively low percentages** highlight the **significant semantic complexity inherent in SMILES-based retrosynthesis predictions**.
+* **Even a single character difference** in a SMILES string can result in a **completely different or invalid molecule**. Consequently, the **low exact match percentages** present a **significant challenge** for integrating SMILES-based retrosynthesis models into AiZynthFinder as an expansion policy. Overcoming this hurdle is crucial to ensure the **reliability and accuracy** of the predicted retrosynthetic pathways.
+
+For **chemical validity score**:
+* Chemical validity score represents the proportion of predicted SMILES strings that **correspond to valid chemical structures when parsed by RDKit**. This metric ensures that the generated SMILES strings translate into chemically viable molecules, which is essential for retrosynthesis predictions.
+* Both Model V27 and Model V28 achieved a **perfect chemical validity score of **1.000**, indicating that **all predicted SMILES strings are chemically valid**.
+* This **100% validity** underscores the models' ability to **generate syntactically correct and chemically feasible molecular structures**, thereby ensuring reliable retrosynthetic predictions when integrated into AiZynthFinder.
+
+For **average Tanimoto coefficient**:
+* The **Tanimoto coefficient** (also known as the **Jaccard index**) measures the **similarity between two chemical structures based on their fingerprints**, ranging from **0 (no similarity)** to **1 (identical structures)**.
+* The **threshold for similarity** is **intrinsically subjective** and is **highly dependent on the molecular fingerprint used**. For instance, with **Daylight fingerprints**, two structures are **typically considered similar** if **$$T > 0.85$$** **<sup>13</sup>**.
+* Our Seq2Seq model utilized **Morgan fingerprints** via **`rdkit.Chem.AllChem.GetMorganFingerprintAsBitVect`** to calculate the Tanimoto coefficient. In future iterations, **comparative Tanimoto coefficients** based on **different molecular fingerprints** will be implemented to **enhance similarity assessments**.
+* **Model V27** has an **average Tanimoto coefficient of 0.869**, while **Model V28** achieved an **average coefficient of 0.874**. This indicates that the predictions from both models are **very structurally similar to the target molecules**, with **Model V28** demonstrating **marginally greater similarity**.
 
 ### 5.5.2 Incorporating Seqeuence-to-Sequence Model into AiZynthFinder
 
@@ -1404,7 +1435,7 @@ As a result, when **incorporated as the AiZynthFinder expansion policy**, Model 
 
 ## 5.6 Future Model Optimisations
 
-Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and a **future transformer model**.
+Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and the **future transformer model**.
 
 
 ### 5.6.1 Layer-wise Learning Rate Decay
@@ -1429,3 +1460,4 @@ Given that Seq2Seq models have **largely been superseded by transformer architec
 **[10]** Bahdanau, D. et al. (2014) ‘Neural Machine Translation by Jointly Learning to Align and Translate’, International Conference on Learning Representations.<br><br>
 **[11]** Roeder, L. (2021) Lutzroeder/netron: Visualizer for Neural Network, Deep Learning and Machine Learning Models, GitHub. Available at: https://github.com/lutzroeder/netron (Accessed: 05 November 2024). <br><br>
 **[12]** Lowe, D. M. (2012) ‘Extraction of Chemical Structures and Reactions from the Literature’; University of Cambridge. <br><br>
+**[13]** Maggiora, G. et al. (2013) ‘Molecular similarity in Medicinal Chemistry’, Journal of Medicinal Chemistry, 57(8), pp. 3186–3204. <br><br>
