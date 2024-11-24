@@ -1226,39 +1226,96 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ## 5.5 Results and Discussion
 
-### 5.5.1 Comparison of Model V27 and Model V28
+### 5.5.1 Analysis of Model V27 and Model V28
 
 As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
-Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**.
+Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**. All other hyperparameters are **consistent between the two models** (**Table 3**).
 
-**Model V27:**
-* **Units**: 256
-* **Attention Dimension**: 256
-* **Encoder Embedding Dimension**: 256
-* **Decoder Embedding Dimension**: 256
-
-**Model V28:**
-* **Units**: 512
-* **Attention Dimension**: 512
-* **Encoder Embedding Dimension**: 512
-* **Decoder Embedding Dimension**: 512
-
-All other hyperparameters are **consistent between the two models**.
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Hyperparameter</th>
+            <th>Model V27</th>
+            <th>Model V28</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Batch Size</td>
+            <td>32</td>
+            <td>32</td>
+        </tr>
+        <tr>
+            <td>Units</td>
+            <td>256</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Encoder Embedding Dimension</td>
+            <td>256</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Decoder Embedding Dimension</td>
+            <td>256</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Attention Dimension</td>
+            <td>256</td>
+            <td>512</td>
+        </tr>
+        <tr>
+            <td>Number of Encoder Layers</td>
+            <td>2</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td>Number of Decoder Layers</td>
+            <td>4</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>Max Encoder Sequence Length</td>
+            <td>140</td>
+            <td>140</td>
+        </tr>
+        <tr>
+            <td>Max Decoder Sequence Length</td>
+            <td>140</td>
+            <td>140</td>
+        </tr>
+        <tr>
+            <td>Dropout Rate</td>
+            <td>0.8</td>
+            <td>0.8</td>
+        </tr>
+        <tr>
+            <td>Learning Rate</td>
+            <td>1e-4</td>
+            <td>1e-4</td>
+        </tr>
+        <tr>
+            <td>Beam Width</td>
+            <td>5</td>
+            <td>5</td>
+        </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 3</b> Model V27 and Model V28 hyperparameters.
+  </p>
+</div>
 
 Both models were trained with using identical product and reactant datasets consisting of approximately **50,000 reactions**, derived from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. The validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
 
-When evaluating the performance metrics of the two models, it became evident that **Model V28 significantly outperformed Model V27**, particularly in **sequence-based metrics** (**Table 3**). This improvement can be attributed to several factors:
-1. **Greater Model Capacity**
-    * **More units and larger embeddings** allow the model to **capture complex patterns** by **learning intricate dependencies**.
-    * **Higher-dimensional embeddings** for the encoder and decoder enable the model to **capture more semantic information about the tokens**.
-2. **Improved Generalisation**
-    * The **larger capacity** of Model V28 **reduces the likelihood of underfitting**, potentially **enhancing validation and test performance** (**up to a point**).
-3. **Enhanced Attention Mechanism**
-    * A **larger attention vector** allows for **more precise computation of alignment scores between the encoder and decoder states**.
-    * This improvement enables the attention mechanism to **focus more effectively on relevant parts of the input** when generating each output token.
+Both models were evaluated against test datasets using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
 
-As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced significantly superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
+However, since these metrics **do not account for the chemical properties of the SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
+
+Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1313,15 +1370,35 @@ As a result, when **incorporated as the AiZynthFinder expansion policy**, Model 
     </tbody>
   </table>
   <p>
-    <b>Table 3</b> Performance metrics of Model V27 and Model V28 on test datasets.
+    <b>Table 4</b> Performance metrics of Model V27 and Model V28 on test datasets.
   </p>
 </div>
 
-Both models were evaluated against test datasets using a **variety of metrics** (**Table 3**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
+For **test loss**:
+* Test loss represents the **average error between the predicted sequences and the target sequences** on the **test dataset**. This is calculated using Tensorflow's **sparse categorical cross entropy loss function** (**`tf.keras.losses.SparseCategoricalCrossentropy`**).
+* Both Model V27 and Model V28 have a loss of **$$0.157$$** which is **relatively low**, indicating that both model's predictions are **close to the target sequences** in terms of loss function.
 
-However, since these metrics **do not account for the chemical properties of the SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
+For **test accuracy**:
+* Test accuracy refers to the **token-level accuracy**, measuring the **percentage of individual tokens predicted correctly**, typically compared to the **ground truth token** for that timestep.
+* Both models **essentially have the same accuracy**, with Model V27 having an accruacy of **98.4%** and Model V28 having an accuracy of **98.5%**.
+* These accuracies are **very high**, suggesting the models **predict individual tokens correctly ~98.5% of timesteps**.
 
-Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
+For **test perplexity**:
+* 
+
+When evaluating the performance metrics of the two models, it became evident that despite showing **identical token-level metrics**, **Model V28 outperformed Model V27 in sequence-level metrics** (**Table 3**). This improvement can be attributed to several factors:
+1. **Greater Model Capacity**
+    * **More units and larger embeddings** allow the model to **capture complex patterns** by **learning intricate dependencies**.
+    * **Higher-dimensional embeddings** for the encoder and decoder enable the model to **capture more semantic information about the tokens**.
+2. **Improved Generalisation**
+    * The **larger capacity** of Model V28 **reduces the likelihood of underfitting**, potentially **enhancing validation and test performance** (**up to a point**).
+3. **Enhanced Attention Mechanism**
+    * A **larger attention vector** allows for **more precise computation of alignment scores between the encoder and decoder states**.
+    * This improvement enables the attention mechanism to **focus more effectively on relevant parts of the input** when generating each output token.
+
+However, when each model was **incorporated into AiZynthFinder** as the **expansion policy**.
+
+As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
 
 ### 5.5.2 Model V28 Analysis
 
@@ -1329,83 +1406,6 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
 
 Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs**. This resulted in a **final learning rate of `XXXX` by epoch XXXX**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
 
-<div style="display: flex;" align="center">
-  <table border="1" cellspacing="0" cellpadding="5">
-    <thead>
-        <tr>
-            <th>Hyperparameter</th>
-            <th>Value</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Batch Size</td>
-            <td>32</td>
-        </tr>
-        <tr>
-            <td>Units</td>
-            <td>512</td>
-        </tr>
-        <tr>
-            <td>Encoder Embedding Dimension</td>
-            <td>512</td>
-        </tr>
-        <tr>
-            <td>Decoder Embedding Dimension</td>
-            <td>512</td>
-        </tr>
-        <tr>
-            <td>Number of Encoder Layers</td>
-            <td>2</td>
-        </tr>
-        <tr>
-            <td>Number of Decoder Layers</td>
-            <td>4</td>
-        </tr>
-        <tr>
-            <td>Max Encoder Sequence Length</td>
-            <td>140</td>
-        </tr>
-        <tr>
-            <td>Max Decoder Sequence Length</td>
-            <td>140</td>
-        </tr>
-        <tr>
-            <td>Dropout Rate</td>
-            <td>0.8</td>
-        </tr>
-        <tr>
-            <td>Learning Rate</td>
-            <td>1e-4</td>
-        </tr>
-        <tr>
-            <td>Beam Width</td>
-            <td>5</td>
-        </tr>
-    </tbody>
-  </table>
-  <p>
-    <b>Table 4</b> Model V28 hyperparameters.
-  </p>
-</div>
-
-### Analysis of Validation and Test Loss
-
-### Analysis of Validation and Test Accuracy
-
-### Analysis of Validation and Test Perplexity
-
-### Analysis of Validation and Test BLEU Score
-
-### Analysis of Validation and Test Average Levenshtein Distance
-
-### Analysis of Validation and Test Exact Match Accuracy
-
-### Analysis of Validation and Test Chemical Validity Score
-
-### Analysis of Validation and Test Average Tanimoto Coefficient
-
-### 5.5.3 Model V28 Retrosynthetic Reaction Predictions
 
 ## 5.6 Future Model Optimisations
 
