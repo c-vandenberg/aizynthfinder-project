@@ -1417,7 +1417,7 @@ For **average Tanimoto coefficient**:
 * Our Seq2Seq model utilized **Morgan fingerprints** via **`rdkit.Chem.AllChem.GetMorganFingerprintAsBitVect`** to calculate the Tanimoto coefficient. In future iterations, **comparative Tanimoto coefficients** based on **different molecular fingerprints** will be implemented to **enhance similarity assessments**.
 * **Model V27** has an **average Tanimoto coefficient of 0.869**, while **Model V28** achieved an **average coefficient of 0.874**. This indicates that the predictions from both models are **very structurally similar to the target molecules**, with **Model V28** demonstrating **marginally greater similarity**.
 
-### 5.5.2 Incorporating Seqeuence-to-Sequence Model into AiZynthFinder
+### 5.5.2 Integrating Seqeuence-to-Sequence Model into AiZynthFinder
 
 When evaluating the performance metrics of the two models, it became evident that despite showing **identical token-level metrics**, **Model V28 outperformed Model V27 in sequence-level metrics** (**Table 3**). This improvement can be attributed to several factors:
 1. **Greater Model Capacity**
