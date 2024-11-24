@@ -1226,7 +1226,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ## 5.5 Results and Discussion
 
-### 5.5.1 Analysis of Model V27 and Model V28
+### 5.5.1 Analysis of Best Performing Model Architecture
 
 As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
@@ -1384,7 +1384,9 @@ For **test accuracy**:
 * These accuracies are **very high**, suggesting the models **predict individual tokens correctly ~98.5% of timesteps**.
 
 For **test perplexity**:
-* 
+* Perplexity is a measure of **how well a probability model predicts a sample**, calculated as the **exponential of the cross-entropy loss**.
+
+### 5.5.2 Incorporating Seqeuence-to-Sequence Model into AiZynthFinder
 
 When evaluating the performance metrics of the two models, it became evident that despite showing **identical token-level metrics**, **Model V28 outperformed Model V27 in sequence-level metrics** (**Table 3**). This improvement can be attributed to several factors:
 1. **Greater Model Capacity**
@@ -1399,13 +1401,6 @@ When evaluating the performance metrics of the two models, it became evident tha
 However, when each model was **incorporated into AiZynthFinder** as the **expansion policy**.
 
 As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
-
-### 5.5.2 Model V28 Analysis
-
-**Model V28** was trained for a **maximum of 100 epochs**, with an **early stopping patience of 5** using **TensorFlow's `EarylStopping` callback**. This meant that if the validation loss did not improve over **five consecutive epochs**, the training process would **terminate early** to **mitigate overfitting**. As a result, training concluded after **XXXX epochs**. 
-
-Additionally, a **dynamic learning rate** strategy was implemented using **TensorFlow's `ReduceLROnPlateau` callback**. This callback also monitored validation loss and **reduced the learning rate by a factor of 0.1** if **no improvement was observed over three consecutive epochs**. This resulted in a **final learning rate of `XXXX` by epoch XXXX**, compared to a **starting learning rate of `1e-4`** (**Table 4**).
-
 
 ## 5.6 Future Model Optimisations
 
