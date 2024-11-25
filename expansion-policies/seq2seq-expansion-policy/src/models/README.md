@@ -1419,6 +1419,14 @@ For **average Tanimoto coefficient**:
 
 ### 5.5.2 Integrating Seqeuence-to-Sequence Model into AiZynthFinder
 
+### i. Simple Drug Retrosynthesis - Aspirin
+
+Aspirin is a **nonsteroidal anti-inflammatory drug (NSAID)**, commonly used as a **painkiller** and **antithrombotic agent**. The synthesis of aspirin is commonly taught in **undergraduate teaching labs** as a **quintessential esterification reaction** due to its **ease of synthesis**. It was therefore used, along with other simple drug molecules, to **evaluate the performance** of Model V27 and Model V28 in **executing basic retrosynthesis tasks**.
+
+### ii. Chiral Drug Retrosynthesis - Rivaroxaban
+
+### iii. AiZynthFinder Expansion Policy Performance Analysis
+
 When evaluating the performance metrics of the two models, it became evident that despite showing **identical token-level metrics**, **Model V28 outperformed Model V27 in sequence-level metrics** (**Table 3**). This improvement can be attributed to several factors:
 1. **Greater Model Capacity**
     * **More units and larger embeddings** allow the model to **capture complex patterns** by **learning intricate dependencies**.
@@ -1429,15 +1437,12 @@ When evaluating the performance metrics of the two models, it became evident tha
     * A **larger attention vector** allows for **more precise computation of alignment scores between the encoder and decoder states**.
     * This improvement enables the attention mechanism to **focus more effectively on relevant parts of the input** when generating each output token.
 
-However, when each model was **incorporated into AiZynthFinder** as the **expansion policy**, **Model V28 predicted correct precursors less frequently than Model V27**. Additionally, **Model V28 did not account for stereochemistry in its predictions** when tested with **chiral molecules**, whereas **Model V27 did**. Finally, **Model V27 provided more route options more consisitently during inference** than Model V28.
+However, as seen in the examples above, when each model was **incorporated into AiZynthFinder** as the **expansion policy**, **Model V28 predicted correct precursors less frequently than Model V27**. Additionally, **Model V28 did not account for stereochemistry in its predictions** when tested with **chiral molecules**, whereas **Model V27 did**. Finally, **Model V27 provided more route options more consisitently during inference** than Model V28.
 
-There are **two related explanations** for the is discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
-1. **Overfitting of Model V28**
+There is a **likely explanation** for the is discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
+1. **Model Compleity, Dataset Sizr and Overfitting**
   * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than generalisable patterns**.
-  * To **mitigate overfitting**, the training regime utilises **TensorFlows Early Stopping Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This would **terminate training early** if the **validation loss did not improve over five consecutive epochs**
-  * Model V28 has **significantly more parameters** than Model V27, due to its **larger units, as well as embedding and attention dimensions**. This **increases the risk of overfitting**, especially if the **training data is not sufficiently large or diverse**.
-2. **Model Complexity vs Dataset Size**
-  * Model V28 has **significantly more parameters** than Model V27 (**Table 5**), due to its **larger units, as well as embedding and attention dimensions**.
+  * Model V28 has **significantly more parameters** and thus is **significantly more complex** than Model V27. This is due to its **larger units, as well as embedding and attention dimensions**.
   * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not increase relative to the complexity of the model**, there is a **significant risk of overfitting**.
 
 <div style="display: flex;" align="center">
@@ -1515,7 +1520,18 @@ There are **two related explanations** for the is discrepancy between **improved
   </p>
 </div>
 
-As you can see from **Table 6**,
+For both Model V27 and Model V28, the training regimen has **several mitigation strategies** to prevent overfitting:
+1. **Early Stopping**
+  * The training regime utilises **TensorFlows Early Stopping Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This **terminates training early** if the **validation loss did not improve over five consecutive epochs**.
+2. **Dropout Regularisation**
+  * Using **dropout** as a **regularisation technique** helps to mitigate overfitting by **randomly deactivating a subset of neurons** during training to **prevent co-adaption**.
+3. **Weight Decay (L2 Regularisation)**
+  * Using **weight decay/L2 regularisation** as a **regularisation technique** helps to mitigate overfitting by **adding penalty terms to discourage large weights**.
+  * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers** to **encourage smaller weights**, leading to **simpler models**.
+
+However, as shown in **Table 6**, there is a **significant increase in trainable parameters** from **5,456,986** to **21,661,786** between Model V27 and Model V28. Therefore, it is likely that the **above mitigation strategies are insufficient to prevent overfitting** for Model V28. Therefore, the **next optimisation** needs to be to **vastly increase the size and diversity of the training data**. It is hoped this will:
+1. **A
+2. confirm whether the **improvement in validation and testing metrics** during training of a more complex model **translates to improved generalisation on new data**, which would **compensate for the increased computational cost**.
 
 As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
 
