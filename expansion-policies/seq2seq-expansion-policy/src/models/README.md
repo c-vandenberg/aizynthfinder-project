@@ -1453,30 +1453,30 @@ For **average Tanimoto coefficient**:
 
 **Fig 12** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of aspirin. The primary issues observed are:
 1. **Incorrect Starting Precursor Prediction**
-  * **Expected Prediction:** **Salicylic acid (ortho-hydroxybenzoic acid)** as one of the two starting precursors.
-  * **Model V27 Prediction:** **meta-Hydroxybenzamide** with a **methoxy group** positioned at the **other meta position**.
+    * **Expected Prediction:** **Salicylic acid (ortho-hydroxybenzoic acid)** as one of the two starting precursors.
+    * **Model V27 Prediction:** **meta-Hydroxybenzamide** with a **methoxy group** positioned at the **other meta position**.
 2. **Faulty Parent Precursor Structure**
-  * **Correct Features:**
-    * **Meta Isomer:** The parent precursor maintains the correct meta isomer configuration.
-    * **Carboxylic Acid Group:** One carboxylic acid group is correctly predicted.
-  * **Incorrect Features:**
-    * **Second Carboxylic Acid Group:** Instead of an **ester group**, the model erroneously includes a **second carboxylic acid group**.
-    * **Ring Structure:** A **pyridine ring** is predicted in place of the correct **phenyl ring**.
-    * **Methoxy Group:** The **incorrect methoxy group** is retained in the structure.
+    * **Correct Features:**
+      * **Meta Isomer:** The parent precursor maintains the correct meta isomer configuration.
+      * **Carboxylic Acid Group:** One carboxylic acid group is correctly predicted.
+    * **Incorrect Features:**
+      * **Second Carboxylic Acid Group:** Instead of an **ester group**, the model erroneously includes a **second carboxylic acid group**.
+      * **Ring Structure:** A **pyridine ring** is predicted in place of the correct **phenyl ring**.
+      * **Methoxy Group:** The **incorrect methoxy group** is retained in the structure.
 
 However, since the model was trained on **only 50,000 reactions**, it serves as a **solid foundation** and demonstrates **several promising aspects** in retrosynthesis prediction:
 1. **Accurate Precursor Prediction:**
-  * The model **correctly identified acetic anhydride** as the starting precursor, showcasing its ability to recognise fundamental reactants.
+    * The model **correctly identified acetic anhydride** as the starting precursor, showcasing its ability to recognise fundamental reactants.
 2. **Partial Ester Group Prediction:**
-  * The inclusion of a **methoxy group** suggests that the model is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
+    * The inclusion of a **methoxy group** suggests that the model is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
 3. **Meta Isomer Identification:**
-  * The model **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
+    * The model **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
 
 ### Model V28 Asprin Retrosynthetic Prediction
 
 <br>
   <div align="center">
-    <img src="", alt="512-hyperparameter-aspirin-aizynthfinder"/>
+    <img src="https://github.com/user-attachments/assets/63828bd2-2f3a-4b15-bb3d-f114cc4c3063", alt="512-hyperparameter-aspirin-aizynthfinder"/>
     <p>
       <b>Fig 14</b> Model V28 aspirin retrosynthesis in AiZynthFinder GUI.
     </p>
@@ -1514,7 +1514,7 @@ Rivaroxaban has **various reported syntheses**, **<sup>17</sup>** however for th
 
 <br>
   <div align="center">
-    <img src="256-hyperparameter-rivaroxaban-aizynthfinder-3](https://github.com/user-attachments/assets/9a88babc-3bdd-43e2-997c-761a2604e068", alt="256-hyperparameter-rivaroxaban-aizynthfinder"/>
+    <img src="https://github.com/user-attachments/assets/9a88babc-3bdd-43e2-997c-761a2604e068", alt="256-hyperparameter-rivaroxaban-aizynthfinder"/>
     <p>
       <b>Fig 17</b> Model V27 rivaroxaban retrosynthesis in AiZynthFinder GUI.
     </p>
@@ -1536,10 +1536,10 @@ When evaluating the performance metrics of the two models, it became evident tha
 However, as seen in the examples above, when each model was **incorporated into AiZynthFinder** as the **expansion policy**, **Model V28 predicted correct precursors less frequently than Model V27**. Additionally, **Model V28 did not account for stereochemistry in its predictions** when tested with **chiral molecules**, whereas **Model V27 did**. Finally, **Model V27 provided more route options more consisitently during inference** than Model V28.
 
 There is a **likely explanation** for the is discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
-1. **Model Compleity, Dataset Sizr and Overfitting**
-  * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than generalisable patterns**.
-  * Model V28 has **significantly more parameters** and thus is **significantly more complex** than Model V27. This is due to its **larger units, as well as embedding and attention dimensions**.
-  * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not increase relative to the complexity of the model**, there is a **significant risk of overfitting**.
+1. **Model Compleity, Dataset Size and Overfitting**
+    * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than generalisable patterns**.
+    * Model V28 has **significantly more parameters** and thus is **significantly more complex** than Model V27. This is due to its **larger units, as well as embedding and attention dimensions**.
+    * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not increase relative to the complexity of the model**, there is a **significant risk of overfitting**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1579,9 +1579,9 @@ There is a **likely explanation** for the is discrepancy between **improved sequ
 </div>
 
 **Table 5** gives the **number of parameters in each layer type** for both Model V27 and Model V28. However, when considering **model complexity vs dataset size**, we **mainly need to focus on trainable parameters**.
-* Trainable parameters are the parameters in a neural network that are **learned and updated during the training process through backpropagation/backproagation through time**.
-* They include **weights and biases** of the layers in the model.
-* These parameters are **adjusted to minimise the loss function** by **optimising the network's performance on the training data**.
+  * Trainable parameters are the parameters in a neural network that are **learned and updated during the training process through backpropagation/backproagation through time**.
+  * They include **weights and biases** of the layers in the model.
+  * These parameters are **adjusted to minimise the loss function** by **optimising the network's performance on the training data**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1618,12 +1618,12 @@ There is a **likely explanation** for the is discrepancy between **improved sequ
 
 For both Model V27 and Model V28, the training regimen has **several mitigation strategies** to prevent overfitting:
 1. **Early Stopping**
-  * The training regime utilises **TensorFlows Early Stopping Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This **terminates training early** if the **validation loss did not improve over five consecutive epochs**.
+    * The training regime utilises **TensorFlows Early Stopping Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This **terminates training early** if the **validation loss did not improve over five consecutive epochs**.
 2. **Dropout Regularisation**
-  * Using **dropout** as a **regularisation technique** helps to mitigate overfitting by **randomly deactivating a subset of neurons** during training to **prevent co-adaption**.
+    * Using **dropout** as a **regularisation technique** helps to mitigate overfitting by **randomly deactivating a subset of neurons** during training to **prevent co-adaption**.
 3. **Weight Decay (L2 Regularisation)**
-  * Using **weight decay/L2 regularisation** as a **regularisation technique** helps to mitigate overfitting by **adding penalty terms to discourage large weights**.
-  * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers** to **encourage smaller weights**, leading to **simpler models**.
+    * Using **weight decay/L2 regularisation** as a **regularisation technique** helps to mitigate overfitting by **adding penalty terms to discourage large weights**.
+    * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers** to **encourage smaller weights**, leading to **simpler models**.
 
 However, as shown in **Table 6**, there is a **significant increase in trainable parameters** from **5,456,986** to **21,661,786** between Model V27 and Model V28. Therefore, it is likely that the **above mitigation strategies are insufficient to prevent overfitting** for Model V28. Therefore, the **next optimisation** needs to be to **vastly increase the size and diversity of the training data**. It is hoped this will:
 1. **A
