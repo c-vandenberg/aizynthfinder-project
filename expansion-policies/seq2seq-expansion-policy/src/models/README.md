@@ -1430,7 +1430,7 @@ For **average Tanimoto coefficient**:
   </div>
 <br>
 
-Aspirin is a **nonsteroidal anti-inflammatory drug (NSAID)**, commonly used as a **painkiller** and **antithrombotic agent**. The synthesis of aspirin (**Fig 12**) is a **classic esterification reaction** that is commonly taught in **undergraduate teaching labs** due to its **ease of synthesis**. It was therefore used, along with other simple drug molecules, to **evaluate the performance** of Model V27 and Model V28 in **executing basic retrosynthesis tasks**.
+**Aspirin** is a **nonsteroidal anti-inflammatory drug (NSAID)**, commonly used as a **painkiller** and **antithrombotic agent**. The synthesis of aspirin (**Fig 12**) is a **classic esterification reaction** that is commonly taught in **undergraduate teaching labs** due to its **ease of synthesis**. It was therefore used, along with other simple drug molecules, to **evaluate the performance** of Model V27 and Model V28 in **executing basic retrosynthesis tasks**.
 
 <br>
   <div align="center">
@@ -1441,9 +1441,10 @@ Aspirin is a **nonsteroidal anti-inflammatory drug (NSAID)**, commonly used as a
   </div>
 <br>
 
+### Model V27 Aspirin Retrosynthetic Prediction
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/72549a8a-4f3f-4e25-80c4-4e2d881f2349", alt="256-hyperparameter-aspirin-aizynthfinder-3"/>
+    <img src="https://github.com/user-attachments/assets/72549a8a-4f3f-4e25-80c4-4e2d881f2349", alt="256-hyperparameter-aspirin-aizynthfinder"/>
     <p>
       <b>Fig 13</b> Model V27 aspirin retrosynthesis in AiZynthFinder GUI.
     </p>
@@ -1471,17 +1472,54 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
 3. **Meta Isomer Identification:**
   * The model **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
 
+### Model V28 Asprin Retrosynthetic Prediction
+
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/72549a8a-4f3f-4e25-80c4-4e2d881f2349", alt="256-hyperparameter-aspirin-aizynthfinder-3"/>
+    <img src="", alt="512-hyperparameter-aspirin-aizynthfinder"/>
     <p>
-      <b>Fig 13</b> Model V27 aspirin retrosynthesis in AiZynthFinder GUI.
+      <b>Fig 14</b> Model V28 aspirin retrosynthesis in AiZynthFinder GUI.
     </p>
   </div>
 <br>
 
 
 ### ii. Complex Chiral Drug Retrosynthesis - Rivaroxaban
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/53513cf0-7b07-4aca-8747-4c521a4c72b1", alt="rivaroxaban-aizynthfinder"/>
+    <p>
+      <b>Fig 15</b> Rivaroxaban in AiZynthFinder Graphical User Interface (GUI).
+    </p>
+  </div>
+<br>
+
+**Rivaroxaban** is an **anticoagulant medication** used to **treat and prevent blood clots**. It works by **inhibiting both free and bound Coagulation Factor Xa**, which is a **key enzyme in the coagulation cascade**. **<sup>14</sup>**
+
+As a drug molecule is is **relatively large and complex orally bioavailable chiral drug**, with only the enantiomer **(S)-Rivaroxaban** being pharmacologically active. **<sup>15</sup>** It was therefore used, along with **other more complex and chrial drug molecules** to **evaluate the performance** of Model V27 and Model V28 in **executing more complex retrosynthesis tasks**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/7724e016-d368-4b79-893d-2860b6a81453", alt="mali-et-al-rivaroxaban-synthesis"/>
+    <p>
+      <b>Fig 16</b> Synthesis of rivaroxaban reported by <i>Mali et al.</i> <b><sup>16</sup></b>
+    </p>
+  </div>
+<br>
+
+Rivaroxaban has **various reported syntheses**, **<sup>17</sup>** however for the sake 
+
+### Model V27 Rivaroxaban Retrosynthetic Prediction
+
+<br>
+  <div align="center">
+    <img src="256-hyperparameter-rivaroxaban-aizynthfinder-3](https://github.com/user-attachments/assets/9a88babc-3bdd-43e2-997c-761a2604e068", alt="256-hyperparameter-rivaroxaban-aizynthfinder"/>
+    <p>
+      <b>Fig 17</b> Model V27 rivaroxaban retrosynthesis in AiZynthFinder GUI.
+    </p>
+  </div>
+<br>
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
@@ -1624,3 +1662,7 @@ Given that Seq2Seq models have **largely been superseded by transformer architec
 **[11]** Roeder, L. (2021) Lutzroeder/netron: Visualizer for Neural Network, Deep Learning and Machine Learning Models, GitHub. Available at: https://github.com/lutzroeder/netron (Accessed: 05 November 2024). <br><br>
 **[12]** Lowe, D. M. (2012) ‘Extraction of Chemical Structures and Reactions from the Literature’; University of Cambridge. <br><br>
 **[13]** Maggiora, G. et al. (2013) ‘Molecular similarity in Medicinal Chemistry’, Journal of Medicinal Chemistry, 57(8), pp. 3186–3204. <br><br>
+**[14]** Roehrig, S. et al. (2005) ‘Discovery of the novel antithrombotic agent 5-chloro-n-({(5s)-2-oxo-3- [4-(3-oxomorpholin-4-yl)phenyl]-1,3-oxazolidin-5-yl}methyl)thiophene- 2-carboxamide (Bay 59-7939):  an oral, direct factor xa inhibitor’, Journal of Medicinal Chemistry, 48(19), pp. 5900–5908. <br><br>
+**[15]** Olegário dos Santos, N., Ribeiro Wingert, N. and Steppe, M. (2023) ‘Quality by design approach for enantiomeric evaluation by RP-HPLC method of rivaroxaban and its chiral impurity’, Microchemical Journal, 192, p. 108911. <br><br>
+**[16]** Mali, A.C. et al. (2015) ‘Facile approach for the synthesis of rivaroxaban using alternate synthon: Reaction, crystallization and isolation in single pot to achieve desired yield, quality and Crystal Form’, Sustainable Chemical Processes, 3(1). <br><br>
+**[17]** Fattah, T.A. and Saeed, A. (2017) ‘A review on the synthetic approaches of Rivaroxaban: An anticoagulant drug’, Tetrahedron: Asymmetry, 28(4), pp. 485–504. <br><br>
