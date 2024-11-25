@@ -1495,20 +1495,20 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
   </div>
 <br>
 
-**Rivaroxaban** is an **anticoagulant medication** used to **treat and prevent blood clots**. It works by **inhibiting both free and bound Coagulation Factor Xa**, which is a **key enzyme in the coagulation cascade**. **<sup>14</sup>**
+**Rivaroxaban** is an **anticoagulant medication** used to **treat and prevent blood clots**. It works by **inhibiting both free and bound Coagulation Factor Xa**, a **key enzyme in the coagulation cascade**. **<sup>14</sup>**
 
-As a drug molecule is is **relatively large and complex orally bioavailable chiral drug**, with only the enantiomer **(S)-Rivaroxaban** being pharmacologically active. **<sup>15</sup>** It was therefore used, along with **other more complex and chrial drug molecules** to **evaluate the performance** of Model V27 and Model V28 in **executing more complex retrosynthesis tasks**.
+Rivaroxaban  is a **relatively large and complex, orally bioavailable chiral drug**, with only the enantiomer **(S)-Rivaroxaban** being pharmacologically active. **<sup>15</sup>** It was therefore used, along with **other relatively complex and chrial drug molecules**, to **evaluate the performance** of Model V27 and Model V28 in **executing more complex retrosynthesis tasks**.
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/7724e016-d368-4b79-893d-2860b6a81453", alt="mali-et-al-rivaroxaban-synthesis"/>
+    <img src="https://github.com/user-attachments/assets/3e10d883-dfb5-47ce-aa0d-af1b0219a5e4", alt="alexander-et-al-rivaroxaban-synthesis"/>
     <p>
-      <b>Fig 16</b> Synthesis of rivaroxaban reported by <i>Mali et al.</i> <b><sup>16</sup></b>
+      <b>Fig 16</b> Synthesis of rivaroxaban reported by <i>Roehrig et al.</i> using an (S)-glycidyl phthalimide precursor (<b>2</b>) <b><sup>16</sup></b>
     </p>
   </div>
 <br>
 
-Rivaroxaban has **various reported syntheses**, **<sup>17</sup>** however for the sake 
+Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for comparison, we will use the *Roehrig et al.* synthesis, which employs an (S)-glycidyl phthalimide precursor (**Fig 16**). **<sup>16</sup>**
 
 ### Model V27 Rivaroxaban Retrosynthetic Prediction
 
@@ -1664,5 +1664,5 @@ Given that Seq2Seq models have **largely been superseded by transformer architec
 **[13]** Maggiora, G. et al. (2013) ‘Molecular similarity in Medicinal Chemistry’, Journal of Medicinal Chemistry, 57(8), pp. 3186–3204. <br><br>
 **[14]** Roehrig, S. et al. (2005) ‘Discovery of the novel antithrombotic agent 5-chloro-n-({(5s)-2-oxo-3- [4-(3-oxomorpholin-4-yl)phenyl]-1,3-oxazolidin-5-yl}methyl)thiophene- 2-carboxamide (Bay 59-7939):  an oral, direct factor xa inhibitor’, Journal of Medicinal Chemistry, 48(19), pp. 5900–5908. <br><br>
 **[15]** Olegário dos Santos, N., Ribeiro Wingert, N. and Steppe, M. (2023) ‘Quality by design approach for enantiomeric evaluation by RP-HPLC method of rivaroxaban and its chiral impurity’, Microchemical Journal, 192, p. 108911. <br><br>
-**[16]** Mali, A.C. et al. (2015) ‘Facile approach for the synthesis of rivaroxaban using alternate synthon: Reaction, crystallization and isolation in single pot to achieve desired yield, quality and Crystal Form’, Sustainable Chemical Processes, 3(1). <br><br>
+**[16]** Roehrig, S. et al. (2005a) ‘Discovery of the novel antithrombotic agent 5-chloro-n-({(5s)-2-oxo-3- [4-(3-oxomorpholin-4-yl)phenyl]-1,3-oxazolidin-5-yl}methyl)thiophene- 2-carboxamide (Bay 59-7939):  an oral, direct factor xa inhibitor’, Journal of Medicinal Chemistry, 48(19), pp. 5900–5908. <br><br>
 **[17]** Fattah, T.A. and Saeed, A. (2017) ‘A review on the synthetic approaches of Rivaroxaban: An anticoagulant drug’, Tetrahedron: Asymmetry, 28(4), pp. 485–504. <br><br>
