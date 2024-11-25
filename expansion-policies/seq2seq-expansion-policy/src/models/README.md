@@ -1309,7 +1309,7 @@ Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu 
   </p>
 </div>
 
-Both models were trained with using identical product and reactant datasets consisting of approximately **50,000 reactions**, derived from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. These datasets were processed as described in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation) and split into training and testing sets with a 7:3 ratio. The validation product and reactant datasets were processed in the same manner, but were pre-split by *Liu et al.*.
+Both models were initially trained with using identical product and reactant datasets, consisting of approximately **50,000 reactions**. These datasets were sourced from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. Following the data processing outlined in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation), the datasets were split into training and testing sets with a 7:3 ratio. The validation datasets for products and reactants were processed similarly, but were **pre-split** by *Liu et al.*. Moving forward, future models will be trained on a **larger and more diverse training dataset** to **enhance performance and generalisation**.
 
 Both models were evaluated against test datasets using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
 
@@ -1421,9 +1421,67 @@ For **average Tanimoto coefficient**:
 
 ### i. Simple Drug Retrosynthesis - Aspirin
 
-Aspirin is a **nonsteroidal anti-inflammatory drug (NSAID)**, commonly used as a **painkiller** and **antithrombotic agent**. The synthesis of aspirin is commonly taught in **undergraduate teaching labs** as a **quintessential esterification reaction** due to its **ease of synthesis**. It was therefore used, along with other simple drug molecules, to **evaluate the performance** of Model V27 and Model V28 in **executing basic retrosynthesis tasks**.
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/bc311e80-99a0-40b1-8cc3-c8bdf0a6ee7e", alt="aspirin-aizynthfinder"/>
+    <p>
+      <b>Fig 11</b> Aspirin in AiZynthFinder Graphical User Interface (GUI).
+    </p>
+  </div>
+<br>
 
-### ii. Chiral Drug Retrosynthesis - Rivaroxaban
+Aspirin is a **nonsteroidal anti-inflammatory drug (NSAID)**, commonly used as a **painkiller** and **antithrombotic agent**. The synthesis of aspirin (**Fig 12**) is a **classic esterification reaction** that is commonly taught in **undergraduate teaching labs** due to its **ease of synthesis**. It was therefore used, along with other simple drug molecules, to **evaluate the performance** of Model V27 and Model V28 in **executing basic retrosynthesis tasks**.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/6a9f59a4-304d-494b-bbe5-3028514fbd6f", alt="aspirin-classical-synthesis"/>
+    <p>
+      <b>Fig 12</b> Classical synthesis of aspirin.
+    </p>
+  </div>
+<br>
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/72549a8a-4f3f-4e25-80c4-4e2d881f2349", alt="256-hyperparameter-aspirin-aizynthfinder-3"/>
+    <p>
+      <b>Fig 13</b> Model V27 aspirin retrosynthesis in AiZynthFinder GUI.
+    </p>
+  </div>
+<br>
+
+**Fig 12** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of aspirin. The primary issues observed are:
+1. **Incorrect Starting Precursor Prediction**
+  * **Expected Prediction:** **Salicylic acid (ortho-hydroxybenzoic acid)** as one of the two starting precursors.
+  * **Model V27 Prediction:** **meta-Hydroxybenzamide** with a **methoxy group** positioned at the **other meta position**.
+2. **Faulty Parent Precursor Structure**
+  * **Correct Features:**
+    * **Meta Isomer:** The parent precursor maintains the correct meta isomer configuration.
+    * **Carboxylic Acid Group:** One carboxylic acid group is correctly predicted.
+  * **Incorrect Features:**
+    * **Second Carboxylic Acid Group:** Instead of an **ester group**, the model erroneously includes a **second carboxylic acid group**.
+    * **Ring Structure:** A **pyridine ring** is predicted in place of the correct **phenyl ring**.
+    * **Methoxy Group:** The **incorrect methoxy group** is retained in the structure.
+
+However, since the model was trained on **only 50,000 reactions**, it serves as a **solid foundation** and demonstrates **several promising aspects** in retrosynthesis prediction:
+1. **Accurate Precursor Prediction:**
+  * The model **correctly identified acetic anhydride** as the starting precursor, showcasing its ability to recognise fundamental reactants.
+2. **Partial Ester Group Prediction:**
+  * The inclusion of a **methoxy group** suggests that the model is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
+3. **Meta Isomer Identification:**
+  * The model **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
+
+<br>
+  <div align="center">
+    <img src="https://github.com/user-attachments/assets/72549a8a-4f3f-4e25-80c4-4e2d881f2349", alt="256-hyperparameter-aspirin-aizynthfinder-3"/>
+    <p>
+      <b>Fig 13</b> Model V27 aspirin retrosynthesis in AiZynthFinder GUI.
+    </p>
+  </div>
+<br>
+
+
+### ii. Complex Chiral Drug Retrosynthesis - Rivaroxaban
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
