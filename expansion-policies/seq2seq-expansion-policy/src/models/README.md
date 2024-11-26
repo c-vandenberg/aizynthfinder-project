@@ -1228,7 +1228,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.5.1 Analysis of Best Performing Model Architecture
 
-As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters** and a **limited dataset of 50,000 reactions**. These have been given the designations **Model V27** and **Model V28**.
+As of **21/11/24**, the **top model architecture** has trained on a **limited dataset of 50,000 reactions**, and evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
 Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**. All other hyperparameters are **consistent between the two models** (**Table 3**).
 
@@ -1451,13 +1451,13 @@ For **average Tanimoto coefficient**:
   </div>
 <br>
 
-**Fig 12** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of aspirin. The primary issues observed are:
-1. **Incorrect Starting Precursor Prediction**
-    * **Expected Prediction:** **Salicylic acid (ortho-hydroxybenzoic acid)** as one of the two starting precursors.
+**Fig 12** illustrates that Model V27 exhibits **suboptimal performance** in its retrosynthetic prediction of aspirin. The primary issues are:
+1. **Incorrect Leaf Node Precursor Prediction**
+    * **Expected Prediction:** **Salicylic acid (ortho-hydroxybenzoic acid)** as **one of the two leaf node precursors**.
     * **Model V27 Prediction:** **meta-Hydroxybenzamide** with a **methoxy group** at the **other meta position**.
 2. **Faulty Parent Precursor Structure**
     * **Correct Features:**
-      * **Meta Isomer:** The parent precursor maintains the correct meta isomer configuration.
+      * **Meta Isomer:** The **parent node precursor** maintains the correct meta isomer configuration.
       * **Carboxylic Acid Group:** One carboxylic acid group is correctly predicted.
     * **Incorrect Features:**
       * **Second Carboxylic Acid Group:** Instead of an **ester group**, the model erroneously includes a **second carboxylic acid group**.
@@ -1465,14 +1465,14 @@ For **average Tanimoto coefficient**:
       * **Methoxy Group:** The **incorrect methoxy group** is retained in the structure.
 
 However, since the model was trained on **only 50,000 reactions**, it serves as a **solid foundation** and demonstrates **several promising aspects** in retrosynthesis prediction:
-1. **Accurate Precursor Prediction:**
-    * The model **correctly identified acetic anhydride** as the starting precursor, showcasing its ability to predict fundamental reactants.
+1. **Accurate Leaf Node Precursor Prediction:**
+    * Model V27 **correctly identified acetic anhydride** as **one of the leaf node precursors**, showcasing its ability to predict fundamental reactants.
 2. **Partial Ester Group Prediction:**
-    * The inclusion of a **methoxy group** suggests that the model is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
+    * The inclusion of a **methoxy group** suggests that Model V27 is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
 3. **Meta Isomer Identification:**
-    * The model **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
+    * Model V27 **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
 4. **Diverse Retrosynthesis Pathway Options**
-    * The model provided **four retrosynthesis pathway options**, most of which **correctly included the acetic anhydride starting precursor**.
+    * Model V27 provided **four retrosynthesis pathway options**, most of which **correctly included the acetic anhydride precursor**.
     * Although the subsequent options had a **lower state score** (*c.f.* [Section 1.5](https://github.com/c-vandenberg/aizynthfinder-project/tree/master#15-aizynthfinder-post-processing-tools---route-scoring)) and **made less synthetic sense**, predicting multiple retrosynthetic routes is crucial for potentially identifying novel synthetic pathways.
 
 ### Model V28 Asprin Retrosynthetic Prediction
@@ -1486,6 +1486,13 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
   </div>
 <br>
 
+**Fig 14** illustrates that Model V28 **performed worse than Model V27** in its retrosynthetic prediction of aspirin. The primary issues are:
+1. **Single Incorrect Leaf Node Precursor Prediction**
+    * Model V28 **only predicts a single leaf node precursor** that **does not have the correct structure of either of the precursors** used in the classic synthesis of aspirin.
+2. **Lack of Diverse Retrosynthesis Pathway Options**
+    * Model V28 **only provides two retrosynthesis pathway options**, with the first option being **the target molecule itself**.
+  
+However, the single precursor **does exhibit structural similarity to aspirin**, correctly predicting an **ester functional group**, albeit with a **-CH<sub>3</sub> group between it and the phenyl ring**. Additionally, the precursor exhibits the **same isomerism as salicylic acid and aspirin**, with the **two phenyl ring substituents being at the ipso and ortho positions**.
 
 ### ii. Complex Chiral Drug Retrosynthesis - Rivaroxaban
 
@@ -1524,13 +1531,13 @@ Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for c
   </div>
 <br>
 
-**Fig 17** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. The primary issues observed are:
-1. **Incorrect Starting Precursor Prediction**
-    * **Neither of the starting precursor predictions are correct** in the context of the *Roehrig et al.* synthesis or any reported synthesis of rivaroxaban. **<sup>17</sup>**
+**Fig 17** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. The primary issues are:
+1. **Incorrect Leaf Node Precursors Prediction**
+    * **Neither of the leaf node precursor predictions are correct** in the context of the *Roehrig et al.* synthesis or any reported synthesis of rivaroxaban. **<sup>17</sup>**
 2. **Too Few Synthetic Steps**
     * The model predicted a **one-step reaction** in **all of its pathway options**. This is **not realistic for a relatively complex molecule** like rivaroxaban.
 3. **Missing Key Moieties**
-    * While **both starting precursors have incorrect structures**, there is a **degree of chemical similarity between them** and the **target molecule**.
+    * While **both leaf node precursors have incorrect structures**, there is a **degree of chemical similarity between them** and the **target molecule**.
     * However, **three moieties are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moeity**. This is likely because **these moeities are underrepresented in the training data**.
 
 Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban compared to that of aspirin, there are **several promising aspects** in its retrosynthesis prediction:
