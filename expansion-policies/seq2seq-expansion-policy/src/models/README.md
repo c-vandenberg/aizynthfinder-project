@@ -1562,7 +1562,7 @@ Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban comp
 
 **Fig 14** illustrates that Model V28 also exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. However, whether it is **performs worse or better than Model V27 is less clear**. Similar to the retrosynthetic prediction of aspirin, the primary issues are:
 1. **Single Incorrect Leaf Node Precursor Prediction**
-    * Model V28 **only predicts a single leaf node precursor** that **does not have the correct structure of either of the precursors** used in any reported syntheses of rivaroxaban. The presence of a **7-membered lactam** is particularly interesting. 
+    * Model V28 **only predicts a single leaf node precursor** that **does not have the correct structure of either of the precursors** used in any reported syntheses of rivaroxaban. The presence of a **seven-membered lactam** is particularly interesting. 
 2. **Non-Chrial Predicted Precursor**
     * Unlike Model V27, the **predicted precursor is not chrial**, indicating that Model V28 **is not accounting for stereochemistry** in its predictions.
 4. **Lack of Diverse Retrosynthesis Pathway Options**
@@ -1574,7 +1574,7 @@ However, there are some **promising features** of the prediction made by Model V
 2. **Presence of Chloro-Heteroaromatic Moiety**
     * Although rivaroxaban contains a **chlorothiophene moiety**, the fact that Model V28 **predicted a chloro-heteroaromatic (chloropyridine) moiety** was an **improvement over Model V27**, whose prediction placed the chloro group **on a phenyl ring**. The prediction of pyridine over thiophene is likely due to thiophenes being underrepresented in the training data compared to pyridines.
   
-Additionally
+Additionally, although not directly relevant to this retrosynthesis, the inclusion of a **seven-membered lactam ($$\epsilon$$-lactam) derivative** in the predicted structure is particularly noteworthy. While **not the most common moeity**, $$\epsilon$$-lactams (also known as **2-azepanones**) derivatives have **therapeutic applications** in various fields, spanning **cancer**, **mental health disorders** and **addiction**. **<sup>18</sup>** The model's ability to **effectively explore this relatively uncommon but important chemical space** is also promising.
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
@@ -1721,3 +1721,4 @@ Given that Seq2Seq models have **largely been superseded by transformer architec
 **[15]** Olegário dos Santos, N., Ribeiro Wingert, N. and Steppe, M. (2023) ‘Quality by design approach for enantiomeric evaluation by RP-HPLC method of rivaroxaban and its chiral impurity’, Microchemical Journal, 192, p. 108911. <br><br>
 **[16]** Roehrig, S. et al. (2005a) ‘Discovery of the novel antithrombotic agent 5-chloro-n-({(5s)-2-oxo-3- [4-(3-oxomorpholin-4-yl)phenyl]-1,3-oxazolidin-5-yl}methyl)thiophene- 2-carboxamide (Bay 59-7939):  an oral, direct factor xa inhibitor’, Journal of Medicinal Chemistry, 48(19), pp. 5900–5908. <br><br>
 **[17]** Fattah, T.A. and Saeed, A. (2017) ‘A review on the synthetic approaches of Rivaroxaban: An anticoagulant drug’, Tetrahedron: Asymmetry, 28(4), pp. 485–504. <br><br>
+**[18]** Saldívar-González, F.I. et al. (2019) ‘Exploring the chemical space and the bioactivity profile of lactams: A chemoinformatic study’, RSC Advances, 9(46), pp. 27105–27116. <br><br>
