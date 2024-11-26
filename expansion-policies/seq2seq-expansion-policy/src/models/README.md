@@ -1588,13 +1588,13 @@ When evaluating the performance metrics of the two models, it became evident tha
     * A **larger attention vector** allows for **more precise computation of alignment scores between the encoder and decoder states**.
     * This improvement enables the attention mechanism to **focus more effectively on relevant parts of the input** when generating each output token.
 
-However, as seen in the examples above, when each model was **incorporated into AiZynthFinder** as the **expansion policy**, **Model V28 predicted correct precursors less frequently than Model V27**. Additionally, **Model V28 did not account for stereochemistry in its predictions** when tested with **chiral molecules**, whereas **Model V27 did**. Finally, **Model V27 provided more route options more consisitently during inference** than Model V28.
+However, as illustrated in the examples above, when each model was **incorporated into AiZynthFinder** as the **expansion policy**, **Model V28 predicted correct precursors less frequently than Model V27**. Additionally, **Model V28 did not account for stereochemistry in its predictions** when tested with **chiral molecules**, whereas **Model V27 did**. Finally, **Model V27 provided more route options more consisitently during inference** than Model V28.
 
-There is a **likely explanation** for the is discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
-1. **Model Compleity, Dataset Size and Overfitting**
-    * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than generalisable patterns**.
-    * Model V28 has **significantly more parameters** and thus is **significantly more complex** than Model V27. This is due to its **larger units, as well as embedding and attention dimensions**.
-    * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not increase relative to the complexity of the model**, there is a **significant risk of overfitting**.
+There is a **likely explanation** for the discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
+1. **Model Complexity, Dataset Size, and Overfitting**
+    * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than extracting generalisable patterns**.
+    * Model V28 has **significantly more parameters**, making it **substantially more complex** than Model V27. This increased complexity is due to its **larger units, as well as expanded embedding and attention dimensions**.
+    * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not scale proportionally with the model's complexity**, there is a **significant risk of overfitting**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1629,12 +1629,12 @@ There is a **likely explanation** for the is discrepancy between **improved sequ
     </tbody>
   </table>
   <p>
-    <b>Table 5</b> Number of parameters in each layer type for Models V27 and V28.
+    <b>Table 5</b> Number of parameters in each layer type for Model V27 and Model V28.
   </p>
 </div>
 
 **Table 5** gives the **number of parameters in each layer type** for both Model V27 and Model V28. However, when considering **model complexity vs dataset size**, we **mainly need to focus on trainable parameters**.
-  * Trainable parameters are the parameters in a neural network that are **learned and updated during the training process through backpropagation/backproagation through time**.
+  * Trainable parameters are the parameters in a neural network that are **learned and updated during the training process through backpropagation/backproagation through time (BPTT)**.
   * They include **weights and biases** of the layers in the model.
   * These parameters are **adjusted to minimise the loss function** by **optimising the network's performance on the training data**.
 
@@ -1680,9 +1680,12 @@ For both Model V27 and Model V28, the training regimen has **several mitigation 
     * Using **weight decay/L2 regularisation** as a **regularisation technique** helps to mitigate overfitting by **adding penalty terms to discourage large weights**.
     * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers** to **encourage smaller weights**, leading to **simpler models**.
 
-However, as shown in **Table 6**, there is a **significant increase in trainable parameters** from **5,456,986** to **21,661,786** between Model V27 and Model V28. Therefore, it is likely that the **above mitigation strategies are insufficient to prevent overfitting** for Model V28. Therefore, the **next optimisation** needs to be to **vastly increase the size and diversity of the training data**. It is hoped this will:
-1. **A
-2. confirm whether the **improvement in validation and testing metrics** during training of a more complex model **translates to improved generalisation on new data**, which would **compensate for the increased computational cost**.
+However, as shown in **Table 6**, there is a **significant increase in trainable parameters** from **5,456,986** in Model V27 to **21,661,786** in Model V28. Therefore, the **mitigation strategies employed are likely insufficient to prevent overfitting** in Model V28. Furthermore, given the **complexity of Model V27**, it is possible that it may **also exhibit some degree of overfitting**.
+
+Therefore, the **next optimisation** needs to be to **vastly increase the size and diversity of the training data**. It is hoped this will:
+1. **Improve AiZynthFinder Performance**: Increasing the size and diversity should **improve the ability of both models to generalise to new, unseed data**, thus **improving 
+2. **Improve Sequence-Level Metrics**: Imp
+3. confirm whether the **improvement in validation and testing metrics** during training of a more complex model **translates to improved generalisation on new data**, which would **compensate for the increased computational cost**.
 
 As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
 
