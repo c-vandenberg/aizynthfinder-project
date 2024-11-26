@@ -1228,7 +1228,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.5.1 Analysis of Best Performing Model Architecture
 
-As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
+As of **21/11/24**, the **top model architecture** has been evaluated using **two sets of hyperparameters** and a **limited dataset of 50,000 reactions**. These have been given the designations **Model V27** and **Model V28**.
 
 Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**. All other hyperparameters are **consistent between the two models** (**Table 3**).
 
