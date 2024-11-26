@@ -1425,7 +1425,7 @@ For **average Tanimoto coefficient**:
   <div align="center">
     <img src="https://github.com/user-attachments/assets/bc311e80-99a0-40b1-8cc3-c8bdf0a6ee7e", alt="aspirin-aizynthfinder"/>
     <p>
-      <b>Fig 11</b> Aspirin in AiZynthFinder Graphical User Interface (GUI).
+      <b>Fig 11</b> Aspirin visualised via the AiZynthFinder Graphical User Interface (GUI).
     </p>
   </div>
 <br>
@@ -1446,7 +1446,7 @@ For **average Tanimoto coefficient**:
   <div align="center">
     <img src="https://github.com/user-attachments/assets/72549a8a-4f3f-4e25-80c4-4e2d881f2349", alt="256-hyperparameter-aspirin-aizynthfinder"/>
     <p>
-      <b>Fig 13</b> Model V27 aspirin retrosynthesis in AiZynthFinder GUI.
+      <b>Fig 13</b> Retrosynthesis of aspirin using Model V27 visualised via the AiZynthFinder GUI, highlighting the pathway with the highest state score.
     </p>
   </div>
 <br>
@@ -1454,7 +1454,7 @@ For **average Tanimoto coefficient**:
 **Fig 12** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of aspirin. The primary issues observed are:
 1. **Incorrect Starting Precursor Prediction**
     * **Expected Prediction:** **Salicylic acid (ortho-hydroxybenzoic acid)** as one of the two starting precursors.
-    * **Model V27 Prediction:** **meta-Hydroxybenzamide** with a **methoxy group** positioned at the **other meta position**.
+    * **Model V27 Prediction:** **meta-Hydroxybenzamide** with a **methoxy group** at the **other meta position**.
 2. **Faulty Parent Precursor Structure**
     * **Correct Features:**
       * **Meta Isomer:** The parent precursor maintains the correct meta isomer configuration.
@@ -1466,11 +1466,14 @@ For **average Tanimoto coefficient**:
 
 However, since the model was trained on **only 50,000 reactions**, it serves as a **solid foundation** and demonstrates **several promising aspects** in retrosynthesis prediction:
 1. **Accurate Precursor Prediction:**
-    * The model **correctly identified acetic anhydride** as the starting precursor, showcasing its ability to recognise fundamental reactants.
+    * The model **correctly identified acetic anhydride** as the starting precursor, showcasing its ability to predict fundamental reactants.
 2. **Partial Ester Group Prediction:**
     * The inclusion of a **methoxy group** suggests that the model is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
 3. **Meta Isomer Identification:**
     * The model **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
+4. **Diverse Retrosynthesis Pathway Options**
+    * The model provided **four retrosynthesis pathway options**, most of which **correctly included the acetic anhydride starting precursor**.
+    * Although the subsequent options had a **lower state score** (*c.f.* [Section 1.5](https://github.com/c-vandenberg/aizynthfinder-project/tree/master#15-aizynthfinder-post-processing-tools---route-scoring)) and **made less synthetic sense**, predicting multiple retrosynthetic routes is crucial for potentially identifying novel synthetic pathways.
 
 ### Model V28 Asprin Retrosynthetic Prediction
 
@@ -1478,7 +1481,7 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
   <div align="center">
     <img src="https://github.com/user-attachments/assets/63828bd2-2f3a-4b15-bb3d-f114cc4c3063", alt="512-hyperparameter-aspirin-aizynthfinder"/>
     <p>
-      <b>Fig 14</b> Model V28 aspirin retrosynthesis in AiZynthFinder GUI.
+      <b>Fig 14</b> Retrosynthesis of aspirin using Model V28 visualised via the AiZynthFinder GUI, highlighting the pathway with the highest state score (option 1 was the target molecule).
     </p>
   </div>
 <br>
@@ -1490,7 +1493,7 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
   <div align="center">
     <img src="https://github.com/user-attachments/assets/53513cf0-7b07-4aca-8747-4c521a4c72b1", alt="rivaroxaban-aizynthfinder"/>
     <p>
-      <b>Fig 15</b> Rivaroxaban in AiZynthFinder Graphical User Interface (GUI).
+      <b>Fig 15</b> Rivaroxaban visualised via the AiZynthFinder GUI.
     </p>
   </div>
 <br>
@@ -1516,10 +1519,28 @@ Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for c
   <div align="center">
     <img src="https://github.com/user-attachments/assets/9a88babc-3bdd-43e2-997c-761a2604e068", alt="256-hyperparameter-rivaroxaban-aizynthfinder"/>
     <p>
-      <b>Fig 17</b> Model V27 rivaroxaban retrosynthesis in AiZynthFinder GUI.
+      <b>Fig 17</b> Retrosynthesis of rivaroxaban using Model V27 visualised via the AiZynthFinder GUI, highlighting the pathway with the highest state score (option 1 was the target molecule).
     </p>
   </div>
 <br>
+
+**Fig 17** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. The primary issues observed are:
+1. **Incorrect Starting Precursor Prediction**
+    * **Neither of the starting precursor predictions are correct** in the context of the *Roehrig et al.* synthesis or any reported synthesis of rivaroxaban. **<sup>17</sup>**
+2. **Too Few Synthetic Steps**
+    * The model predicted a **one-step reaction** in **all of its pathway options**. This is **not realistic for a relatively complex molecule** like rivaroxaban.
+3. **Missing Key Moieties**
+    * While **both starting precursors have incorrect structures**, there is a **degree of chemical similarity between them** and the **target molecule**.
+    * However, **three moieties that are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moeity**. This is likely because **these moeities are underepresented in the training data**.
+
+Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban compared to that of aspirin, there are **several promising aspects** in its retrosynthesis prediction:
+1. **Accounting for Stereochemistry**
+    * In the *Roehrig et al.* synthesis and **most other reported syntheses**, the **stereochemistry of (S)-rivaroxaban is installed via (S)-glycidyl phthalimide**.
+    * Although the precursor predicted by Model V27 **was not chemically similar to (S)-glycidyl phthalimide**, it was **chiral** and was the **S-enantiomer**.
+    * Additionally, the **chrial centre was positioned within a $$\gamma$$-lactam**, which is **structurally similar to (S)-glycidyl phthalimide**, albeit at the **wrong position**.
+2. **Presence of Lactams**
+    * Both of the precursors predicted by Model V27 **contain lactam rings**: a **$$\beta$$-lactam$$**, and a $$\gamma$$-lactam**.
+    * While **lactams are not present in any of the starting materials or intermediates** in the reported syntheses, the **$$\gamma$$-lactam** is **structurally similar to the imide group** in phthalimide.
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
