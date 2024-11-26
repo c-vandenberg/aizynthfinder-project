@@ -1531,7 +1531,7 @@ Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for c
     * The model predicted a **one-step reaction** in **all of its pathway options**. This is **not realistic for a relatively complex molecule** like rivaroxaban.
 3. **Missing Key Moieties**
     * While **both starting precursors have incorrect structures**, there is a **degree of chemical similarity between them** and the **target molecule**.
-    * However, **three moieties that are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moeity**. This is likely because **these moeities are underepresented in the training data**.
+    * However, **three moieties are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moeity**. This is likely because **these moeities are underepresented in the training data**.
 
 Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban compared to that of aspirin, there are **several promising aspects** in its retrosynthesis prediction:
 1. **Accounting for Stereochemistry**
