@@ -1547,18 +1547,19 @@ Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban comp
     * Additionally, the **chrial centre was positioned within a $$\gamma$$-lactam**, which is **structurally similar to (S)-glycidyl phthalimide**, albeit at the **wrong position**.
 2. **Presence of Lactams**
     * Both of the precursors predicted by Model V27 **contain lactam rings**: a **$$\beta$$-lactam**, and a **$$\gamma$$-lactam**.
-    * While **lactams are not present in any of the starting materials or intermediates** in the reported syntheses, the **$$\gamma$$-lactam** is **structurally similar to the imide group** in **phthalimide**.
+    * While **lactams are not present in any of the reactants or intermediates** in the reported syntheses, the **$$\gamma$$-lactam** is **structurally similar to the imide group** in **phthalimide**.
   
 ### Model V28 Rivaroxaban Retrosynthetic Prediction
 
 <br>
   <div align="center">
-    <img src="https://github.com/user-attachments/assets/63828bd2-2f3a-4b15-bb3d-f114cc4c3063", alt="512-hyperparameter-aspirin-aizynthfinder"/>
+    <img src="https://github.com/user-attachments/assets/a8a4c615-b184-443f-bc34-0175c9985116", alt="512-hyperparameter-aspirin-aizynthfinder"/>
     <p>
       <b>Fig 14</b> Model V28 retrosynthetic prediction of rivaroxaban in AiZynthFinder GUI, highlighting the pathway with the highest state score (option 1 was the target molecule).
     </p>
   </div>
 <br>
+
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
