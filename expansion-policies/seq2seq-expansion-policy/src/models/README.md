@@ -1633,10 +1633,10 @@ There is a **likely explanation** for the discrepancy between **improved sequenc
   </p>
 </div>
 
-**Table 5** gives the **number of parameters in each layer type** for both Model V27 and Model V28. However, when considering **model complexity vs dataset size**, we **mainly need to focus on trainable parameters**.
-  * Trainable parameters are the parameters in a neural network that are **learned and updated during the training process through backpropagation/backproagation through time (BPTT)**.
-  * They include **weights and biases** of the layers in the model.
-  * These parameters are **adjusted to minimise the loss function** by **optimising the network's performance on the training data**.
+**Table 5** presents the **number of parameters in each layer type** for both Model V27 and Model V28. However, when evaluating **model complexity relative to dataset size**, the focus should primarily be on **trainable parameters**:
+  * **Trainable parameters** are the elements in a neural network that are **learned and updated during the training process through backpropagation or backproagation through time (BPTT)**.
+  * They include the **weights and biases** of the model's layers.
+  * These parameters are **adjusted to minimise the loss function**, thereby **optimising the network's performance on the training data**.
 
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
@@ -1671,23 +1671,25 @@ There is a **likely explanation** for the discrepancy between **improved sequenc
   </p>
 </div>
 
-For both Model V27 and Model V28, the training regimen has **several mitigation strategies** to prevent overfitting:
+Both Model V27 and Model V28 **incorporate several mitigation strategies** in their training regimens to **prevent overfitting**:
 1. **Early Stopping**
-    * The training regime utilises **TensorFlows Early Stopping Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This **terminates training early** if the **validation loss did not improve over five consecutive epochs**.
+    * The training process utilises **TensorFlow's `EarlyStopping` Callback (`tensorflow.keras.callbacks.EarlyStopping`)**. This **terminates training early** if the **validation loss does not improve over five consecutive epochs**.
 2. **Dropout Regularisation**
-    * Using **dropout** as a **regularisation technique** helps to mitigate overfitting by **randomly deactivating a subset of neurons** during training to **prevent co-adaption**.
+    * **Dropout** is employed as a **regularisation technique** to mitigate overfitting by **randomly deactivating a subset of neurons** during training, thereby **preventing co-adaptation of neurons**.
 3. **Weight Decay (L2 Regularisation)**
-    * Using **weight decay/L2 regularisation** as a **regularisation technique** helps to mitigate overfitting by **adding penalty terms to discourage large weights**.
-    * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers** to **encourage smaller weights**, leading to **simpler models**.
+    * **Weight decay/L2 regularisation** helps reduce overfitting by **adding penalty terms that discourage large weights**.
+    * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers**, **encouraging smaller weights** and resulting in **simpler, more generalisable models**.
 
 However, as shown in **Table 6**, there is a **significant increase in trainable parameters** from **5,456,986** in Model V27 to **21,661,786** in Model V28. Therefore, the **mitigation strategies employed are likely insufficient to prevent overfitting** in Model V28. Furthermore, given the **complexity of Model V27**, it is possible that it may **also exhibit some degree of overfitting**.
 
-Therefore, the **next optimisation** needs to be to **vastly increase the size and diversity of the training data**. It is hoped this will:
-1. **Improve AiZynthFinder Performance**: Increasing the size and diversity should **improve the ability of both models to generalise to new, unseed data**, thus **improving 
-2. **Improve Sequence-Level Metrics**: Imp
-3. confirm whether the **improvement in validation and testing metrics** during training of a more complex model **translates to improved generalisation on new data**, which would **compensate for the increased computational cost**.
-
-As a result, when **incorporated as the AiZynthFinder expansion policy**, Model V28 **produced superior retrosynthetic SMILES predictions**. These performance gains **more than compensated for the increased computational cost**, with **little indication of diminishing returns**.
+Therefore, the **next model optimisation** aims to **vastly increase the size and diversity of the training data**. It is hoped that this will:
+1. **Increase Generalisability**:
+    * Expanding the training dataset's size and diversity should **enhance both models' ability to generalise to new, unseed data**, thereby **improving their performance when integrated into AiZynthFinder**.
+2. **Improve Sequence-Level Metrics**:
+    * A larger and more diverse training dataset should **enable the models to capture the underlying patterns** that **represent the chemical relationships** between **product and reactant SMILES strings**.
+3. **Identify Diminishing Returns**:
+    * Reducing overfitting will help to confirm whether the **improvement in validation and testing metrics** achieved by training a more complex model **translate to better generalisation on new data**.
+    * This will allow us to evaluate whether the **performance improvements are significant enough to justify the increased computational cost**.
 
 ## 5.6 Future Model Optimisations
 
