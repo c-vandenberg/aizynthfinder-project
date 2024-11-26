@@ -1538,7 +1538,7 @@ Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for c
     * The model predicted a **one-step reaction** in **all of its pathway options**. This is **not realistic for a relatively complex molecule** like rivaroxaban.
 3. **Missing Key Moieties**
     * While **both leaf node precursors have incorrect structures**, there is a **degree of chemical similarity between them** and the **target molecule**.
-    * However, **three moieties are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moeity**. This is likely because **these moeities are underrepresented in the training data**.
+    * However, **three moieties are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moiety**. This is likely because **these moeities are underrepresented in the training data**.
 
 Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban compared to that of aspirin, there are **several promising aspects** in its retrosynthesis prediction:
 1. **Accounting for Stereochemistry**
@@ -1555,11 +1555,26 @@ Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban comp
   <div align="center">
     <img src="https://github.com/user-attachments/assets/a8a4c615-b184-443f-bc34-0175c9985116", alt="512-hyperparameter-aspirin-aizynthfinder"/>
     <p>
-      <b>Fig 14</b> Model V28 retrosynthetic prediction of rivaroxaban in AiZynthFinder GUI, highlighting the pathway with the highest state score (option 1 was the target molecule).
+      <b>Fig 18</b> Model V28 retrosynthetic prediction of rivaroxaban in AiZynthFinder GUI, highlighting the pathway with the highest state score (option 1 was the target molecule).
     </p>
   </div>
 <br>
 
+**Fig 14** illustrates that Model V28 also exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. However, whether it is **performs worse or better than Model V27 is less clear**. Similar to the retrosynthetic prediction of aspirin, the primary issues are:
+1. **Single Incorrect Leaf Node Precursor Prediction**
+    * Model V28 **only predicts a single leaf node precursor** that **does not have the correct structure of either of the precursors** used in any reported syntheses of rivaroxaban. The presence of a **7-membered lactam** is particularly interesting. 
+2. **Non-Chrial Predicted Precursor**
+    * Unlike Model V27, the **predicted precursor is not chrial**, indicating that Model V28 **is not accounting for stereochemistry** in its predictions.
+4. **Lack of Diverse Retrosynthesis Pathway Options**
+    * Model V28 **only provides two retrosynthesis pathway options**, with the first option being **the target molecule itself**.
+  
+However, there are some **promising features** of the prediction made by Model V28:
+1. **Presence of 3-Morpholinone Ring Moiety**
+    * Model V28 **correctly predicts the 3-Morpholinone ring moiety** in the precursor, a **key moiety in all of the reported syntheses** of rivaroxaban. This feature was **notably absent in the prediction by Model V27**.
+2. **Presence of Chloro-Heteroaromatic Moiety**
+    * Although rivaroxaban contains a **chlorothiophene moiety**, the fact that Model V28 **predicted a chloro-heteroaromatic (chloropyridine) moiety** was an **improvement over Model V27**, whose prediction placed the chloro group **on a phenyl ring**. The prediction of pyridine over thiophene is likely due to thiophenes being underrepresented in the training data compared to pyridines.
+  
+Additionally
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
