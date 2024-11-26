@@ -1687,6 +1687,7 @@ Therefore, the **next model optimisation** aims to **vastly increase the size an
     * Expanding the training dataset's size and diversity should **enhance both models' ability to generalise to new, unseed data**, thereby **improving their performance when integrated into AiZynthFinder**.
 2. **Improve Sequence-Level Metrics**:
     * A larger and more diverse training dataset should **enable the models to capture the underlying patterns** that **represent the chemical relationships** between **product and reactant SMILES strings**.
+    * This, in turn, should **improve sequence-level metrics** such as **BLEU score**, **average Levenshtein distance**, **exact match accruacy** and **average Tanimoto coefficient**.
 3. **Identify Diminishing Returns**:
     * Reducing overfitting will help to confirm whether the **improvement in validation and testing metrics** achieved by training a more complex model **translate to better generalisation on new data**.
     * This will allow us to evaluate whether the **performance improvements are significant enough to justify the increased computational cost**.
@@ -1695,18 +1696,35 @@ Therefore, the **next model optimisation** aims to **vastly increase the size an
 
 Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and the **future transformer model**.
 
-### 5.6.1 Increased Training Dataset Size
+### 5.6.1 Increased Training Dataset Size and Diversity
+  * As previously stated, a larger and more diverse training dataset should **increase generalisability**, **improve evaluation metrics** and generally **enhance model performance** when integrated into AiZynthFinder.
+  * Potential **reaction database sources** include:
+    1. **Open Reaction Database (ORD)**
+        * [ORD Official Site](https://open-reaction-database.org/)
+        * [ORD Official Data Repository Github](https://github.com/open-reaction-database/ord-data)
+    2. **United States Patent and Trademark Office (USPTO) Reaction Datasets**
+        * [DeepChem USPTO Tool Github](https://www.kaggle.com/datasets/yeonseokcho/reaction-smiles-uspto-year-2023)
+        * [Kaggle USPTO 2023 Upload](https://www.kaggle.com/datasets/yeonseokcho/reaction-smiles-uspto-year-2023)
+    3. **Github Repositories**
+        * [hesther/reactiondatabase](https://github.com/hesther/reactiondatabase)
+  * Depending on the database source, this will likely involve:
+    1. **Parsing** pre-existing SMILES strings.
+    2. **Converting data formats to SMILES strings**parsing pre-existing SMILES strings for extraction.
+  * These SMILES strings will then need to be **processed into a format compatible with the model's training regimen**.
 
 ### 5.6.2 Layer-wise Learning Rate Decay
-  * Layer-wise learning rate decay **adjusts the learning rate for different layers**, typically using **smaller learning rates for lower layers** and **larger ones for higher layers**. This approach can help **stabilise training**, especially in **very deep networks**.
-  * Given that this Seq2Seq model has an **2-layer encoder** and a **4-layer decoder**, it is classified as a **deep neural network** and thus **could benefit from layer-wise learning rate decay**.
+  * Layer-wise learning rate decay **adjusts the learning rate for different layers**, typically applying **smaller learning rates to lower layers** and **larger learning rates to higher layers**.
+  * This strategy can help **stabilise training**, especially in **very deep networks**.
+  * Given that this Seq2Seq model is comprised of a **2-layer encoder** and a **4-layer decoder**, it is classified as a **deep neural network** and thus **could benefit from layer-wise learning rate decay**.
 
 ### 5.6.3 Scheduled Sampling
   * Scheduled Sampling is a technique used to **mitigate exposure bias during training** in NLP models.
-  * Instead of **always using the ground truth tokens as inputs to the decoder during training**, the model **occasionally uses its own predictions as inputs** for the next time step.
-  * This strategy helps the model become **more robust to its own errors during inference**.
+  * Instead of **consistently using the ground truth tokens as inputs to the decoder during training**, the model **occasionally uses its own predictions as inputs** for the next time step.
+  * This strategy **enhances the model's robustness to its own errors during inference**, leading to **more reliable performance in real-world applications**.
 
 ### 5.6.4 High Throughput Testing of Model Expansion Policy Performance
+  * The current approach to evaluating the model's performance in AiZynthFinder is **very rudimentary**, involving **manual inspection** of retrosynthetic predictions and **assessment based on author's chemical intuition**.
+  * While this method should still be **employed on a small scale**, the integration could benefit from **automated testing** to evaluate the model's predictions **across a large reaction database** in a **high-throughput manner**.
 
 ## 5.7 References
 **[1]** Liu, B. et al. (2017) ‘Retrosynthetic reaction prediction using neural sequence-to-sequence models’, ACS Central Science, 3(10), pp. 1103–1113. <br><br>
