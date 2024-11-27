@@ -1426,6 +1426,57 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
 * In future model iterations, **comparative Tanimoto coefficients** based on **different molecular fingerprints** will be implemented to **enhance similarity assessments**.
 * **Model V27** has an **average Tanimoto coefficient of 0.869**, while **Model V28** achieved an **average coefficient of 0.874**. This indicates that the predictions from both models are **very structurally similar to the target molecules**, with **Model V28** demonstrating **marginally greater similarity**.
 
+<br>
+<div style="display: flex;" align="center">
+  <table border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th style="width: 10%;">Sample Number</th>
+        <th style="width: 30%;">Target SMILES</th>
+        <th style="width: 30%;">Predicted SMILES (Model V27)</th>
+        <th style="width: 30%;">Predicted SMILES (Model V28)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-size: 12px; white-space: nowrap;">1</td>
+        <td style="font-size: 12px; white-space: nowrap;">CSc1nc(Cl)c(C(N)=O)c(Nc2ccnc2)n1.C[O-]</td>
+        <td style="font-size: 12px; white-space: nowrap;">COc1nc(SC)nc(Cl)c1C(N)=O.O=C1CCC(=O)N1</td>
+        <td style="font-size: 12px; white-space: nowrap;">COc1nc(Cl)c(C(=O)Nc2ccnc2)c1C(N)=O.OB(O)c1cccnc1</td>
+      </tr>
+      <tr>
+        <td style="font-size: 12px; white-space: nowrap;">2</td>
+        <td style="font-size: 12px; white-space: nowrap;">CC(=O)O.Nc1nc2cccnc2c(=O)[nH]1</td>
+        <td style="font-size: 12px; white-space: nowrap;">CC(=O)Nc1nc2cccnc2c(=O)[nH]1.OB(O)c1ccc(F)cc1</td>
+        <td style="font-size: 12px; white-space: nowrap;">CC(=O)OC(C)=O.Nc1nc2cccnc2c(=O)[nH]1</td>
+      </tr>
+      <tr>
+        <td style="font-size: 12px; white-space: nowrap;">3</td>
+        <td style="font-size: 12px; white-space: nowrap;">CC(C)(C)OC(=O)NCCCOP+([O-])=C(O)C[N+](C)(C)C</td>
+        <td style="font-size: 12px; white-space: nowrap;">CC(C)(C)OC(=O)NC(=O)OC(C)(C)C.NC(=O)CBr</td>
+        <td style="font-size: 12px; white-space: nowrap;">CC(=O)OCCC#N.CNCC(=O)O</td>
+      </tr>
+      <tr>
+        <td style="font-size: 12px; white-space: nowrap;">4</td>
+        <td style="font-size: 12px; white-space: nowrap;">CCOc1cc(CN2CCC(Nc3ccc(C(=O)O)cn3)CC2)cc(OC)c1Cl.NCCO</td>
+        <td style="font-size: 12px; white-space: nowrap;">CCOc1cc(CN2CCC(Nc3ccc(C(=O)O)cn3)CC2)cc(OC)c1Cl.NCCO</td>
+        <td style="font-size: 12px; white-space: nowrap;">CCOc1cc(CN2CCC(Nc3ccc(C(=O)O)cn3)CC2)cc(OC)c1Cl.NCCO</td>
+      </tr>
+      <tr>
+        <td style="font-size: 12px; white-space: nowrap;">5</td>
+        <td style="font-size: 12px; white-space: nowrap;">Clc1ncc(Cl)c(Cl)n1.Nc1cc(OCC2CC2)[nH]n1</td>
+        <td style="font-size: 12px; white-space: nowrap;">CS(=O)(=O)OCC1CC1.CCOP(=O)(Cc1cc(Cl)ncc1Cl)NC(=O)OC(C)(C)C</td>
+        <td style="font-size: 12px; white-space: nowrap;">ClCc1cc(Cl)ncc1Cl.Nc1cc(OCC2CC2)n c2c1CC(=O)N2</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <b>Table 5</b> Sample test predictions from Model V27 and Model V28.
+  </p>
+</div>
+<br>
+
+
 ### 5.5.2 Integrating Seqeuence-to-Sequence Model into AiZynthFinder
 
 ### i. Simple Drug Retrosynthesis - Aspirin
@@ -1639,12 +1690,12 @@ There is a **likely explanation** for the discrepancy between **improved sequenc
     </tbody>
   </table>
   <p>
-    <b>Table 5</b> Number of parameters in each layer type for Model V27 and Model V28.
+    <b>Table 6</b> Number of parameters in each layer type for Model V27 and Model V28.
   </p>
 </div>
 <br>
 
-**Table 5** shows the **number of parameters in each layer type** for both Model V27 and Model V28. However, when evaluating **model complexity relative to dataset size**, the focus should primarily be on **trainable parameters**:
+**Table 6** shows the **number of parameters in each layer type** for both Model V27 and Model V28. However, when evaluating **model complexity relative to dataset size**, the focus should primarily be on **trainable parameters**:
   * **Trainable parameters** are the elements in a neural network that are **learned and updated during the training process through backpropagation or backproagation through time (BPTT)**.
   * They include the **weights and biases** of the model's layers.
   * These parameters are **adjusted to minimise the loss function**, thereby **optimising the network's performance on the training data**.
@@ -1679,7 +1730,7 @@ There is a **likely explanation** for the discrepancy between **improved sequenc
     </tbody>
   </table>
   <p>
-    <b>Table 6</b> Comparison of the number of trainable parameters, non-trainable parameters, optimizer parameters, and total parameters for Models V27 and V28.
+    <b>Table 7</b> Comparison of the number of trainable parameters, non-trainable parameters, optimizer parameters, and total parameters for Models V27 and V28.
   </p>
 </div>
 <br>
@@ -1693,7 +1744,7 @@ Both Model V27 and Model V28 **incorporate several mitigation strategies** in th
     * **Weight decay/L2 regularisation** helps reduce overfitting by **adding penalty terms that discourage large weights**.
     * Both Model V27 and Model V28 **apply L2 regularisation (`weight_decay`)** to the **kernal weights** of the **LSTM and Dense layers**, **encouraging smaller weights** and resulting in **simpler, more generalisable models**.
 
-However, as shown in **Table 6**, there is a **significant increase in trainable parameters** from **5,456,986** in Model V27 to **21,661,786** in Model V28. Therefore, the **mitigation strategies employed are likely insufficient to prevent overfitting** in Model V28. Furthermore, given the **complexity of Model V27**, it is possible that it may **also exhibit some degree of overfitting**.
+However, as shown in **Table 7**, there is a **significant increase in trainable parameters** from **5,456,986** in Model V27 to **21,661,786** in Model V28. Therefore, the **mitigation strategies employed are likely insufficient to prevent overfitting** in Model V28. Furthermore, given the **complexity of Model V27**, it is possible that it may **also exhibit some degree of overfitting**.
 
 Therefore, the **next model optimisation** aims to **vastly increase the size and diversity of the training data**. It is hoped that this will:
 1. **Increase Generalisability**:
