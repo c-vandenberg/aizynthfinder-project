@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from tensorflow.keras.callbacks import Callback
@@ -30,6 +31,8 @@ class BestValLossCallback(Callback):
         self.checkpoint_manager: CheckpointManager = checkpoint_manager
         self.best_val_loss: float = float('inf')  # Initialize as infinity
 
+        self._logger = logging.getLogger(__name__)
+
     def on_epoch_end(self, epoch: int, logs: Optional[dict] = None) -> None:
         """
         Checks validation loss at the end of an epoch and saves the model if it improves.
@@ -47,7 +50,7 @@ class BestValLossCallback(Callback):
             if current_val_loss < self.best_val_loss:
                 self.best_val_loss = current_val_loss
                 save_path: str = self.checkpoint_manager.save()
-                print(
+                self._logger.info(
                     f"\nEpoch {epoch+1}: Validation loss improved to {current_val_loss:.4f}. "
                     f"Saving checkpoint to {save_path}"
                 )

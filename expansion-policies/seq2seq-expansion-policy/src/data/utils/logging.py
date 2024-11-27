@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Dict, List, Optional, Union, Tuple
 
 import tensorflow as tf
@@ -6,6 +7,8 @@ from tensorflow.summary import SummaryWriter
 
 from metrics.bleu_score import BleuScore
 from metrics.smiles_string_metrics import SmilesStringMetrics
+
+logger = logging.getLogger(__name__)
 
 CORE_LOG_METRICS_KEY_MAPPING: Dict[str, str] = {
     'loss': 'Training Loss',
@@ -164,9 +167,9 @@ def print_metrics(
     """
     for name, value in metrics.items():
         if epoch is not None:
-            print(f'Epoch {epoch + 1}: {name}: {value:.4f}')
+            logger.info(f'Epoch {epoch + 1}: {name}: {value:.4f}')
         else:
-            print(f'{name}: {value:.4f}')
+            logger.info(f'{name}: {value:.4f}')
 
 def log_sample_predictions(
     target_smiles: List[str],
@@ -246,12 +249,12 @@ def print_sample_predictions(
     num_samples = min(num_samples, len(target_smiles))
     separator = '-' * separator_length
 
-    print("\nSample Predictions:")
+    logger.info("\nSample Predictions:")
     for i in range(num_samples):
-        print(f"Sample {i + 1}:")
-        print(f"  Target:    {target_smiles[i]}")
-        print(f"  Predicted: {predicted_smiles[i]}")
-        print(separator)
+        logger.info(f"Sample {i + 1}:")
+        logger.info(f"  Target:    {target_smiles[i]}")
+        logger.info(f"  Predicted: {predicted_smiles[i]}")
+        logger.info(separator)
 
 def log_to_tensorboard(
     writer: SummaryWriter,

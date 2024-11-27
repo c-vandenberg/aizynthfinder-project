@@ -1,5 +1,6 @@
 import os
 import random
+import logging
 from typing import Dict, Any
 
 import numpy as np
@@ -17,6 +18,9 @@ class TrainingEnvironment:
     setup_environment(config)
         Sets up the environment for deterministic training based on the provided configuration.
     """
+
+    _logger = logging.getLogger(__name__)
+
     @staticmethod
     def setup_environment(config: Dict[str, Any]) -> None:
         """
@@ -71,6 +75,6 @@ class TrainingEnvironment:
         # tf.config.threading.set_intra_op_parallelism_threads(1)
         # tf.config.threading.set_inter_op_parallelism_threads(1)
 
-        print("Environment setup for deterministic (reproducible) training complete.")
+        TrainingEnvironment._logger.info("Environment setup for deterministic (reproducible) training complete.")
 
 
