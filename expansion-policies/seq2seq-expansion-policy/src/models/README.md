@@ -1471,11 +1471,29 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
     </tbody>
   </table>
   <p>
-    <b>Table 5</b> Sample test predictions from Model V27 and Model V28.
+    <b>Table 5</b> Sample test predictions from Model V27 and Model V28. The reactant SMILES strings are separated by a period.
   </p>
 </div>
 <br>
 
+**Table 5** illustrates **five sample test predictions** from Model V27 and Model V28. The reactant SMILES strings are **separated by a `.`**.
+1. **Sample 1**
+    * Both Model V27 and Model V28 **predict chemically valid SMILES** for both the reactants, however **neither models predict the correct structure for either reactant**.
+    * The first reactant prediction of Model V28 is the **closest in terms of chemical similarity**.
+2. **Sample 2**
+    * Both Model V27 and Model V28 **predicy chemically valid SMILES** for both the reactants, with Model V27 **not predicting the correct structure for either reactants**.
+    * Model V28 however, **predicts the exact structure of the second reactant**, and its prediction of the first reactant is **very structurally similar to the target**, with the target reactant being **acetic acid**, and the prediction being **acetic anhydride**.
+3. **Sample 3**
+    * Both Model V27 and Model V28 **predict chemically valid SMILES** for both the reactants, however **neither models predict the correct structure for the reactant**.
+    * The prediction by Model V27 **appears to be the **closest in terms of chemical similarity**.
+    * However, analysis of this target SMILES string shows that **it is invalid**. Its possible this SMILES string became **malformed during preprocessing**, or was an **erroneous data point** in the data obtained from *Liu et al.*
+4. **Sample 4**
+    * This was the **best performing sample for both Model V27 and Model V28**, with both models **predicting both reactant SMILES strings exactly**.
+    * This is likely due to the target sequence **only containing common elements and subgroups**.
+    * The other sample target sequences contain elemental atoms, anions and cations that are **likely underrepresented in the dataset** (e.g. **[O-], [nH], P+, [N+]**), which the **model will struggle to predict** given the **limited dataset**.
+5. **Sample 5**
+    * For this sample, **only Model V28 predicts a chemically invalid reactant SMILES** for its prediction of the second reactant. However, its prediction of the first reactant is **very chemically similar to the target**, with the only differences being a **pyridine moeity instead of pyrimidine**, and a **-CH<sub>3</sub>Cl** group in place of one of the **Cl** groups.
+    * Despite its predictions of the first reactant being **less chemically similar** than that of Model V28, Model V27 **correctly predicts the unsusual cyclopropane moeity** of the second target reactant. Prediction of relatively unusual moieties is a promising sign of model learning.
 
 ### 5.5.2 Integrating Seqeuence-to-Sequence Model into AiZynthFinder
 
