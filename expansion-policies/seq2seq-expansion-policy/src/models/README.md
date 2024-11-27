@@ -144,6 +144,7 @@ Callbacks can be used for a wide range of purposes, such as:
 
 TensorFlow Keras provides a **set of built-in callbacks**, but you can also **create custom callbacks** by **subclassing the `tf.keras.callbacks.Callback` class**. During training, Keras **calls specific methods of these callback objects** at different points. **Table 2** shows the methods within the  `tf.keras.callbacks.Callback` class.
 
+<br>
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -157,12 +158,12 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
         <tr>
             <td>on_epoch_begin</td>
             <td>At the start of an epoch</td>
-            <td>Initialize or reset variables related to epochs</td>
+            <td>Initialise or reset variables at start of each epoch</td>
         </tr>
         <tr>
             <td>on_epoch_end</td>
             <td>At the end of an epoch</td>
-            <td>Perform actions like logging or saving models</td>
+            <td>Perform actions like logging or saving models at end of each epoch</td>
         </tr>
         <tr>
             <td>on_batch_begin</td>
@@ -177,32 +178,32 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
         <tr>
             <td>on_train_begin</td>
             <td>At the start of training</td>
-            <td>Initialize resources or logging</td>
+            <td>Initialize resources or logging related to training</td>
         </tr>
         <tr>
             <td>on_train_end</td>
             <td>At the end of training</td>
-            <td>Cleanup resources or finalize logging</td>
+            <td>Cleanup resources or finalize logging related to training</td>
         </tr>
         <tr>
             <td>on_predict_begin</td>
             <td>At the start of prediction</td>
-            <td></td>
+            <td>Initialise or reset variables at start of each prediction</td>
         </tr>
         <tr>
             <td>on_predict_end</td>
             <td>At the end of prediction</td>
-            <td></td>
+            <td>Perform actions like logging or saving models at end of each prediction</td>
         </tr>
         <tr>
             <td>on_test_begin</td>
             <td>At the start of testing</td>
-            <td></td>
+            <td>Initialize resources or logging related to testing</td>
         </tr>
         <tr>
             <td>on_test_end</td>
             <td>At the end of testing</td>
-            <td></td>
+            <td>Cleanup resources or finalize logging related to testing</td>
         </tr>
     </tbody>
   </table>
@@ -210,6 +211,7 @@ TensorFlow Keras provides a **set of built-in callbacks**, but you can also **cr
     <b>Table 2</b> Lifecycle methods of the `tf.keras.callbacks.Callback` class.
   </p>
 </div>
+<br>
 
 ### i. EarlyStopping
 
@@ -970,15 +972,15 @@ The **`Trainer.setup_model()`** method **orchestrates the initialisation and com
       * **`dropout_rate`**: Rate for **dropout regularization**.
       * **`weight_decay`**: Optional **weight decay for regularization**.
 2. **Model Compliation** - Compile the Seq2Seq model with the **appropriate optimiser, loss function, and metrics**.
-  * **Optimiser**
-    * Use the **`Adam` optimiser** with a specified **`learning_rate` from the **configuration YAML file**.
-    * Set **`clipnorm`** to **prevent gradient explosion**.
-  * **Loss Function**
-    * Use core **`tf.keras.losses.SparseCategoricalCrossentropy()` loss function**.
-    * Ensure that **padded elements in the sequences** are **not taken into account in loss calculation**.
-  * **Metrics**
-    * Use core metrics specified in the **configuration YAML file** such as `accuracy`.
-    * Use a custom **`Perplexity`** metric based on the **loss function**.
+    * **Optimiser**
+      * Use the **`Adam` optimiser** with a specified **`learning_rate` from the **configuration YAML file**.
+      * Set **`clipnorm`** to **prevent gradient explosion**.
+    * **Loss Function**
+      * Use core **`tf.keras.losses.SparseCategoricalCrossentropy()` loss function**.
+      * Ensure that **padded elements in the sequences** are **not taken into account in loss calculation**.
+    * **Metrics**
+      * Use core metrics specified in the **configuration YAML file** such as `accuracy`.
+      * Use a custom **`Perplexity`** metric based on the **loss function**.
 
 The **`Trainer.build_model()` method** is used to **initialise the model's weights and variables** by **running a sample input through the model**. 
   * When using **subclassed models**, the model's variables and weights are **not fully initialised until the model is called on some input data**.
@@ -1174,7 +1176,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### i. Data Tokenization and Preprocessing Debugging
 1. **Analyse Data Set Token Frequency Distribution**:
-   * Add `tensorflow.print()` statement **immediately after data set tokenization** in `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._tokenize_datasets`. For example, to check **tokenized products (input) data set**:
+    * Add `tensorflow.print()` statement **immediately after data set tokenization** in `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._tokenize_datasets`. For example, to check **tokenized products (input) data set**:
      
       ```
       train_test_products_all_tokens = ' '.join(self.tokenized_products_x_dataset).split()
@@ -1185,7 +1187,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       ```
     
 2. **Analyse Tokenizer Functionality**:
-  * Check that tokenizer **reverses only the product (input/x-data) data set** by printing/logging random tokenized data set samples. For example:
+    * Check that tokenizer **reverses only the product (input/x-data) data set** by printing/logging random tokenized data set samples. For example:
     
       ```
       secure_random = random.SystemRandom()
@@ -1195,7 +1197,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       print(f"Tokenized Products x-Dataset Sample: {secure_random.choice(self.tokenized_reactants_y_valid_dataset)}")
       ```
     
-  * Check tokenizer word index **before and after adapting** with `tensorflow.print()` statement. Tokenizer is adapted to **tokenized products only** to prevent data leakage. This is carried **immediately after splitting data** in data loader class `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._split_datasets()`. For example:
+    * Check tokenizer word index **before and after adapting** with `tensorflow.print()` statement. Tokenizer is adapted to **tokenized products only** to prevent data leakage. This is carried **immediately after splitting data** in data loader class `expansion-policies.seq2seq-expansion-policy.src.data.utils/data_loader._split_datasets()`. For example:
     
       ```
       combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
@@ -1204,9 +1206,9 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
       tf.print(f"Tokenizer Word Index After Adapting: \n{self.smiles_tokenizer.word_index}\n")
       ```
     
-  * **N.B.** Because environment setup has **set seeds for `random` psuedorandom number generator**, you will get the **same 'random' samples each time**.
+    * **N.B.** Because environment setup has **set seeds for `random` psuedorandom number generator**, you will get the **same 'random' samples each time**.
 3. **Analyse Data Preprocesser Functionality**:
-  * Print/log random preprocessed data set samples and **cross reference integers with adapted tokenizer word index**. For example:
+    * Print/log random preprocessed data set samples and **cross reference integers with adapted tokenizer word index**. For example:
     
       ```
       secure_random = random.SystemRandom()
@@ -1217,7 +1219,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### ii. General TensorFlow Debugging
 1. **Analyse Tensor Shape**:
-   * Add `tensorflow.print()` statement to print/log to **dynamically check tensor dimensions/shape**. For example:
+    * Add `tensorflow.print()` statement to print/log to **dynamically check tensor dimensions/shape**. For example:
      
        ```
        encoder_output: tf.Tensor = self.embedding(encoder_input)
@@ -1228,10 +1230,11 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.5.1 Analysis of Best Performing Model Architecture
 
-As of **21/11/24**, the **top model architecture** has trained on a **limited dataset of 50,000 reactions**, and evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
+As of **26/11/24**, the **top model architecture** has trained on a **limited dataset of 50,000 reactions**, and evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
 Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**. All other hyperparameters are **consistent between the two models** (**Table 3**).
 
+<br>
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -1308,15 +1311,17 @@ Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu 
     <b>Table 3</b> Model V27 and Model V28 hyperparameters.
   </p>
 </div>
+<br>
 
 Both models were initially trained with using identical product and reactant datasets, consisting of approximately **50,000 reactions**. These datasets were sourced from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. Following the data processing outlined in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation), the datasets were split into training and testing sets with a 7:3 ratio. The validation datasets for products and reactants were processed similarly, but were **pre-split** by *Liu et al.*. Moving forward, future models will be trained on a **larger and more diverse training dataset** to **enhance performance and generalisation**.
 
-Both models were evaluated against test datasets using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
+Both models were evaluated against the test datasets using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
 
-However, since these metrics **do not account for the chemical properties of the SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
+However, since these metrics **do not account for the chemical properties of SMILES sequences**, it was necessary to incorporate **cheminformatics-based metrics** to provide a **more comprehensive assessment** of the model's predictions. This included the core cheminformatic metric, the **Tanimoto coefficient**, as well as a custom **chemical validity score** which measures the **ratio of chemically valid to non-valid SMILES strings predicted by the model**.
 
 Additionally, **string metrics** such as **Levenshtein Distance** and **exact match accuracy** were employed to **broaden the range of sequence similarity evaluations**.
 
+<br>
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -1373,48 +1378,52 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
     <b>Table 4</b> Performance metrics of Model V27 and Model V28 on test datasets.
   </p>
 </div>
+<br>
 
-For **test loss**:
-* Test loss represents the **average error between the predicted sequences and the target sequences** on the **test dataset**.
-* This metric is calculated using Tensorflow's **Sparse Categorical Cross Entropy Loss Function** (**`tf.keras.losses.SparseCategoricalCrossentropy`**), which measures the **discrepancy between the predicted probability distribution** and the **actual distribution of the target sequences**.
+**Test loss**:
+* Test loss represents the **average error between the predicted sequences** and the **target sequences in the test dataset**.
+* This metric was calculated using Tensorflow's **Sparse Categorical Cross Entropy Loss Function** (**`tf.keras.losses.SparseCategoricalCrossentropy`**), which measures the **discrepancy between the predicted probability distribution** and the **actual distribution of the target sequences**.
 * Both **Model V27** and **Model V28** achieved a **test loss of 0.157**, which is **relatively low**. This indicates that the predictions made by both models are **closely aligned with the target sequences in terms of the loss function**, reflecting **high accuracy** and **effective learning** during training.
 
-For **test accuracy**:
-* Test accuracy refers to the **token-level accuracy**, measuring the **percentage of individual tokens predicted correctly** compared to the **ground truth tokens** at each timestep.
+**Test Accuracy**:
+* Test accuracy refers to **token-level accuracy**, measuring the **percentage of individual tokens predicted correctly** compared to the **ground truth token at each timestep**.
 * Both **Model V27** and **Model V28** achieved **nearly identical test accuracies**, with Model V27 attaining an accuracy of **~98.4%** and Model V28 achieving **~98.5%**.
 * These high accuracies suggest that the models **correctly predict individual tokens in approximately 98.4–98.5% of timesteps**, indicating **robust performance in token prediction** and **effective learning** during training.
 
-For **test perplexity**:
+**Test Perplexity**:
 * Perplexity is a measure of **how well a probability model predicts a sample**, calculated as the **exponential of the cross-entropy loss**. A **lower perplexity** indicates **better predictive performance**.
 * In the context of retrosynthetic SMILES predictions, low perplexity signifies that the model can **accurately predict the sequence of tokens representing valid retrosynthetic transformations**.
 * Both **Model V27** and **Model V28** achieved a **test perplexity of 1.170**, which is **excellent**. This demonstrates that both models are **highly confident and accurate in their token predictions**, effectively **capturing the underlying patterns** in the data.
 
-For **test BLEU score**:
+**Test BLEU Score**:
 * The **BLEU (Bilingual Evaluation Understudy) score** measures the **similarity between the predicted sequences and the reference sequences**, focusing on **matching n-grams**. Scores **range from 0 to 1**, with **higher scores indicating closer matches**.
-* In the context of retrosynthetic SMILES predictions, a higher BLEU score signifies that the model's generated sequences **exhibit substantial n-gram overlap with the target sequences**.
+* In the context of retrosynthetic SMILES predictions, a higher BLEU score signifies that the model's generated sequences **exhibit greater n-gram overlap with the target sequences**.
 * **Model V27** achieved a **BLEU score of 0.665**, while **Model V28** attained a **BLEU score of 0.688**. These scores indicate that the predictions made by both models **share substantial n-gram overlap with the target sequences**.
 * **Model V28's slightly better BLEU score** suggets its predictions are **marginally more similar to the targets** in terms of **n-gram overlap**. This improvement, although modest, highlights the **enhanced capability of Model V28** in generating sequences that **more closely align with the reference data**.
 
-For **test Average Levenshtein Distance**:
+**Test Average Levenshtein Distance**:
 * Levenshtein Distance measures the **minimum number of single-character edits** required to **change one sequence into another**.
-* **Model V27** has an **average Levenshtein Distance of 32.163**, while **Model V28** achieved an **average distance of 30.461**.
+* **Model V27** has an **average Levenshtein distance of 32.163**, while **Model V28** achieved an **average distance of 30.461**.
 * This indicates that, on average, approximately **32 edits** are needed to **convert Model V27's predicted sequences into the target sequences**, compared to **~30 edits for Model V28**.
-* A **lower average Levenshtein Distance** suggests that **Model V28's predictions are closer to the target sequences** with **fewer edits required**, highlighting its **superior performance** in generating accurate retrosynthetic SMILES predictions.
+* A **lower average Levenshtein distance** suggests that **Model V28's predictions are closer to the target sequences** with **fewer edits required**, highlighting its **superior performance** in generating accurate retrosynthetic SMILES predictions.
 
-For **test exact match accuracy**:
+**Test Exact Match Accuracy**:
 * Exact match accuracy measures the **percentage of predictions that exactly match the target sequences in their entirety**.
 * **Model V27** achieved an **exact match accuracy of ~10.50%**, while **Model V28** attained an **exact match accuracy of ~13.80%**. These **relatively low percentages** highlight the **significant semantic complexity inherent in SMILES-based retrosynthesis predictions**.
-* **Even a single character difference** in a SMILES string can result in a **completely different or invalid molecule**. Consequently, the **low exact match percentages** present a **significant challenge** for integrating SMILES-based retrosynthesis models into AiZynthFinder as an expansion policy. Overcoming this hurdle is crucial to ensure the **reliability and accuracy** of the predicted retrosynthetic pathways.
+* **Even a single character difference** in a SMILES string can result in a **completely different or invalid molecule**.
+* Consequently, the **low exact match percentages** present a **significant challenge** for integrating SMILES-based retrosynthesis models into AiZynthFinder as an expansion policy. Overcoming this hurdle is crucial to ensure the **reliability and accuracy** of the predicted retrosynthetic pathways.
 
-For **chemical validity score**:
-* Chemical validity score represents the proportion of predicted SMILES strings that **correspond to valid chemical structures when parsed by RDKit**. This metric ensures that the generated SMILES strings translate into chemically viable molecules, which is essential for retrosynthesis predictions.
-* Both Model V27 and Model V28 achieved a **perfect chemical validity score of **1.000**, indicating that **all predicted SMILES strings are chemically valid**.
+**Chemical Validity Score**:
+* Chemical validity score represents the proportion of predicted SMILES strings that **correspond to valid chemical structures when parsed by `rdkit.Chem.MolFromSmiles()`**.
+* This metric ensures that the generated SMILES strings translate into chemically viable molecules, which is essential for retrosynthesis predictions.
+* Both Model V27 and Model V28 achieved a **perfect chemical validity score of 1.000**, indicating that **all predicted SMILES strings are chemically valid**.
 * This **100% validity** underscores the models' ability to **generate syntactically correct and chemically feasible molecular structures**, thereby ensuring reliable retrosynthetic predictions when integrated into AiZynthFinder.
 
-For **average Tanimoto coefficient**:
+**Average Tanimoto Coefficient**:
 * The **Tanimoto coefficient** (also known as the **Jaccard index**) measures the **similarity between two chemical structures based on their fingerprints**, ranging from **0 (no similarity)** to **1 (identical structures)**.
-* The **threshold for similarity** is **intrinsically subjective** and is **highly dependent on the molecular fingerprint used**. For instance, with **Daylight fingerprints**, two structures are **typically considered similar** if **$$T > 0.85$$** **<sup>13</sup>**.
-* Our Seq2Seq model utilized **Morgan fingerprints** via **`rdkit.Chem.AllChem.GetMorganFingerprintAsBitVect`** to calculate the Tanimoto coefficient. In future iterations, **comparative Tanimoto coefficients** based on **different molecular fingerprints** will be implemented to **enhance similarity assessments**.
+* The **threshold for similarity** is **intrinsically subjective** and is **highly dependent on the molecular fingerprint used**. For instance, with **Daylight fingerprints**, two structures are **typically considered similar** if **$$T > 0.85$$**. **<sup>13</sup>**
+* Our Seq2Seq model utilised **Morgan fingerprints** via **`rdkit.Chem.AllChem.GetMorganFingerprintAsBitVect`** to calculate the Tanimoto coefficient.
+* In future model iterations, **comparative Tanimoto coefficients** based on **different molecular fingerprints** will be implemented to **enhance similarity assessments**.
 * **Model V27** has an **average Tanimoto coefficient of 0.869**, while **Model V28** achieved an **average coefficient of 0.874**. This indicates that the predictions from both models are **very structurally similar to the target molecules**, with **Model V28** demonstrating **marginally greater similarity**.
 
 ### 5.5.2 Integrating Seqeuence-to-Sequence Model into AiZynthFinder
@@ -1468,12 +1477,12 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
 1. **Accurate Leaf Node Precursor Prediction:**
     * Model V27 **correctly identified acetic anhydride** as **one of the leaf node precursors**, showcasing its ability to predict fundamental reactants.
 2. **Partial Ester Group Prediction:**
-    * The inclusion of a **methoxy group** suggests that Model V27 is effectively **attempting to predict the ester group**, indicating an understanding of functional group transformations.
+    * The inclusion of a **methoxy group** suggests that Model V27 is effectively **attempting to predict the ester group**, indicating some understanding of functional group transformations.
 3. **Meta Isomer Identification:**
     * Model V27 **successfully predicted the meta isomer** in relation to the **carbonyl groups**, indicating an ability to discern specific structural configurations.
 4. **Diverse Retrosynthesis Pathway Options**
     * Model V27 provided **four retrosynthesis pathway options**, most of which **correctly included the acetic anhydride precursor**.
-    * Although the subsequent options had a **lower state score** (*c.f.* [Section 1.5](https://github.com/c-vandenberg/aizynthfinder-project/tree/master#15-aizynthfinder-post-processing-tools---route-scoring)) and **made less synthetic sense**, predicting multiple retrosynthetic routes is crucial for potentially identifying novel synthetic pathways.
+    * Although the subsequent options had a **lower state score** (*c.f.* [Section 1.5](https://github.com/c-vandenberg/aizynthfinder-project/tree/master#15-aizynthfinder-post-processing-tools---route-scoring)) and **made less synthetic sense**, predicting multiple retrosynthetic routes is crucial for potentially **novel synthetic pathways** and **exploring chemical space**.
 
 ### Model V28 Asprin Retrosynthetic Prediction
 
@@ -1492,7 +1501,7 @@ However, since the model was trained on **only 50,000 reactions**, it serves as 
 2. **Lack of Diverse Retrosynthesis Pathway Options**
     * Model V28 **only provides two retrosynthesis pathway options**, with the first option being **the target molecule itself**.
   
-However, the single precursor **does exhibit structural similarity to aspirin**, correctly predicting an **ester functional group**, albeit with a **-CH<sub>3</sub> group between it and the phenyl ring**. Additionally, the precursor exhibits the **same isomerism as salicylic acid and aspirin**, with the **two phenyl ring substituents being at the ipso and ortho positions**.
+However, the single precursor **does exhibit structural similarity to aspirin**, correctly predicting the **ester functional group**, albeit with a **-CH<sub>3</sub> group between it and the phenyl ring**. Additionally, the precursor exhibits the **same isomerism as salicylic acid and aspirin**, with the **two phenyl ring substituents at the ipso and ortho positions**.
 
 ### ii. Complex Chiral Drug Retrosynthesis - Rivaroxaban
 
@@ -1518,7 +1527,7 @@ Rivaroxaban  is a **relatively large and complex, orally bioavailable chiral dru
   </div>
 <br>
 
-Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for comparison, we will use the *Roehrig et al.* synthesis, which employs an (S)-glycidyl phthalimide precursor (**Fig 16**). **<sup>16</sup>**
+Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for comparison, we will use the *Roehrig et al.* synthesis, **<sup>16</sup>** which employs an (S)-glycidyl phthalimide precursor (**Fig 16**).
 
 ### Model V27 Rivaroxaban Retrosynthetic Prediction
 
@@ -1533,19 +1542,19 @@ Rivaroxaban has **various reported syntheses**. **<sup>17</sup>** However, for c
 
 **Fig 17** illustrates that Model V27 exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. The primary issues are:
 1. **Incorrect Leaf Node Precursors Prediction**
-    * **Neither of the leaf node precursor predictions are correct** in the context of the *Roehrig et al.* synthesis or any reported synthesis of rivaroxaban. **<sup>17</sup>**
+    * **Neither of the leaf node precursor predictions** represent **reported reactants or intermediates** in the *Roehrig et al.* synthesis or any other reported synthesis of rivaroxaban. **<sup>17</sup>**
 2. **Too Few Synthetic Steps**
-    * The model predicted a **one-step reaction** in **all of its pathway options**. This is **not realistic for a relatively complex molecule** like rivaroxaban.
+    * The model predicted a **one-step reaction** in **all of its pathway options**. This is **not practical for a relatively complex molecule** like rivaroxaban.
 3. **Missing Key Moieties**
     * While **both leaf node precursors have incorrect structures**, there is a **degree of chemical similarity between them** and the **target molecule**.
-    * However, **three moieties are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moiety**. This is likely because **these moeities are underrepresented in the training data**.
+    * However, **three moieties are completely missing**: the **thiophene and 3-Morpholinone rings**, and the **oxazolidone moiety**. This is likely because **these moieties are underrepresented in the training data**.
 
 Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban compared to that of aspirin, there are **several promising aspects** in its retrosynthesis prediction:
 1. **Accounting for Stereochemistry**
     * In the *Roehrig et al.* synthesis and **most other reported syntheses**, the **stereochemistry of (S)-rivaroxaban is installed via (S)-glycidyl phthalimide**.
     * Although the precursor predicted by Model V27 **was not chemically similar to (S)-glycidyl phthalimide**, it was **chiral** and was the **S-enantiomer**.
     * Additionally, the **chrial centre was positioned within a $$\gamma$$-lactam**, which is **structurally similar to (S)-glycidyl phthalimide**, albeit at the **wrong position**.
-2. **Presence of Lactams**
+2. **Presence of Structurally Similar Lactam**
     * Both of the precursors predicted by Model V27 **contain lactam rings**: a **$$\beta$$-lactam**, and a **$$\gamma$$-lactam**.
     * While **lactams are not present in any of the reactants or intermediates** in the reported syntheses, the **$$\gamma$$-lactam** is **structurally similar to the imide group** in **phthalimide**.
   
@@ -1560,9 +1569,9 @@ Despite Model V27 **performing worse** in the retrosynthesis of rivaroxaban comp
   </div>
 <br>
 
-**Fig 14** illustrates that Model V28 also exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. However, whether it is **performs worse or better than Model V27 is less clear**. Similar to the retrosynthetic prediction of aspirin, the primary issues are:
+**Fig 18** illustrates that Model V28 also exhibits **suboptimal performance** in the retrosynthesis of rivaroxaban. However, whether it **performs worse or better than Model V27 is less clear**. The primary issues are:
 1. **Single Incorrect Leaf Node Precursor Prediction**
-    * Model V28 **only predicts a single leaf node precursor** that **does not have the correct structure of either of the precursors** used in any reported syntheses of rivaroxaban. The presence of a **seven-membered lactam** is particularly interesting. 
+    * Model V28 **only predicts a single leaf node precursor** that **does not have the correct structure of either of the precursors** used in any reported syntheses of rivaroxaban.
 2. **Non-Chrial Predicted Precursor**
     * Unlike Model V27, the **predicted precursor is not chrial**, indicating that Model V28 **is not accounting for stereochemistry** in its predictions.
 4. **Lack of Diverse Retrosynthesis Pathway Options**
@@ -1574,11 +1583,11 @@ However, there are some **promising features** of the prediction made by Model V
 2. **Presence of Chloro-Heteroaromatic Moiety**
     * Although rivaroxaban contains a **chlorothiophene moiety**, the fact that Model V28 **predicted a chloro-heteroaromatic (chloropyridine) moiety** was an **improvement over Model V27**, whose prediction placed the chloro group **on a phenyl ring**. The prediction of pyridine over thiophene is likely due to thiophenes being underrepresented in the training data compared to pyridines.
   
-Additionally, although not directly relevant to this retrosynthesis, the inclusion of a **seven-membered lactam ($$\epsilon$$-lactam) derivative** in the predicted structure is particularly noteworthy. While **not the most common moeity**, $$\epsilon$$-lactams (also known as **2-azepanones**) derivatives have **therapeutic applications** in various fields, spanning **cancer**, **mental health disorders** and **addiction**. **<sup>18</sup>** The model's ability to **effectively explore this relatively uncommon but important chemical space** is also promising.
+Additionally, although not directly relevant to this retrosynthesis, the inclusion of a **seven-membered lactam ($$\epsilon$$-lactam) derivative** in the predicted structure is particularly noteworthy. While **not the most common moeity**, $$\epsilon$$-lactams (also known as **2-azepanones**) derivatives have **therapeutic applications** in various fields, spanning **cancer**, **mental health disorders** and **addiction**. **<sup>18</sup>** Therefore, the model's ability to **effectively explore this relatively uncommon but important chemical space** is also promising.
 
 ### iii. AiZynthFinder Expansion Policy Performance Analysis
 
-When evaluating the performance metrics of the two models, it became evident that despite showing **identical token-level metrics**, **Model V28 outperformed Model V27 in sequence-level metrics** (**Table 3**). This improvement can be attributed to several factors:
+When evaluating the performance metrics of the two models, it became evident that despite showing **identical token-level metrics**, **Model V28 outperformed Model V27 in sequence-level metrics** (**Table 4**). This improvement can be attributed to several factors:
 1. **Greater Model Capacity**
     * **More units and larger embeddings** allow the model to **capture complex patterns** by **learning intricate dependencies**.
     * **Higher-dimensional embeddings** for the encoder and decoder enable the model to **capture more semantic information about the tokens**.
@@ -1593,9 +1602,10 @@ However, as illustrated in the examples above, when each model was **incorporate
 There is a **likely explanation** for the discrepancy between **improved sequence-level metrics** and **reduced generalisation and less diverse prediction options**:
 1. **Model Complexity, Dataset Size, and Overfitting**
     * Overfitting occurs when a **model learns the training data too well**, including its **noise and outliers**, at the expense of its **ability to generalise to new, unseen data**. As a result, the model may **memorise training examples rather than extracting generalisable patterns**.
-    * Model V28 has **significantly more parameters**, making it **substantially more complex** than Model V27. This increased complexity is due to its **larger units, as well as expanded embedding and attention dimensions**.
+    * Model V28 has **significantly more parameters**, making it **substantially more complex** than Model V27. This increased complexity is due to its **larger units**, as well as **expanded embedding and attention dimensions**.
     * It is well known that **increased model complexity leads to overfitting on smaller training sets**. Therefore, if **training dataset size does not scale proportionally with the model's complexity**, there is a **significant risk of overfitting**.
-
+      
+<br>
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -1632,12 +1642,14 @@ There is a **likely explanation** for the discrepancy between **improved sequenc
     <b>Table 5</b> Number of parameters in each layer type for Model V27 and Model V28.
   </p>
 </div>
+<br>
 
-**Table 5** presents the **number of parameters in each layer type** for both Model V27 and Model V28. However, when evaluating **model complexity relative to dataset size**, the focus should primarily be on **trainable parameters**:
+**Table 5** shows the **number of parameters in each layer type** for both Model V27 and Model V28. However, when evaluating **model complexity relative to dataset size**, the focus should primarily be on **trainable parameters**:
   * **Trainable parameters** are the elements in a neural network that are **learned and updated during the training process through backpropagation or backproagation through time (BPTT)**.
   * They include the **weights and biases** of the model's layers.
   * These parameters are **adjusted to minimise the loss function**, thereby **optimising the network's performance on the training data**.
 
+<br>
 <div style="display: flex;" align="center">
   <table border="1" cellspacing="0" cellpadding="5">
     <thead>
@@ -1670,6 +1682,7 @@ There is a **likely explanation** for the discrepancy between **improved sequenc
     <b>Table 6</b> Comparison of the number of trainable parameters, non-trainable parameters, optimizer parameters, and total parameters for Models V27 and V28.
   </p>
 </div>
+<br>
 
 Both Model V27 and Model V28 **incorporate several mitigation strategies** in their training regimens to **prevent overfitting**:
 1. **Early Stopping**
@@ -1684,17 +1697,19 @@ However, as shown in **Table 6**, there is a **significant increase in trainable
 
 Therefore, the **next model optimisation** aims to **vastly increase the size and diversity of the training data**. It is hoped that this will:
 1. **Increase Generalisability**:
-    * Expanding the training dataset's size and diversity should **enhance both models' ability to generalise to new, unseed data**, thereby **improving their performance when integrated into AiZynthFinder**.
+    * Expanding the training dataset's size and diversity should **enhance both models' ability to generalise to new, unseen data**, thereby **improving their performance when integrated into AiZynthFinder**.
 2. **Improve Sequence-Level Metrics**:
     * A larger and more diverse training dataset should **enable the models to capture the underlying patterns** that **represent the chemical relationships** between **product and reactant SMILES strings**.
     * This, in turn, should **improve sequence-level metrics** such as **BLEU score**, **average Levenshtein distance**, **exact match accruacy** and **average Tanimoto coefficient**.
 3. **Identify Diminishing Returns**:
-    * Reducing overfitting will help to confirm whether the **improvement in validation and testing metrics** achieved by training a more complex model **translate to better generalisation on new data**.
+    * Reducing overfitting will help to confirm whether the **improvement in validation and testing metrics** achieved by training a more complex model such as Model V28 **translate to better generalisation on new data**.
     * This will allow us to evaluate whether the **performance improvements are significant enough to justify the increased computational cost**.
 
 ## 5.6 Future Model Optimisations
 
-Given that Seq2Seq models have **largely been superseded by transformer architectures**, the primary future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and the **future transformer model**.
+Given that Seq2Seq models have **largely been superseded by transformer architectures**, the immediate future priority for this research project is to **incorporate the encoder, decoder and attention mechanism of this model** into a **transformer-based expansion policy**. 
+
+However, there are some features to add that could improve the performance of **both the Seq2Seq model**, and the **future transformer model**.
 
 ### 5.6.1 Increased Training Dataset Size and Diversity
   * As previously stated, a larger and more diverse training dataset should **increase generalisability**, **improve evaluation metrics** and generally **enhance model performance** when integrated into AiZynthFinder.
@@ -1709,7 +1724,7 @@ Given that Seq2Seq models have **largely been superseded by transformer architec
         * [hesther/reactiondatabase](https://github.com/hesther/reactiondatabase)
   * Depending on the database source, this will likely involve:
     1. **Parsing** pre-existing SMILES strings.
-    2. **Converting data formats to SMILES strings**parsing pre-existing SMILES strings for extraction.
+    2. **Converting non-SMILES molecular representations to SMILES strings**.
   * These SMILES strings will then need to be **processed into a format compatible with the model's training regimen**.
 
 ### 5.6.2 Layer-wise Learning Rate Decay
