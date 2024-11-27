@@ -1228,9 +1228,9 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ## 5.5 Results and Discussion
 
-### 5.5.1 Analysis of Best Performing Model Architecture
+### 5.5.1 Evaluation of Current Optimal Model Architecture
 
-As of **26/11/24**, the **top model architecture** has trained on a **limited dataset of 50,000 reactions**, and evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
+As of **26/11/24**, the **optimal model architecture** has trained on a **limited dataset of 50,000 reactions**, and evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
 Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu et al.*, however, it  was **highly computationally expensive** to train. Therefore, for **performance comparison**, Model V27 was configured with the **number of neurons/nodes (units)**, the **size of the token vector representations** for both the encoder and decoder, and the **attention vector dimensionality** all **reduced to 256**. All other hyperparameters are **consistent between the two models** (**Table 3**).
 
@@ -1314,6 +1314,8 @@ Model V28 adopts a configuration similar to the Seq2Seq model developed by *Liu 
 <br>
 
 Both models were initially trained with using identical product and reactant datasets, consisting of approximately **50,000 reactions**. These datasets were sourced from an **open source patent database** **<sup>12</sup>** by *Liu et al.*. Following the data processing outlined in [Section 5.1](https://github.com/c-vandenberg/aizynthfinder-project/blob/master/expansion-policies/seq2seq-expansion-policy/src/models/README.md#51-data-preparation), the datasets were split into training and testing sets with a 7:3 ratio. The validation datasets for products and reactants were processed similarly, but were **pre-split** by *Liu et al.*. Moving forward, future models will be trained on a **larger and more diverse training dataset** to **enhance performance and generalisation**.
+
+### i. Analysis of Performance Metrics
 
 Both models were evaluated against the test datasets using a **variety of metrics** (**Table 4**). These metrics included **standard machine learning and natural langauge processing (NLP) performance metrics** such as **loss**, **accuracy**, **perplexity** and **BLEU score**.
 
@@ -1425,6 +1427,8 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
 * Our Seq2Seq model utilised **Morgan fingerprints** via **`rdkit.Chem.AllChem.GetMorganFingerprintAsBitVect`** to calculate the Tanimoto coefficient.
 * In future model iterations, **comparative Tanimoto coefficients** based on **different molecular fingerprints** will be implemented to **enhance similarity assessments**.
 * **Model V27** has an **average Tanimoto coefficient of 0.869**, while **Model V28** achieved an **average coefficient of 0.874**. This indicates that the predictions from both models are **very structurally similar to the target molecules**, with **Model V28** demonstrating **marginally greater similarity**.
+
+### ii. Analysis of Sample Predictions
 
 <br>
 <div style="display: flex;" align="center">
@@ -1795,7 +1799,8 @@ However, there are some features to add that could improve the performance of **
   * Depending on the database source, this will likely involve:
     1. **Parsing** pre-existing SMILES strings.
     2. **Converting non-SMILES molecular representations to SMILES strings**.
-  * These SMILES strings will then need to be **processed into a format compatible with the model's training regimen**.
+  * These SMILES strings will then need to be **preprocessed into a format compatible with the model's training regimen**.
+  * Earlier **analysis of sample SMILES predictions** revealed that **some of the target sequences were chemically invalid**. Therefore, future preprocessing should also **filter out any malformed or chemically invalid SMILES strings**.
 
 ### 5.6.2 Layer-wise Learning Rate Decay
   * Layer-wise learning rate decay **adjusts the learning rate for different layers**, typically applying **smaller learning rates to lower layers** and **larger learning rates to higher layers**.
