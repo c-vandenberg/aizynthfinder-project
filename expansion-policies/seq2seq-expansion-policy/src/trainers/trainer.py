@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from typing import Dict, Any, List, Tuple, Union, Callable, Optional
 
 import yaml
@@ -59,6 +60,8 @@ class Trainer:
         self.loss_function: Optional[Any] = None
         self.metrics: Optional[List[str]] = None
         self.callbacks: Optional[List[Callback]] = None
+
+        self._logger = logging.getLogger(__name__)
 
         self.initialize_components()
 
@@ -168,9 +171,9 @@ class Trainer:
         try:
             with open(tokenizer_path, 'w') as f:
                 json.dump(self.tokenizer.word_index, f, indent=4)
-            print(f"Tokenizer vocabulary saved to {tokenizer_path}")
+            self._logger.info(f"Tokenizer vocabulary saved to {tokenizer_path}")
         except IOError as e:
-            print(f"Failed to save tokenizer to {tokenizer_path}: {e}")
+            self._logger.error(f"Failed to save tokenizer to {tokenizer_path}: {e}")
             raise
 
     def setup_model(self) -> None:
@@ -244,7 +247,7 @@ class Trainer:
         StopIteration
             If the training dataset is empty.
         """
-        print("Building the model with sample data to initialize variables...")
+        self._logger.info("Building the model with sample data to initialize variables...")
 
         # Get a batch from the training dataset
         train_dataset = self.data_loader.get_train_dataset()
@@ -258,7 +261,7 @@ class Trainer:
         # Run the model on sample data
         self.model([sample_encoder_input, sample_decoder_input])
 
-        print("Model built successfully.\n")
+        self._logger.info("Model built successfully.\n")
 
     def setup_callbacks(self) -> None:
         """
@@ -295,9 +298,9 @@ class Trainer:
         # Restore from latest checkpoint if exists
         if checkpoint_manager.latest_checkpoint:
             checkpoint.restore(checkpoint_manager.latest_checkpoint)
-            print(f"Restored from {checkpoint_manager.latest_checkpoint}")
+            self._logger.info(f"Restored from {checkpoint_manager.latest_checkpoint}")
         else:
-            print("Initializing from scratch.")
+            self._logger.info("Initializing from scratch.")
 
         # Checkpoint Callback
         best_val_loss_checkpoint_callback: BestValLossCallback = BestValLossCallback(
@@ -512,7 +515,7 @@ class Trainer:
                 model=self.model
             )
         except Exception as e:
-            print(f"Error saving model in Keras format: {e}")
+            self._logger.error(f"Error saving model in Keras format: {e}")
 
         try:
             Seq2SeqModelUtils.model_save_hdf5_format(
@@ -520,7 +523,7 @@ class Trainer:
                 model=self.model
             )
         except Exception as e:
-            print(f"Error saving model in HDF5 format: {e}")
+            self._logger.error(f"Error saving model in HDF5 format: {e}")
 
         try:
             Seq2SeqModelUtils.model_save_onnx_format(
@@ -530,7 +533,7 @@ class Trainer:
                 max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140)
             )
         except Exception as e:
-            print(f"Error saving model in ONNX format: {e}")
+            self._logger.error(f"Error saving model in ONNX format: {e}")
 
         try:
             Seq2SeqModelUtils.save_saved_model_format(
@@ -538,7 +541,7 @@ class Trainer:
                 model=self.model
             )
         except Exception as e:
-            print(f"Error saving model in SavedModel format: {e}")
+            self._logger.error(f"Error saving model in SavedModel format: {e}")
 
     def run(self):
         """
@@ -572,7 +575,7 @@ class Trainer:
             self.save_model()
             self.evaluate()
         except Exception as e:
-            print(f"An error occurred during the training pipeline: {e}")
+            self._logger.error(f"An error occurred during the training pipeline: {e}")
             raise
 
 def custom_train_step(

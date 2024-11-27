@@ -1,5 +1,4 @@
 import logging
-import pydevd_pycharm
 
 from aizynthfinder.aizynthfinder import AiZynthFinder
 

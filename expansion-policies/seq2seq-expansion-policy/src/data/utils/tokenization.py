@@ -14,7 +14,7 @@ class SmilesTokenizer:
     adds optional start and end tokens, and uses a Keras Tokenizer internally
     to convert tokens to indices.
 
-    Parameters
+    Attributes
     ----------
     start_token : str, optional
         Token representing the start of a sequence (default is '<START>').
@@ -26,17 +26,6 @@ class SmilesTokenizer:
         Maximum number of tokens in the vocabulary (default is 150).
     reverse_input_sequence : bool, optional
         Whether to reverse the input sequence during tokenization (default is False).
-
-    Attributes
-    ----------
-    _start_token : str
-        Start token.
-    _end_token : str
-        End token.
-    _oov_token : str
-        Out-of-vocabulary token.
-    reverse_input_sequence: int
-        Boolean indicating whether to reverse the input sequence during tokenization or not.
 
     Methods
     -------
@@ -251,14 +240,38 @@ class SmilesTokenizer:
 
     @property
     def start_token(self):
+        """
+        Returns the start token used in tokenization.
+
+        Returns
+        -------
+        str
+            The start token.
+        """
         return self._start_token
 
     @property
     def end_token(self):
+        """
+        Returns the end token used in tokenization.
+
+        Returns
+        -------
+        str
+            The end token.
+        """
         return self._end_token
 
     @property
     def oov_token(self):
+        """
+        Returns the out-of-vocabulary (OOV) token used in tokenization.
+
+        Returns
+        -------
+        str
+            The OOV token.
+        """
         return self._oov_token
 
     @property

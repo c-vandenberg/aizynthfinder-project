@@ -1,18 +1,14 @@
-import os
-import pydevd_pycharm
-
-import tensorflow as tf
+import logging
 
 from trainers.trainer import Trainer
 
 def main():
-    # Path to the configuration file
-    config_path = 'config/training/model_v27_config.yml'
+    logging.basicConfig(level=logging.INFO)
 
-    # Initialize the Trainer with the configuration
+    config_path = 'config/training/model_v28_config.yml'
+
     trainer = Trainer(config_path=config_path)
 
-    # Run the training pipeline
     trainer.run()
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 
 import os
 import pydevd_pycharm
+import logging
 
 import tensorflow as tf
 
@@ -18,6 +19,8 @@ tf.config.threading.set_intra_op_parallelism_threads(1)
 tf.config.threading.set_inter_op_parallelism_threads(1)
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
     # Path to the configuration file
     config_path = 'config/training/model_v23_config.yml'
 
