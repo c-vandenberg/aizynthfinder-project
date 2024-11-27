@@ -1470,7 +1470,7 @@ Additionally, **string metrics** such as **Levenshtein Distance** and **exact ma
         <td style="font-size: 12px; white-space: nowrap;">5</td>
         <td style="font-size: 12px; white-space: nowrap;">Clc1ncc(Cl)c(Cl)n1.Nc1cc(OCC2CC2)[nH]n1</td>
         <td style="font-size: 12px; white-space: nowrap;">CS(=O)(=O)OCC1CC1.CCOP(=O)(Cc1cc(Cl)ncc1Cl)NC(=O)OC(C)(C)C</td>
-        <td style="font-size: 12px; white-space: nowrap;">ClCc1cc(Cl)ncc1Cl.Nc1cc(OCC2CC2)n c2c1CC(=O)N2</td>
+        <td style="font-size: 12px; white-space: nowrap;">ClCc1cc(Cl)ncc1Cl.Nc1cc(OCC2CC2)nc2c1CC(=O)N2</td>
       </tr>
     </tbody>
   </table>
