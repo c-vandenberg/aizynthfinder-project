@@ -102,8 +102,3 @@ cython_debug/
 *.tmp
 *.temp
 *.bak
-
-expansion-policies/model_code.py
-expansion-policies/training_code.py
-expansion-policies/inference_code.py
-expansion-policies/all_carbon_predictions_output.txt
