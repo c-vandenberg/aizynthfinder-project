@@ -23,26 +23,6 @@ class RetrosynthesisSeq2SeqModel(Model):
 
     Parameters
     ----------
-    input_vocab_size : int
-        Size of the input vocabulary.
-    output_vocab_size : int
-        Size of the output vocabulary.
-    encoder_embedding_dim : int
-        Dimension of the embedding space for the encoder.
-    decoder_embedding_dim : int
-        Dimension of the embedding space for the decoder.
-    units : int
-        Number of units in LSTM layers.
-    attention_dim : int
-        Dimensionality of the attention mechanism.
-    num_encoder_layers : int, optional
-        Number of stacked layers in the encoder (default is 2).
-    num_decoder_layers : int, optional
-        Number of stacked layers in the decoder (default is 4).
-    dropout_rate : float, optional
-        Dropout rate for regularization (default is 0.2).
-    weight_decay : Optional[float], optional
-        L2 regularization factor applied to the LSTM and Dense layers (default is `None`).
     **kwargs : Any
         Additional keyword arguments for the Model superclass.
 
@@ -149,10 +129,10 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         Parameters
         ----------
-        inputs : tuple of tf.Tensor
+        inputs : Tuple[tf.Tensor, tf.Tensor]
             Tuple containing encoder_input and decoder_input:
-            - encoder_input : tf.Tensor of shape (batch_size, seq_len_enc)
-            - decoder_input : tf.Tensor of shape (batch_size, seq_len_dec)
+                - encoder_input : tf.Tensor of shape (batch_size, seq_len_enc)
+                - decoder_input : tf.Tensor of shape (batch_size, seq_len_dec)
         training : bool, optional
             Indicates whether the model is in training mode.
 

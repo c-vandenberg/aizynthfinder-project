@@ -13,14 +13,6 @@ class SmilesDataPreprocessor:
     This class leverages a provided `SmilesTokenizer` to convert tokenized SMILES strings into
     integer sequences and applies padding to ensure uniform sequence lengths across the dataset.
 
-    Parameters
-    ----------
-    smiles_tokenizer : SmilesTokenizer
-        An instance of `SmilesTokenizer` that provides methods to convert text to integer sequences.
-    max_seq_length : int
-        The maximum sequence length for padding. Sequences longer than this length will be truncated,
-        and shorter sequences will be padded to match this length.
-
     Attributes
     ----------
     smiles_tokenizer : SmilesTokenizer

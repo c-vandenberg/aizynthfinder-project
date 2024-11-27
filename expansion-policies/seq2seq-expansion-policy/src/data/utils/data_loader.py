@@ -11,42 +11,25 @@ from data.utils.preprocessing import SmilesDataPreprocessor
 
 class DataLoader:
     """
-    DataLoader is responsible for loading, preprocessing, and managing
-    datasets for training, validation, and testing of SMILES-based Retrosynthesis models.
-
-    Attributes
-    ----------
-    DEFAULT_MAX_SEQ_LENGTH : int
-        Default maximum sequence length for encoder and decoder.
-    DEFAULT_BATCH_SIZE : int
-        Default batch size for training.
-    DEFAULT_BUFFER_SIZE : int
-        Default buffer size for shuffling datasets.
-    DEFAULT_TEST_SIZE : float
-        Default proportion of the dataset to include in the test split.
-    DEFAULT_RANDOM_STATE : int
-        Default random state for reproducibility.
-    DEFAULT_MAX_TOKENS : int
-        Default maximum number of tokens.
-    DEFAULT_REVERSE_INPUT_SEQ_BOOL : bool
-        Default flag to reverse input sequences.
+    Responsible for loading, preprocessing, and managing datasets for training, validation,
+    and testing of SMILES-based Retrosynthesis models.
 
     Methods
     -------
-    vocab_size:
+    vocab_size
         Returns the size of the tokenizer's vocabulary.
-    load_and_prepare_data():
+    smiles_tokenizer
+        Returns the SMILES tokenizer instance.
+    load_and_prepare_data()
         Loads and preprocesses the datasets.
-    get_dataset(data, training=True):
+    get_dataset(data, training=True)
         Creates a TensorFlow dataset from the given data.
-    get_train_dataset():
+    get_train_dataset()
         Returns the training dataset.
-    get_valid_dataset():
+    get_valid_dataset()
         Returns the validation dataset.
-    get_test_dataset():
+    get_test_dataset()
         Returns the test dataset.
-    _load_smiles_from_file(file_path):
-        Loads SMILES strings from a specified file.
     """
     DEFAULT_MAX_SEQ_LENGTH = 140
     DEFAULT_BATCH_SIZE = 16
@@ -71,36 +54,6 @@ class DataLoader:
         random_state: int = DEFAULT_RANDOM_STATE,
         reverse_input_sequence: bool = DEFAULT_REVERSE_INPUT_SEQ_BOOL
     ) -> None:
-        """
-        Initializes the DataLoader with file paths and configuration parameters.
-
-        Parameters
-        ----------
-        products_file : str
-            Path to the file containing product SMILES strings.
-        reactants_file : str
-            Path to the file containing reactant SMILES strings.
-        products_valid_file : str
-            Path to the validation file for product SMILES strings.
-        reactants_valid_file : str
-            Path to the validation file for reactant SMILES strings.
-        num_samples : Optional[int], default=None
-            Number of samples to load. If None, all samples are loaded.
-        max_encoder_seq_length : int, default=DEFAULT_MAX_SEQ_LENGTH
-            Maximum sequence length for the encoder.
-        max_decoder_seq_length : int, default=DEFAULT_MAX_SEQ_LENGTH
-            Maximum sequence length for the decoder.
-        batch_size : int, default=DEFAULT_BATCH_SIZE
-            Size of batches for training.
-        buffer_size : int, default=DEFAULT_BUFFER_SIZE
-            Buffer size for shuffling datasets.
-        test_size : float, default=DEFAULT_TEST_SIZE
-            Proportion of the dataset to include in the test split.
-        random_state : int, default=DEFAULT_RANDOM_STATE
-            Seed for random number generators to ensure reproducibility.
-        reverse_input_sequence : bool, default=DEFAULT_REVERSE_INPUT_SEQ_BOOL
-            Whether to reverse input sequences before tokenization.
-        """
         self.products_file = products_file
         self.reactants_file = reactants_file
         self.products_valid_file = products_valid_file
@@ -131,7 +84,7 @@ class DataLoader:
 
         Returns
         -------
-        self.smiles_tokenizer.vocab_size : int
+        int
             Vocabulary size.
         """
         return self.smiles_tokenizer.vocab_size
@@ -143,7 +96,7 @@ class DataLoader:
 
         Returns
         -------
-        self._smiles_tokenizer : SmilesTokenizer
+        SmilesTokenizer
             The SMILES tokenizer used for tokenizing SMILES strings.
         """
         return self._smiles_tokenizer
@@ -159,7 +112,7 @@ class DataLoader:
 
         Returns
         -------
-            None
+        None
         """
         self._load_datasets()
         self._tokenize_datasets()
@@ -176,7 +129,7 @@ class DataLoader:
 
         Returns
         -------
-            None
+        None
 
         Raises
         ------
@@ -247,7 +200,7 @@ class DataLoader:
 
         Returns
         -------
-            None
+        None
 
         Raises
         ------
@@ -275,7 +228,7 @@ class DataLoader:
 
         Returns
         -------
-            None
+        None
         """
         # Initialize DataPreprocessors
         self.encoder_data_processor = SmilesDataPreprocessor(
@@ -314,17 +267,19 @@ class DataLoader:
 
         Parameters
         ----------
-        encoder_data : List[str]
+        encoder_data : list of str
             Tokenized encoder data.
-        decoder_data : List[str]
+        decoder_data : list of str
             Tokenized decoder data.
 
         Returns
         -------
-        (encoder_input, decoder_input), decoder_target : Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]
+        tuple
             A tuple containing:
-                - A tuple of encoder input and decoder input tensors.
-                - Decoder target tensor.
+            - (encoder_input, decoder_input) : tuple of tf.Tensor
+                Encoder and decoder input tensors.
+            - decoder_target : tf.Tensor
+                Decoder target tensor.
         """
         encoder_input = self.encoder_data_processor.preprocess_smiles(encoder_data)
         decoder_full = self.decoder_data_processor.preprocess_smiles(decoder_data)
@@ -340,21 +295,20 @@ class DataLoader:
         """
         Creates a TensorFlow dataset from the given data.
 
-        Converts the preprocessed data into a `tf.data.Dataset` object, applies
+        Converts the preprocessed data into a `tf.data.Dataset` object and applies
         shuffling, batching, and prefetching as per the configuration.
 
         Parameters
         ----------
-        data : Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]
-            The data to create the dataset from.
+        data : tuple
+            A tuple ((encoder_input, decoder_input), decoder_target) where each element is a tf.Tensor.
         training : bool, optional
-            Whether the dataset is for training (default is True). If True, shuffling
-            and dropping the remainder of batches is applied to ensure consistent
-            batch sizes.
+            Whether the dataset is for training. If True, shuffling and dropping the remainder
+            of batches is applied to ensure consistent batch sizes. Default is True.
 
         Returns
         -------
-        dataset : tf.data.Dataset
+        tf.data.Dataset
             A TensorFlow dataset ready for model consumption.
         """
         (encoder_input, decoder_input), decoder_target = data
@@ -455,26 +409,24 @@ class DataLoader:
         """
         Canonicalises SMILES strings using `rdkit.Chem.MolFromSmiles()`.
 
-        Correctly handles reactant SMILES separated by `.` by canonicalising separately and re-concatenating the
-        reassembling in the same order by concatenating with a `.` separator.
+        Correctly handles reactant SMILES separated by `.` by canonicalizing each separately
+        and reassembling them in the same order with a `.` separator.
 
         Parameters
         ----------
         smiles : str
-            The single SMILES string or multiple, `.` separated SMILES strings to canonicalise.
+            The single SMILES string or multiple `.`-separated SMILES strings to canonicalise.
 
         Returns
         -------
         str
-        str
-             The single canonicalised SMILES string or multiple, `.` separated canonicalised SMILES strings.
+            The single canonicalised SMILES string or multiple `.`-separated canonicalised SMILES strings.
 
         Raises
         ------
         ValueError
             If any of the SMILES components are invalid.
         """
-        # Split the SMILES string on '.' to get individual components
         smiles_components = smiles.split('.')
         canonical_components = []
         for smi in smiles_components:
@@ -486,4 +438,5 @@ class DataLoader:
 
         # Reassemble the components in the same order, separated by '.'
         canonical_smiles = '.'.join(canonical_components)
+
         return canonical_smiles

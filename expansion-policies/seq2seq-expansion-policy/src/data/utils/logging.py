@@ -149,7 +149,18 @@ def print_metrics(
     epoch: Optional[int] = None
 ) -> None:
     """
-    Print metrics to the console.
+    Prints metrics to the console.
+
+    Parameters
+    ----------
+    metrics : dict of str to float
+        A dictionary containing metric names and their corresponding values.
+    epoch : int, optional
+        The current epoch number. If provided, it will be included in the printed output.
+
+    Returns
+    -------
+    None
     """
     for name, value in metrics.items():
         if epoch is not None:
@@ -167,7 +178,28 @@ def log_sample_predictions(
     separator_length: Optional[int] = 153
 ) -> None:
     """
-    Log sample predictions to a specified file.
+    Logs sample predictions to a specified file.
+
+    Parameters
+    ----------
+    target_smiles : list of str
+        The list of target SMILES strings.
+    predicted_smiles : list of str
+        The list of predicted SMILES strings.
+    directory : str
+        The directory where the log file will be saved.
+    filename : str, optional
+        The name of the log file. Default is 'sample_predictions.txt'.
+    epoch : int, optional
+        The current epoch number. If provided, it will be included in the log.
+    num_samples : int, optional
+        The number of sample predictions to log. Default is 5.
+    separator_length : int, optional
+        The length of the separator line in the log. Default is 153.
+
+    Returns
+    -------
+    None
     """
     num_samples = min(num_samples, len(target_smiles))
     os.makedirs(directory, exist_ok=True)
@@ -194,7 +226,22 @@ def print_sample_predictions(
     separator_length: int = 153
 ) -> None:
     """
-    Print sample predictions to the console.
+    Prints sample predictions to the console.
+
+    Parameters
+    ----------
+    target_smiles : list of str
+        The list of target SMILES strings.
+    predicted_smiles : list of str
+        The list of predicted SMILES strings.
+    num_samples : int, optional
+        The number of sample predictions to print. Default is 5.
+    separator_length : int, optional
+        The length of the separator line in the console output. Default is 153.
+
+    Returns
+    -------
+    None
     """
     num_samples = min(num_samples, len(target_smiles))
     separator = '-' * separator_length
@@ -212,7 +259,20 @@ def log_to_tensorboard(
     epoch: int
 ):
     """
-    Log metrics to TensorBoard.
+    Logs metrics to TensorBoard.
+
+    Parameters
+    ----------
+    writer : tf.summary.SummaryWriter or None
+        The TensorBoard summary writer. If None, no logging is performed.
+    metrics : dict of str to float
+        A dictionary containing metric names and their corresponding values.
+    epoch : int
+        The current epoch number.
+
+    Returns
+    -------
+    None
     """
     if writer is not None:
         with writer.as_default():

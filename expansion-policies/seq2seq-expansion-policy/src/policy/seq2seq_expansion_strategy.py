@@ -18,12 +18,49 @@ from attention.attention import BahdanauAttention
 
 class Seq2SeqExpansionStrategy(ExpansionStrategy):
     """
-    A Seq2Seq-based expansion strategy using an ONNX model for retrosynthesis prediction.
+    A Seq2Seq-based expansion strategy using a trained model for retrosynthesis prediction.
 
-    :param key: the key or label
-    :param config: the configuration of the tree search
-    :param model_path: path to the ONNX model file
-    :param top_k: number of top predictions to consider
+    This strategy generates retrosynthetic actions by predicting precursor molecules
+    for a given target molecule using a Seq2Seq model. It integrates with the AiZynthFinder
+    framework as an expansion policy.
+
+    Parameters
+    ----------
+    key : str
+        The key or label for this strategy.
+    config : Configuration
+        The configuration object of the tree search.
+    **kwargs : dict
+        Additional keyword arguments:
+        - model (str): Path to the trained model file.
+        - tokenizer (str): Path to the tokenizer file.
+        - max_encoder_seq_length (int, optional): Maximum sequence length for the encoder. Default is 140.
+        - max_decoder_seq_length (int, optional): Maximum sequence length for the decoder. Default is 140.
+        - beam_width (int, optional): Beam width for beam search decoding. Default is 5.
+        - use_remote_models (bool, optional): Whether to use remote models. Default is True.
+        - return_top_n (int, optional): Number of top sequences to return. Default is 1.
+
+    Attributes
+    ----------
+    model : RetrosynthesisSeq2SeqModel
+        The loaded Seq2Seq model for prediction.
+    smiles_tokenizer : SmilesTokenizer
+        The tokenizer used for encoding and decoding SMILES strings.
+    max_encoder_seq_length : int
+        Maximum sequence length for the encoder.
+    max_decoder_seq_length : int
+        Maximum sequence length for the decoder.
+    beam_width : int
+        Beam width for beam search decoding.
+    use_remote_models : bool
+        Whether to use remote models.
+    return_top_n : int
+        Number of top sequences to return.
+
+    Methods
+    -------
+    get_actions(molecules, cache_molecules=None)
+        Generate retrosynthetic actions using the Seq2Seq model.
     """
     def __init__(self, key: str, config: Configuration, **kwargs: str) -> None:
         super().__init__(key, config, **kwargs)
@@ -42,7 +79,25 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         self._logger.info(f"Loaded Seq2Seq model and tokenizers for expansion policy {self.key}")
 
-    def load_model(self, model_path: str):
+    def load_model(self, model_path: str) -> RetrosynthesisSeq2SeqModel:
+        """
+        Loads the Seq2Seq model from the specified path.
+
+        Parameters
+        ----------
+        model_path : str
+            Path to the trained model file.
+
+        Returns
+        -------
+        RetrosynthesisSeq2SeqModel
+            The loaded Seq2Seq model.
+
+        Raises
+        ------
+        Exception
+            If there is an error loading the model.
+        """
         self._logger.info(f"Loading Seq2Seq model from {model_path}")
 
         custom_objects = {
@@ -61,7 +116,20 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             raise
         return model
 
-    def load_tokenizer(self, tokenizer_path: str):
+    def load_tokenizer(self, tokenizer_path: str) -> SmilesTokenizer:
+        """
+        Loads the SMILES tokenizer from the specified path.
+
+        Parameters
+        ----------
+        tokenizer_path : str
+            Path to the tokenizer file.
+
+        Returns
+        -------
+        SmilesTokenizer
+            The loaded SMILES tokenizer.
+        """
         self._logger.info(f"Loading tokenizer from {tokenizer_path}")
         tokenizer: SmilesTokenizer = SmilesTokenizer.from_json(tokenizer_path)
         self._logger.info("Tokenizer loaded successfully.")
@@ -76,10 +144,20 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         """
         Generate retrosynthetic actions using the Seq2Seq model.
 
-        :param molecules: the molecules to consider
-        :param cache_molecules: additional molecules to submit to the expansion
-            policy but that only will be cached for later use
-        :return: the actions and the priors of those actions
+        Parameters
+        ----------
+        molecules : sequence of TreeMolecule
+            The target molecules to consider for expansion.
+        cache_molecules : sequence of TreeMolecule, optional
+            Additional molecules to submit to the expansion policy but that will only be cached
+            for later use. Default is None.
+
+        Returns
+        -------
+        possible_actions : List[RetroReaction]
+            The list of generated retrosynthetic reactions.
+        priors : List[float]
+            The corresponding probabilities (priors) of the generated actions.
         """
         possible_actions = []
         priors = []
@@ -111,6 +189,26 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return possible_actions, priors
 
     def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
+        """
+        Predicts precursor molecules for a list of target SMILES strings.
+
+        Parameters
+        ----------
+        smiles_list : list of str
+            The list of target SMILES strings.
+
+        Returns
+        -------
+        all_predicted_smiles : List[List[str]]
+            A list containing lists of predicted precursor SMILES strings for each target.
+        all_probabilities : List[List[float]]
+            A list containing lists of probabilities corresponding to each predicted precursor.
+
+        Notes
+        -----
+        This method uses beam search decoding to generate multiple predictions per molecule.
+        It also filters out invalid SMILES strings from the predictions.
+        """
         tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(
             smiles_list,
             is_input_sequence=True
@@ -181,6 +279,19 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
     @staticmethod
     def _is_valid_smiles(smiles: str) -> bool:
+        """
+        Checks if a SMILES string is valid.
+
+        Parameters
+        ----------
+        smiles : str
+            The SMILES string to validate.
+
+        Returns
+        -------
+        bool
+            True if the SMILES string is valid, False otherwise.
+        """
         try:
             mol = Chem.MolFromSmiles(smiles)
             return mol is not None
@@ -189,6 +300,23 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
     @staticmethod
     def _clean_sequence(sequence: str, start_token: str, end_token: str) -> str:
+        """
+        Cleans a tokenized sequence by removing start and end tokens and whitespace.
+
+        Parameters
+        ----------
+        sequence : str
+            The tokenized sequence to clean.
+        start_token : str
+            The start token to remove.
+        end_token : str
+            The end token to remove.
+
+        Returns
+        -------
+        str
+            The cleaned sequence.
+        """
         if sequence.startswith(start_token + ' '):
             sequence = sequence[len(start_token) + 1:]
         end_idx = sequence.find(' ' + end_token)
@@ -199,4 +327,10 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         return sequence.strip()
 
     def reset_cache(self) -> None:
+        """
+        Resets any internal caches used by the expansion strategy.
+
+        This method is a placeholder to comply with the interface and does nothing
+        in this implementation.
+        """
         pass

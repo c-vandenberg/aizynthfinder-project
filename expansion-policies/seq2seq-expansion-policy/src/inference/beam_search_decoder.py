@@ -25,32 +25,18 @@ class BeamSearchDecoder:
         - Early Stopping: Terminates the search early if all beams have generated the end-of-sequence token,
                                 reducing unnecessary computations.
 
-    Parameters
-    ----------
-    decoder : DecoderInterface
-        The decoder instance used for generating predictions.
-    beam_width : int, optional
-        The number of beams to keep during search (default is 5).
-    num_groups : int, optional
-        The number of groups to divide beams into for diversity (default is 1).
-    diversity_strength : float, optional
-        The strength of the diversity penalty (lambda) (default is 0.5).
-    max_length : int, optional
-        The maximum length of the generated sequences (default is 140).
-    start_token_id : int, optional
-        The token ID representing the start of a sequence.
-    end_token_id : int, optional
-        The token ID representing the end of a sequence.
-    length_penalty : float, optional
-        The penalty applied to longer sequences to balance between length and probability (default is 1.0).
-    return_top_n : int, optional
-        The number of top sequences to return (default is 1).
     Attributes
     ----------
     decoder : DecoderInterface
         The decoder instance used for generating predictions.
     beam_width : int
         The number of beams to keep during search.
+    num_groups : int
+        The number of groups for diversity in beam search.
+    group_size : int
+        The size of each group in beam search.
+    diversity_strength : float
+        The strength of the diversity penalty.
     max_length : int
         The maximum length of the generated sequences.
     start_token_id : Optional[int]
@@ -58,14 +44,16 @@ class BeamSearchDecoder:
     end_token_id : Optional[int]
         The token ID representing the end of a sequence.
     length_penalty : float
-        The penalty applied to longer sequences to balance between length and probability.
+        The penalty applied to longer sequences.
+    return_top_n : int
+        The number of top sequences to return.
+
 
     Methods
     -------
     search(encoder_output, initial_decoder_states)
         Perform beam search decoding to generate the best sequences.
     """
-
     def __init__(
         self,
         decoder: 'DecoderInterface',
@@ -94,6 +82,29 @@ class BeamSearchDecoder:
         encoder_output: tf.Tensor,
         initial_decoder_states: List[tf.Tensor],
     ) -> Tuple[List[List[List[int]]], List[List[float]]]:
+        """
+        Performs beam search decoding to generate the best sequences.
+
+        Parameters
+        ----------
+        encoder_output : tf.Tensor
+            The output tensor from the encoder of shape `[batch_size, seq_len, hidden_dim]`.
+        initial_decoder_states : list of tf.Tensor
+            The initial states for the decoder.
+
+        Returns
+        -------
+        best_sequences : List[List[List[int]]]
+            The best sequences generated for each sample in the batch.
+        best_scores : List[List[float]]
+            The scores corresponding to the best sequences.
+
+        Notes
+        -----
+        This method implements beam search with optional group-based diversity to
+        promote varied outputs. It maintains multiple hypotheses (beams) simultaneously
+        and applies a length penalty to balance between sequence length and probability.
+        """
         batch_size = tf.shape(encoder_output)[0]
 
         # Initialize sequences with the start token
