@@ -1,5 +1,6 @@
 import os
-from typing import List, Any, Union, Tuple, Dict
+import logging
+from typing import List, Any, Union, Dict
 
 import onnx
 import tf2onnx
@@ -8,6 +9,7 @@ import numpy as np
 from tensorflow.keras import Model
 from sklearn.model_selection import ShuffleSplit, cross_validate
 
+logger = logging.getLogger(__name__)
 
 class Seq2SeqModelUtils:
     """
@@ -133,10 +135,10 @@ class Seq2SeqModelUtils:
                 This function prints the layer configuration to the console.
             """
             indent_str: str = "  " * indent
-            print(f"{indent_str}Layer: {model_layer.name}")
+            logger.debug(f"{indent_str}Layer: {model_layer.name}")
             config: Dict[str, Any] = model_layer.get_config()
             for key, value in config.items():
-                print(f"{indent_str}  - {key}: {value}")
+                logger.debug(f"{indent_str}  - {key}: {value}")
 
             # Recursively inspect sublayers if present
             if hasattr(model_layer, 'layers'):  # For layers like Bidirectional, TimeDistributed, etc.
@@ -177,9 +179,9 @@ class Seq2SeqModelUtils:
         keras_save_path: str = os.path.join(keras_save_dir, 'seq2seq_model.keras')
         try:
             model.save(keras_save_path)
-            print(f"Model Keras V3 format save successful. Save file path: {keras_save_path}.")
+            logger.info(f"Model Keras V3 format save successful. Save file path: {keras_save_path}.")
         except OSError as e:
-            print(f"Failed to save model in Keras format: {e}")
+            logger.info(f"Failed to save model in Keras format: {e}")
             raise
 
     @staticmethod
@@ -211,9 +213,9 @@ class Seq2SeqModelUtils:
         hdf5_save_path: str = os.path.join(hdf5_save_dir, 'seq2seq_model.h5')
         try:
             model.save(hdf5_save_path)
-            print(f"Model HDF5 format save successful. Save file path: {hdf5_save_path}.")
+            logger.info(f"Model HDF5 format save successful. Save file path: {hdf5_save_path}.")
         except OSError as e:
-            print(f"Failed to save model in HDF5 format: {e}")
+            logger.error(f"Failed to save model in HDF5 format: {e}")
             raise
 
     @staticmethod
@@ -288,9 +290,9 @@ class Seq2SeqModelUtils:
                 opset=13,
                 output_path=onnx_save_path
             )
-            print(f"Model successfully converted to ONNX. Save file path: {onnx_save_path}")
+            logger.info(f"Model successfully converted to ONNX. Save file path: {onnx_save_path}")
         except Exception as e:
-            print(f"Failed to convert model to ONNX format: {e}")
+            logger.error(f"Failed to convert model to ONNX format: {e}")
             raise
 
     @staticmethod
@@ -322,7 +324,7 @@ class Seq2SeqModelUtils:
         os.makedirs(model_save_path, exist_ok=True)
         try:
             model.export(model_save_path)
-            print(f"Model SavedModel format save successful. Save file path: {model_save_path}")
+            logger.info(f"Model SavedModel format save successful. Save file path: {model_save_path}")
         except OSError as e:
-            print(f"Failed to save model in SavedModel format: {e}")
+            logger.error(f"Failed to save model in SavedModel format: {e}")
             raise
