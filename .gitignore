@@ -102,3 +102,8 @@ cython_debug/
 *.tmp
 *.temp
 *.bak
+
+# Combined code files
+expansion-policies/inference_code.py
+expansion-policies/model_code.py
+expansion-policies/training_code.py
