@@ -1,15 +1,20 @@
+import os
 import logging
 
-from trainers.trainer import Trainer
+from data.utils.open_reaction_database_extractor import OpenReactionDatabaseExtractor
 
 def main():
     logging.basicConfig(level=logging.INFO)
 
-    config_path = 'config/training/model_v28_config.yml'
+    ord_extractor = OpenReactionDatabaseExtractor(ord_data_dir=os.environ.get('ORD_RAW_DATA_DIR'))
 
-    trainer = Trainer(config_path=config_path)
+    extract_reactions_generator = ord_extractor.write_reactions_to_files(
+        reactants_smiles_path=os.environ.get('ORD_PROCESSED_REACTANTS_PATH'),
+        products_smiles_path=os.environ.get('ORD_PROCESSED_PRODUCTS_PATH')
+    )
 
-    trainer.run()
+    for reaction in extract_reactions_generator:
+        print(reaction)
 
 if __name__ == "__main__":
     main()
