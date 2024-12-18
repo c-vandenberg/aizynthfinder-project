@@ -1,7 +1,7 @@
 import os
-import json
 import glob
-import gzip
+import warnings
+import sqlite3
 from typing import Generator, Tuple, List, Callable, Sequence
 
 from ord_schema.message_helpers import load_message, write_message
@@ -13,10 +13,12 @@ from rdkit.Chem import rdChemReactions, AllChem
 from rdkit.Chem.rdChemReactions import ChemicalReaction
 from rdkit.Contrib.RxnRoleAssignment import identifyReactants
 
+warnings.filterwarnings("ignore", message="DEPRECATION WARNING: please use MorganGenerator")
 
 class OpenReactionDatabaseExtractor:
-    def __init__(self, ord_data_dir: str):
+    def __init__(self, ord_data_dir: str, db_path: str):
         self.ord_data_dir = ord_data_dir
+        self.db_path = db_path
 
     def write_reactions_to_files(
         self,
@@ -26,11 +28,32 @@ class OpenReactionDatabaseExtractor:
         os.makedirs(os.path.dirname(reactants_smiles_path), exist_ok=True)
         os.makedirs(os.path.dirname(products_smiles_path), exist_ok=True)
 
+        # Use lightweight SQLite key-value store to prevent duplicate entries
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS pairs (
+            reactant TEXT,
+            product TEXT,
+            PRIMARY KEY (reactant, product)
+        )
+        """)
+
         with open(reactants_smiles_path, 'w') as reactants_file, \
              open(products_smiles_path, 'w') as products_file:
             for reactant_line, cleaned_product_line in self.extract_all_reactions():
-                reactants_file.write(reactant_line + '\n')
-                products_file.write(cleaned_product_line + '\n')
+                c = conn.cursor()
+                c.execute(
+                    "SELECT 1 FROM pairs WHERE reactant=? AND product=?",
+                    (reactant_line, cleaned_product_line)
+                )
+                if c.fetchone() is None:
+                    conn.execute(
+                        "INSERT INTO pairs (reactant, product) VALUES (?, ?)",
+                        (reactant_line, cleaned_product_line)
+                    )
+                    conn.commit()
+                    reactants_file.write(reactant_line + '\n')
+                    products_file.write(cleaned_product_line + '\n')
 
     def extract_all_reactions(self)-> Generator[Tuple[str, str], None, None]:
         """
@@ -53,11 +76,18 @@ class OpenReactionDatabaseExtractor:
                 if rxn_smarts is None:
                     continue
 
-                cleaned_rxn_smiles = identifyReactants.reassignReactionRoles(rxn_smarts)
+                try:
+                    cleaned_rxn_smiles = identifyReactants.reassignReactionRoles(rxn_smarts)
+                except ValueError:
+                    continue
+
                 if not cleaned_rxn_smiles:
                     continue
 
-                cleaned_rxn = AllChem.ReactionFromSmarts(cleaned_rxn_smiles, useSmiles=True)
+                try:
+                    cleaned_rxn = AllChem.ReactionFromSmarts(cleaned_rxn_smiles, useSmiles=True)
+                except ValueError:
+                    continue
 
                 _, unmodified_reactants, unmodified_products = identifyReactants.identifyReactants(
                     cleaned_rxn
@@ -65,6 +95,9 @@ class OpenReactionDatabaseExtractor:
 
                 reactant_smiles = self._get_reactant_smiles_from_cleaned_rxn(cleaned_rxn, unmodified_reactants)
                 product_smiles = self._get_product_smiles_from_cleaned_rxn(cleaned_rxn, unmodified_products)
+
+                if len(reactant_smiles) == 0 or len(product_smiles) == 0:
+                    continue
 
                 reactant_line = '.'.join(reactant_smiles) if reactant_smiles else ''
                 product_line = '.'.join(product_smiles) if product_smiles else ''

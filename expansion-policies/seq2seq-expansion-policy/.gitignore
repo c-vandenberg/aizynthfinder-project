@@ -107,6 +107,9 @@ cython_debug/
 # Tokenizer Files
 /data/training/liu-et-al/**/tokenizer/
 
+# Database Files
+/data/database/
+
 # Logs Directory
 /logs/
 
