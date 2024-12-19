@@ -4,56 +4,25 @@ import warnings
 import sqlite3
 from typing import Generator, Tuple, List, Callable, Sequence
 
-from ord_schema.message_helpers import load_message, write_message
+from ord_schema.message_helpers import load_message
 from ord_schema.proto import dataset_pb2
 from ord_schema.proto import reaction_pb2
-from ord_schema import message_helpers
 from rdkit import Chem
-from rdkit.Chem import rdChemReactions, AllChem
+from rdkit.Chem import AllChem
 from rdkit.Chem.rdChemReactions import ChemicalReaction
 from rdkit.Contrib.RxnRoleAssignment import identifyReactants
+
+from data.utils.preprocessing import SmilesDataPreprocessor
 
 warnings.filterwarnings("ignore", message="DEPRECATION WARNING: please use MorganGenerator")
 
 class OpenReactionDatabaseExtractor:
-    def __init__(self, ord_data_dir: str, db_path: str):
-        self.ord_data_dir = ord_data_dir
-        self.db_path = db_path
+    def __init__(self, ord_data_dir: str, smiles_preprocessor: SmilesDataPreprocessor):
+        if not isinstance(smiles_preprocessor, SmilesDataPreprocessor):
+            raise TypeError("smiles_preprocessor must be an instance of SmilesDataPreprocessor.")
 
-    def write_reactions_to_files(
-        self,
-        reactants_smiles_path: str,
-        products_smiles_path: str
-    ):
-        os.makedirs(os.path.dirname(reactants_smiles_path), exist_ok=True)
-        os.makedirs(os.path.dirname(products_smiles_path), exist_ok=True)
-
-        # Use lightweight SQLite key-value store to prevent duplicate entries
-        conn = sqlite3.connect(self.db_path)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS pairs (
-            reactant TEXT,
-            product TEXT,
-            PRIMARY KEY (reactant, product)
-        )
-        """)
-
-        with open(reactants_smiles_path, 'w') as reactants_file, \
-             open(products_smiles_path, 'w') as products_file:
-            for reactant_line, cleaned_product_line in self.extract_all_reactions():
-                c = conn.cursor()
-                c.execute(
-                    "SELECT 1 FROM pairs WHERE reactant=? AND product=?",
-                    (reactant_line, cleaned_product_line)
-                )
-                if c.fetchone() is None:
-                    conn.execute(
-                        "INSERT INTO pairs (reactant, product) VALUES (?, ?)",
-                        (reactant_line, cleaned_product_line)
-                    )
-                    conn.commit()
-                    reactants_file.write(reactant_line + '\n')
-                    products_file.write(cleaned_product_line + '\n')
+        self.ord_data_dir: str = ord_data_dir
+        self.smiles_preprocessor = smiles_preprocessor
 
     def extract_all_reactions(self)-> Generator[Tuple[str, str], None, None]:
         """
@@ -63,6 +32,8 @@ class OpenReactionDatabaseExtractor:
             reaction_pb2.Reaction: A parsed Reaction protocol buffer message.
         """
         pb_files = glob.glob(os.path.join(self.ord_data_dir, '**', '*.pb.gz'), recursive=True)
+
+        limit = 0
 
         for pb_file in pb_files:
             dataset = load_message(pb_file, dataset_pb2.Dataset)
@@ -101,7 +72,7 @@ class OpenReactionDatabaseExtractor:
 
                 reactant_line = '.'.join(reactant_smiles) if reactant_smiles else ''
                 product_line = '.'.join(product_smiles) if product_smiles else ''
-                cleaned_product_line = self._remove_smiles_inorganic_fragments(product_line)
+                cleaned_product_line = self.smiles_preprocessor.remove_smiles_inorganic_fragments(product_line)
 
                 yield reactant_line, cleaned_product_line
 
@@ -185,17 +156,3 @@ class OpenReactionDatabaseExtractor:
     def _remove_atom_mapping_from_mol(mol: Chem.Mol):
         for atom in mol.GetAtoms():
             atom.SetAtomMapNum(0)
-
-    @staticmethod
-    def _remove_smiles_inorganic_fragments(smiles: str):
-        mol = Chem.MolFromSmiles(smiles)
-        if not mol:
-            return smiles
-
-        frags = Chem.GetMolFrags(mol, asMols=True)
-        if len(frags) == 1:
-            return Chem.MolToSmiles(frags[0])
-
-        main_frag = max(frags, key=lambda frag: frag.GetNumHeavyAtoms())
-
-        return Chem.MolToSmiles(main_frag, isomericSmiles=True)

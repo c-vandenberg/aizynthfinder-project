@@ -9,7 +9,7 @@ from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import List, Optional, Sequence, Tuple
 
 from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import SmilesDataPreprocessor
+from data.utils.preprocessing import TokenizedSmilesPreprocessor
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
@@ -214,7 +214,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             is_input_sequence=True
         )
 
-        encoder_data_preprocessor = SmilesDataPreprocessor(
+        encoder_data_preprocessor = TokenizedSmilesPreprocessor(
             smiles_tokenizer=self.smiles_tokenizer,
             max_seq_length=self.max_encoder_seq_length
         )

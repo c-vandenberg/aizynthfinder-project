@@ -6,7 +6,7 @@ from rdkit import Chem
 from sklearn.model_selection import train_test_split
 
 from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import SmilesDataPreprocessor
+from data.utils.preprocessing import TokenizedSmilesPreprocessor
 
 
 class DataLoader:
@@ -231,11 +231,11 @@ class DataLoader:
         None
         """
         # Initialize DataPreprocessors
-        self.encoder_data_processor = SmilesDataPreprocessor(
+        self.encoder_data_processor = TokenizedSmilesPreprocessor(
             self.smiles_tokenizer,
             self.max_encoder_seq_length
         )
-        self.decoder_data_processor = SmilesDataPreprocessor(
+        self.decoder_data_processor = TokenizedSmilesPreprocessor(
             self.smiles_tokenizer,
             self.max_decoder_seq_length
         )

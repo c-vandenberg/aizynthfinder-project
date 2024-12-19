@@ -21,7 +21,7 @@ from callbacks.gradient_monitoring import GradientMonitoringCallback
 from metrics.perplexity import Perplexity
 from data.utils.data_loader import DataLoader
 from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import SmilesDataPreprocessor
+from data.utils.preprocessing import TokenizedSmilesPreprocessor
 from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
                                 log_sample_predictions, print_sample_predictions)
 from models.seq2seq import RetrosynthesisSeq2SeqModel
@@ -53,8 +53,8 @@ class Trainer:
         self.tokenizer: Optional[SmilesTokenizer] = None
         self.data_loader: Optional[DataLoader] = None
         self.vocab_size: Optional[int] = None
-        self.encoder_preprocessor: Optional[SmilesDataPreprocessor] = None
-        self.decoder_preprocessor: Optional[SmilesDataPreprocessor] = None
+        self.encoder_preprocessor: Optional[TokenizedSmilesPreprocessor] = None
+        self.decoder_preprocessor: Optional[TokenizedSmilesPreprocessor] = None
         self.model: Optional[RetrosynthesisSeq2SeqModel] = None
         self.optimizer: Optional[Adam] = None
         self.loss_function: Optional[Any] = None
@@ -140,11 +140,11 @@ class Trainer:
         self.save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
 
         # Initialize Preprocessors
-        self.encoder_preprocessor = SmilesDataPreprocessor(
+        self.encoder_preprocessor = TokenizedSmilesPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
             max_seq_length=data_conf.get('max_encoder_seq_length', 140)
         )
-        self.decoder_preprocessor = SmilesDataPreprocessor(
+        self.decoder_preprocessor = TokenizedSmilesPreprocessor(
             smiles_tokenizer=self.data_loader.smiles_tokenizer,
             max_seq_length=data_conf.get('max_decoder_seq_length', 140)
         )
