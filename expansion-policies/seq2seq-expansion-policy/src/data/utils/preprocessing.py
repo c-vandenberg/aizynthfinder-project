@@ -140,12 +140,6 @@ class SmilesDataPreprocessor:
         self._validate_smiles_datasets()
 
         self._logger.info("Starting SQLite-based deduplication.")
-        unique_products = []
-        unique_reactants = []
-
-        if os.path.exists(db_path):
-            os.remove(db_path)
-            self._logger.info(f"Existing database '{db_path}' removed for a fresh start.")
 
         conn = sqlite3.connect(db_path)
         try:
@@ -160,12 +154,14 @@ class SmilesDataPreprocessor:
 
             total = len(self.products_smiles)
             current_idx = 0
+            batch_number = 1
+
+            cursor.execute("BEGIN TRANSACTION;")
 
             while current_idx < total:
                 batch_products = self.products_smiles[current_idx:current_idx + batch_size]
                 batch_reactants = self.reactants_smiles[current_idx:current_idx + batch_size]
 
-                temp_seen = set()
                 sanitised_batch = []
 
                 for product_smiles, reactant_smiles in zip(batch_products, batch_reactants):
@@ -181,23 +177,21 @@ class SmilesDataPreprocessor:
                     product_line = '.'.join(canonical_products).strip()
                     reaction_pair = (reactant_line, product_line)
 
-                    if reaction_pair not in temp_seen:
-                        temp_seen.add(reaction_pair)
-                        sanitised_batch.append(reaction_pair)
-                    else:
-                        self._logger.debug(
-                            f"Duplicate within batch skipped: Reactant={reactant_line}, Product={product_line}"
-                        )
+                    sanitised_batch.append(reaction_pair)
 
-                # Process the sanitised batch
-                self._process_batch(
-                    batch=sanitised_batch,
-                    cursor=cursor,
-                    unique_products=unique_products,
-                    unique_reactants=unique_reactants
-                )
+                try:
+                    # Insert the sanitized batch into the database
+                    cursor.executemany(
+                        "INSERT OR IGNORE INTO pairs (reactant, product) VALUES (?, ?)",
+                        sanitised_batch
+                    )
+                    self._logger.debug(f"Batch {batch_number} inserted with {len(sanitised_batch)} reactions.")
+                except sqlite3.Error as e:
+                    self._logger.error(f"SQLite error during batch {batch_number} insertion: {e}")
+                    continue
 
                 current_idx += batch_size
+                batch_number += 1
 
                 if current_idx % log_interval == 0:
                     self._logger.info(f"Processed {current_idx}/{total} reactions.")
@@ -207,8 +201,7 @@ class SmilesDataPreprocessor:
         finally:
             conn.close()
 
-        self.products_smiles = unique_products
-        self.reactants_smiles = unique_reactants
+        self._extract_unique_reactions_from_db(db_path=db_path)
 
     def deduplicate_in_memory(self) -> None:
         """
@@ -251,6 +244,37 @@ class SmilesDataPreprocessor:
         self.products_smiles = unique_products
         self.reactants_smiles = unique_reactants
 
+    def _extract_unique_reactions_from_db(self, db_path: str = 'seen_pairs.db') -> None:
+        """
+        Extract all unique (reactant, product) pairs from the SQLite database and assign them to in-memory datasets.
+
+        Parameters
+        ----------
+        db_path : str, optional
+            Path to the SQLite database used for deduplication. Defaults to 'seen_pairs.db'.
+
+        Returns
+        -------
+        None
+        """
+        self._logger.info("Extracting unique reactions from the SQLite database.")
+
+        conn = sqlite3.connect(db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT reactant, product FROM pairs")
+            rows = cursor.fetchall()
+            self._logger.debug(f"Fetched {len(rows)} unique reactions from the database.")
+
+            self.reactants_smiles = [reactant.split('.') for reactant, _ in rows]
+            self.products_smiles = [product.split('.') for _, product in rows]
+
+            self._logger.info(f"Assigned {len(self.products_smiles)} unique reactions to in-memory datasets.")
+        except sqlite3.Error as e:
+            self._logger.error(f"SQLite error during extraction: {e}")
+        finally:
+            conn.close()
+
     def _validate_smiles_datasets(self):
         if not self.products_smiles or not self.reactants_smiles:
             self._logger.error("Cannot remove duplicates from empty reaction dataset.")
@@ -259,59 +283,6 @@ class SmilesDataPreprocessor:
         if not len(self.products_smiles) == len(self.reactants_smiles):
             self._logger.error("Product SMILES and reaction SMILES datasets must be the same length.")
             return
-
-    def _process_batch(
-        self,
-        batch: List[Tuple[str, str]],
-        cursor: sqlite3.Cursor,
-        unique_products: List[List[str]],
-        unique_reactants: List[List[str]]
-    ) -> None:
-        """
-        Process a batch of reaction pairs: insert into DB and append to unique lists if unique.
-
-        Parameters
-        ----------
-        batch : List[Tuple[str, str]]
-            List of (reactant, product) pairs.
-        cursor : sqlite3.Cursor
-            SQLite cursor for executing database operations.
-        unique_products : List[List[str]]
-            List to append unique product SMILES.
-        unique_reactants : List[List[str]]
-            List to append unique reactant SMILES.
-
-        Returns
-        -------
-        None
-        """
-        try:
-            cursor.executemany(
-                "INSERT INTO pairs (reactant, product) VALUES (?, ?)",
-                batch
-            )
-            # All inserts were successful; append to unique lists
-            for reactant_line, product_line in batch:
-                unique_reactants.append(reactant_line.split('.'))
-                unique_products.append(product_line.split('.'))
-            self._logger.debug(f"Batch of {len(batch)} reactions inserted successfully.")
-        except sqlite3.IntegrityError as e:
-            self._logger.warning(f"IntegrityError encountered: {e}. Processing batch individually.")
-            # Some inserts failed due to duplicates; handle individually
-            for reactant_line, product_line in batch:
-                try:
-                    cursor.execute(
-                        "INSERT INTO pairs (reactant, product) VALUES (?, ?)",
-                        (reactant_line, product_line)
-                    )
-                    # Insert succeeded; append to unique lists
-                    unique_reactants.append(reactant_line.split('.'))
-                    unique_products.append(product_line.split('.'))
-                    self._logger.debug(f"Inserted Reaction - Reactant: {reactant_line}, Product: {product_line}")
-                except sqlite3.IntegrityError as e:
-                    # Duplicate pair; skip appending
-                    self._logger.warning(f"IntegrityError encountered: {e}. Duplicate pair skipped: Reactant={reactant_line}, Product={product_line}")
-                    continue
 
     @staticmethod
     def canonicalise_smiles(smiles: str) -> str:

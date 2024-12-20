@@ -23,9 +23,7 @@ def main():
     logging.info(f"Total reactions extracted: {len(smiles_preprocessor.products_smiles)}")
 
     smiles_preprocessor.remove_duplicate_product_reactant_pairs(
-        db_path=os.environ.get('SQLITE_DB_PATH'),
-        batch_size=1000,
-        log_interval=100
+        db_path=os.environ.get('SQLITE_DB_PATH')
     )
 
     logging.info(f"Total unique reactants after deduplication: {len(smiles_preprocessor.reactants_smiles)}")
@@ -34,8 +32,7 @@ def main():
     # Write unique reactions to files
     smiles_preprocessor.write_reactions_to_files(
         reactants_smiles_path=os.environ.get('ORD_PROCESSED_REACTANTS_PATH'),
-        products_smiles_path=os.environ.get('ORD_PROCESSED_PRODUCTS_PATH'),
-        log_interval=100000
+        products_smiles_path=os.environ.get('ORD_PROCESSED_PRODUCTS_PATH')
     )
 
 
