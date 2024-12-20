@@ -1,7 +1,7 @@
 import os
 import glob
 import warnings
-import sqlite3
+import logging
 from typing import Generator, Tuple, List, Callable, Sequence
 
 from ord_schema.message_helpers import load_message
@@ -13,6 +13,8 @@ from rdkit.Chem.rdChemReactions import ChemicalReaction
 from rdkit.Contrib.RxnRoleAssignment import identifyReactants
 
 from data.utils.preprocessing import SmilesDataPreprocessor
+
+logging.basicConfig(level=logging.INFO)
 
 warnings.filterwarnings("ignore", message="DEPRECATION WARNING: please use MorganGenerator")
 
@@ -32,8 +34,6 @@ class OpenReactionDatabaseExtractor:
             reaction_pb2.Reaction: A parsed Reaction protocol buffer message.
         """
         pb_files = glob.glob(os.path.join(self.ord_data_dir, '**', '*.pb.gz'), recursive=True)
-
-        limit = 0
 
         for pb_file in pb_files:
             dataset = load_message(pb_file, dataset_pb2.Dataset)
@@ -70,11 +70,7 @@ class OpenReactionDatabaseExtractor:
                 if len(reactant_smiles) == 0 or len(product_smiles) == 0:
                     continue
 
-                reactant_line = '.'.join(reactant_smiles) if reactant_smiles else ''
-                product_line = '.'.join(product_smiles) if product_smiles else ''
-                cleaned_product_line = self.smiles_preprocessor.remove_smiles_inorganic_fragments(product_line)
-
-                yield reactant_line, cleaned_product_line
+                yield reactant_smiles, product_smiles
 
     def _get_smiles_from_templates(
         self,
@@ -147,7 +143,7 @@ class OpenReactionDatabaseExtractor:
             if identifier.type == reaction_pb2.CompoundIdentifier.SMILES:
                 mol = Chem.MolFromSmiles(identifier.value)
                 if mol:
-                    canonical_smiles = Chem.MolToSmiles(mol, isomericSmiles=True)
+                    canonical_smiles = Chem.MolToSmiles(mol, canonical=True, isomericSmiles=True)
                     smiles_list.append(canonical_smiles)
 
         return smiles_list

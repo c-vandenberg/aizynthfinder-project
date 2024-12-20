@@ -9,14 +9,28 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from data.utils.tokenization import SmilesTokenizer
 
+logging.basicConfig(level=logging.INFO)
+
 class SmilesDataPreprocessor:
     def __init__(
         self,
         products_smiles: Optional[List[List[str]]] = None,
         reactants_smiles: Optional[List[List[str]]] = None,
     ):
-        self.products_smiles = products_smiles
-        self.reactants_smiles = reactants_smiles
+        """
+        Initialize the SmilesDataPreprocessor with product and reactant SMILES lists.
+
+        Parameters
+        ----------
+        products_smiles : List[List[str]], optional
+            List containing lists of product SMILES strings for each reaction.
+            If None, initializes as an empty list.
+        reactants_smiles : List[List[str]], optional
+            List containing lists of reactant SMILES strings for each reaction.
+            If None, initializes as an empty list.
+        """
+        self.products_smiles: List[List[str]] = products_smiles if products_smiles is not None else []
+        self.reactants_smiles: List[List[str]] = reactants_smiles if reactants_smiles is not None else []
 
         self._logger = logging.getLogger(__name__)
 
@@ -41,16 +55,16 @@ class SmilesDataPreprocessor:
             The updated products and reactants SMILES lists after concatenation.
         """
         if products_smiles_lists is not None:
-            logging.info("Concatenating product datasets.")
-            logging.info(f"Total products before concatenation: {len(self.products_smiles)}")
+            self._logger.info("Concatenating product datasets.")
+            self._logger.info(f"Total products before concatenation: {len(self.products_smiles)}")
             self.products_smiles.extend(products_smiles_lists)
-            logging.info(f"Total products after concatenation: {len(self.products_smiles)}")
+            self._logger.info(f"Total products after concatenation: {len(self.products_smiles)}")
 
         if reactants_smiles_lists is not None:
-            logging.info("Concatenating reactant datasets.")
-            logging.info(f"Total reactants before concatenation: {len(self.reactants_smiles)}")
+            self._logger.info("Concatenating reactant datasets.")
+            self._logger.info(f"Total reactants before concatenation: {len(self.reactants_smiles)}")
             self.reactants_smiles.extend(reactants_smiles_lists)
-            logging.info(f"Total reactants after concatenation: {len(self.reactants_smiles)}")
+            self._logger.info(f"Total reactants after concatenation: {len(self.reactants_smiles)}")
 
         return self.products_smiles, self.reactants_smiles
 
@@ -76,11 +90,9 @@ class SmilesDataPreprocessor:
         -------
         None
         """
-        if self.products_smiles is None or self.reactants_smiles is None:
-            logging.error("Cannot write empty reaction dataset to files.")
-            return
+        self._validate_smiles_datasets()
 
-        logging.info("Starting writing reactions to files.")
+        self._logger.info("Starting writing reactions to files.")
 
         os.makedirs(os.path.dirname(reactants_smiles_path), exist_ok=True)
         os.makedirs(os.path.dirname(products_smiles_path), exist_ok=True)
@@ -93,15 +105,15 @@ class SmilesDataPreprocessor:
             for idx, (product_smiles, reactant_smiles) in enumerate(zip(self.products_smiles, self.reactants_smiles), 1):
                 reactant_line = '.'.join(reactant_smiles) if reactant_smiles else ''
                 product_line = '.'.join(product_smiles) if product_smiles else ''
-                cleaned_product_line = self.remove_smiles_inorganic_fragments(product_line)
+                cleaned_product_line = self.remove_non_product_fragment_smiles(product_line)
 
                 reactants_file.write(reactant_line + '\n')
                 products_file.write(cleaned_product_line + '\n')
 
                 if idx % log_interval == 0:
-                    logging.info(f"Written {idx}/{total} reactions to files.")
+                    self._logger.info(f"Written {idx}/{total} reactions to files.")
 
-        logging.info("Writing reactions to files completed successfully.")
+        self._logger.info("Writing reactions to files completed successfully.")
 
     def remove_duplicate_product_reactant_pairs(
         self,
@@ -123,16 +135,17 @@ class SmilesDataPreprocessor:
 
         Returns
         -------
-        Union[Tuple[List[List[str]], List[List[str]]], None]
-            Unique product and reactant SMILES lists after deduplication, or None.
+        None
         """
-        if self.products_smiles is None or self.reactants_smiles is None:
-            logging.error("Cannot remove duplicates from empty reaction dataset.")
-            return None
+        self._validate_smiles_datasets()
 
-        logging.info("Starting SQLite-based deduplication.")
-        unique_x = []
-        unique_y = []
+        self._logger.info("Starting SQLite-based deduplication.")
+        unique_products = []
+        unique_reactants = []
+
+        if os.path.exists(db_path):
+            os.remove(db_path)
+            self._logger.info(f"Existing database '{db_path}' removed for a fresh start.")
 
         conn = sqlite3.connect(db_path)
         try:
@@ -146,91 +159,113 @@ class SmilesDataPreprocessor:
             cursor = conn.cursor()
 
             total = len(self.products_smiles)
-            batch = []
+            current_idx = 0
 
-            for idx, (x, y) in enumerate(zip(self.products_smiles, self.reactants_smiles), 1):
-                reactant_line = '.'.join(y)
-                product_line = '.'.join(x)
-                batch.append((reactant_line, product_line))
+            while current_idx < total:
+                batch_products = self.products_smiles[current_idx:current_idx + batch_size]
+                batch_reactants = self.reactants_smiles[current_idx:current_idx + batch_size]
 
-                if len(batch) >= batch_size:
-                    self._process_batch(
-                        batch=batch,
-                        cursor=cursor,
-                        unique_x=unique_x,
-                        unique_y=unique_y
-                    )
-                    batch = []
+                temp_seen = set()
+                sanitised_batch = []
 
-                    if idx % log_interval == 0:
-                        logging.info(f"Processed {idx}/{total} reactions.")
+                for product_smiles, reactant_smiles in zip(batch_products, batch_reactants):
+                    try:
+                        # Canonicalise/normalise SMILES
+                        canonical_reactants = [self.canonicalise_smiles(smi) for smi in reactant_smiles]
+                        canonical_products = [self.canonicalise_smiles(smi) for smi in product_smiles]
+                    except ValueError as ve:
+                        self._logger.error(str(ve))
+                        continue
 
-            # Process any remaining pairs
-            if batch:
+                    reactant_line = '.'.join(canonical_reactants).strip()
+                    product_line = '.'.join(canonical_products).strip()
+                    reaction_pair = (reactant_line, product_line)
+
+                    if reaction_pair not in temp_seen:
+                        temp_seen.add(reaction_pair)
+                        sanitised_batch.append(reaction_pair)
+                    else:
+                        self._logger.debug(
+                            f"Duplicate within batch skipped: Reactant={reactant_line}, Product={product_line}"
+                        )
+
+                # Process the sanitised batch
                 self._process_batch(
-                    batch=batch,
+                    batch=sanitised_batch,
                     cursor=cursor,
-                    unique_x=unique_x,
-                    unique_y=unique_y
+                    unique_products=unique_products,
+                    unique_reactants=unique_reactants
                 )
 
+                current_idx += batch_size
+
+                if current_idx % log_interval == 0:
+                    self._logger.info(f"Processed {current_idx}/{total} reactions.")
+
             conn.commit()
-            logging.info("SQLite-based deduplication completed successfully.")
+            self._logger.info("SQLite-based deduplication completed successfully.")
         finally:
             conn.close()
 
-        self.products_smiles = unique_x
-        self.reactants_smiles = unique_y
+        self.products_smiles = unique_products
+        self.reactants_smiles = unique_reactants
 
-    def deduplicate_in_memory(self) -> Union[Tuple[List[List[str]], List[List[str]]], None]:
+    def deduplicate_in_memory(self) -> None:
         """
         Deduplicate reaction pairs using in-memory sets.
 
         Returns:
         -------
-        Union[Tuple[List[str], List[str]], None]
-            Unique x_data (products) and y_data (reactants), or None.
+        None
         """
-        if self.products_smiles is None or self.reactants_smiles is None:
-            logging.error("Cannot remove duplicates from empty reaction dataset.")
+        self._validate_smiles_datasets()
+
+        self._logger.info("Starting in-memory deduplication.")
+        seen = set()
+        unique_products = []
+        unique_reactants = []
+
+        for product_smiles, reactant_smiles in zip(self.products_smiles, self.reactants_smiles):
+            try:
+                # Canonicalise/normalise SMILES
+                canonical_reactants = [self.canonicalise_smiles(smi) for smi in reactant_smiles]
+                canonical_products = [self.canonicalise_smiles(smi) for smi in product_smiles]
+            except ValueError as ve:
+                self._logger.error(str(ve))
+                continue
+
+            reactant_line = '.'.join(canonical_reactants).strip()
+            product_line = '.'.join(canonical_products).strip()
+            reaction_pair = (reactant_line, product_line)
+
+            if reaction_pair not in seen:
+                seen.add(reaction_pair)
+                unique_products.append(canonical_products)
+                unique_reactants.append(canonical_reactants)
+            else:
+                self._logger.debug(
+                    f"Duplicate within batch skipped: Reactant={reactant_line}, Product={product_line}")
+
+        self._logger.info(f"Deduplication completed. Unique reactions: {len(unique_products)}")
+
+        self.products_smiles = unique_products
+        self.reactants_smiles = unique_reactants
+
+    def _validate_smiles_datasets(self):
+        if not self.products_smiles or not self.reactants_smiles:
+            self._logger.error("Cannot remove duplicates from empty reaction dataset.")
             return None
 
-        logging.info("Starting in-memory deduplication.")
-        seen = set()
-        unique_x = []
-        unique_y = []
+        if not len(self.products_smiles) == len(self.reactants_smiles):
+            self._logger.error("Product SMILES and reaction SMILES datasets must be the same length.")
+            return
 
-        for x, y in zip(self.products_smiles, self.reactants_smiles):
-            pair = (tuple(y), tuple(x))  # Reactant, Product
-            if pair not in seen:
-                seen.add(pair)
-                unique_x.append(x)
-                unique_y.append(y)
-
-        logging.info(f"Deduplication completed. Unique reactions: {len(unique_x)}")
-
-        return unique_x, unique_y
-
-    @staticmethod
-    def remove_smiles_inorganic_fragments(smiles: str):
-        mol = Chem.MolFromSmiles(smiles)
-        if not mol:
-            return smiles
-
-        frags = Chem.GetMolFrags(mol, asMols=True)
-        if len(frags) == 1:
-            return Chem.MolToSmiles(frags[0])
-
-        main_frag = max(frags, key=lambda frag: frag.GetNumHeavyAtoms())
-
-        return Chem.MolToSmiles(main_frag, isomericSmiles=True)
-
-    @staticmethod
     def _process_batch(
+        self,
         batch: List[Tuple[str, str]],
         cursor: sqlite3.Cursor,
-        unique_x: List[List[str]],
-        unique_y: List[List[str]]
+        unique_products: List[List[str]],
+        unique_reactants: List[List[str]]
     ) -> None:
         """
         Process a batch of reaction pairs: insert into DB and append to unique lists if unique.
@@ -241,9 +276,9 @@ class SmilesDataPreprocessor:
             List of (reactant, product) pairs.
         cursor : sqlite3.Cursor
             SQLite cursor for executing database operations.
-        unique_x : List[List[str]]
+        unique_products : List[List[str]]
             List to append unique product SMILES.
-        unique_y : List[List[str]]
+        unique_reactants : List[List[str]]
             List to append unique reactant SMILES.
 
         Returns
@@ -257,9 +292,11 @@ class SmilesDataPreprocessor:
             )
             # All inserts were successful; append to unique lists
             for reactant_line, product_line in batch:
-                unique_y.append(reactant_line.split('.'))
-                unique_x.append(product_line.split('.'))
-        except sqlite3.IntegrityError:
+                unique_reactants.append(reactant_line.split('.'))
+                unique_products.append(product_line.split('.'))
+            self._logger.debug(f"Batch of {len(batch)} reactions inserted successfully.")
+        except sqlite3.IntegrityError as e:
+            self._logger.warning(f"IntegrityError encountered: {e}. Processing batch individually.")
             # Some inserts failed due to duplicates; handle individually
             for reactant_line, product_line in batch:
                 try:
@@ -268,12 +305,64 @@ class SmilesDataPreprocessor:
                         (reactant_line, product_line)
                     )
                     # Insert succeeded; append to unique lists
-                    unique_y.append(reactant_line.split('.'))
-                    unique_x.append(product_line.split('.'))
-                except sqlite3.IntegrityError:
+                    unique_reactants.append(reactant_line.split('.'))
+                    unique_products.append(product_line.split('.'))
+                    self._logger.debug(f"Inserted Reaction - Reactant: {reactant_line}, Product: {product_line}")
+                except sqlite3.IntegrityError as e:
                     # Duplicate pair; skip appending
-                    logging.debug(f"Duplicate pair skipped: Reactant={reactant_line}, Product={product_line}")
+                    self._logger.warning(f"IntegrityError encountered: {e}. Duplicate pair skipped: Reactant={reactant_line}, Product={product_line}")
                     continue
+
+    @staticmethod
+    def canonicalise_smiles(smiles: str) -> str:
+        """
+        Canonicalises SMILES strings using `rdkit.Chem.MolFromSmiles()`.
+
+        Correctly handles reactant SMILES separated by `.` by canonicalizing each separately
+        and reassembling them in the same order with a `.` separator.
+
+        Parameters
+        ----------
+        smiles : str
+            The single SMILES string or multiple `.`-separated SMILES strings to canonicalise.
+
+        Returns
+        -------
+        str
+            The single canonicalised SMILES string or multiple `.`-separated canonicalised SMILES strings.
+
+        Raises
+        ------
+        ValueError
+            If any of the SMILES components are invalid.
+        """
+        smiles_components = smiles.split('.')
+        canonical_components = []
+        for smiles in smiles_components:
+            mol = Chem.MolFromSmiles(smiles)
+            if mol is None:
+                raise ValueError(f"Invalid SMILES: {smiles}")
+            canonical_smiles = Chem.MolToSmiles(mol, canonical=True, isomericSmiles=True)
+            canonical_components.append(canonical_smiles)
+
+        # Reassemble the components in the same order, separated by '.'
+        canonical_smiles = '.'.join(canonical_components)
+
+        return canonical_smiles
+
+    @staticmethod
+    def remove_non_product_fragment_smiles(smiles: str):
+        mol = Chem.MolFromSmiles(smiles)
+        if not mol:
+            return smiles
+
+        frags = Chem.GetMolFrags(mol, asMols=True)
+        if len(frags) == 1:
+            return Chem.MolToSmiles(frags[0])
+
+        main_frag = max(frags, key=lambda frag: frag.GetNumHeavyAtoms())
+
+        return Chem.MolToSmiles(main_frag, canonical=True, isomericSmiles=True)
 
 
 class TokenizedSmilesPreprocessor:

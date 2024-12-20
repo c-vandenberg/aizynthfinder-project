@@ -1,5 +1,6 @@
 import os
 import logging
+import sqlite3
 
 from data.utils.preprocessing import SmilesDataPreprocessor
 from data.utils.open_reaction_database_extractor import OpenReactionDatabaseExtractor
@@ -15,12 +16,7 @@ def main():
     )
 
     logging.info("Extracting reactions from ORD dataset.")
-    smiles_preprocessor.reactants_smiles = []
-    smiles_preprocessor.products_smiles = []
-    for reactant_line, product_line in ord_extractor.extract_all_reactions():
-        reactant_smiles = reactant_line.split('.') if reactant_line else []
-        product_smiles = product_line.split('.') if product_line else []
-
+    for reactant_smiles, product_smiles in ord_extractor.extract_all_reactions():
         smiles_preprocessor.reactants_smiles.append(reactant_smiles)
         smiles_preprocessor.products_smiles.append(product_smiles)
 
@@ -28,8 +24,8 @@ def main():
 
     smiles_preprocessor.remove_duplicate_product_reactant_pairs(
         db_path=os.environ.get('SQLITE_DB_PATH'),
-        batch_size=10000,
-        log_interval=100000
+        batch_size=1000,
+        log_interval=100
     )
 
     logging.info(f"Total unique reactants after deduplication: {len(smiles_preprocessor.reactants_smiles)}")
@@ -51,6 +47,18 @@ def main():
 
     print(f'Reactant SMILES Length: {len(reactant_smiles_list)}')
     print(f'Product SMILES Length: {len(product_smiles_list)}')
+
+    db_unique_count = get_unique_count(os.environ.get('SQLITE_DB_PATH'))
+
+    print(f'Sqlite3 Database Unique Count : {db_unique_count}')
+
+def get_unique_count(db_path: str = 'seen_pairs.db') -> int:
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM pairs")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
 
 if __name__ == "__main__":
     main()
