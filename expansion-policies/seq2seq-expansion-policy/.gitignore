@@ -111,7 +111,7 @@ cython_debug/
 /data/database/
 
 # Logs Directory
-/logs/
+/var/log/
 
 # # AiZynthFinder stock and trained model files
 *.h5

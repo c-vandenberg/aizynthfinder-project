@@ -2,7 +2,7 @@
 
 import os
 import pydevd_pycharm
-import logging
+import argparse
 
 import tensorflow as tf
 
@@ -18,16 +18,28 @@ tf.config.run_functions_eagerly(True)
 tf.config.threading.set_intra_op_parallelism_threads(1)
 tf.config.threading.set_inter_op_parallelism_threads(1)
 
-def main():
-    logging.basicConfig(level=logging.INFO)
+def parse_arguments():
+    """
+    Parses command-line arguments.
 
-    # Path to the configuration file
-    config_path = 'config/training/model_v23_config.yml'
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Train seq2seq model via configuration file.")
+    parser.add_argument('--training_config_file_path', type=str, required=True, help='Path to training configuration file.')
+    return parser.parse_args()
+
+def main():
+    # Parse command-line arguments
+    args = parse_arguments()
+
+    training_config_file_path: str = args.training_config_file_path
 
     # Initialize the Trainer with the configuration
-    trainer = Trainer(config_path=config_path)
+    trainer = Trainer(config_path=training_config_file_path)
 
     # Run the training pipeline
     trainer.run()
+
 if __name__ == "__main__":
     main()

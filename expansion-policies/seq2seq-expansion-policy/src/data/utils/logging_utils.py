@@ -8,8 +8,6 @@ from tensorflow.summary import SummaryWriter
 from metrics.bleu_score import BleuScore
 from metrics.smiles_string_metrics import SmilesStringMetrics
 
-logger = logging.getLogger(__name__)
-
 CORE_LOG_METRICS_KEY_MAPPING: Dict[str, str] = {
     'loss': 'Training Loss',
     'accuracy': 'Training Accuracy',
@@ -19,6 +17,35 @@ CORE_LOG_METRICS_KEY_MAPPING: Dict[str, str] = {
     'val_perplexity': 'Validation Perplexity',
 }
 
+def configure_logger(log_path: str) -> logging.Logger:
+    """
+    Configures and returns a module-specific logger.
+
+    Returns:
+        logging.Logger: Configured logger.
+    """
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    # Prevent adding multiple handlers if the logger already has handlers
+    if not logger.handlers:
+        # Console handler for level INFO and above
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_formatter = logging.Formatter('%(levelname)s - %(message)s')
+        console_handler.setFormatter(console_formatter)
+
+        # File handler for level DEBUG and above
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setLevel(logging.DEBUG)
+        file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(file_formatter)
+
+        # Add handlers to the logger
+        logger.addHandler(console_handler)
+        logger.addHandler(file_handler)
+
+    return logger
 
 def extract_core_log_metrics(logs: Optional[Dict[str, float]]) -> Dict[str, float]:
     """
@@ -148,15 +175,18 @@ def log_metrics(
         f.write(f"{separator}\n\n\n")
 
 def print_metrics(
+    logger: logging.Logger,
     metrics: Dict[str, float],
-    epoch: Optional[int] = None
+    epoch: Optional[int] = None,
 ) -> None:
     """
     Prints metrics to the console.
 
     Parameters
     ----------
-    metrics : dict of str to float
+    logger : logging.Logger
+        Instance of Python core logger.
+    metrics : Dict[str, float]
         A dictionary containing metric names and their corresponding values.
     epoch : int, optional
         The current epoch number. If provided, it will be included in the printed output.
@@ -223,6 +253,7 @@ def log_sample_predictions(
         f.write("\n\n")
 
 def print_sample_predictions(
+    logger: logging.Logger,
     target_smiles: List[str],
     predicted_smiles: List[str],
     num_samples: int = 5,
@@ -233,6 +264,8 @@ def print_sample_predictions(
 
     Parameters
     ----------
+    logger : logging.Logger
+        Instance of Python core logger.
     target_smiles : list of str
         The list of target SMILES strings.
     predicted_smiles : list of str

@@ -1,6 +1,5 @@
 import os
 import json
-import logging
 from typing import Dict, Any, List, Tuple, Union, Callable, Optional
 
 import yaml
@@ -14,6 +13,7 @@ from tensorflow.keras.callbacks import (
 )
 from tensorflow.train import Checkpoint, CheckpointManager
 
+from data.utils.logging_utils import configure_logger
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.validation_metrics import ValidationMetricsCallback
@@ -61,7 +61,7 @@ class Trainer:
         self.metrics: Optional[List[str]] = None
         self.callbacks: Optional[List[Callback]] = None
 
-        self._logger = logging.getLogger(__name__)
+        self._logger = configure_logger(self.config.get('data', {}).get('logger_path', 'var/log/default_logs.log'))
 
         self.initialize_components()
 

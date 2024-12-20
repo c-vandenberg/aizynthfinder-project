@@ -58,6 +58,7 @@ data:
   products_valid_file: 'data/raw/liu-et-al/validation_products_smiles'
   reactants_valid_file: 'data/raw/liu-et-al/validation_reactants_smiles'
   tokenizer_save_path: 'data/training/liu-et-al/model-v28/tokenizer/model_v28_tokenizer.json'
+  logger_path: 'var/log/liu-et-al/model-v28/model-v28.log'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
