@@ -74,23 +74,14 @@ def main():
     # Parse command-line arguments, validate paths and configure logger
     args = parse_arguments()
 
-    concat_reactants_output_path: str = args.concat_reactants_output_path
-    concat_products_output_path: str = args.concat_products_output_path
-    reactants_a_file_path: str = args.reactants_a_filepath
-    products_a_file_path: str = args.products_a_filepath
-    reactants_b_file_path: str = args.reactants_b_filepath
-    products_b_file_path: str = args.products_b_filepath
-    sqlite3_db_path: str = args.sqlite3_db_path
-    log_path: str = args.script_log_path
-
-    os.makedirs(os.path.dirname(log_path), exist_ok=True)
-    logger = configure_logger(log_path=log_path)
+    os.makedirs(os.path.dirname(args.script_log_path), exist_ok=True)
+    logger = configure_logger(log_path=args.script_log_path)
 
     file_paths: List = [
-        reactants_a_file_path,
-        products_a_file_path,
-        reactants_b_file_path,
-        products_b_file_path
+        args.reactants_a_filepath,
+        args.products_a_filepath,
+        args.reactants_b_filepath,
+        args.products_b_filepath
     ]
 
     for file_path in file_paths:
@@ -98,22 +89,22 @@ def main():
             logger.error(f"SMILES dataset file directory does not exist: {file_path}")
             return
 
-    os.makedirs(os.path.dirname(concat_reactants_output_path), exist_ok=True)
-    os.makedirs(os.path.dirname(concat_products_output_path), exist_ok=True)
-    os.makedirs(os.path.dirname(sqlite3_db_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.concat_reactants_output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.concat_products_output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.sqlite3_db_path), exist_ok=True)
 
     reactants_smiles_a: List[List[str]] = [
-        reactant.split('.') for reactant in load_smiles_from_file(reactants_a_file_path)
+        reactant.split('.') for reactant in load_smiles_from_file(args.reactants_a_filepath)
     ]
     products_smiles_a: List[List[str]] = [
-        product.split('.') for product in load_smiles_from_file(products_a_file_path)
+        product.split('.') for product in load_smiles_from_file(args.products_a_filepath)
     ]
 
     reactants_smiles_b: List[List[str]] = [
-        reactant.split('.') for reactant in load_smiles_from_file(reactants_b_file_path)
+        reactant.split('.') for reactant in load_smiles_from_file(args.reactants_b_filepath)
     ]
     products_smiles_b: List[List[str]] = [
-        product.split('.') for product in load_smiles_from_file(products_b_file_path)
+        product.split('.') for product in load_smiles_from_file(args.products_b_filepath)
     ]
 
     # Initialise SMILES preprocessor
@@ -142,7 +133,7 @@ def main():
     # Remove duplicate reactions
     try:
         smiles_preprocessor.remove_duplicate_product_reactant_pairs(
-            db_path=sqlite3_db_path,
+            db_path=args.sqlite3_db_path,
             batch_size=100000,
             log_interval=100000
         )
@@ -157,8 +148,8 @@ def main():
     # Write unique reactions to files
     try:
         smiles_preprocessor.write_reactions_to_files(
-            reactants_smiles_path=concat_reactants_output_path,
-            products_smiles_path=concat_products_output_path
+            reactants_smiles_path=args.concat_reactants_output_path,
+            products_smiles_path=args.concat_products_output_path
         )
         logger.debug("Unique reactions written to files.")
     except Exception as e:
@@ -167,7 +158,7 @@ def main():
 
     # Get number of unique reactions in database
     try:
-        db_unique_count = get_unique_count(sqlite3_db_path)
+        db_unique_count = get_unique_count(args.sqlite3_db_path)
         logger.info(f"SQLite3 Database Unique Count: {db_unique_count}")
     except Exception as e:
         logger.exception(f"An error occurred while fetching unique count from the database: {e}")

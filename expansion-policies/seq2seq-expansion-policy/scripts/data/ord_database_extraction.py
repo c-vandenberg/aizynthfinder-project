@@ -55,22 +55,16 @@ def main():
     # Parse command-line arguments, validate paths and configure logger
     args = parse_arguments()
 
-    ord_data_dir: str = args.ord_data_dir
-    reactants_output_path: str = args.reactants_output_path
-    products_output_path: str = args.products_output_path
-    sqlite3_db_path: str = args.sqlite3_db_path
-    ord_log_path: str = args.script_log_path
+    os.makedirs(os.path.dirname(args.script_log_path), exist_ok=True)
+    logger = configure_logger(log_path=args.script_log_path)
 
-    os.makedirs(os.path.dirname(ord_log_path), exist_ok=True)
-    logger = configure_logger(log_path=ord_log_path)
-
-    if not os.path.isdir(ord_data_dir):
-        logger.error(f"ORD data directory does not exist: {ord_data_dir}")
+    if not os.path.isdir(args.ord_data_dir):
+        logger.error(f"ORD data directory does not exist: {args.ord_data_dir}")
         return
 
-    os.makedirs(os.path.dirname(reactants_output_path), exist_ok=True)
-    os.makedirs(os.path.dirname(products_output_path), exist_ok=True)
-    os.makedirs(os.path.dirname(sqlite3_db_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.reactants_output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.products_output_path), exist_ok=True)
+    os.makedirs(os.path.dirname(args.sqlite3_db_path), exist_ok=True)
 
     # Initialise SMILES preprocessor
     try:
@@ -83,7 +77,7 @@ def main():
     # Initialize ORD reaction extractor
     try:
         ord_extractor = OpenReactionDatabaseExtractor(
-            ord_data_dir=ord_data_dir,
+            ord_data_dir=args.ord_data_dir,
             smiles_preprocessor=smiles_preprocessor
         )
         logger.debug("Initialised OpenReactionDatabaseExtractor.")
@@ -107,7 +101,7 @@ def main():
     # Remove duplicate reactions
     try:
         smiles_preprocessor.remove_duplicate_product_reactant_pairs(
-            db_path=sqlite3_db_path
+            db_path=args.sqlite3_db_path
         )
         logger.debug("Deduplication process completed.")
     except Exception as e:
@@ -120,8 +114,8 @@ def main():
     # Write unique reactions to files
     try:
         smiles_preprocessor.write_reactions_to_files(
-            reactants_smiles_path=reactants_output_path,
-            products_smiles_path=products_output_path
+            reactants_smiles_path=args.reactants_output_path,
+            products_smiles_path=args.products_output_path
         )
         logger.debug("Unique reactions written to files.")
     except Exception as e:
@@ -130,7 +124,7 @@ def main():
 
     # Get number of unique reactions in database
     try:
-        db_unique_count = get_unique_count(sqlite3_db_path)
+        db_unique_count = get_unique_count(args.sqlite3_db_path)
         logger.info(f"SQLite3 Database Unique Count: {db_unique_count}")
     except Exception as e:
         logger.exception(f"An error occurred while fetching unique count from the database: {e}")

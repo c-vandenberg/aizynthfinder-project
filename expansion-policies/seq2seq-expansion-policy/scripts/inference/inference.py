@@ -38,18 +38,14 @@ def main():
     # Parse command-line arguments
     args = parse_arguments()
 
-    target_smiles: str = args.product_smiles
-    inference_config_file_path: str = args.inference_config_file_path
-    expansion_policy: str = args.expansion_policy
-
     # Configure AiZynthFinder logger
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger("aizynthfinder")
     logger.setLevel(logging.DEBUG)
 
-    finder = AiZynthFinder(configfile=inference_config_file_path)
-    finder.expansion_policy.select(expansion_policy)
-    finder.target_smiles = target_smiles
+    finder = AiZynthFinder(configfile=args.inference_config_file_path)
+    finder.expansion_policy.select(args.expansion_policy)
+    finder.target_smiles = args.product_smiles
 
     # Prepare the search tree
     finder.prepare_tree()

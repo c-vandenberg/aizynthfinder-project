@@ -39,10 +39,8 @@ def main():
     # Parse command-line arguments
     args = parse_arguments()
 
-    training_config_file_path: str = args.training_config_file_path
-
     # Initialize the Trainer with the configuration
-    trainer = Trainer(config_path=training_config_file_path)
+    trainer = Trainer(config_path=args.training_config_file_path)
 
     # Run the training pipeline
     trainer.run()
