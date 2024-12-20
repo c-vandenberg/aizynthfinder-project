@@ -1,8 +1,8 @@
 expansion:
   seq2seq_policy:
     type: policy.seq2seq_expansion_strategy.Seq2SeqExpansionStrategy
-    model: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/training/liu-et-al/model-v27/model/keras/seq2seq_model.keras
-    tokenizer: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/training/liu-et-al/model-v27/tokenizer/model_v27_tokenizer.json
+    model: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/training/concatenated-smiles/model-v29/model/keras/seq2seq_model.keras
+    tokenizer: /home/chris-vdb/Computational-Chemistry/aizynthfinder-project/expansion-policies/seq2seq-expansion-policy/data/training/concatenated-smiles/model-v29/tokenizer/model_v29_tokenizer.json
     max_encoder_seq_length: 140
     max_decoder_seq_length: 140
     beam_width: 5

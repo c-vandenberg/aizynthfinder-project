@@ -2,7 +2,7 @@
 # -
 #
 # Training run metrics:
-#   - Epochs: 10
+#   - Epochs: 100
 #
 #   - Train Loss (Smoothed):
 #   - Train Accuracy (Smoothed):

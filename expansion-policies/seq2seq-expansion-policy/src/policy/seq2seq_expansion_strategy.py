@@ -8,7 +8,7 @@ from aizynthfinder.chem.reaction import RetroReaction
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import List, Optional, Sequence, Tuple
 
-from data.utils.tokenization import SmilesTokeniser
+from data.utils.tokenisation import SmilesTokeniser
 from data.utils.preprocessing import TokenisedSmilesPreprocessor
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder

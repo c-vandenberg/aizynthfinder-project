@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from trainers.trainer import Trainer
 
-pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True, suspend=False)
+# pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
@@ -27,7 +27,7 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(description="Train seq2seq model via configuration file.")
     parser.add_argument(
-        '--training_config_file_path',
+        '--training_config_filepath',
         type=str,
         required=True,
         help='Path to training configuration file.'
@@ -40,7 +40,7 @@ def main():
     args = parse_arguments()
 
     # Initialize the Trainer with the configuration
-    trainer = Trainer(config_path=args.training_config_file_path)
+    trainer = Trainer(config_path=args.training_config_filepath)
 
     # Run the training pipeline
     trainer.run()

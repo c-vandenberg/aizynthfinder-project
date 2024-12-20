@@ -1,11 +1,12 @@
 import os
+import logging
 from typing import Iterable, Optional, Union, Tuple, List, Dict, Any
 
 import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
 from tensorflow.summary import SummaryWriter
 
-from data.utils.logging import (extract_core_log_metrics, compute_metrics,
+from data.utils.logging_utils import (extract_core_log_metrics, compute_metrics,
                                 log_metrics, print_metrics, log_sample_predictions,
                                 print_sample_predictions, log_to_tensorboard)
 
@@ -44,6 +45,7 @@ class ValidationMetricsCallback(Callback):
         validation_data: Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]],
         validation_metrics_dir: str,
         tensorboard_dir: str,
+        logger: logging.Logger,
         max_length: int = 140
     ) -> None:
         super(ValidationMetricsCallback, self).__init__()
@@ -51,6 +53,7 @@ class ValidationMetricsCallback(Callback):
         self.validation_data = validation_data
         self.validation_metrics_dir = validation_metrics_dir
         self.tensorboard_dir = tensorboard_dir
+        self.logger = logger
         self.max_length = max_length
 
         os.makedirs(self.tensorboard_dir, exist_ok=True)
@@ -114,8 +117,8 @@ class ValidationMetricsCallback(Callback):
             file_writer=self.file_writer
         )
 
-    @staticmethod
     def validation(
+        self,
         logs: Union[Dict, None],
         epoch: int,
         references,
@@ -172,14 +175,14 @@ class ValidationMetricsCallback(Callback):
         metrics.update(custom_metrics)
 
         log_metrics(metrics=metrics, directory=validation_metrics_dir, epoch=epoch)
-        print_metrics(metrics=metrics, epoch=epoch)
+        print_metrics(logger=self.logger, metrics=metrics, epoch=epoch)
         log_sample_predictions(
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
             directory=validation_metrics_dir,
             epoch=epoch,
         )
-        print_sample_predictions(target_smiles=target_smiles, predicted_smiles=predicted_smiles)
+        print_sample_predictions(logger=self.logger, target_smiles=target_smiles, predicted_smiles=predicted_smiles)
 
         if tensorboard_dir and file_writer:
             log_to_tensorboard(file_writer, metrics, epoch)

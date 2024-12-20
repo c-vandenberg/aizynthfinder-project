@@ -20,9 +20,9 @@ from callbacks.validation_metrics import ValidationMetricsCallback
 from callbacks.gradient_monitoring import GradientMonitoringCallback
 from metrics.perplexity import Perplexity
 from data.utils.data_loader import DataLoader
-from data.utils.tokenization import SmilesTokeniser
+from data.utils.tokenisation import SmilesTokeniser
 from data.utils.preprocessing import TokenisedSmilesPreprocessor
-from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
+from data.utils.logging_utils import (compute_metrics, log_metrics, print_metrics,
                                 log_sample_predictions, print_sample_predictions)
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from models.utils import Seq2SeqModelUtils
@@ -61,6 +61,10 @@ class Trainer:
         self.metrics: Optional[List[str]] = None
         self.callbacks: Optional[List[Callback]] = None
 
+        os.makedirs(os.path.dirname(
+            self.config.get('data', {}).get('logger_path', 'var/log/default_logs.log')),
+            exist_ok=True
+        )
         self._logger = configure_logger(self.config.get('data', {}).get('logger_path', 'var/log/default_logs.log'))
 
         self.initialize_components()
@@ -118,13 +122,12 @@ class Trainer:
         self.data_loader = DataLoader(
             products_file=data_conf.get('products_file', ''),
             reactants_file=data_conf.get('reactants_file', ''),
-            products_valid_file=data_conf.get('products_valid_file', ''),
-            reactants_valid_file=data_conf.get('reactants_valid_file', ''),
+            test_split=data_conf.get('test_split', 0.1),
+            validation_split=data_conf.get('validation_split', 0.1),
             num_samples=train_conf.get('num_samples'),
             max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
-            test_size=data_conf.get('test_size', 0.3),
             random_state=data_conf.get('random_state', 42),
             reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True)
         )
@@ -322,6 +325,7 @@ class Trainer:
             validation_data=self.data_loader.get_valid_dataset(),
             validation_metrics_dir=valid_metrics_dir,
             tensorboard_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
+            logger=self._logger,
             max_length=self.data_loader.max_decoder_seq_length
         )
 
@@ -466,7 +470,7 @@ class Trainer:
             separator='-' * 40
         )
 
-        print_metrics(metrics=metrics)
+        print_metrics(logger=self._logger, metrics=metrics)
 
         log_sample_predictions(
             target_smiles=target_smiles,
@@ -478,6 +482,7 @@ class Trainer:
         )
 
         print_sample_predictions(
+            logger=self._logger,
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
             num_samples=5,

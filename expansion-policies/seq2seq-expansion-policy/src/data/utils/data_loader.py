@@ -1,4 +1,3 @@
-import os
 from typing import List, Tuple, Optional
 
 import tensorflow as tf
@@ -13,6 +12,8 @@ class DataLoader:
     """
     Responsible for loading, preprocessing, and managing datasets for training, validation,
     and testing of SMILES-based Retrosynthesis models.
+
+    N.B. The sum of `train_split`, `test_split`, and `validation_split` must equal 1.
 
     Methods
     -------
@@ -43,8 +44,8 @@ class DataLoader:
         self,
         products_file: str,
         reactants_file: str,
-        products_valid_file: str,
-        reactants_valid_file: str,
+        test_split: float,
+        validation_split: float,
         num_samples: Optional[int] = None,
         max_encoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
         max_decoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
@@ -56,8 +57,8 @@ class DataLoader:
     ) -> None:
         self.products_file = products_file
         self.reactants_file = reactants_file
-        self.products_valid_file = products_valid_file
-        self.reactants_valid_file = reactants_valid_file
+        self.test_split = test_split
+        self.validation_split = validation_split
         self.num_samples = num_samples
         self.max_encoder_seq_length = max_encoder_seq_length
         self.max_decoder_seq_length = max_decoder_seq_length
@@ -65,6 +66,14 @@ class DataLoader:
         self.buffer_size = buffer_size
         self.test_size = test_size
         self.random_state = random_state
+
+        total_split = self.test_split + self.validation_split
+        if not (0 < self.test_split < 1 and 0 < self.validation_split < 1):
+            raise ValueError("test_split and validation_split must be between 0 and 1.")
+        if not (0 < total_split < 1):
+            raise ValueError("The sum of test_split and validation_split must be between 0 and 1.")
+
+        self.train_split = 1.0 - total_split
 
         self._smiles_tokeniser = SmilesTokeniser(
             reverse_input_sequence=reverse_input_sequence
@@ -140,21 +149,15 @@ class DataLoader:
         """
         self.products_x_dataset: List[str] = load_smiles_from_file(self.products_file)
         self.reactants_y_dataset: List[str] = load_smiles_from_file(self.reactants_file)
-        self.products_x_valid_dataset: List[str] = load_smiles_from_file(self.products_valid_file)
-        self.reactants_y_valid_dataset: List[str] = load_smiles_from_file(self.reactants_valid_file)
 
         # Ensure datasets have the same length
         if len(self.products_x_dataset) != len(self.reactants_y_dataset):
             raise ValueError("Mismatch in dataset lengths.")
-        if len(self.products_x_valid_dataset) != len(self.reactants_y_valid_dataset):
-            raise ValueError("Mismatch in validation dataset lengths.")
 
         # Limit the number of samples if specified
         if self.num_samples is not None:
             self.products_x_dataset = self.products_x_dataset[:self.num_samples]
             self.reactants_y_dataset = self.reactants_y_dataset[:self.num_samples]
-            self.products_x_valid_dataset = self.products_x_valid_dataset[:self.num_samples]
-            self.reactants_y_valid_dataset = self.reactants_y_valid_dataset[:self.num_samples]
 
         # Canonicalise SMILES strings
         smiles_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor()
@@ -163,12 +166,6 @@ class DataLoader:
         ]
         self.reactants_y_dataset = [
             smiles_preprocessor.canonicalise_smiles(smi) for smi in self.reactants_y_dataset
-        ]
-        self.products_x_valid_dataset = [
-            smiles_preprocessor.canonicalise_smiles(smi) for smi in self.products_x_valid_dataset
-        ]
-        self.reactants_y_valid_dataset = [
-            smiles_preprocessor.canonicalise_smiles(smi) for smi in self.reactants_y_valid_dataset
         ]
 
     def _tokenise_datasets(self) -> None:
@@ -189,22 +186,13 @@ class DataLoader:
             is_input_sequence=False
         )
 
-        self.tokenised_products_x_valid_dataset = self.smiles_tokeniser.tokenise_list(
-            self.products_x_valid_dataset,
-            is_input_sequence=True
-        )
-        self.tokenised_reactants_y_valid_dataset = self.smiles_tokeniser.tokenise_list(
-            self.reactants_y_valid_dataset,
-            is_input_sequence=False
-        )
-
     def _split_datasets(self) -> None:
         """
-        Splits the datasets into training and test sets.
+        Splits the datasets into training, testing, and validation sets.
 
         Utilises scikit-learn's `train_test_split()` method to partition the tokenised
-        product and reactant datasets into training and testing subsets based on
-        the specified test size and random state. Adapts the tokeniser only on
+        product and reactant datasets into training, testing, and validation subsets based on
+        the specified split ratios and random state. Adapts the tokeniser only on
         the training data to prevent data leakage.
 
         Returns
@@ -216,14 +204,30 @@ class DataLoader:
         ValueError
             If the tokenised datasets are empty or invalid.
         """
-        (self.tokenised_products_x_train_data, self.tokenised_products_x_test_data,
-         self.tokenised_reactants_y_train_data, self.tokenised_reactants_y_test_data) = train_test_split(
+        # First split: Train vs Temp (Test + Validation)
+        (self.tokenised_products_x_train_data, self.tokenised_products_x_temp_data,
+         self.tokenised_reactants_y_train_data, self.tokenised_reactants_y_temp_data) = train_test_split(
             self.tokenised_products_x_dataset,
             self.tokenised_reactants_y_dataset,
-            test_size=self.test_size,
-            random_state=self.random_state
+            test_size=(self.test_split + self.validation_split),
+            random_state=self.random_state,
+            shuffle=True
         )
 
+        # Calculate the proportion of validation split relative to the temp data
+        validation_ratio = self.validation_split / (self.test_split + self.validation_split)
+
+        # Second split: Validation vs Test from Temp
+        (self.tokenised_products_x_valid_data, self.tokenised_products_x_test_data,
+         self.tokenised_reactants_y_valid_data, self.tokenised_reactants_y_test_data) = train_test_split(
+            self.tokenised_products_x_temp_data,
+            self.tokenised_reactants_y_temp_data,
+            test_size=(1-validation_ratio),
+            random_state=self.random_state,
+            shuffle=True
+        )
+
+        # Adapt the tokeniser on the training data only
         combined_tokenised_train_data = self.tokenised_products_x_train_data + self.tokenised_reactants_y_train_data
         self.smiles_tokeniser.adapt(combined_tokenised_train_data)
 
@@ -263,8 +267,8 @@ class DataLoader:
 
         # Preprocess validation data
         self.valid_data = self._preprocess_data_pair(
-            self.tokenised_products_x_valid_dataset,
-            self.tokenised_reactants_y_valid_dataset
+            self.tokenised_products_x_valid_data,
+            self.tokenised_reactants_y_valid_data
         )
 
     def _preprocess_data_pair(
