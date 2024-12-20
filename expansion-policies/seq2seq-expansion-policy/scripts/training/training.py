@@ -26,7 +26,13 @@ def parse_arguments():
         argparse.Namespace: Parsed arguments.
     """
     parser = argparse.ArgumentParser(description="Train seq2seq model via configuration file.")
-    parser.add_argument('--training_config_file_path', type=str, required=True, help='Path to training configuration file.')
+    parser.add_argument(
+        '--training_config_file_path',
+        type=str,
+        required=True,
+        help='Path to training configuration file.'
+    )
+
     return parser.parse_args()
 
 def main():

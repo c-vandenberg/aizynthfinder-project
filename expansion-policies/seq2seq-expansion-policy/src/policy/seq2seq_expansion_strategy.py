@@ -8,8 +8,8 @@ from aizynthfinder.chem.reaction import RetroReaction
 from aizynthfinder.context.config import Configuration
 from aizynthfinder.utils.type_utils import List, Optional, Sequence, Tuple
 
-from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import TokenizedSmilesPreprocessor
+from data.utils.tokenization import SmilesTokeniser
+from data.utils.preprocessing import TokenisedSmilesPreprocessor
 from models.seq2seq import RetrosynthesisSeq2SeqModel
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
@@ -44,7 +44,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
     ----------
     model : RetrosynthesisSeq2SeqModel
         The loaded Seq2Seq model for prediction.
-    smiles_tokenizer : SmilesTokenizer
+    smiles_tokenizer : SmilesTokeniser
         The tokenizer used for encoding and decoding SMILES strings.
     max_encoder_seq_length : int
         Maximum sequence length for the encoder.
@@ -116,7 +116,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             raise
         return model
 
-    def load_tokenizer(self, tokenizer_path: str) -> SmilesTokenizer:
+    def load_tokenizer(self, tokenizer_path: str) -> SmilesTokeniser:
         """
         Loads the SMILES tokenizer from the specified path.
 
@@ -127,11 +127,11 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         Returns
         -------
-        SmilesTokenizer
+        SmilesTokeniser
             The loaded SMILES tokenizer.
         """
         self._logger.info(f"Loading tokenizer from {tokenizer_path}")
-        tokenizer: SmilesTokenizer = SmilesTokenizer.from_json(tokenizer_path)
+        tokenizer: SmilesTokeniser = SmilesTokeniser.from_json(tokenizer_path)
         self._logger.info("Tokenizer loaded successfully.")
 
         return tokenizer
@@ -209,12 +209,12 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         This method uses beam search decoding to generate multiple predictions per molecule.
         It also filters out invalid SMILES strings from the predictions.
         """
-        tokenized_smiles_list = self.smiles_tokenizer.tokenize_list(
+        tokenized_smiles_list = self.smiles_tokenizer.tokenise_list(
             smiles_list,
             is_input_sequence=True
         )
 
-        encoder_data_preprocessor = TokenizedSmilesPreprocessor(
+        encoder_data_preprocessor = TokenisedSmilesPreprocessor(
             smiles_tokenizer=self.smiles_tokenizer,
             max_seq_length=self.max_encoder_seq_length
         )

@@ -7,15 +7,15 @@ import tensorflow as tf
 from rdkit import Chem
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-from data.utils.tokenization import SmilesTokenizer
+from data.utils.tokenisation import SmilesTokeniser
 
-logging.basicConfig(level=logging.INFO)
 
 class SmilesDataPreprocessor:
     def __init__(
         self,
         products_smiles: Optional[List[List[str]]] = None,
         reactants_smiles: Optional[List[List[str]]] = None,
+        logger: Optional[logging.Logger] = None
     ):
         """
         Initialize the SmilesDataPreprocessor with product and reactant SMILES lists.
@@ -32,7 +32,7 @@ class SmilesDataPreprocessor:
         self.products_smiles: List[List[str]] = products_smiles if products_smiles is not None else []
         self.reactants_smiles: List[List[str]] = reactants_smiles if reactants_smiles is not None else []
 
-        self._logger = logging.getLogger(__name__)
+        self._logger = logger if logger else logging.getLogger(__name__)
 
     def concatenate_datasets(
         self,
@@ -119,7 +119,7 @@ class SmilesDataPreprocessor:
         self,
         db_path: str = 'seen_pairs.db',
         batch_size: int = 10000,
-        log_interval: int = 100000
+        log_interval: int = 10000
     )-> None:
         """
         Remove duplicate (reactant, product) pairs using SQLite and return unique datasets.
@@ -336,7 +336,7 @@ class SmilesDataPreprocessor:
         return Chem.MolToSmiles(main_frag, canonical=True, isomericSmiles=True)
 
 
-class TokenizedSmilesPreprocessor:
+class TokenisedSmilesPreprocessor:
     """
     Preprocesses tokenized SMILES strings into padded sequences of integers for model training and evaluation.
 
@@ -345,7 +345,7 @@ class TokenizedSmilesPreprocessor:
 
     Attributes
     ----------
-    smiles_tokenizer : SmilesTokenizer
+    smiles_tokenizer : SmilesTokeniser
         The tokenizer used for converting SMILES strings to integer sequences.
     max_seq_length : int
         The maximum sequence length for padding sequences.
@@ -357,10 +357,10 @@ class TokenizedSmilesPreprocessor:
     """
     def __init__(
         self,
-        smiles_tokenizer: SmilesTokenizer,
+        smiles_tokenizer: SmilesTokeniser,
         max_seq_length: int
     ) -> None:
-        if not isinstance(smiles_tokenizer, SmilesTokenizer):
+        if not isinstance(smiles_tokenizer, SmilesTokeniser):
             raise TypeError("smiles_tokenizer must be an instance of SmilesTokenizer.")
         if not isinstance(max_seq_length, int) or max_seq_length <= 0:
             raise ValueError("max_seq_length must be a positive integer.")

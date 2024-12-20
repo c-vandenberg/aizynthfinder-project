@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense
 
-from data.utils.preprocessing import SmilesTokenizer
+from data.utils.preprocessing import SmilesTokeniser
 from encoders.lstm_encoders import StackedBidirectionalLSTMEncoder
 from decoders.lstm_decoders import StackedLSTMDecoder
 from inference.beam_search_decoder import BeamSearchDecoder
@@ -44,7 +44,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         Dense layer to map encoder hidden state to decoder initial hidden state.
     enc_state_c : Dense
         Dense layer to map encoder cell state to decoder initial cell state.
-    smiles_tokenizer : Optional[SmilesTokenizer]
+    smiles_tokenizer : Optional[SmilesTokeniser]
         Data preprocessor for the encoder and decoder inputs.
     dropout_rate : float
         Dropout rate for regularization.
@@ -114,7 +114,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
         # Smiles tokenizer to be set externally
-        self.smiles_tokenizer: Optional[SmilesTokenizer] = None
+        self.smiles_tokenizer: Optional[SmilesTokeniser] = None
 
         self.dropout_rate = dropout_rate
         self.weight_decay = weight_decay

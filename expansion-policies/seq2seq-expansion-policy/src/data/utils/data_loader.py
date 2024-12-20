@@ -2,11 +2,11 @@ import os
 from typing import List, Tuple, Optional
 
 import tensorflow as tf
-from rdkit import Chem
 from sklearn.model_selection import train_test_split
 
-from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import TokenizedSmilesPreprocessor, SmilesDataPreprocessor
+from data.utils.tokenisation import SmilesTokeniser
+from data.utils.preprocessing import TokenisedSmilesPreprocessor, SmilesDataPreprocessor
+from data.utils.file_utils import load_smiles_from_file
 
 
 class DataLoader:
@@ -17,9 +17,9 @@ class DataLoader:
     Methods
     -------
     vocab_size
-        Returns the size of the tokenizer's vocabulary.
-    smiles_tokenizer
-        Returns the SMILES tokenizer instance.
+        Returns the size of the tokeniser's vocabulary.
+    smiles_tokeniser
+        Returns the SMILES tokeniser instance.
     load_and_prepare_data()
         Loads and preprocesses the datasets.
     get_dataset(data, training=True)
@@ -66,7 +66,7 @@ class DataLoader:
         self.test_size = test_size
         self.random_state = random_state
 
-        self._smiles_tokenizer = SmilesTokenizer(
+        self._smiles_tokeniser = SmilesTokeniser(
             reverse_input_sequence=reverse_input_sequence
         )
 
@@ -80,34 +80,34 @@ class DataLoader:
     @property
     def vocab_size(self) -> int:
         """
-        Returns the size of the tokenizer's vocabulary.
+        Returns the size of the tokeniser's vocabulary.
 
         Returns
         -------
         int
             Vocabulary size.
         """
-        return self.smiles_tokenizer.vocab_size
+        return self.smiles_tokeniser.vocab_size
 
     @property
-    def smiles_tokenizer(self) -> 'SmilesTokenizer':
+    def smiles_tokeniser(self) -> 'SmilesTokeniser':
         """
-        Returns the SMILES tokenizer instance.
+        Returns the SMILES tokeniser instance.
 
         Returns
         -------
-        SmilesTokenizer
-            The SMILES tokenizer used for tokenizing SMILES strings.
+        SmilesTokeniser
+            The SMILES tokeniser used for tokenising SMILES strings.
         """
-        return self._smiles_tokenizer
+        return self._smiles_tokeniser
 
     def load_and_prepare_data(self) -> None:
         """
-        Loads datasets from files, tokenizes them, splits into training and
+        Loads datasets from files, tokenises them, splits into training and
         test sets, and preprocesses the data for model consumption.
 
         This method orchestrates the entire data preparation pipeline, including
-        loading raw SMILES strings, tokenizing, splitting into training/testing
+        loading raw SMILES strings, tokenising, splitting into training/testing
         sets, and preprocessing for model input.
 
         Returns
@@ -115,9 +115,9 @@ class DataLoader:
         None
         """
         self._load_datasets()
-        self._tokenize_datasets()
+        self._tokenise_datasets()
         self._split_datasets()
-        self._preprocess_datasets()
+        self._preprocess_tokenised_datasets()
 
     def _load_datasets(self) -> None:
         """
@@ -138,10 +138,10 @@ class DataLoader:
         ValueError
             If there is a mismatch in the lengths of the datasets.
         """
-        self.products_x_dataset: List[str] = self._load_smiles_from_file(self.products_file)
-        self.reactants_y_dataset: List[str] = self._load_smiles_from_file(self.reactants_file)
-        self.products_x_valid_dataset: List[str] = self._load_smiles_from_file(self.products_valid_file)
-        self.reactants_y_valid_dataset: List[str] = self._load_smiles_from_file(self.reactants_valid_file)
+        self.products_x_dataset: List[str] = load_smiles_from_file(self.products_file)
+        self.reactants_y_dataset: List[str] = load_smiles_from_file(self.reactants_file)
+        self.products_x_valid_dataset: List[str] = load_smiles_from_file(self.products_valid_file)
+        self.reactants_y_valid_dataset: List[str] = load_smiles_from_file(self.reactants_valid_file)
 
         # Ensure datasets have the same length
         if len(self.products_x_dataset) != len(self.reactants_y_dataset):
@@ -156,7 +156,7 @@ class DataLoader:
             self.products_x_valid_dataset = self.products_x_valid_dataset[:self.num_samples]
             self.reactants_y_valid_dataset = self.reactants_y_valid_dataset[:self.num_samples]
 
-        # Canonicalize SMILES strings
+        # Canonicalise SMILES strings
         smiles_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor()
         self.products_x_dataset = [
             smiles_preprocessor.canonicalise_smiles(smi) for smi in self.products_x_dataset
@@ -171,29 +171,29 @@ class DataLoader:
             smiles_preprocessor.canonicalise_smiles(smi) for smi in self.reactants_y_valid_dataset
         ]
 
-    def _tokenize_datasets(self) -> None:
+    def _tokenise_datasets(self) -> None:
         """
-        Tokenizes the datasets using the SMILES tokenizer for training
+        Tokenises the datasets using the SMILES tokeniser for training
         validation and testing datasets.
 
         Returns
         -------
             None
         """
-        self.tokenized_products_x_dataset: List[str] = self.smiles_tokenizer.tokenize_list(
+        self.tokenised_products_x_dataset: List[str] = self.smiles_tokeniser.tokenise_list(
             self.products_x_dataset,
             is_input_sequence=True
         )
-        self.tokenized_reactants_y_dataset = self.smiles_tokenizer.tokenize_list(
+        self.tokenised_reactants_y_dataset = self.smiles_tokeniser.tokenise_list(
             self.reactants_y_dataset,
             is_input_sequence=False
         )
 
-        self.tokenized_products_x_valid_dataset = self.smiles_tokenizer.tokenize_list(
+        self.tokenised_products_x_valid_dataset = self.smiles_tokeniser.tokenise_list(
             self.products_x_valid_dataset,
             is_input_sequence=True
         )
-        self.tokenized_reactants_y_valid_dataset = self.smiles_tokenizer.tokenize_list(
+        self.tokenised_reactants_y_valid_dataset = self.smiles_tokeniser.tokenise_list(
             self.reactants_y_valid_dataset,
             is_input_sequence=False
         )
@@ -202,9 +202,9 @@ class DataLoader:
         """
         Splits the datasets into training and test sets.
 
-        Utilizes scikit-learn's `train_test_split()` method to partition the tokenized
+        Utilises scikit-learn's `train_test_split()` method to partition the tokenised
         product and reactant datasets into training and testing subsets based on
-        the specified test size and random state. Adapts the tokenizer only on
+        the specified test size and random state. Adapts the tokeniser only on
         the training data to prevent data leakage.
 
         Returns
@@ -214,24 +214,24 @@ class DataLoader:
         Raises
         ------
         ValueError
-            If the tokenized datasets are empty or invalid.
+            If the tokenised datasets are empty or invalid.
         """
-        (self.tokenized_products_x_train_data, self.tokenized_products_x_test_data,
-         self.tokenized_reactants_y_train_data, self.tokenized_reactants_y_test_data) = train_test_split(
-            self.tokenized_products_x_dataset,
-            self.tokenized_reactants_y_dataset,
+        (self.tokenised_products_x_train_data, self.tokenised_products_x_test_data,
+         self.tokenised_reactants_y_train_data, self.tokenised_reactants_y_test_data) = train_test_split(
+            self.tokenised_products_x_dataset,
+            self.tokenised_reactants_y_dataset,
             test_size=self.test_size,
             random_state=self.random_state
         )
 
-        combined_tokenized_train_data = self.tokenized_products_x_train_data + self.tokenized_reactants_y_train_data
-        self.smiles_tokenizer.adapt(combined_tokenized_train_data)
+        combined_tokenised_train_data = self.tokenised_products_x_train_data + self.tokenised_reactants_y_train_data
+        self.smiles_tokeniser.adapt(combined_tokenised_train_data)
 
-    def _preprocess_datasets(self) -> None:
+    def _preprocess_tokenised_datasets(self) -> None:
         """
-        Preprocesses the training, validation, and test datasets.
+        Preprocesses the tokenised training, validation, and test datasets.
 
-        Initializes data preprocessors for encoder and decoder, and applies
+        Initialises data preprocessors for encoder and decoder, and applies
         preprocessing to the respective datasets to prepare them for model training
         and evaluation.
 
@@ -239,32 +239,32 @@ class DataLoader:
         -------
         None
         """
-        # Initialize DataPreprocessors
-        self.encoder_data_processor = TokenizedSmilesPreprocessor(
-            self.smiles_tokenizer,
+        # Initialise DataPreprocessors
+        self.encoder_data_processor = TokenisedSmilesPreprocessor(
+            self.smiles_tokeniser,
             self.max_encoder_seq_length
         )
-        self.decoder_data_processor = TokenizedSmilesPreprocessor(
-            self.smiles_tokenizer,
+        self.decoder_data_processor = TokenisedSmilesPreprocessor(
+            self.smiles_tokeniser,
             self.max_decoder_seq_length
         )
 
         # Preprocess training data
         self.train_data = self._preprocess_data_pair(
-            self.tokenized_products_x_train_data,
-            self.tokenized_reactants_y_train_data
+            self.tokenised_products_x_train_data,
+            self.tokenised_reactants_y_train_data
         )
 
         # Preprocess test data
         self.test_data = self._preprocess_data_pair(
-            self.tokenized_products_x_test_data,
-            self.tokenized_reactants_y_test_data
+            self.tokenised_products_x_test_data,
+            self.tokenised_reactants_y_test_data
         )
 
         # Preprocess validation data
         self.valid_data = self._preprocess_data_pair(
-            self.tokenized_products_x_valid_dataset,
-            self.tokenized_reactants_y_valid_dataset
+            self.tokenised_products_x_valid_dataset,
+            self.tokenised_reactants_y_valid_dataset
         )
 
     def _preprocess_data_pair(
@@ -277,9 +277,9 @@ class DataLoader:
         Parameters
         ----------
         encoder_data : list of str
-            Tokenized encoder data.
+            Tokenised encoder data.
         decoder_data : list of str
-            Tokenized decoder data.
+            Tokenised decoder data.
 
         Returns
         -------
@@ -339,7 +339,7 @@ class DataLoader:
         """
         Returns the training dataset.
 
-        Utilizes the `get_dataset` method with training-specific configurations.
+        Utilises the `get_dataset` method with training-specific configurations.
 
         Returns
         -------
@@ -355,7 +355,7 @@ class DataLoader:
         """
         Returns the validation dataset.
 
-        Utilizes the `get_dataset` method with validation-specific configurations.
+        Utilises the `get_dataset` method with validation-specific configurations.
 
         Returns
         -------
@@ -371,7 +371,7 @@ class DataLoader:
         """
         Returns the test dataset.
 
-        Utilizes the `get_dataset` method with test-specific configurations.
+        Utilises the `get_dataset` method with test-specific configurations.
 
         Returns
         -------
@@ -382,33 +382,3 @@ class DataLoader:
             raise ValueError("Test data has not been loaded and preprocessed.")
 
         return self.get_dataset(self.test_data, training=False)
-
-    @staticmethod
-    def _load_smiles_from_file(file_path: str) -> List[str]:
-        """
-        Loads SMILES strings from a specified file.
-
-        Reads a file containing SMILES strings, ensuring that each line is
-        properly stripped of whitespace and non-empty.
-
-        Parameters
-        ----------
-        file_path : str
-            The path to the file containing SMILES strings.
-
-        Returns
-        -------
-        List[str]
-            A list of SMILES strings.
-
-        Raises
-        ------
-        FileNotFoundError
-            If the specified file does not exist.
-        """
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"The file {file_path} does not exist.")
-        with open(file_path, 'r') as file:
-            smiles_list = [line.strip() for line in file if line.strip()]
-
-        return smiles_list

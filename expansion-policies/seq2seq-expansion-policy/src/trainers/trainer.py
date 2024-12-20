@@ -20,8 +20,8 @@ from callbacks.validation_metrics import ValidationMetricsCallback
 from callbacks.gradient_monitoring import GradientMonitoringCallback
 from metrics.perplexity import Perplexity
 from data.utils.data_loader import DataLoader
-from data.utils.tokenization import SmilesTokenizer
-from data.utils.preprocessing import TokenizedSmilesPreprocessor
+from data.utils.tokenization import SmilesTokeniser
+from data.utils.preprocessing import TokenisedSmilesPreprocessor
 from data.utils.logging import (compute_metrics, log_metrics, print_metrics,
                                 log_sample_predictions, print_sample_predictions)
 from models.seq2seq import RetrosynthesisSeq2SeqModel
@@ -50,11 +50,11 @@ class Trainer:
         """
         self.config:Dict[str, Any] = self.load_config(config_path)
 
-        self.tokenizer: Optional[SmilesTokenizer] = None
+        self.tokenizer: Optional[SmilesTokeniser] = None
         self.data_loader: Optional[DataLoader] = None
         self.vocab_size: Optional[int] = None
-        self.encoder_preprocessor: Optional[TokenizedSmilesPreprocessor] = None
-        self.decoder_preprocessor: Optional[TokenizedSmilesPreprocessor] = None
+        self.encoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
+        self.decoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
         self.model: Optional[RetrosynthesisSeq2SeqModel] = None
         self.optimizer: Optional[Adam] = None
         self.loss_function: Optional[Any] = None
@@ -133,19 +133,19 @@ class Trainer:
         self.data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokenizer = self.data_loader.smiles_tokenizer
+        self.tokenizer = self.data_loader.smiles_tokeniser
         self.vocab_size = self.data_loader.vocab_size
 
         # Save the tokenizer
         self.save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
 
         # Initialize Preprocessors
-        self.encoder_preprocessor = TokenizedSmilesPreprocessor(
-            smiles_tokenizer=self.data_loader.smiles_tokenizer,
+        self.encoder_preprocessor = TokenisedSmilesPreprocessor(
+            smiles_tokenizer=self.data_loader.smiles_tokeniser,
             max_seq_length=data_conf.get('max_encoder_seq_length', 140)
         )
-        self.decoder_preprocessor = TokenizedSmilesPreprocessor(
-            smiles_tokenizer=self.data_loader.smiles_tokenizer,
+        self.decoder_preprocessor = TokenisedSmilesPreprocessor(
+            smiles_tokenizer=self.data_loader.smiles_tokeniser,
             max_seq_length=data_conf.get('max_decoder_seq_length', 140)
         )
 
