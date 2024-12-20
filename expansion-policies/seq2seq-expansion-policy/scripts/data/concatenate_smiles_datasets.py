@@ -26,16 +26,16 @@ def parse_arguments():
         help='File path for first reactants SMILES dataset.'
     )
     parser.add_argument(
-        '--reactants_b_filepath',
-        type=str,
-        required=True,
-        help='File path for second reactants SMILES dataset.'
-    )
-    parser.add_argument(
         '--products_a_filepath',
         type=str,
         required=True,
         help='File path for first products SMILES dataset.'
+    )
+    parser.add_argument(
+        '--reactants_b_filepath',
+        type=str,
+        required=True,
+        help='File path for second reactants SMILES dataset.'
     )
     parser.add_argument(
         '--products_b_filepath',
@@ -77,8 +77,8 @@ def main():
     concat_reactants_output_path: str = args.concat_reactants_output_path
     concat_products_output_path: str = args.concat_products_output_path
     reactants_a_file_path: str = args.reactants_a_filepath
-    reactants_b_file_path: str = args.reactants_b_filepath
     products_a_file_path: str = args.products_a_filepath
+    reactants_b_file_path: str = args.reactants_b_filepath
     products_b_file_path: str = args.products_b_filepath
     sqlite3_db_path: str = args.sqlite3_db_path
     log_path: str = args.script_log_path
@@ -88,8 +88,8 @@ def main():
 
     file_paths: List = [
         reactants_a_file_path,
-        reactants_b_file_path,
         products_a_file_path,
+        reactants_b_file_path,
         products_b_file_path
     ]
 
@@ -143,8 +143,8 @@ def main():
     try:
         smiles_preprocessor.remove_duplicate_product_reactant_pairs(
             db_path=sqlite3_db_path,
-            batch_size=1000,
-            log_interval=1000
+            batch_size=100000,
+            log_interval=100000
         )
         logger.debug("Deduplication process completed.")
     except Exception as e:
