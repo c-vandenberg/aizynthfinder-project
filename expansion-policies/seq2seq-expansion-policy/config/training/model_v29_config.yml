@@ -84,7 +84,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 3
+  epochs: 100
   patience: 5
   reverse_tokenized_input_sequence: True
   model_save_path: '../data/training/concatenated-smiles/model-v29/model/saved_model'
@@ -94,7 +94,7 @@ training:
   tensorboard_dir: '../data/training/concatenated-smiles/model-v29/tensorboard'
   log_dir: '../logs/concatenated-smiles/model-v29'
   checkpoint_dir: '../data/training/concatenated-smiles/model-v29/checkpoints'
-  num_samples: 100 # Number of samples to use for debugging model
+  num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
 env:
