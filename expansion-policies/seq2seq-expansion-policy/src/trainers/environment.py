@@ -69,7 +69,7 @@ class TrainingEnvironment:
         os.environ['TF_DETERMINISTIC_OPS'] = '1'
 
         # Optionally disable GPU for deterministic behavior (may impact performance)
-        os.environ['CUDA_VISIBLE_DEVICES'] = ''
+        # os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
         # Configure TensorFlow session for single-threaded execution (optional, heavily impacts performance)
         # tf.config.threading.set_intra_op_parallelism_threads(1)
