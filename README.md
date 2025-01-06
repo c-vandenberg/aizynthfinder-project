@@ -1,4 +1,4 @@
-# AiZynthFinder Research Project
+# AiZynthFinder Seq2Seq and Transformer Expansion Policies
 
 # Abstract
 
