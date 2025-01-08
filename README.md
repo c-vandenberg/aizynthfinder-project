@@ -2,7 +2,7 @@
 
 # Abstract
 
-Retrosynthetic analysis and reaction prediction are fundamental for efficient chemical synthesis and drug discovery. Consequently, computer-assisted synthesis prediction (CASP) tools have been at the forefront of research and development, striving to computationally identify the optimal sequence of chemical reaction steps that transform commercially viable starting materials into desired chemical compounds. <sup>**1**</sup> 
+Retrosynthetic analysis and reaction prediction are fundamental for efficient chemical synthesis and drug discovery. Consequently, computer-assisted synthesis planning (CASP) tools have been at the forefront of research and development, striving to computationally identify the optimal sequence of chemical reaction steps that transform commercially viable starting materials into desired chemical compounds. <sup>**1**</sup> 
 
 A leading CASP tool, [AiZynthFinder](https://github.com/MolecularAI/aizynthfinder), achieves retrosynthesis prediction by generating a retrosynthetic search tree using a template-based, feedforward neural network (FNN) model known as the expansion policy to give a ranked list of reaction templates. This process is followed by another neural network, the filter policy, which removes unfeasible reactions. Once the retrosynthesis search tree is constructed, a Monte Carlo Tree Search (MCTS) algorithm traverses the search tree to identify the best synthetic routes.
 
