@@ -1,55 +1,6 @@
 # Seq2Seq Model Architecture
-# -
-#
-# Training run metrics:
-#   - Epochs: 10
-#
-#   - Train Loss (Smoothed):
-#   - Train Accuracy (Smoothed):
-#   - Train Perplexity (Smoothed):
-#
-#   - Validation Loss (Smoothed):
-#   - Validation Accuracy (Smoothed):
-#   - Validation Perplexity (Smoothed):
-#   - Validation BLEU Score (Smoothed):
-#
-#   - Test Loss (Smoothed):
-#   - Test Accuracy (Smoothed):
-#   - Test Perplexity (Smoothed):
-#   - Test BLEU Score (Smoothed):
-#
-# Training Performance Evaluation
-# 1. Training vs Validation Accuracy, Loss, Perplexity and BLEU Score:
-#     - Train Accuracy:
-#     - Validation Accuracy:
-#     - Difference:
-#
-#     - Train Loss:
-#     - Validation Loss:
-#     - Difference:
-#
-#     - Train Perplexity:
-#     - Validation Perplexity:
-#     - Difference:
-#
-#
-# 2. Validation vs Testing Accuracy, Loss, Perplexity and BLEU Score:
-#   - Validation Accuracy:
-#   - Testing Accuracy:
-#   - Difference:
-#
-#   - Validation Loss:
-#   - Testing Loss:
-#   - Difference:
-#
-#   - Validation Perplexity:
-#   - Testing Perplexity:
-#   - Difference:
-#
-#   - Validation BLEU Score:
-#   - Testing BLEU Score:
-#   - Difference:
-#
+
+# Epochs: 10
 
 # Data Configuration and Hyperparameters
 data:
