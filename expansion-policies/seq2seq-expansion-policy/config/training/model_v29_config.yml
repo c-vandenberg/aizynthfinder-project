@@ -7,7 +7,7 @@ data:
   products_file: '../data/preprocessed/liu-et-al/products_smiles'
   reactants_file: '../data/preprocessed/liu-et-al/reactants_smiles'
   tokenizer_save_path: '../data/training/liu-et-al/model-v29/tokenizer/model_v29_tokenizer.json'
-  logger_path: '../var/log/concatenated-smiles/model-v29/model-v29.log'
+  logger_path: '../var/log/liu-et-al/model-v29/model-v29.log'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -36,13 +36,13 @@ training:
   epochs: 100
   patience: 5
   reverse_tokenized_input_sequence: True
-  model_save_path: '../data/training/concatenated-smiles/model-v29/model/saved_model'
-  model_save_dir: '../data/training/concatenated-smiles/model-v29/model'
-  valid_metrics_dir: '../data/training/concatenated-smiles/model-v29/validation-metrics'
-  test_metrics_dir: '../data/training/concatenated-smiles/model-v29/testing-metrics'
-  tensorboard_dir: '../data/training/concatenated-smiles/model-v29/tensorboard'
-  log_dir: '../logs/concatenated-smiles/model-v29'
-  checkpoint_dir: '../data/training/concatenated-smiles/model-v29/checkpoints'
+  model_save_path: '../data/training/liu-et-al/model-v29/model/saved_model'
+  model_save_dir: '../data/training/liu-et-al/model-v29/model'
+  valid_metrics_dir: '../data/training/liu-et-al/model-v29/validation-metrics'
+  test_metrics_dir: '../data/training/liu-et-al/model-v29/testing-metrics'
+  tensorboard_dir: '../data/training/liu-et-al/model-v29/tensorboard'
+  log_dir: '../var/log/liu-et-al/model-v29'
+  checkpoint_dir: '../data/training/liu-et-al/model-v29/checkpoints'
   num_samples: null # Number of samples to use for debugging model
 
 # Environment Configuration
