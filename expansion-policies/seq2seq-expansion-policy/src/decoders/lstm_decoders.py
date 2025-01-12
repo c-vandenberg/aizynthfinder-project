@@ -359,10 +359,6 @@ class StackedLSTMDecoder(DecoderInterface):
             # Run one time step of this LSTM layer
             # `decoder_output` Shape: (batch_size, 1, units)
             # `state_h, state_c` Shape: (batch_size, units)
-            if state_h is None or state_c is None:
-                batch_size = tf.shape(decoder_output)[0]
-                state_h = tf.zeros((batch_size, self.units))
-                state_c = tf.zeros((batch_size, self.units))
             decoder_output, new_h, new_c = lstm_layer(
                 decoder_output,
                 initial_state=[state_h, state_c],
