@@ -227,8 +227,10 @@ class Trainer:
 
         # Set up the loss function and metrics
         self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
-        self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
-        self.metrics.append(Perplexity(loss_function=self.loss_function))
+        self.metrics = [
+            tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
+            Perplexity(loss_function=self.loss_function)
+        ]
 
         # Compile the model
         self.model.compile(
