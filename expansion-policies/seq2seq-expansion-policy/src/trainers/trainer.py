@@ -225,10 +225,14 @@ class Trainer:
         # Set up the optimiser
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
-        # Set up the loss function and metrics
+        # Set up the loss function and metrics.
+        # For accuracy, because our sequences are integer-encoded, we have to specify `SparseCategoricalAccuracy`
+        # (Kera's default accuracy is CategoricalAccuracy, which is for sequences that are one-hot encoded)
         self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
-        self.metrics: List[Any] = model_conf.get('metrics', ['accuracy'])
-        self.metrics.append(Perplexity(loss_function=self.loss_function))
+        self.metrics = [
+            tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
+            Perplexity(loss_function=self.loss_function)
+        ]
 
         # Compile the model
         self.model.compile(

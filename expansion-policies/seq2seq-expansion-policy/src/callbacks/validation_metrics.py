@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from typing import Iterable, Optional, Union, Tuple, List, Dict, Any
 
 import tensorflow as tf
@@ -78,6 +79,8 @@ class ValidationMetricsCallback(Callback):
         start_token = self.tokenizer.start_token
         end_token = self.tokenizer.end_token
 
+        validation_start_time: float = time.time()
+
         for (encoder_input, decoder_input), target_sequences in self.validation_data:
             # Generate sequences
             predicted_sequences = self.model.predict_sequence(
@@ -116,6 +119,12 @@ class ValidationMetricsCallback(Callback):
             tensorboard_dir=self.tensorboard_dir,
             file_writer=self.file_writer
         )
+
+        validation_end_time: float = time.time()
+
+        validation_time = validation_end_time - validation_start_time
+
+        self.logger.info(f'Epoch {epoch} Validation Time: {round(validation_time)} seconds')
 
     def validation(
         self,

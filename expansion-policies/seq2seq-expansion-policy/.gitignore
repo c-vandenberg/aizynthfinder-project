@@ -88,24 +88,8 @@ cython_debug/
 # ** Project-Specific Ignored Files **
 # ------------------------------
 
-# TensorFlow Checkpoints
-/data/training/liu-et-al/**/checkpoints/
-
-# TensorFlow Saved Models
-/data/training/liu-et-al/**/model/
-
-# TensorBoard Metrics
-/data/training/liu-et-al/**/tensorboard/
-
-# Model Validation Metrics
-/data/training/liu-et-al/**/validation-metrics/
-
-# Model Testing Metrics
-/data/training/liu-et-al/**/evaluate/
-/data/training/liu-et-al/**/testing-metrics/
-
-# Tokenizer Files
-/data/training/liu-et-al/**/tokenizer/
+# Training dayta
+/data/training/*
 
 # Database Files
 /data/database/

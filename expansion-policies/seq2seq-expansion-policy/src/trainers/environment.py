@@ -65,10 +65,26 @@ class TrainingEnvironment:
         np.random.seed(determinism_conf['numpy_seed'])
         tf.random.set_seed(determinism_conf['tf_seed'])
 
+        # OpenMP is used by many numeric libraries (e.g. Eigen, MKL etc.) to parallelise loops across
+        # multiple CPU threads.
+        # Optionally configure OpemMP to use only 1 thread for deterministic operations (impacts performance)
+        # os.environ['OMP_NUM_THREADS'] = '1'
+
+        # Intra-op parallelism is used by TensorFlow to parallelise individual operations (e.g. matrix multiplication)
+        # across multiple threads.
+        # Optionally configure intra-op parallelism to limit any single operation to a single thread
+        # (impacts performance).
+        # os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
+
+        # Inter-op parallelism is used by TensorFlow to parallelise multiple operations across multiple threads.
+        # Optionally configure inter-op parallelism to limit TensorFlow to one operation at a time.
+        # (impacts performance).
+        # os.environ['TF_NUM_INTEROP_THREADS'] = '1'
+
         # Configure TensorFlow for deterministic operations
         os.environ['TF_DETERMINISTIC_OPS'] = '1'
 
-        # Optionally disable GPU for deterministic behavior (may impact performance)
+        # Optionally disable GPU for deterministic behavior (impacts performance).
         # os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
         # Configure TensorFlow session for single-threaded execution (optional, heavily impacts performance)
