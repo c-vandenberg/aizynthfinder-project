@@ -212,15 +212,13 @@ class Trainer:
             encoder_embedding_dim=encoder_embedding_dim,
             decoder_embedding_dim=decoder_embedding_dim,
             attention_dim=attention_dim,
+            smiles_tokenizer=self.tokenizer,
             units=units,
             num_encoder_layers=encoder_num_layers,
             num_decoder_layers=decoder_num_layers,
             dropout_rate=dropout_rate,
             weight_decay=weight_decay
         )
-
-        # Set encoder and decoder preprocessors
-        self.model.smiles_tokenizer = self.tokenizer
 
         # Set up the optimiser
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)

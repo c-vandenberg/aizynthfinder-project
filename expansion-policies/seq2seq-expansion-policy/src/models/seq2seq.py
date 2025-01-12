@@ -74,6 +74,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         decoder_embedding_dim: int,
         units: int,
         attention_dim: int,
+        smiles_tokenizer: SmilesTokeniser,
         num_encoder_layers = 2,
         num_decoder_layers: int = 4,
         dropout_rate: float = 0.2,
@@ -114,7 +115,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         self.enc_state_c: Dense = Dense(units, name='enc_state_c')
 
         # Smiles tokenizer to be set externally
-        self.smiles_tokenizer: Optional[SmilesTokeniser] = None
+        self.smiles_tokenizer = smiles_tokenizer
+        self.tokenizer_vocab_size = self.smiles_tokenizer.vocab_size
 
         self.dropout_rate = dropout_rate
         self.weight_decay = weight_decay
@@ -188,6 +190,87 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         return output
 
+    @tf.function
+    def predict_sequence_tf(
+            self,
+            encoder_input: tf.Tensor,
+            max_length: int = 140,
+            start_token_id: int = None,
+            end_token_id: int = None
+    ) -> tf.Tensor:
+        """
+        Generate a sequence prediction using a TF while_loop for greedy decoding.
+
+        This refactors the step-by-step for-loop into a compiled graph.
+        It should reduce Python overhead and allow more efficient GPU usage.
+
+        Parameters
+        ----------
+        encoder_input : tf.Tensor
+            Tensor of shape (batch_size, seq_len_enc) containing encoder input sequences.
+        max_length : int, optional
+            Maximum length of the generated sequences (default=100).
+        start_token_id : int, optional
+            The token ID representing the start of a sequence.
+            If None, it is retrieved from the tokenizer in _encode_and_initialize().
+        end_token_id : int, optional
+            The token ID representing the end of a sequence.
+            If None, it is retrieved from the tokenizer in _encode_and_initialize().
+
+        Returns
+        -------
+        tf.Tensor
+            Tensor of shape (batch_size, generated_seq_length)
+            containing the generated token IDs.
+        """
+        # 1) Encode and set up initial states
+        batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
+            encoder_input,
+            start_token_id=start_token_id,
+            end_token_id=end_token_id
+        )
+
+        # 2) Prepare storage for output tokens via a TensorArray
+        #    We write one time-step’s predictions at index i
+        sequences_ta = tf.TensorArray(
+            dtype=tf.int32,
+            size=max_length,
+            dynamic_size=False
+        )
+
+        # 3) Initialize loop variables
+        idx = tf.constant(0, dtype=tf.int32)
+        finished = tf.zeros([batch_size], dtype=tf.bool)
+        # Decoder input at first step is just the <start> token
+        decoder_input = tf.fill([batch_size, 1], start_token_id)
+        max_length_tf = tf.constant(max_length, dtype=tf.int32)
+
+        # 4) Define the loop condition and body as lambda
+        cond_func = lambda idx_, sequences_ta_, finished_, decoder_input_, decoder_states_: (
+            self._predict_sequence_cond(
+                idx_, sequences_ta_, finished_, decoder_input_, decoder_states_, max_length_tf
+            )
+        )
+        body_func = lambda idx_, sequences_ta_, finished_, decoder_input_, decoder_states_: (
+            self._predict_sequence_body(
+                idx_, sequences_ta_, finished_, decoder_input_, decoder_states_,
+                encoder_output, end_token_id
+            )
+        )
+
+        # 5) Execute the `tf.while_loop`
+        _, sequences_ta, _, _, _ = tf.while_loop(
+            cond=cond_func,
+            body=body_func,
+            loop_vars=[idx, sequences_ta, finished, decoder_input, initial_decoder_states]
+        )
+
+        # 7) Finalize the output sequence shape
+        sequences = sequences_ta.stack()  # (max_length, batch_size)
+        sequences = tf.transpose(sequences, [1, 0])  # (batch_size, max_length)
+
+        return sequences
+
     def predict_sequence(
         self,
         encoder_input: tf.Tensor,
@@ -219,7 +302,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         ValueError
             If `smiles_tokenizer` is not set.
         """
-        batch_size, encoder_output, decoder_states, start_token_id, end_token_id, vocab_size = self._encode_and_initialize(
+        batch_size, encoder_output, decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
             start_token_id,
             end_token_id
@@ -267,7 +350,6 @@ class RetrosynthesisSeq2SeqModel(Model):
         max_length: int = 140,
         start_token_id: Optional[int] = None,
         end_token_id: Optional[int] = None,
-        vocab_size: Optional[int] = None,
         return_top_n=1
     ) -> Tuple[List[List[List[int]]], List[List[float]]]:
         """
@@ -296,11 +378,10 @@ class RetrosynthesisSeq2SeqModel(Model):
         ValueError
             If `smiles_tokenizer` is not set.
         """
-        batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id, vocab_size = self._encode_and_initialize(
+        batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id = self._encode_and_initialize(
             encoder_input,
             start_token_id,
-            end_token_id,
-            vocab_size
+            end_token_id
         )
 
         # Initialize BeamSearchDecoder
@@ -325,9 +406,8 @@ class RetrosynthesisSeq2SeqModel(Model):
         self,
         encoder_input: tf.Tensor,
         start_token_id: Optional[int] = None,
-        end_token_id: Optional[int] = None,
-        vocab_size: Optional[int] = None,
-    ) -> Tuple[int, tf.Tensor, List[tf.Tensor], int, int, int]:
+        end_token_id: Optional[int] = None
+    ) -> Tuple[int, tf.Tensor, List[tf.Tensor], int, int]:
         """
         Helper method to encode input and initialize decoder states.
 
@@ -360,20 +440,23 @@ class RetrosynthesisSeq2SeqModel(Model):
             If `smiles_tokenizer` is not set.
             If `start_token_id` or `end_token_id` cannot be found in the tokenizer.
         """
-        if self.smiles_tokenizer is None:
-            raise ValueError("smiles_tokenizer must be set before encoding and initialization.")
-
+        # 1) Encode the input sequence
         batch_size = tf.shape(encoder_input)[0]
-
-        # Encode the input sequence
         encoder_output, state_h, state_c = self.encoder(encoder_input, training=False)
 
-        # Map encoder final states to decoder initial states
+        # 2) Map encoder final states to first-layer decoder states
         decoder_state_h = self.enc_state_h(state_h)
         decoder_state_c = self.enc_state_c(state_c)
         initial_decoder_states = [decoder_state_h, decoder_state_c]
 
-        # Prepare start and end token IDs
+        # 3) Create a full set of (2 * `num_decoder_layers`) states
+        #    The first pair are the mapped encoder final states, and the rest of zero-initialised
+        initial_decoder_states = [decoder_state_h, decoder_state_c]
+        for _ in range(self.decoder.num_layers - 1):
+            initial_decoder_states.append(tf.zeros_like(decoder_state_h))
+            initial_decoder_states.append(tf.zeros_like(decoder_state_c))
+
+        # 4) Prepare start and end token IDs
         if start_token_id is None:
             start_token = self.smiles_tokenizer.start_token
             start_token_id = self.smiles_tokenizer.word_index[start_token]
@@ -386,114 +469,71 @@ class RetrosynthesisSeq2SeqModel(Model):
             if end_token_id is None:
                 raise ValueError(f"End token '{end_token}' not found in tokenizer's word_index.")
 
-        if vocab_size is None:
-            vocab_size = self.smiles_tokenizer.vocab_size
-
-        return batch_size, encoder_output, initial_decoder_states, start_token_id, end_token_id, vocab_size
+        return (
+            batch_size,
+            encoder_output,
+            initial_decoder_states,
+            start_token_id,
+            end_token_id
+        )
 
     @tf.function
-    def predict_sequence_tf(
-            self,
-            encoder_input: tf.Tensor,
-            max_length: int = 140,
-            start_token_id: int = None,
-            end_token_id: int = None
+    def _predict_sequence_cond(
+        self,
+        i: tf.Tensor,
+        sequences_ta: tf.TensorArray,
+        finished: tf.Tensor,
+        decoder_input: tf.Tensor,
+        decoder_states: List[tf.Tensor],
+        max_length: tf.Tensor
     ) -> tf.Tensor:
         """
-        Generate a sequence prediction using a TF while_loop for greedy decoding.
-
-        This refactors the step-by-step for-loop into a compiled graph.
-        It should reduce Python overhead and allow more efficient GPU usage.
-
-        Parameters
-        ----------
-        encoder_input : tf.Tensor
-            Tensor of shape (batch_size, seq_len_enc) containing encoder input sequences.
-        max_length : int, optional
-            Maximum length of the generated sequences (default=100).
-        start_token_id : int, optional
-            The token ID representing the start of a sequence.
-            If None, it is retrieved from the tokenizer in _encode_and_initialize().
-        end_token_id : int, optional
-            The token ID representing the end of a sequence.
-            If None, it is retrieved from the tokenizer in _encode_and_initialize().
-
-        Returns
-        -------
-        tf.Tensor
-            Tensor of shape (batch_size, generated_seq_length)
-            containing the generated token IDs.
+        Condition function for `tf.while_loop`: checks whether
+        we have reached `max_length` or whether all sequences are finished.
         """
-        # 1) Encode and set up initial states
-        (batch_size,
-         encoder_output,
-         initial_decoder_states,
-         start_token_id,
-         end_token_id,
-         vocab_size) = self._encode_and_initialize(
-            encoder_input,
-            start_token_id=start_token_id,
-            end_token_id=end_token_id
+        not_all_finished = tf.logical_not(tf.reduce_all(finished))
+        return tf.logical_and(i < max_length, not_all_finished)
+
+    @tf.function
+    def _predict_sequence_body(
+        self,
+        i: tf.Tensor,
+        sequences_ta: tf.TensorArray,
+        finished: tf.Tensor,
+        decoder_input: tf.Tensor,
+        decoder_states: List[tf.Tensor],
+        encoder_output: tf.Tensor,
+        end_token_id: tf.Tensor
+    ) -> Tuple[tf.Tensor, tf.TensorArray, tf.Tensor, tf.Tensor, List[tf.Tensor]]:
+        """
+        Body function for `tf.while_loop`:
+        1) Calls `single_step`
+        2) Argmax for predicted token
+        3) Updates 'finished'
+        4) Writes predictions to `sequences_ta`
+        5) Returns updated loop variables
+        """
+        # 1) single-step decode
+        decoder_output, new_states = self.decoder.single_step(
+            decoder_input, decoder_states, encoder_output
         )
+        # shape: (batch_size, 1, vocab_size)
 
-        # 2) Prepare storage for output tokens via a TensorArray
-        #    We write one time-step’s predictions at index i
-        sequences_ta = tf.TensorArray(
-            dtype=tf.int32,
-            size=max_length,
-            dynamic_size=False
-        )
+        # 2) Argmax to get predicted token, then squeeze shape -> (batch_size,)
+        predicted_id = tf.argmax(decoder_output, axis=-1, output_type=tf.int32)
+        predicted_id = tf.squeeze(predicted_id, axis=-1)  # shape: (batch_size,)
 
-        # 3) Initialize loop variables
-        i = tf.constant(0, dtype=tf.int32)
-        finished = tf.zeros([batch_size], dtype=tf.bool)
-        # Decoder input at first step is just the <start> token
-        decoder_input = tf.fill([batch_size, 1], start_token_id)
+        # 3) Update 'finished' status
+        newly_finished = tf.equal(predicted_id, end_token_id)
+        finished = tf.logical_or(finished, newly_finished)
 
-        # 4) Define the loop condition
-        def cond(
-                i, sequences_ta, finished, decoder_input, decoder_states
-        ):
-            not_all_finished = tf.logical_not(tf.reduce_all(finished))
-            return tf.logical_and(i < max_length, not_all_finished)
+        # 4) Write predictions to the TensorArray
+        sequences_ta = sequences_ta.write(i, predicted_id)
 
-        # 5) Define the loop body
-        def body(
-                i, sequences_ta, finished, decoder_input, decoder_states
-        ):
-            # Single-step decoding from your custom decoder
-            decoder_output, new_states = self.decoder.single_step(
-                decoder_input,
-                decoder_states,
-                encoder_output
-            )
-            # Argmax to get predicted token
-            predicted_id = tf.argmax(decoder_output, axis=-1, output_type=tf.int32)
-            # Store the predicted_id in the TensorArray at index i
-            # predicted_id is shape [batch_size, 1], so squeeze out dim=1
-            sequences_ta = sequences_ta.write(i, tf.squeeze(predicted_id, axis=1))
+        # 5) Next input must be shape (batch_size, 1)
+        next_input = tf.expand_dims(predicted_id, axis=-1)
 
-            # Update 'finished' if any sample just predicted end_token_id
-            newly_finished = tf.equal(predicted_id, end_token_id)
-            finished = tf.logical_or(finished, newly_finished)
-
-            # The predicted token becomes next step's input
-            next_input = predicted_id
-
-            return i + 1, sequences_ta, finished, next_input, new_states
-
-        # 6) Execute the while_loop
-        _, sequences_ta, _, _, _ = tf.while_loop(
-            cond=cond,
-            body=body,
-            loop_vars=[i, sequences_ta, finished, decoder_input, initial_decoder_states]
-        )
-
-        # 7) Finalize the output sequence shape
-        sequences = sequences_ta.stack()  # (max_length, batch_size)
-        sequences = tf.transpose(sequences, [1, 0])  # (batch_size, max_length)
-
-        return sequences
+        return i + 1, sequences_ta, finished, next_input, new_states
 
     def get_config(self) -> Dict[str, Any]:
         """

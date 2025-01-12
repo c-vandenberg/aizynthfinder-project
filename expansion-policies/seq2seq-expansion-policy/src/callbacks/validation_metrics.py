@@ -83,7 +83,7 @@ class ValidationMetricsCallback(Callback):
 
         for (encoder_input, decoder_input), target_sequences in self.validation_data:
             # Generate sequences
-            predicted_sequences = self.model.predict_sequence(
+            predicted_sequences = self.model.predict_sequence_tf(
                 encoder_input,
                 max_length=self.max_length,
                 start_token_id=self.tokenizer.word_index.get(start_token),
