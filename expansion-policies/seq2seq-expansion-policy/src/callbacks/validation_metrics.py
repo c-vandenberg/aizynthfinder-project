@@ -82,7 +82,7 @@ class ValidationMetricsCallback(Callback):
         start_token = self.tokenizer.start_token
         end_token = self.tokenizer.end_token
 
-        validation_start_time: float = time.time()
+        validation_metrics_start_time: float = time.time()
 
         for (encoder_input, decoder_input), target_sequences in self.validation_data:
             # Generate sequences
@@ -123,9 +123,9 @@ class ValidationMetricsCallback(Callback):
             file_writer=self.file_writer
         )
 
-        validation_end_time: float = time.time()
-        validation_time = validation_end_time - validation_start_time
-        self.logger.info(f'Epoch {epoch} Validation Time: {round(validation_time)} seconds')
+        validation_metrics_end_time: float = time.time()
+        validation_metrics_time = validation_metrics_end_time - validation_metrics_start_time
+        self.logger.info(f'Epoch {epoch + 1} Validation Metrics Time: {round(validation_metrics_time)} seconds')
 
     def validation(
         self,

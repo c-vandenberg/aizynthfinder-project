@@ -456,6 +456,7 @@ class Trainer:
         beam_search_time = beam_search_end_time - beam_search_start_time
         self._logger.info(f'Test Dataset Beam Search Time: {round(beam_search_time)} seconds')
 
+        testing_metrics_start_time: float = time.time()
         metrics: Dict[str, float] = {
             'Test Loss': test_loss,
             'Test Accuracy': test_accuracy,
@@ -498,6 +499,10 @@ class Trainer:
             num_samples=5,
             separator_length=153
         )
+
+        testing_metrics_end_time: float = time.time()
+        testing_metrics_time = testing_metrics_end_time - testing_metrics_start_time
+        self._logger.info(f'Testing Metrics Time: {round(testing_metrics_time)} seconds')
 
     def save_model(self) -> None:
         """
