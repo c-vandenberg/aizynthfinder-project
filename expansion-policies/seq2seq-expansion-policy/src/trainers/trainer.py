@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from typing import Dict, Any, List, Tuple, Union, Callable, Optional
 
 import yaml
@@ -14,6 +15,7 @@ from tensorflow.keras.callbacks import (
 from tensorflow.train import Checkpoint, CheckpointManager
 
 from data.utils.logging_utils import configure_logger
+from metrics.smiles_string_metrics import SmilesStringMetrics
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
 from callbacks.validation_metrics import ValidationMetricsCallback
@@ -418,6 +420,7 @@ class Trainer:
         start_token: str = self.tokenizer.start_token
         end_token: str = self.tokenizer.end_token
 
+        beam_search_start_time: float = time.time()
         for (encoder_input, decoder_input), target_sequences in test_dataset:
             # Generate sequences
             predicted_sequences_list, predicted_scores_list = self.model.predict_sequence_beam_search(
@@ -449,6 +452,10 @@ class Trainer:
                 target_smiles.append(ref)
                 predicted_smiles.append(hyp)
 
+        beam_search_end_time: float = time.time()
+        beam_search_time = beam_search_end_time - beam_search_start_time
+        self._logger.info(f'Test Dataset Beam Search Time: {round(beam_search_time)} seconds')
+
         metrics: Dict[str, float] = {
             'Test Loss': test_loss,
             'Test Accuracy': test_accuracy,
@@ -460,7 +467,8 @@ class Trainer:
             hypotheses=hypotheses,
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
-            evaluation_stage='Test'
+            evaluation_stage='Test',
+            smiles_string_metrics=SmilesStringMetrics()
         )
 
         metrics.update(additional_metrics)
