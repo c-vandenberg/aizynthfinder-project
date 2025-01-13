@@ -1,10 +1,13 @@
-from typing import List
+from typing import Dict, List, Optional
 
 import Levenshtein
 from rdkit import Chem, RDLogger
-from rdkit.Chem import AllChem, DataStructs
+from rdkit.Chem import Mol, AllChem, DataStructs
 
 class SmilesStringMetrics:
+    def __init__(self):
+        self.target_morgan_fps: Optional[Dict] = None
+
     """
     SmilesStringMetrics
 
@@ -90,53 +93,7 @@ class SmilesStringMetrics:
 
         return valid_predictions / len(predicted_smiles)
 
-    @staticmethod
-    def tanimoto_coefficient(smiles1: str, smiles2: str) -> float:
-        """
-        Compute the Tanimoto similarity between two SMILES strings.
-
-        Tanimoto similarity is a metric used to compare the similarity of two chemical structures based
-        on their fingerprint representations. It ranges from 0.0 (no similarity) to 1.0 (identical).
-
-        Parameters
-        ----------
-        smiles1 : str
-            First SMILES string.
-        smiles2 : str
-            Second SMILES string.
-
-        Returns
-        -------
-        float
-            Tanimoto similarity score between 0.0 and 1.0.
-            Returns 0.0 if either SMILES is invalid.
-
-        Raises
-        ------
-        ValueError
-            If either `smiles1` or `smiles2` is not a string.
-        """
-        if not isinstance(smiles1, str) or not isinstance(smiles2, str):
-            raise ValueError("Both smiles1 and smiles2 must be strings.")
-
-        # Suppress RDKit error messages. Invalid SMILES errors overload logs early in training.
-        RDLogger.DisableLog('rdApp.error')
-        try:
-            mol1 = Chem.MolFromSmiles(smiles1)
-            mol2 = Chem.MolFromSmiles(smiles2)
-
-            if mol1 is None or mol2 is None:
-                return 0.0
-
-            fp1 = AllChem.GetMorganFingerprintAsBitVect(mol1, radius=2, nBits=2048)
-            fp2 = AllChem.GetMorganFingerprintAsBitVect(mol2, radius=2, nBits=2048)
-        finally:
-            RDLogger.EnableLog('rdApp.error')
-
-        return DataStructs.TanimotoSimilarity(fp1, fp2)
-
-    @staticmethod
-    def average_tanimoto_similarity(target_smiles: List[str], predicted_smiles: List[str]) -> float:
+    def average_tanimoto_similarity(self, target_smiles: List[str], predicted_smiles: List[str]) -> float:
         """
         Compute the average Tanimoto similarity across all SMILES pairs.
 
@@ -165,11 +122,68 @@ class SmilesStringMetrics:
 
         similarity_scores = []
         for ref_smiles, pred_smiles in zip(target_smiles, predicted_smiles):
-            similarity = SmilesStringMetrics.tanimoto_coefficient(ref_smiles, pred_smiles)
+            similarity = self.tanimoto_coefficient(ref_smiles, pred_smiles)
             similarity_scores.append(similarity)
 
-        average_similarity = (sum(similarity_scores) / len(similarity_scores)) if similarity_scores else 0.0
-        return average_similarity
+        if not similarity_scores:
+            return 0.0
+
+        return sum(similarity_scores) / len(similarity_scores)
+
+    def tanimoto_coefficient(self, target_smiles: str, predicted_smiles: str) -> float:
+        """
+        Compute the Tanimoto similarity between two SMILES strings.
+
+        Tanimoto similarity is a metric used to compare the similarity of two chemical structures based
+        on their fingerprint representations. It ranges from 0.0 (no similarity) to 1.0 (identical).
+
+        Parameters
+        ----------
+        target_smiles : str
+            Target SMILES string.
+        predicted_smiles : str
+            Predicted SMILES string.
+
+        Returns
+        -------
+        float
+            Tanimoto similarity score between 0.0 and 1.0.
+            Returns 0.0 if either SMILES is invalid.
+
+        Raises
+        ------
+        ValueError
+            If either `smiles1` or `smiles2` is not a string.
+        """
+        if not isinstance(target_smiles, str) or not isinstance(predicted_smiles, str):
+            raise ValueError("Both smiles1 and smiles2 must be strings.")
+
+        if self.target_morgan_fps is None:
+            self.target_morgan_fps = {}
+
+        # Suppress RDKit error messages. Invalid SMILES errors overload logs early in training.
+        RDLogger.DisableLog('rdApp.error')
+        try:
+            # Cache target SMILES Morgan Fingerprints as calculation is CPU intensive.
+            if target_smiles not in self.target_morgan_fps.keys():
+                target_mol: Mol = Chem.MolFromSmiles(target_smiles)
+
+                if target_mol is None:
+                    return 0.0
+
+                target_morgan_fp = AllChem.GetMorganFingerprintAsBitVect(target_mol, radius=2, nBits=2048)
+                self.target_morgan_fps[target_smiles] = target_morgan_fp
+
+            predicted_mol: Mol = Chem.MolFromSmiles(predicted_smiles)
+
+            if predicted_mol is None:
+                return 0.0
+
+            predicted_morgan_fp = AllChem.GetMorganFingerprintAsBitVect(predicted_mol, radius=2, nBits=2048)
+        finally:
+            RDLogger.EnableLog('rdApp.error')
+
+        return DataStructs.TanimotoSimilarity(self.target_morgan_fps[target_smiles], predicted_morgan_fp)
 
     @staticmethod
     def levenshtein_distance(target_smiles: List[str], predicted_smiles: List[str]) -> float:

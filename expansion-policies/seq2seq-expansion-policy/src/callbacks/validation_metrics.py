@@ -7,6 +7,7 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import Callback
 from tensorflow.summary import SummaryWriter
 
+from metrics.smiles_string_metrics import SmilesStringMetrics
 from data.utils.logging_utils import (extract_core_log_metrics, compute_metrics,
                                 log_metrics, print_metrics, log_sample_predictions,
                                 print_sample_predictions, log_to_tensorboard)
@@ -59,6 +60,8 @@ class ValidationMetricsCallback(Callback):
 
         os.makedirs(self.tensorboard_dir, exist_ok=True)
         self.file_writer = tf.summary.create_file_writer(self.tensorboard_dir)
+
+        self.smiles_string_metrics = SmilesStringMetrics()
 
     def on_epoch_end(self, epoch: int, logs: Optional[dict] = None) -> None:
         """
@@ -179,6 +182,7 @@ class ValidationMetricsCallback(Callback):
             hypotheses=hypotheses,
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
+            smiles_string_metrics=self.smiles_string_metrics,
             evaluation_stage='Validation'
         )
         metrics.update(custom_metrics)

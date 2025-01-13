@@ -78,6 +78,7 @@ def compute_metrics(
     hypotheses: List[List[str]],
     target_smiles: List[str],
     predicted_smiles: List[str],
+    smiles_string_metrics: SmilesStringMetrics,
     evaluation_stage: Optional[str] = None
 ) -> Dict[str, float]:
     """
@@ -116,10 +117,12 @@ def compute_metrics(
 
     metrics: Dict[str, float] = {
         'BLEU score': BleuScore.smoothed_corpus_bleu(references, hypotheses),
-        'Average Levenshtein Distance': SmilesStringMetrics.levenshtein_distance(target_smiles, predicted_smiles),
-        'Exact Match Accuracy': SmilesStringMetrics.smiles_exact_match(target_smiles, predicted_smiles),
-        'Chemical Validity Score': SmilesStringMetrics.chemical_validity(predicted_smiles),
-        'Average Tanimoto Similarity': SmilesStringMetrics.average_tanimoto_similarity(target_smiles, predicted_smiles)
+        'Average Levenshtein Distance': smiles_string_metrics.levenshtein_distance(target_smiles, predicted_smiles),
+        'Exact Match Accuracy': smiles_string_metrics.smiles_exact_match(target_smiles, predicted_smiles),
+        'Chemical Validity Score': smiles_string_metrics.chemical_validity(predicted_smiles),
+        'Average Tanimoto Similarity': smiles_string_metrics.average_tanimoto_similarity(
+            target_smiles, predicted_smiles
+        )
     }
 
     if evaluation_stage:
