@@ -401,9 +401,34 @@ class Trainer:
         if self.tokenizer is None:
             raise ValueError("Tokenizer is not initialized.")
 
-        test_dataset = self.data_loader.get_test_dataset()
         training_conf: Dict[str, Any] = self.config.get('training', {})
         model_conf: Dict[str, Any] = self.config.get('model', {})
+
+        test_dataset = self.data_loader.get_test_dataset()
+
+        # Get test subset fraction for partial test evaluation
+        test_subset_fraction: float = training_conf.get('test_subset_fraction', 1.0)
+
+        if test_subset_fraction < 0.0 or test_subset_fraction > 1.0:
+            raise ValueError(f"Test subset fraction must be a non-negative float under 1.0: "
+                             f"{test_subset_fraction} found")
+
+        if test_subset_fraction > 1.0:
+            test_dataset_size: int = self.data_loader.test_size
+            partial_count: int = int(test_dataset_size * test_subset_fraction)
+
+            # Shuffle and take the first `partial_count` samples
+            test_dataset = (
+                test_dataset
+                .shuffle(buffer_size=test_dataset_size, seed=self.data_loader.random_state)
+                .take(partial_count)
+            )
+
+            self._logger.info(
+                f"Subsampling test dataset to {partial_count} out of {test_dataset_size} "
+                f"({test_subset_fraction * 100:.1f}%)."
+            )
+
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
 
         # Evaluate the model on the test dataset

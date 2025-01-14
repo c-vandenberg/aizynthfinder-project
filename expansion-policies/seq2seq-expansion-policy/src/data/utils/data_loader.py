@@ -51,7 +51,6 @@ class DataLoader:
         max_decoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
         batch_size: int = DEFAULT_BATCH_SIZE,
         buffer_size: int = DEFAULT_BUFFER_SIZE,
-        test_size: float = DEFAULT_TEST_SIZE,
         random_state: int = DEFAULT_RANDOM_STATE,
         reverse_input_sequence: bool = DEFAULT_REVERSE_INPUT_SEQ_BOOL
     ) -> None:
@@ -64,7 +63,6 @@ class DataLoader:
         self.max_decoder_seq_length = max_decoder_seq_length
         self.batch_size = batch_size
         self.buffer_size = buffer_size
-        self.test_size = test_size
         self.random_state = random_state
 
         total_split = self.test_split + self.validation_split
@@ -85,6 +83,7 @@ class DataLoader:
         self.train_data = None
         self.valid_data = None
         self.test_data = None
+        self.test_dataset_size = None
 
     @property
     def vocab_size(self) -> int:
@@ -226,6 +225,9 @@ class DataLoader:
             random_state=self.random_state,
             shuffle=True
         )
+
+        # Store test dataset size for partial test evaluation
+        self.test_size = len(self.tokenised_products_x_test_data)
 
         # Adapt the tokeniser on the training data only
         combined_tokenised_train_data = self.tokenised_products_x_train_data + self.tokenised_reactants_y_train_data
