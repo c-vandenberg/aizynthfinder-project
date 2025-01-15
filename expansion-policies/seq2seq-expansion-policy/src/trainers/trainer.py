@@ -413,7 +413,7 @@ class Trainer:
             raise ValueError(f"Test subset fraction must be a non-negative float under 1.0: "
                              f"{test_subset_fraction} found")
 
-        if test_subset_fraction > 1.0:
+        if test_subset_fraction < 1.0:
             test_dataset_size: int = self.data_loader.test_size
             partial_count: int = int(test_dataset_size * test_subset_fraction)
 
