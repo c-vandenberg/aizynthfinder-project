@@ -52,7 +52,7 @@ class Trainer:
         """
         self.config:Dict[str, Any] = self.load_config(config_path)
 
-        self.tokenizer: Optional[SmilesTokeniser] = None
+        self.tokeniser: Optional[SmilesTokeniser] = None
         self.data_loader: Optional[DataLoader] = None
         self.vocab_size: Optional[int] = None
         self.encoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
@@ -138,7 +138,7 @@ class Trainer:
         self.data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokenizer = self.data_loader.smiles_tokeniser
+        self.tokeniser = self.data_loader.smiles_tokeniser
         self.vocab_size = self.data_loader.vocab_size
 
         # Save the tokenizer
@@ -175,7 +175,7 @@ class Trainer:
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
         try:
             with open(tokenizer_path, 'w') as f:
-                json.dump(self.tokenizer.word_index, f, indent=4)
+                json.dump(self.tokeniser.word_index, f, indent=4)
             self._logger.info(f"Tokenizer vocabulary saved to {tokenizer_path}")
         except IOError as e:
             self._logger.error(f"Failed to save tokenizer to {tokenizer_path}: {e}")
@@ -214,7 +214,7 @@ class Trainer:
             encoder_embedding_dim=encoder_embedding_dim,
             decoder_embedding_dim=decoder_embedding_dim,
             attention_dim=attention_dim,
-            smiles_tokenizer=self.tokenizer,
+            smiles_tokenizer=self.tokeniser,
             units=units,
             num_encoder_layers=encoder_num_layers,
             num_decoder_layers=decoder_num_layers,
@@ -325,7 +325,7 @@ class Trainer:
         valid_metrics_dir: str = training_conf.get('valid_metrics_dir', './validation-metrics')
         tensorboard_dir: str = training_conf.get('tensorboard_dir', './tensorboard')
         validation_metrics_callback: ValidationMetricsCallback = ValidationMetricsCallback(
-            tokenizer=self.tokenizer,
+            tokenizer=self.tokeniser,
             validation_data=self.data_loader.get_valid_dataset(),
             validation_metrics_dir=valid_metrics_dir,
             tensorboard_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
@@ -398,7 +398,7 @@ class Trainer:
         ValueError
             If tokenizer is not set or if required metrics functions are not available.
         """
-        if self.tokenizer is None:
+        if self.tokeniser is None:
             raise ValueError("Tokenizer is not initialized.")
 
         training_conf: Dict[str, Any] = self.config.get('training', {})
@@ -442,8 +442,8 @@ class Trainer:
         hypotheses: List[List[str]] = []
         target_smiles: List[str] = []
         predicted_smiles: List[str] = []
-        start_token: str = self.tokenizer.start_token
-        end_token: str = self.tokenizer.end_token
+        start_token: str = self.tokeniser.start_token
+        end_token: str = self.tokeniser.end_token
 
         beam_search_start_time: float = time.time()
         for (encoder_input, decoder_input), target_sequences in test_dataset:
@@ -452,19 +452,19 @@ class Trainer:
                 encoder_input=encoder_input,
                 beam_width=model_conf.get('beam_width', 5),
                 max_length=self.data_loader.max_decoder_seq_length,
-                start_token_id=self.tokenizer.word_index.get(start_token),
-                end_token_id=self.tokenizer.word_index.get(end_token),
+                start_token_id=self.tokeniser.word_index.get(start_token),
+                end_token_id=self.tokeniser.word_index.get(end_token),
                 return_top_n=1
             )
 
             top_predicted_sequences = [seq_list[0] for seq_list in predicted_sequences_list]
 
             # Convert sequences to text
-            predicted_texts: List[str]  = self.tokenizer.sequences_to_texts(
+            predicted_texts: List[str]  = self.tokeniser.sequences_to_texts(
                 top_predicted_sequences,
                 is_input_sequence=False
             )
-            target_texts: List[str]  = self.tokenizer.sequences_to_texts(
+            target_texts: List[str]  = self.tokeniser.sequences_to_texts(
                 target_sequences,
                 is_input_sequence=False
             )
