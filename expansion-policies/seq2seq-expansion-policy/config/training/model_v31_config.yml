@@ -53,10 +53,10 @@
 
 # Data Configuration and Hyperparameters
 data:
-  products_file: '../data/preprocessed/liu-et-al-ord-concatenated-smiles/products_smiles'
-  reactants_file: '../data/preprocessed/liu-et-al-ord-concatenated-smiles/reactants_smiles'
-  tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/tokenizer/model_v31_tokenizer.json'
-  logger_path: '../var/log/liu-et-al-ord-concatenated-smiles/model-v31/model-v31.log'
+  products_file: '../data/preprocessed/liu-et-al-ord-concatenated/products_smiles'
+  reactants_file: '../data/preprocessed/liu-et-al-ord-concatenated/reactants_smiles'
+  tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated/model-v31/tokenizer/model_v31_tokenizer.json'
+  logger_path: '../var/log/liu-et-al-ord-concatenated/model-v31/model-v31.log'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
@@ -84,13 +84,13 @@ training:
   epochs: 1000
   patience: 5
   reverse_tokenized_input_sequence: True
-  model_save_path: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/model/saved_model'
-  model_save_dir: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/model'
-  valid_metrics_dir: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/validation-metrics'
-  test_metrics_dir: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/testing-metrics'
-  tensorboard_dir: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/tensorboard'
-  log_dir: '../logs/liu-et-al-ord-concatenated-smiles/model-v31'
-  checkpoint_dir: '../data/training/liu-et-al-ord-concatenated-smiles/model-v31/checkpoints'
+  model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v31/model/saved_model'
+  model_save_dir: '../data/training/liu-et-al-ord-concatenated/model-v31/model'
+  valid_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v31/validation-metrics'
+  test_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v31/testing-metrics'
+  tensorboard_dir: '../data/training/liu-et-al-ord-concatenated/model-v31/tensorboard'
+  log_dir: '../logs/liu-et-al-ord-concatenated/model-v31'
+  checkpoint_dir: '../data/training/liu-et-al-ord-concatenated/model-v31/checkpoints'
   num_samples: null # Number of samples to use for debugging model
   test_subset_fraction: 0.1
 
