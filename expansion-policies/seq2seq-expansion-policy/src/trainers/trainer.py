@@ -127,11 +127,12 @@ class Trainer:
             test_split=data_conf.get('test_split', 0.1),
             validation_split=data_conf.get('validation_split', 0.1),
             num_samples=train_conf.get('num_samples'),
+            logger=self._logger,
             max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
             random_state=data_conf.get('random_state', 42),
-            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True)
+            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True),
         )
 
         # Load and prepare data

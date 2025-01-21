@@ -2,7 +2,7 @@ import os
 import glob
 import warnings
 import logging
-from typing import Generator, Tuple, List, Callable, Sequence
+from typing import Generator, Tuple, List, Callable, Sequence, Optional
 
 from ord_schema.message_helpers import load_message
 from ord_schema.proto import dataset_pb2
@@ -19,12 +19,18 @@ logging.basicConfig(level=logging.INFO)
 warnings.filterwarnings("ignore", message="DEPRECATION WARNING: please use MorganGenerator")
 
 class OpenReactionDatabaseExtractor:
-    def __init__(self, ord_data_dir: str, smiles_preprocessor: SmilesDataPreprocessor):
+    def __init__(
+        self,
+        ord_data_dir: str,
+        smiles_preprocessor: SmilesDataPreprocessor,
+        logger: logging.Logger
+    ):
         if not isinstance(smiles_preprocessor, SmilesDataPreprocessor):
             raise TypeError("smiles_preprocessor must be an instance of SmilesDataPreprocessor.")
 
         self.ord_data_dir: str = ord_data_dir
         self.smiles_preprocessor = smiles_preprocessor
+        self._logger = logger
 
     def extract_all_reactions(self)-> Generator[Tuple[str, str], None, None]:
         """
@@ -78,16 +84,32 @@ class OpenReactionDatabaseExtractor:
         get_template: Callable[[int], Chem.Mol],
         unmodified_indices=None
     ):
+        num_templates = get_template_count()
         mols = [get_template(i) for i in range(get_template_count())]
 
         if unmodified_indices is not None:
-            main_indices = [i for i in range(get_template_count()) if i not in unmodified_indices]
+            main_indices = [i for i in range(num_templates) if i not in unmodified_indices]
             mols = [mols[i] for i in main_indices]
 
+        valid_smiles_list: List = []
         for mol in mols:
+            # 1. Remove atom mapping
             self._remove_atom_mapping_from_mol(mol)
 
-        return [Chem.MolToSmiles(mol) for mol in mols]
+            # 2. Convert SMARTS or partial SMILES to SMILES
+            raw_smiles = Chem.MolToSmiles(mol, canonical=True)
+
+            # 3. Reparse SMILES to Mol to strictly validate
+            parsed = Chem.MolFromSmiles(raw_smiles)
+            if parsed is None:
+                self._logger.error(f"Invalid SMILES after SMARTS -> SMILES conversion: {raw_smiles}")
+                continue
+
+            # 4. If valid, do append final canonical SMILES to valid SMILES list
+            final_smiles = Chem.MolToSmiles(parsed, canonical=True, isomericSmiles=True)
+            valid_smiles_list.append(final_smiles)
+
+        return valid_smiles_list
 
     def _get_reactant_smiles_from_cleaned_rxn(
         self,
