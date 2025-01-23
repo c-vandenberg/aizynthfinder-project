@@ -15,6 +15,7 @@ from tensorflow.keras.callbacks import (
 from tensorflow.train import Checkpoint, CheckpointManager
 
 from data.utils.logging_utils import configure_logger
+from losses.losses import WeightedSparseCategoricalCrossEntropy
 from metrics.smiles_string_metrics import SmilesStringMetrics
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
@@ -126,8 +127,8 @@ class Trainer:
             reactants_file=data_conf.get('reactants_file', ''),
             test_split=data_conf.get('test_split', 0.1),
             validation_split=data_conf.get('validation_split', 0.1),
-            num_samples=train_conf.get('num_samples'),
             logger=self._logger,
+            num_samples=train_conf.get('num_samples'),
             max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
@@ -225,6 +226,15 @@ class Trainer:
 
         # Set up the optimiser
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
+
+        token_to_weight_map = self.tokeniser.build_token_weight_map(
+            token_counts=self.data_loader.token_counts
+        )
+
+        self.loss_function = WeightedSparseCategoricalCrossEntropy(
+            token_to_weight_map=token_to_weight_map,
+            from_logits=False
+        )
 
         # Set up the loss function and metrics.
         # For accuracy, because our sequences are integer-encoded, we have to specify `SparseCategoricalAccuracy`

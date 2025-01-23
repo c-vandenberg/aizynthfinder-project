@@ -55,8 +55,8 @@
 data:
   products_file: '../data/preprocessed/liu-et-al-ord-concatenated/products_smiles_cleaned_smarts'
   reactants_file: '../data/preprocessed/liu-et-al-ord-concatenated/reactants_smiles_cleaned_smarts'
-  tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated/model-v36/tokenizer/model_v36_tokenizer.json'
-  logger_path: '../var/log/liu-et-al-ord-concatenated/model-v36/model-v36.log'
+  tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated/model-v35/tokenizer/model_v35_tokenizer.json'
+  logger_path: '../var/log/liu-et-al-ord-concatenated/model-v35/model-v35.log'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 64
@@ -84,13 +84,13 @@ training:
   epochs: 20
   patience: 5
   reverse_tokenized_input_sequence: True
-  model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v36/model/saved_model'
-  model_save_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/model'
-  valid_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/validation-metrics'
-  test_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/testing-metrics'
-  tensorboard_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/tensorboard'
-  log_dir: '../logs/liu-et-al-ord-concatenated/model-v36'
-  checkpoint_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/checkpoints'
+  model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v35/model/saved_model'
+  model_save_dir: '../data/training/liu-et-al-ord-concatenated/model-v35/model'
+  valid_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v35/validation-metrics'
+  test_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v35/testing-metrics'
+  tensorboard_dir: '../data/training/liu-et-al-ord-concatenated/model-v35/tensorboard'
+  log_dir: '../logs/liu-et-al-ord-concatenated/model-v35'
+  checkpoint_dir: '../data/training/liu-et-al-ord-concatenated/model-v35/checkpoints'
   num_samples: null # Number of samples to use for debugging model
   test_subset_fraction: 0.01
 

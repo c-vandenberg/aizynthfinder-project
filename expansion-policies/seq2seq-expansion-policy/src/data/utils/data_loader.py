@@ -3,7 +3,6 @@ from typing import List, Tuple, Optional
 
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from collections import Counter
 
 from data.utils.tokenisation import SmilesTokeniser
 from data.utils.preprocessing import TokenisedSmilesPreprocessor, SmilesDataPreprocessor
@@ -48,8 +47,8 @@ class DataLoader:
         reactants_file: str,
         test_split: float,
         validation_split: float,
+        logger: logging.Logger,
         num_samples: Optional[int] = None,
-        logger: Optional[logging.Logger] = None,
         max_encoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
         max_decoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
         batch_size: int = DEFAULT_BATCH_SIZE,
@@ -61,8 +60,8 @@ class DataLoader:
         self.reactants_file = reactants_file
         self.test_split = test_split
         self.validation_split = validation_split
-        self.num_samples = num_samples
         self._logger = logger
+        self.num_samples = num_samples
         self.max_encoder_seq_length = max_encoder_seq_length
         self.max_decoder_seq_length = max_decoder_seq_length
         self.batch_size = batch_size
@@ -78,6 +77,7 @@ class DataLoader:
         self.train_split = 1.0 - total_split
 
         self._smiles_tokeniser = SmilesTokeniser(
+            logger=self._logger,
             reverse_input_sequence=reverse_input_sequence
         )
 
@@ -88,6 +88,8 @@ class DataLoader:
         self.valid_data = None
         self.test_data = None
         self.test_dataset_size = None
+
+        self.token_counts = None
 
     @property
     def vocab_size(self) -> int:
@@ -235,8 +237,10 @@ class DataLoader:
 
         # Adapt the tokeniser on the training data only
         combined_tokenised_train_data = self.tokenised_products_x_train_data + self.tokenised_reactants_y_train_data
-        self._log_token_frequencies(combined_tokenised_train_data)
         self.smiles_tokeniser.adapt(combined_tokenised_train_data)
+
+        # Extract token frequencies
+        self.token_counts = self._smiles_tokeniser.get_token_frequencies(combined_tokenised_train_data)
 
     def _preprocess_tokenised_datasets(self) -> None:
         """
@@ -393,18 +397,3 @@ class DataLoader:
             raise ValueError("Test data has not been loaded and preprocessed.")
 
         return self.get_dataset(self.test_data, training=False)
-
-    def _log_token_frequencies(self, tokenized_smiles_list):
-        token_counts = Counter()
-        for line in tokenized_smiles_list:
-            tokens = line.split()
-            token_counts.update(tokens)
-
-        total_count = sum(token_counts.values())
-        self._logger.info(f"Total tokens in dataset: {total_count}")
-        self._logger.info(f"Unique tokens: {len(token_counts)}\n")
-
-        # Sort by descending frequency
-        for token, count in token_counts.most_common():
-            percentage = count / total_count * 100
-            self._logger.info(f"Token: {token:10s} | Count: {count:7d} | {percentage:6.2f}%")

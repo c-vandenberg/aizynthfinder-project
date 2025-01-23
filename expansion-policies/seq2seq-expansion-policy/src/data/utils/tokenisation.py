@@ -1,4 +1,6 @@
+import logging
 import json
+from collections import Counter
 from typing import Dict, List, Union
 
 import numpy as np
@@ -45,12 +47,14 @@ class SmilesTokeniser:
     """
     def __init__(
         self,
+        logger: logging.Logger,
         start_token: str = '<START>',
         end_token: str = '<END>',
         oov_token: str = '',
         max_tokens: int = 150,
         reverse_input_sequence: bool = False
     ) -> None:
+        self._logger = logger
         self._start_token = start_token
         self._end_token = end_token
         self._oov_token = oov_token
@@ -237,6 +241,52 @@ class SmilesTokeniser:
                 tokens = tokens[::-1]
             texts.append(' '.join(tokens))
         return texts
+
+    def get_token_frequencies(self, tokenized_smiles_list) -> Dict:
+        token_counts = Counter()
+        for line in tokenized_smiles_list:
+            tokens = line.split()
+            token_counts.update(tokens)
+
+        total_count = sum(token_counts.values())
+        self._logger.info(f"Total tokens in dataset: {total_count}")
+        self._logger.info(f"Unique tokens: {len(token_counts)}\n")
+
+        # Sort by descending frequency
+        for token, count in token_counts.most_common():
+            percentage = count / total_count * 100
+            self._logger.info(f"Token: {token:10s} | Count: {count:7d} | {percentage:6.2f}%")
+
+        return dict(token_counts)
+
+    def build_token_weight_map(
+        self,
+        token_counts: Dict,
+        alpha: float = 1.0,
+        min_count: int = 1
+    ):
+        """
+        Build a 1D float32 tensor of shape [vocab_size],
+        where index i corresponds to the weight for token i.
+
+        Example weighting: weight = alpha / (frequency + 1)
+        so that rare tokens get higher weights.
+        """
+        vocab_size = len(self.word_index)
+        weights_array = np.zeros((vocab_size,), dtype=np.float32)
+
+        # Reverse mapping: idx->token
+        idx_to_token = {idx: tok for tok, idx in self.word_index.items()}
+
+        for idx in range(vocab_size):
+            token_str = idx_to_token[idx]
+            # Default to 0 or small frequency if token not found
+            freq = token_counts.get(token_str, 1)
+            freq = max(freq, min_count)  # to avoid divide by zero
+
+            weights_array[idx] = alpha / float(freq)
+
+        return tf.constant(weights_array, dtype=tf.float32)
 
     @property
     def start_token(self):
