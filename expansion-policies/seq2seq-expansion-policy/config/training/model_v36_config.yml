@@ -59,7 +59,7 @@ data:
   logger_path: '../var/log/liu-et-al-ord-concatenated/model-v36/model-v36.log'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
-  batch_size: 64
+  batch_size: 32
   test_split: 0.1
   validation_split: 0.1
   random_state: 4
@@ -81,7 +81,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 5
+  epochs: 20
   patience: 5
   reverse_tokenized_input_sequence: True
   model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v36/model/saved_model'
