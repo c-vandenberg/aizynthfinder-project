@@ -27,7 +27,7 @@ class SmilesTokeniser:
         Token representing out-of-vocabulary tokens (default is '').
     max_tokens : int, optional
         Maximum number of tokens in the vocabulary (default is 150).
-    reverse_input_sequence : bool, optional
+    _reverse_input_sequence : bool, optional
         Whether to reverse the input sequence during tokenization (default is False).
 
     Methods
@@ -60,7 +60,7 @@ class SmilesTokeniser:
         self._end_token = end_token
         self._oov_token = oov_token
         self._max_tokens = max_tokens
-        self.reverse_input_sequence = reverse_input_sequence
+        self._reverse_input_sequence = reverse_input_sequence
 
         # Initialize TextVectorization layer
         self.text_vectorization = TextVectorization(
@@ -122,36 +122,6 @@ class SmilesTokeniser:
 
         return smiles_tokenizer
 
-    def tokenize(self, smiles: str, is_input_sequence: bool) -> str:
-        """
-        Tokenizes a single SMILES string into individual characters.
-
-        Parameters
-        ----------
-        smiles : str
-            A SMILES string.
-        is_input_sequence : bool, optional
-            Is input SMILES string boolean.
-
-        Returns
-        -------
-        List[str]
-            A list of character tokens with start and end tokens.
-        """
-        basic_smiles_tokenizer = BasicSmilesTokenizer()
-        tokenized_smiles = basic_smiles_tokenizer.tokenize(smiles)
-
-        # Add start and end tokens
-        tokens = [self.start_token] + tokenized_smiles + [self.end_token]
-
-        # Reverse the SMILES tokens if required (excluding special tokens)
-        if self.reverse_input_sequence and is_input_sequence:
-            # Reverse only the SMILES tokens, keep start and end tokens in place
-            tokens = [self.start_token] + tokenized_smiles[::-1] + [self.end_token]
-
-        # Join tokens back into a string separated by spaces (required for TextVectorization)
-        return ' '.join(tokens)
-
     def tokenise_list(
         self,
         smiles_list: List[str],
@@ -172,7 +142,7 @@ class SmilesTokeniser:
         List[List[str]]
             A list of token lists.
         """
-        return [self.tokenize(smiles, is_input_sequence) for smiles in smiles_list]
+        return [self._tokenise(smiles, is_input_sequence) for smiles in smiles_list]
 
     def adapt(self, tokenized_smiles_list: List[str]) -> None:
         """
@@ -243,7 +213,7 @@ class SmilesTokeniser:
                 tokens = tokens[1:]
             if tokens and tokens[-1] == self.end_token:
                 tokens = tokens[:-1]
-            if self.reverse_input_sequence and is_input_sequence:
+            if self._reverse_input_sequence and is_input_sequence:
                 tokens = tokens[::-1]
             texts.append(' '.join(tokens))
         return texts
@@ -286,7 +256,8 @@ class SmilesTokeniser:
 
         for idx in range(vocab_size):
             token_str = idx_to_token[idx]
-            # Default to 0 or small frequency if token not found
+            # Default to 1 if the token isn't found in `token_counts` (i.e., a small nonzero freq to avoid dividing
+            # by zero)
             freq = token_counts.get(token_str, 1)
             freq = max(freq, min_count)  # to avoid divide by zero
 
@@ -297,6 +268,36 @@ class SmilesTokeniser:
             weights_array[idx] = alpha / math.log(float(freq) + math.e)
 
         return tf.constant(weights_array, dtype=tf.float32)
+
+    def _tokenise(self, smiles: str, is_input_sequence: bool) -> str:
+        """
+        Tokenises a single SMILES string into individual characters.
+
+        Parameters
+        ----------
+        smiles : str
+            A SMILES string.
+        is_input_sequence : bool, optional
+            Is input SMILES string boolean.
+
+        Returns
+        -------
+        List[str]
+            A list of character tokens with start and end tokens.
+        """
+        basic_smiles_tokenizer = BasicSmilesTokenizer()
+        tokenized_smiles = basic_smiles_tokenizer.tokenize(smiles)
+
+        # Add start and end tokens
+        tokens = [self.start_token] + tokenized_smiles + [self.end_token]
+
+        # Reverse the SMILES tokens if required (excluding special tokens)
+        if self._reverse_input_sequence and is_input_sequence:
+            # Reverse only the SMILES tokens, keep start and end tokens in place
+            tokens = [self.start_token] + tokenized_smiles[::-1] + [self.end_token]
+
+        # Join tokens back into a string separated by spaces (required for TextVectorization)
+        return ' '.join(tokens)
 
     @property
     def max_tokens(self) -> int:

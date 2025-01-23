@@ -80,6 +80,7 @@ class DataLoader:
 
         self._smiles_tokeniser = SmilesTokeniser(
             logger=self._logger,
+            max_tokens=self._max_tokens,
             reverse_input_sequence=reverse_input_sequence
         )
 
@@ -401,6 +402,7 @@ class DataLoader:
         int
             Vocabulary size.
         """
+        self._logger.info(f"Tokeniser Vocabulary Size: {self._smiles_tokeniser.vocab_size}")
         return self._smiles_tokeniser.vocab_size
 
     @property
@@ -414,3 +416,39 @@ class DataLoader:
             The SMILES tokeniser used for tokenising SMILES strings.
         """
         return self._smiles_tokeniser
+
+    @property
+    def test_size(self) -> int:
+        """
+        Returns the number of data points in the test dataset.
+
+        Returns
+        -------
+        int
+            Test dataset size.
+        """
+        return self._test_size
+
+    @property
+    def max_decoder_seq_length(self) -> int:
+        """
+        Returns the maximum length of the decoder sequence.
+
+        Returns
+        -------
+        int
+            Decoder sequence maximum length.
+        """
+        return self._max_decoder_seq_length
+
+    @property
+    def random_state(self) -> int:
+        """
+        Returns the random state seed integer.
+
+        Returns
+        -------
+        int
+            Random state seed.
+        """
+        return self._random_state
