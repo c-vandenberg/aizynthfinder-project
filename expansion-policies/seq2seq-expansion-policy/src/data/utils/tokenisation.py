@@ -1,5 +1,6 @@
 import logging
 import json
+import math
 from collections import Counter
 from typing import Dict, List, Union
 
@@ -58,6 +59,7 @@ class SmilesTokeniser:
         self._start_token = start_token
         self._end_token = end_token
         self._oov_token = oov_token
+        self._max_tokens = max_tokens
         self.reverse_input_sequence = reverse_input_sequence
 
         # Initialize TextVectorization layer
@@ -70,10 +72,13 @@ class SmilesTokeniser:
             pad_to_max_tokens=False,
         )
 
+        self._token_counts = None
+
     @classmethod
     def from_json(
         cls,
         tokenizer_path: str,
+        logger: logging.Logger,
         reverse_input_sequence: bool = False,
         start_token: str = '<START>',
         end_token: str = '<END>',
@@ -105,6 +110,7 @@ class SmilesTokeniser:
 
         # Initialize a new SmilesTokenizer instance
         smiles_tokenizer = cls(
+            logger=logger,
             start_token=start_token,
             end_token=end_token,
             oov_token=oov_token,
@@ -242,7 +248,7 @@ class SmilesTokeniser:
             texts.append(' '.join(tokens))
         return texts
 
-    def get_token_frequencies(self, tokenized_smiles_list) -> Dict:
+    def calculate_token_frequencies(self, tokenized_smiles_list) -> Dict:
         token_counts = Counter()
         for line in tokenized_smiles_list:
             tokens = line.split()
@@ -257,13 +263,13 @@ class SmilesTokeniser:
             percentage = count / total_count * 100
             self._logger.info(f"Token: {token:10s} | Count: {count:7d} | {percentage:6.2f}%")
 
-        return dict(token_counts)
+        self._token_counts = dict(token_counts)
 
     def build_token_weight_map(
         self,
         token_counts: Dict,
-        alpha: float = 1.0,
-        min_count: int = 1
+        alpha: float = 0.1,
+        min_count: int = 10
     ):
         """
         Build a 1D float32 tensor of shape [vocab_size],
@@ -284,42 +290,59 @@ class SmilesTokeniser:
             freq = token_counts.get(token_str, 1)
             freq = max(freq, min_count)  # to avoid divide by zero
 
-            weights_array[idx] = alpha / float(freq)
+            # Square root weighting
+            ## weights_array[idx] = alpha / math.sqrt(freq)
+
+            # Log Weighting
+            weights_array[idx] = alpha / math.log(float(freq) + math.e)
 
         return tf.constant(weights_array, dtype=tf.float32)
 
     @property
-    def start_token(self):
+    def max_tokens(self) -> int:
+        """
+        Returns the tokeniser vocabulary maximum number of tokens.
+
+        Returns
+        -------
+        max_tokens: int
+            The start token.
+        """
+
+        return self._max_tokens
+
+    @property
+    def start_token(self) -> str:
         """
         Returns the start token used in tokenization.
 
         Returns
         -------
-        str
+        start_token: str
             The start token.
         """
         return self._start_token
 
     @property
-    def end_token(self):
+    def end_token(self) -> str:
         """
         Returns the end token used in tokenization.
 
         Returns
         -------
-        str
+        end_token: str
             The end token.
         """
         return self._end_token
 
     @property
-    def oov_token(self):
+    def oov_token(self) -> str:
         """
         Returns the out-of-vocabulary (OOV) token used in tokenization.
 
         Returns
         -------
-        str
+        oov_token: str
             The OOV token.
         """
         return self._oov_token
@@ -331,20 +354,32 @@ class SmilesTokeniser:
 
         Returns
         -------
-        dict
+        word_index: dict
             Word to index mapping.
         """
         vocab = self.text_vectorization.get_vocabulary()
         return {word: idx for idx, word in enumerate(vocab)}
 
     @property
-    def vocab_size(self):
+    def vocab_size(self) -> int:
         """
         Gets the size of the vocabulary.
 
         Returns
         -------
-        int
+        vocab_size: int
             Vocabulary size.
         """
         return len(self.text_vectorization.get_vocabulary())
+
+    @property
+    def token_counts(self) -> Dict:
+        """
+        Gets the counts for each token in the vocabulary.
+
+        Returns
+        -------
+        token_counts: Dict
+            Token counts.
+        """
+        return self._token_counts

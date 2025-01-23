@@ -133,7 +133,8 @@ class Trainer:
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
             random_state=data_conf.get('random_state', 42),
-            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True),
+            max_tokens = data_conf.get('max_tokens', 150),
+            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True)
         )
 
         # Load and prepare data
@@ -197,6 +198,7 @@ class Trainer:
             If required model configuration keys are missing.
         """
         model_conf: Dict[str, Any] = self.config.get('model', {})
+        data_conf: Dict[str, Any] = self.config.get('data', {})
 
         # Retrieve model parameters with defaults
         encoder_embedding_dim: int = model_conf.get('encoder_embedding_dim', 256)
@@ -227,19 +229,30 @@ class Trainer:
         # Set up the optimiser
         self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
-        token_to_weight_map = self.tokeniser.build_token_weight_map(
-            token_counts=self.data_loader.token_counts
-        )
-
-        self.loss_function = WeightedSparseCategoricalCrossEntropy(
-            token_to_weight_map=token_to_weight_map,
-            from_logits=False
-        )
-
         # Set up the loss function and metrics.
-        # For accuracy, because our sequences are integer-encoded, we have to specify `SparseCategoricalAccuracy`
-        # (Kera's default accuracy is CategoricalAccuracy, which is for sequences that are one-hot encoded)
-        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
+        # For loss:
+        #   - If `use_weighted_loss` config is `True`, we build a token-to-weight map where a tokens weight is
+        #     dictated by its frequency in the training dataset. These weights are then applied to each token class in
+        #     a custom `WeightedSparseCategoricalCrossEntropy`.
+        #   - If `use_weighted_loss` config is `False`, we simply use the core
+        #     `tf.keras.losses.SparseCategoricalCrossentropy()` method.
+        #
+        # For accuracy:
+        #   - Because our sequences are integer-encoded, we have to specify `SparseCategoricalAccuracy`
+        #     (Kera's default accuracy is CategoricalAccuracy, which is for sequences that are one-hot encoded)
+        use_weighted_loss: bool = data_conf.get('use_weighted_loss', False)
+        if use_weighted_loss:
+            token_to_weight_map = self.tokeniser.build_token_weight_map(
+                token_counts=self.tokeniser.token_counts
+            )
+
+            self.loss_function = WeightedSparseCategoricalCrossEntropy(
+                token_to_weight_map=token_to_weight_map,
+                from_logits=False
+            )
+        else:
+            self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
+
         self.metrics = [
             tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
             Perplexity(loss_function=self.loss_function)
@@ -341,7 +354,7 @@ class Trainer:
             validation_metrics_dir=valid_metrics_dir,
             tensorboard_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
             logger=self._logger,
-            max_length=self.data_loader.max_decoder_seq_length
+            max_length=self.data_loader._max_decoder_seq_length
         )
 
         # TensorBoard
@@ -431,7 +444,7 @@ class Trainer:
             # Shuffle and take the first `partial_count` samples
             test_dataset = (
                 test_dataset
-                .shuffle(buffer_size=test_dataset_size, seed=self.data_loader.random_state)
+                .shuffle(buffer_size=test_dataset_size, seed=self.data_loader._random_state)
                 .take(partial_count)
             )
 
@@ -462,7 +475,7 @@ class Trainer:
             predicted_sequences_list, predicted_scores_list = self.model.predict_sequence_beam_search(
                 encoder_input=encoder_input,
                 beam_width=model_conf.get('beam_width', 5),
-                max_length=self.data_loader.max_decoder_seq_length,
+                max_length=self.data_loader._max_decoder_seq_length,
                 start_token_id=self.tokeniser.word_index.get(start_token),
                 end_token_id=self.tokeniser.word_index.get(end_token),
                 return_top_n=1

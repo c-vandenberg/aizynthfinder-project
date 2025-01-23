@@ -131,7 +131,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             The loaded SMILES tokenizer.
         """
         self._logger.info(f"Loading tokenizer from {tokenizer_path}")
-        tokenizer: SmilesTokeniser = SmilesTokeniser.from_json(tokenizer_path)
+        tokenizer: SmilesTokeniser = SmilesTokeniser.from_json(tokenizer_path, self._logger)
         self._logger.info("Tokenizer loaded successfully.")
 
         return tokenizer
