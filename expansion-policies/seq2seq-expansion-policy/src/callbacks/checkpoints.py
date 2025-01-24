@@ -16,9 +16,9 @@ class BestValLossCallback(Callback):
 
     Attributes
     ----------
-    checkpoint_manager : tf.train.CheckpointManager
+    _checkpoint_manager : tf.train.CheckpointManager
         Manages the saving of checkpoints.
-    best_val_loss : float
+    _best_val_loss : float
         Tracks the best validation loss observed so far.
 
     Methods
@@ -28,8 +28,8 @@ class BestValLossCallback(Callback):
     """
     def __init__(self, checkpoint_manager: CheckpointManager) -> None:
         super(BestValLossCallback, self).__init__()
-        self.checkpoint_manager: CheckpointManager = checkpoint_manager
-        self.best_val_loss: float = float('inf')  # Initialize as infinity
+        self._checkpoint_manager: CheckpointManager = checkpoint_manager
+        self._best_val_loss: float = float('inf')  # Initialize as infinity
 
         self._logger = logging.getLogger(__name__)
 
@@ -47,9 +47,9 @@ class BestValLossCallback(Callback):
         logs = logs or {}
         current_val_loss: float = logs.get('val_loss')
         if current_val_loss is not None:
-            if current_val_loss < self.best_val_loss:
-                self.best_val_loss = current_val_loss
-                save_path: str = self.checkpoint_manager.save()
+            if current_val_loss < self._best_val_loss:
+                self._best_val_loss = current_val_loss
+                save_path: str = self._checkpoint_manager.save()
                 self._logger.info(
                     f"\nEpoch {epoch+1}: Validation loss improved to {current_val_loss:.4f}. "
                     f"Saving checkpoint to {save_path}"
