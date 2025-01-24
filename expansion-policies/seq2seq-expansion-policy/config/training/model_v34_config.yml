@@ -53,8 +53,8 @@
 
 # Data Configuration and Hyperparameters
 data:
-  products_file: '../data/preprocessed/liu-et-al-ord-concatenated/products_smiles'
-  reactants_file: '../data/preprocessed/liu-et-al-ord-concatenated/reactants_smiles'
+  products_file: '../data/preprocessed/liu-et-al-ord-concatenated/products_smiles_cleaned_smarts'
+  reactants_file: '../data/preprocessed/liu-et-al-ord-concatenated/reactants_smiles_cleaned_smarts'
   tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated/model-v34/tokenizer/model_v34_tokenizer.json'
   logger_path: '../var/log/liu-et-al-ord-concatenated/model-v34/model-v34.log'
   max_encoder_seq_length: 140
@@ -81,7 +81,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 5
+  epochs: 20
   patience: 5
   reverse_tokenized_input_sequence: True
   model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v34/model/saved_model'

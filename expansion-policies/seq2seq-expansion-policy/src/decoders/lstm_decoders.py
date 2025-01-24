@@ -21,15 +21,15 @@ class StackedLSTMDecoder(DecoderInterface):
     Architecture:
         - Embedding Layer: Transforms target token indices into dense embedding vectors.
         - Stacked LSTM Layers: Processes embeddings through multiple LSTM layers to capture sequential dependencies
-                                    and patterns.
+            and patterns.
         - Dropout Layers: Applies dropout after each LSTM layer for regularization.
         - Layer Normalization Layers: Normalizes the outputs of each LSTM layer to stabilize and accelerate training.
         - Residual Connections: Implements residual (skip) connections from the embeddings to deeper LSTM layers to
-                                    facilitate gradient flow and mitigate vanishing gradient issues.
+            facilitate gradient flow and mitigate vanishing gradient issues.
         - Attention Mechanism: Utilizes a Bahdanau attention mechanism to focus on relevant parts of the encoder's
-                                    outputs during decoding.
+            outputs during decoding.
         - Projection Layers for Residual Connections: Transforms decoder outputs and context vectors before adding
-                                    them together for residual connections around the attention mechanism.
+            them together for residual connections around the attention mechanism.
         - Output Dense Layer: Produces probability distributions over the target vocabulary via softmax activation.
 
     Parameters
@@ -51,23 +51,23 @@ class StackedLSTMDecoder(DecoderInterface):
 
     Attributes
     ----------
-    embedding : Embedding
+    _embedding : Embedding
         Embedding layer that transforms target token indices into dense vectors.
-    lstm_layers : List[LSTM]
+    _lstm_layers : List[LSTM]
         List of stacked LSTM layers.
-    dropout_layers : List[Dropout]
+    _dropout_layers : List[Dropout]
         List of Dropout layers applied after each LSTM layer.
-    layer_norm_layers : List[LayerNormalization]
+    _layer_norm_layers : List[LayerNormalization]
         List of Layer Normalization layers applied after each LSTM layer.
-    attention : BahdanauAttention
+    _attention : BahdanauAttention
         Bahdanau attention mechanism instance.
-    decoder_dense : Dense
+    _decoder_dense : Dense
         Dense layer transforming decoder outputs for residual connections.
-    context_dense : Dense
+    _context_dense : Dense
         Dense layer transforming context vectors for residual connections.
-    output_layer_norm : LayerNormalization
+    _output_layer_norm : LayerNormalization
         Layer Normalization applied after residual connections.
-    dense : Dense
+    _dense : Dense
         Output Dense layer that produces probability distributions over the target vocabulary.
 
     Methods
@@ -97,24 +97,24 @@ class StackedLSTMDecoder(DecoderInterface):
         attention_dim: int,
         dropout_rate: float = 0.2,
         weight_decay: float = 1e-4,
+        supports_masking: Optional[bool] = True,
         **kwargs
     ) -> None:
         super(StackedLSTMDecoder, self).__init__(**kwargs)
-        self.vocab_size = vocab_size
-        self.embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
-        self.units = units
-        self.num_layers = num_layers
-        self.vocab_size = vocab_size
-        self.attention_dim = attention_dim
-        self.dropout_rate = dropout_rate
-        self.weight_decay = weight_decay
+        self._vocab_size = vocab_size
+        self._embedding = Embedding(vocab_size, decoder_embedding_dim, mask_zero=True)
+        self._units = units
+        self._num_layers = num_layers
+        self._attention_dim = attention_dim
+        self._dropout_rate = dropout_rate
+        self._weight_decay = weight_decay
 
-        self.supports_masking = True
+        self._supports_masking = supports_masking
 
         # Build LSTM, Dropout, and LayerNormalization layers
-        self.lstm_layers = []
-        self.dropout_layers = []
-        self.layer_norm_layers = []
+        self._lstm_layers = []
+        self._dropout_layers = []
+        self._layer_norm_layers = []
         for i in range(num_layers):
             lstm_layer = LSTM(
                 units=units,
@@ -123,26 +123,26 @@ class StackedLSTMDecoder(DecoderInterface):
                 kernel_regularizer=l2(weight_decay) if weight_decay is not None else None,
                 name=f'lstm_decoder_{i + 1}'
             )
-            self.lstm_layers.append(lstm_layer)
+            self._lstm_layers.append(lstm_layer)
 
             dropout_layer = Dropout(dropout_rate, name=f'decoder_dropout_{i + 1}')
-            self.dropout_layers.append(dropout_layer)
+            self._dropout_layers.append(dropout_layer)
 
             layer_norm_layer = LayerNormalization(name=f'decoder_layer_norm_{i + 1}')
-            self.layer_norm_layers.append(layer_norm_layer)
+            self._layer_norm_layers.append(layer_norm_layer)
 
         # Attention Mechanism
-        self.attention: BahdanauAttention = BahdanauAttention(
+        self._attention: BahdanauAttention = BahdanauAttention(
             units=attention_dim
         )
 
         # Projection layers for residual connection
-        self.decoder_dense = Dense(self.units, name='decoder_dense')
-        self.context_dense = Dense(self.units, name='context_dense')
-        self.output_layer_norm = LayerNormalization(name='output_layer_norm')
+        self._decoder_dense = Dense(self._units, name='decoder_dense')
+        self._context_dense = Dense(self._units, name='context_dense')
+        self._output_layer_norm = LayerNormalization(name='output_layer_norm')
 
         # Output layer
-        self.dense: Dense = Dense(
+        self._dense: Dense = Dense(
             vocab_size,
             activation='softmax',
             kernel_regularizer=l2(weight_decay) if weight_decay is not None else None
@@ -231,13 +231,13 @@ class StackedLSTMDecoder(DecoderInterface):
         # Process through decoder layers
         new_states: List[tf.Tensor] = []
         for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
-                zip(self.lstm_layers, self.dropout_layers, self.layer_norm_layers)
+                zip(self._lstm_layers, self._dropout_layers, self._layer_norm_layers)
         ):
             state_h, state_c = states_list[i]
             if state_h is None or state_c is None:
                 batch_size = tf.shape(decoder_output)[0]
-                state_h = tf.zeros((batch_size, self.units))
-                state_c = tf.zeros((batch_size, self.units))
+                state_h = tf.zeros((batch_size, self._units))
+                state_c = tf.zeros((batch_size, self._units))
 
             decoder_output, state_h, state_c = lstm_layer(
                 decoder_output,
@@ -269,24 +269,24 @@ class StackedLSTMDecoder(DecoderInterface):
         # Apply attention mechanism
         context_vector: tf.Tensor  # Shape: (batch_size, seq_len_dec, enc_units)
         attention_weights: tf.Tensor  # Shape: (batch_size, seq_len_dec, seq_len_enc)
-        context_vector, attention_weights = self.attention(
+        context_vector, attention_weights = self._attention(
             inputs=[encoder_output, decoder_output],
             mask=encoder_mask
         )
 
         # Transform decoder_output and context_vector for residual connections around attention mechanism
-        decoder_transformed = self.decoder_dense(decoder_output)  # Shape: (batch_size, seq_len_dec, units)
-        context_transformed = self.context_dense(context_vector)  # Shape: (batch_size, seq_len_dec, units)
+        decoder_transformed = self._decoder_dense(decoder_output)  # Shape: (batch_size, seq_len_dec, units)
+        context_transformed = self._context_dense(context_vector)  # Shape: (batch_size, seq_len_dec, units)
 
         # Add transformed decoder outputs and context vector together for residual connection
         decoder_output = decoder_transformed + context_transformed # Shape: (batch_size, seq_len_dec, units)
 
         # Apply layer normalization and activation
-        decoder_output = self.output_layer_norm(decoder_output)
+        decoder_output = self._output_layer_norm(decoder_output)
         decoder_output = tf.nn.relu(decoder_output)
 
         # Generate output probabilities
-        decoder_output: tf.Tensor = self.dense(decoder_output)
+        decoder_output: tf.Tensor = self._dense(decoder_output)
 
         return decoder_output
 
@@ -351,7 +351,7 @@ class StackedLSTMDecoder(DecoderInterface):
 
         # 4) Process `decoder_input` through each stacked LSTM decoder layer
         for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
-                zip(self.lstm_layers, self.dropout_layers, self.layer_norm_layers)
+                zip(self._lstm_layers, self._dropout_layers, self._layer_norm_layers)
         ):
             # Extract h, c states for this LSTM layer
             state_h, state_c = states_list[i]
@@ -384,25 +384,25 @@ class StackedLSTMDecoder(DecoderInterface):
         # 5) Apply attention mechanism
         context_vector: tf.Tensor  # Shape: (batch_size, 1, enc_units)
         attention_weights: tf.Tensor  # Shape: (batch_size, 1, seq_len_enc)
-        context_vector, attention_weights = self.attention(
+        context_vector, attention_weights = self._attention(
             inputs=[encoder_output, decoder_output],
             mask=None  # No mask during inference
         )
 
         # 6) Apply the post-attention residual and normalisation
         #    Transform decoder_output and context_vector for residual connections around attention mechanism
-        decoder_transformed = self.decoder_dense(decoder_output)  # Shape: (batch_size, 1, units)
-        context_transformed = self.context_dense(context_vector)  # Shape: (batch_size, 1, units)
+        decoder_transformed = self._decoder_dense(decoder_output)  # Shape: (batch_size, 1, units)
+        context_transformed = self._context_dense(context_vector)  # Shape: (batch_size, 1, units)
 
         # Add transformed decoder outputs and context vector together for residual connection
         decoder_output = decoder_transformed + context_transformed  # Shape: (batch_size, 1, units)
 
         # Apply layer normalization and ReLu activation
-        decoder_output = self.output_layer_norm(decoder_output)
+        decoder_output = self._output_layer_norm(decoder_output)
         decoder_output = tf.nn.relu(decoder_output)
 
         # 7) Generate output probability distributions
-        decoder_output = self.dense(decoder_output)  # Shape: (batch_size, 1, vocab_size)
+        decoder_output = self._dense(decoder_output)  # Shape: (batch_size, 1, vocab_size)
 
         return decoder_output, new_states
 
@@ -451,13 +451,13 @@ class StackedLSTMDecoder(DecoderInterface):
         """
         config = super().get_config()
         config.update({
-            'vocab_size': self.vocab_size,
-            'decoder_embedding_dim': self.embedding.output_dim,
-            'units': self.units,
-            'num_layers': self.num_layers,
-            'attention_dim': self.attention_dim,
-            'dropout_rate': self.dropout_rate,
-            'weight_decay': self.weight_decay
+            'vocab_size': self._vocab_size,
+            'decoder_embedding_dim': self._embedding.output_dim,
+            'units': self._units,
+            'num_layers': self._num_layers,
+            'attention_dim': self._attention_dim,
+            'dropout_rate': self._dropout_rate,
+            'weight_decay': self._weight_decay
         })
         return config
 
@@ -480,3 +480,27 @@ class StackedLSTMDecoder(DecoderInterface):
             A new instance of `StackedLSTMDecoder` configured using the provided config.
         """
         return cls(**config)
+
+    @property
+    def embedding(self) -> Embedding:
+        """
+        Returns the Embedding layer that transforms target token indices into dense vectors.
+
+        Returns
+        -------
+        Embedding
+            The decoders embedding layer.
+        """
+        return self._embedding
+
+    @property
+    def num_layers(self):
+        """
+        Returns the number of stacked LSTM layers in the decoder.
+
+        Returns
+        -------
+        int
+            Number of stacked LSTM layers (default is 4).
+        """
+        return self._num_layers

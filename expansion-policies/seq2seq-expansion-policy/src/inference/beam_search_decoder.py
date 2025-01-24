@@ -27,25 +27,25 @@ class BeamSearchDecoder:
 
     Attributes
     ----------
-    decoder : DecoderInterface
+    _decoder : DecoderInterface
         The decoder instance used for generating predictions.
-    beam_width : int
+    _beam_width : int
         The number of beams to keep during search.
-    num_groups : int
+    _num_groups : int
         The number of groups for diversity in beam search.
-    group_size : int
+    _group_size : int
         The size of each group in beam search.
-    diversity_strength : float
+    _diversity_strength : float
         The strength of the diversity penalty.
-    max_length : int
+    _max_length : int
         The maximum length of the generated sequences.
-    start_token_id : Optional[int]
+    _start_token_id : Optional[int]
         The token ID representing the start of a sequence.
-    end_token_id : Optional[int]
+    _end_token_id : Optional[int]
         The token ID representing the end of a sequence.
-    length_penalty : float
+    _length_penalty : float
         The penalty applied to longer sequences.
-    return_top_n : int
+    _return_top_n : int
         The number of top sequences to return.
 
 
@@ -66,16 +66,16 @@ class BeamSearchDecoder:
         length_penalty: float = 1.0,
         return_top_n: int = 1
     ) -> None:
-        self.decoder = decoder
-        self.beam_width = beam_width
-        self.num_groups = num_groups
-        self.group_size = beam_width // num_groups
-        self.diversity_strength = diversity_strength
-        self.max_length = max_length
-        self.start_token_id = start_token_id
-        self.end_token_id = end_token_id
-        self.length_penalty = length_penalty
-        self.return_top_n = return_top_n
+        self._decoder = decoder
+        self._beam_width = beam_width
+        self._num_groups = num_groups
+        self._group_size = beam_width // num_groups
+        self._diversity_strength = diversity_strength
+        self._max_length = max_length
+        self._start_token_id = start_token_id
+        self._end_token_id = end_token_id
+        self._length_penalty = length_penalty
+        self._return_top_n = return_top_n
 
     def search(
         self,
@@ -108,25 +108,25 @@ class BeamSearchDecoder:
         batch_size = tf.shape(encoder_output)[0]
 
         # Initialize sequences with the start token
-        start_tokens = tf.fill([batch_size, 1], self.start_token_id)
-        sequences = tf.tile(start_tokens, [1, self.beam_width])
+        start_tokens = tf.fill([batch_size, 1], self._start_token_id)
+        sequences = tf.tile(start_tokens, [1, self._beam_width])
 
         # Initialize scores with zeros
-        scores = tf.zeros([batch_size, self.beam_width], dtype=tf.float32)
+        scores = tf.zeros([batch_size, self._beam_width], dtype=tf.float32)
 
         # Initialize completed sequences and their scores
         completed_sequences = [[] for _ in range(batch_size)]
         completed_scores = [[] for _ in range(batch_size)]
 
         # Initialize finished flags
-        finished = tf.zeros([batch_size, self.beam_width], dtype=tf.bool)
+        finished = tf.zeros([batch_size, self._beam_width], dtype=tf.bool)
 
         # Expand encoder outputs for beam search
         encoder_outputs = tf.expand_dims(encoder_output, axis=1)
-        encoder_outputs = tf.tile(encoder_outputs, [1, self.beam_width, 1, 1])
+        encoder_outputs = tf.tile(encoder_outputs, [1, self._beam_width, 1, 1])
         flat_encoder_outputs = tf.reshape(
             encoder_outputs,
-            [batch_size * self.beam_width, -1, encoder_output.shape[-1]]
+            [batch_size * self._beam_width, -1, encoder_output.shape[-1]]
         )
 
         # Tile the initial decoder states for beam search
@@ -135,19 +135,19 @@ class BeamSearchDecoder:
             tiled_state = tf.expand_dims(state, axis=1)
             tiled_state = tf.tile(
                 tiled_state,
-                [1, self.beam_width, 1]
+                [1, self._beam_width, 1]
             )
-            tiled_initial_states.append(tf.reshape(tiled_state, [batch_size * self.beam_width, -1]))
+            tiled_initial_states.append(tf.reshape(tiled_state, [batch_size * self._beam_width, -1]))
 
         # Flatten initial decoder states
         flat_decoder_states = tiled_initial_states
 
-        for t in range(self.max_length):
+        for t in range(self._max_length):
             # Initialize per-batch, per-group tokens to keep track of tokens selected in each group at current time step
-            group_tokens = [ [ [] for _ in range(batch_size) ] for _ in range(self.num_groups) ]
+            group_tokens = [[ [] for _ in range(batch_size) ] for _ in range(self._num_groups)]
 
             # Reshape current sequences to [batch_size * beam_width, current_seq_length]
-            flat_sequences = tf.reshape(sequences, [batch_size * self.beam_width, -1])
+            flat_sequences = tf.reshape(sequences, [batch_size * self._beam_width, -1])
 
             # Get the last token from each sequence
             last_tokens = flat_sequences[:, -1]
@@ -156,7 +156,7 @@ class BeamSearchDecoder:
             decoder_input = tf.expand_dims(last_tokens, axis=1)
 
             # Run decoder single step
-            decoder_output, new_states = self.decoder.single_step(
+            decoder_output, new_states = self._decoder.single_step(
                 decoder_input,
                 flat_decoder_states,
                 flat_encoder_outputs
@@ -173,7 +173,7 @@ class BeamSearchDecoder:
             log_probs = log_probs / temperature
 
             # Reshape log_probs to [batch_size, beam_width, vocab_size]
-            log_probs = tf.reshape(log_probs, [batch_size, self.beam_width, -1])
+            log_probs = tf.reshape(log_probs, [batch_size, self._beam_width, -1])
 
             # Add random noise to promote diversity
             epsilon = 1e-1  # Increased epsilon
@@ -192,10 +192,10 @@ class BeamSearchDecoder:
             all_topk_indices = []
             all_beam_indices = []
 
-            for group_idx in range(self.num_groups):
+            for group_idx in range(self._num_groups):
                 # Compute group offsets
-                group_start = group_idx * self.group_size
-                group_end = group_start + self.group_size
+                group_start = group_idx * self._group_size
+                group_end = group_start + self._group_size
 
                 # Extract log_probs and scores for this group
                 group_log_probs = log_probs[:, group_start:group_end, :]
@@ -215,13 +215,13 @@ class BeamSearchDecoder:
 
                         if penalized_tokens:
                             penalized_tokens = tf.constant(penalized_tokens, dtype=tf.int32)
-                            updates = tf.ones_like(penalized_tokens, dtype=tf.float32) * self.diversity_strength
+                            updates = tf.ones_like(penalized_tokens, dtype=tf.float32) * self._diversity_strength
 
                             # Build indices
                             indices = tf.stack(
                                 [
-                                    tf.repeat(tf.range(self.group_size), len(penalized_tokens)),
-                                    tf.tile(penalized_tokens, [self.group_size])
+                                    tf.repeat(tf.range(self._group_size), len(penalized_tokens)),
+                                    tf.tile(penalized_tokens, [self._group_size])
                                 ],
                                 axis=-1
                             )
@@ -237,13 +237,13 @@ class BeamSearchDecoder:
                 adjusted_scores -= penalty_mask
 
                 # Apply length penalty
-                adjusted_scores = adjusted_scores / tf.pow(tf.cast(t + 1, tf.float32), self.length_penalty)
+                adjusted_scores = adjusted_scores / tf.pow(tf.cast(t + 1, tf.float32), self._length_penalty)
 
                 # Reshape to [batch_size, group_size * vocab_size]
                 adjusted_scores_flat = tf.reshape(adjusted_scores, [batch_size, -1])
 
                 # Get the top k scores and their indices for this group
-                topk_scores, topk_indices = tf.math.top_k(adjusted_scores_flat, k=self.group_size, sorted=True)
+                topk_scores, topk_indices = tf.math.top_k(adjusted_scores_flat, k=self._group_size, sorted=True)
 
                 # Map topk_indices back to beam and token indices
                 vocab_size = adjusted_scores.shape[2]
@@ -269,24 +269,24 @@ class BeamSearchDecoder:
             beam_indices = tf.concat(all_beam_indices, axis=1)
 
             # Gather the sequences corresponding to beam_indices
-            batch_offsets = tf.range(batch_size)[:, None] * self.beam_width
+            batch_offsets = tf.range(batch_size)[:, None] * self._beam_width
             beam_indices_flat = beam_indices + batch_offsets
-            beam_indices_flat = tf.reshape(beam_indices_flat, [batch_size * self.beam_width])
+            beam_indices_flat = tf.reshape(beam_indices_flat, [batch_size * self._beam_width])
 
             # Gather the new sequences
             selected_sequences = tf.gather(flat_sequences, beam_indices_flat)
-            new_tokens = tf.reshape(token_indices, [batch_size * self.beam_width, 1])
+            new_tokens = tf.reshape(token_indices, [batch_size * self._beam_width, 1])
             new_sequences = tf.concat([selected_sequences, new_tokens], axis=1)
 
             # Update the finished mask
-            is_finished = tf.equal(new_tokens, self.end_token_id)
-            is_finished = tf.reshape(is_finished, [batch_size, self.beam_width])
+            is_finished = tf.equal(new_tokens, self._end_token_id)
+            is_finished = tf.reshape(is_finished, [batch_size, self._beam_width])
             finished = tf.logical_or(finished, is_finished)
 
             # Update completed sequences and their scores
             for i in range(batch_size):
-                for j in range(self.beam_width):
-                    idx = i * self.beam_width + j
+                for j in range(self._beam_width):
+                    idx = i * self._beam_width + j
                     if is_finished[i, j]:
                         seq = new_sequences[idx].numpy().tolist()
                         score = scores[i, j].numpy()
@@ -295,12 +295,12 @@ class BeamSearchDecoder:
                             completed_scores[i].append(score)
 
             # Update sequences
-            sequences = tf.reshape(new_sequences, [batch_size, self.beam_width, -1])
+            sequences = tf.reshape(new_sequences, [batch_size, self._beam_width, -1])
 
             # Update decoder states
             flat_decoder_states = []
             for state in new_states:
-                state = tf.reshape(state, [batch_size * self.beam_width, -1])
+                state = tf.reshape(state, [batch_size * self._beam_width, -1])
                 selected_states = tf.gather(state, beam_indices_flat)
                 flat_decoder_states.append(selected_states)
 
@@ -313,14 +313,14 @@ class BeamSearchDecoder:
         best_scores = []
         for i in range(batch_size):
             seq_score_pairs = list(zip(completed_sequences[i], completed_scores[i]))
-            if len(seq_score_pairs) < self.return_top_n:
-                remaining = self.return_top_n - len(seq_score_pairs)
+            if len(seq_score_pairs) < self._return_top_n:
+                remaining = self._return_top_n - len(seq_score_pairs)
                 current_seqs = sequences[i].numpy().tolist()
                 current_scores = scores[i].numpy().tolist()
                 current_seq_score_pairs = list(zip(current_seqs, current_scores))
                 seq_score_pairs.extend(current_seq_score_pairs)
             seq_score_pairs.sort(key=lambda x: x[1], reverse=True)
-            top_n = min(self.return_top_n, len(seq_score_pairs))
+            top_n = min(self._return_top_n, len(seq_score_pairs))
             best_sequences.append([seq for seq, _ in seq_score_pairs[:top_n]])
             best_scores.append([score for _, score in seq_score_pairs[:top_n]])
 

@@ -17,12 +17,14 @@ class GradientMonitoringCallback(Callback):
     """
     def __init__(self, log_dir: Optional[str] = None) -> None:
         super().__init__()
-        self.log_dir: Optional[str] = log_dir
+        self._log_dir: Optional[str] = log_dir
+
         if log_dir:
-            self.writer: Optional[tf.summary.SummaryWriter] = tf.summary.create_file_writer(log_dir)
+            self._writer: Optional[tf.summary.SummaryWriter] = tf.summary.create_file_writer(log_dir)
         else:
-            self.writer = None
-        self.step: int = 0
+            self._writer = None
+
+        self._step: int = 0
 
     def on_gradients_computed(
         self,
@@ -51,12 +53,12 @@ class GradientMonitoringCallback(Callback):
         grad_norms = [tf.norm(grad) for grad in gradients if grad is not None]
         avg_grad_norm = tf.reduce_mean(grad_norms)
 
-        if self.writer:
-            with self.writer.as_default():
-                tf.summary.scalar('avg_grad_norm', avg_grad_norm, step=self.step)
+        if self._writer:
+            with self._writer.as_default():
+                tf.summary.scalar('avg_grad_norm', avg_grad_norm, step=self._step)
                 # Optionally log individual gradients
                 for grad, var in zip(gradients, variables):
                     if grad is not None:
-                        tf.summary.histogram(f'gradients/{var.name}', grad, step=self.step)
-            self.writer.flush()
-        self.step += 1
+                        tf.summary.histogram(f'gradients/{var.name}', grad, step=self._step)
+            self._writer.flush()
+        self._step += 1
