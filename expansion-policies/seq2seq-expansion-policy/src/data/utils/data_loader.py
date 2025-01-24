@@ -1,3 +1,4 @@
+import logging
 from typing import List, Tuple, Optional
 
 import tensorflow as tf
@@ -46,68 +47,66 @@ class DataLoader:
         reactants_file: str,
         test_split: float,
         validation_split: float,
+        logger: logging.Logger,
         num_samples: Optional[int] = None,
         max_encoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
         max_decoder_seq_length: int = DEFAULT_MAX_SEQ_LENGTH,
         batch_size: int = DEFAULT_BATCH_SIZE,
         buffer_size: int = DEFAULT_BUFFER_SIZE,
         random_state: int = DEFAULT_RANDOM_STATE,
+        max_tokens: int = DEFAULT_MAX_TOKENS,
         reverse_input_sequence: bool = DEFAULT_REVERSE_INPUT_SEQ_BOOL
     ) -> None:
-        self.products_file = products_file
-        self.reactants_file = reactants_file
-        self.test_split = test_split
-        self.validation_split = validation_split
-        self.num_samples = num_samples
-        self.max_encoder_seq_length = max_encoder_seq_length
-        self.max_decoder_seq_length = max_decoder_seq_length
-        self.batch_size = batch_size
-        self.buffer_size = buffer_size
-        self.random_state = random_state
+        self._products_file = products_file
+        self._reactants_file = reactants_file
+        self._test_split = test_split
+        self._validation_split = validation_split
+        self._logger = logger
+        self._num_samples = num_samples
+        self._max_encoder_seq_length = max_encoder_seq_length
+        self._max_decoder_seq_length = max_decoder_seq_length
+        self._batch_size = batch_size
+        self._buffer_size = buffer_size
+        self._random_state = random_state
+        self._max_tokens = max_tokens
 
-        total_split = self.test_split + self.validation_split
-        if not (0 < self.test_split < 1 and 0 < self.validation_split < 1):
+        total_split = self._test_split + self._validation_split
+        if not (0 < self._test_split < 1 and 0 < self._validation_split < 1):
             raise ValueError("test_split and validation_split must be between 0 and 1.")
         if not (0 < total_split < 1):
             raise ValueError("The sum of test_split and validation_split must be between 0 and 1.")
 
-        self.train_split = 1.0 - total_split
+        self._train_split = 1.0 - total_split
 
         self._smiles_tokeniser = SmilesTokeniser(
+            logger=self._logger,
+            max_tokens=self._max_tokens,
             reverse_input_sequence=reverse_input_sequence
         )
 
-        self.encoder_data_processor = None
-        self.decoder_data_processor = None
+        self._encoder_data_processor = None
+        self._decoder_data_processor = None
 
-        self.train_data = None
-        self.valid_data = None
-        self.test_data = None
-        self.test_dataset_size = None
+        self._products_x_dataset = None
+        self._reactants_y_dataset = None
 
-    @property
-    def vocab_size(self) -> int:
-        """
-        Returns the size of the tokeniser's vocabulary.
+        self._tokenised_products_x_dataset = None
+        self._tokenised_reactants_y_dataset = None
 
-        Returns
-        -------
-        int
-            Vocabulary size.
-        """
-        return self.smiles_tokeniser.vocab_size
+        self._tokenised_products_x_train_data = None
+        self._tokenised_reactants_y_train_data = None
+        self._tokenised_products_x_valid_data = None
+        self._tokenised_reactants_y_valid_data = None
+        self._tokenised_products_x_test_data = None
+        self._tokenised_reactants_y_test_data = None
 
-    @property
-    def smiles_tokeniser(self) -> 'SmilesTokeniser':
-        """
-        Returns the SMILES tokeniser instance.
+        self._test_size = None
+        self._train_data = None
+        self._valid_data = None
+        self._test_data = None
+        self._test_dataset_size = None
 
-        Returns
-        -------
-        SmilesTokeniser
-            The SMILES tokeniser used for tokenising SMILES strings.
-        """
-        return self._smiles_tokeniser
+        self._token_counts = None
 
     def load_and_prepare_data(self) -> None:
         """
@@ -146,25 +145,25 @@ class DataLoader:
         ValueError
             If there is a mismatch in the lengths of the datasets.
         """
-        self.products_x_dataset: List[str] = load_smiles_from_file(self.products_file)
-        self.reactants_y_dataset: List[str] = load_smiles_from_file(self.reactants_file)
+        self._products_x_dataset: List[str] = load_smiles_from_file(self._products_file)
+        self._reactants_y_dataset: List[str] = load_smiles_from_file(self._reactants_file)
 
         # Ensure datasets have the same length
-        if len(self.products_x_dataset) != len(self.reactants_y_dataset):
+        if len(self._products_x_dataset) != len(self._reactants_y_dataset):
             raise ValueError("Mismatch in dataset lengths.")
 
         # Limit the number of samples if specified
-        if self.num_samples is not None:
-            self.products_x_dataset = self.products_x_dataset[:self.num_samples]
-            self.reactants_y_dataset = self.reactants_y_dataset[:self.num_samples]
+        if self._num_samples is not None:
+            self._products_x_dataset = self._products_x_dataset[:self._num_samples]
+            self._reactants_y_dataset = self._reactants_y_dataset[:self._num_samples]
 
         # Canonicalise SMILES strings
         smiles_preprocessor: SmilesDataPreprocessor = SmilesDataPreprocessor()
-        self.products_x_dataset = [
-            smiles_preprocessor.canonicalise_smiles(smi) for smi in self.products_x_dataset
+        self._products_x_dataset = [
+            smiles_preprocessor.canonicalise_smiles(smi) for smi in self._products_x_dataset
         ]
-        self.reactants_y_dataset = [
-            smiles_preprocessor.canonicalise_smiles(smi) for smi in self.reactants_y_dataset
+        self._reactants_y_dataset = [
+            smiles_preprocessor.canonicalise_smiles(smi) for smi in self._reactants_y_dataset
         ]
 
     def _tokenise_datasets(self) -> None:
@@ -176,12 +175,12 @@ class DataLoader:
         -------
             None
         """
-        self.tokenised_products_x_dataset: List[str] = self.smiles_tokeniser.tokenise_list(
-            self.products_x_dataset,
+        self._tokenised_products_x_dataset: List[str] = self._smiles_tokeniser.tokenise_list(
+            self._products_x_dataset,
             is_input_sequence=True
         )
-        self.tokenised_reactants_y_dataset = self.smiles_tokeniser.tokenise_list(
-            self.reactants_y_dataset,
+        self._tokenised_reactants_y_dataset = self._smiles_tokeniser.tokenise_list(
+            self._reactants_y_dataset,
             is_input_sequence=False
         )
 
@@ -204,34 +203,37 @@ class DataLoader:
             If the tokenised datasets are empty or invalid.
         """
         # First split: Train vs Temp (Test + Validation)
-        (self.tokenised_products_x_train_data, self.tokenised_products_x_temp_data,
-         self.tokenised_reactants_y_train_data, self.tokenised_reactants_y_temp_data) = train_test_split(
-            self.tokenised_products_x_dataset,
-            self.tokenised_reactants_y_dataset,
-            test_size=(self.test_split + self.validation_split),
-            random_state=self.random_state,
+        (self._tokenised_products_x_train_data, tokenised_products_x_temp_data,
+         self._tokenised_reactants_y_train_data, tokenised_reactants_y_temp_data) = train_test_split(
+            self._tokenised_products_x_dataset,
+            self._tokenised_reactants_y_dataset,
+            test_size=(self._test_split + self._validation_split),
+            random_state=self._random_state,
             shuffle=True
         )
 
         # Calculate the proportion of validation split relative to the temp data
-        validation_ratio = self.validation_split / (self.test_split + self.validation_split)
+        validation_ratio = self._validation_split / (self._test_split + self._validation_split)
 
         # Second split: Validation vs Test from Temp
-        (self.tokenised_products_x_valid_data, self.tokenised_products_x_test_data,
-         self.tokenised_reactants_y_valid_data, self.tokenised_reactants_y_test_data) = train_test_split(
-            self.tokenised_products_x_temp_data,
-            self.tokenised_reactants_y_temp_data,
+        (self._tokenised_products_x_valid_data, self._tokenised_products_x_test_data,
+         self._tokenised_reactants_y_valid_data, self._tokenised_reactants_y_test_data) = train_test_split(
+            tokenised_products_x_temp_data,
+            tokenised_reactants_y_temp_data,
             test_size=(1-validation_ratio),
-            random_state=self.random_state,
+            random_state=self._random_state,
             shuffle=True
         )
 
         # Store test dataset size for partial test evaluation
-        self.test_size = len(self.tokenised_products_x_test_data)
+        self._test_size = len(self._tokenised_products_x_test_data)
 
         # Adapt the tokeniser on the training data only
-        combined_tokenised_train_data = self.tokenised_products_x_train_data + self.tokenised_reactants_y_train_data
-        self.smiles_tokeniser.adapt(combined_tokenised_train_data)
+        combined_tokenised_train_data = self._tokenised_products_x_train_data + self._tokenised_reactants_y_train_data
+        self._smiles_tokeniser.adapt(combined_tokenised_train_data)
+
+        # Extract token frequencies
+        self._smiles_tokeniser.calculate_token_frequencies(combined_tokenised_train_data)
 
     def _preprocess_tokenised_datasets(self) -> None:
         """
@@ -246,35 +248,36 @@ class DataLoader:
         None
         """
         # Initialise DataPreprocessors
-        self.encoder_data_processor = TokenisedSmilesPreprocessor(
-            self.smiles_tokeniser,
-            self.max_encoder_seq_length
+        self._encoder_data_processor = TokenisedSmilesPreprocessor(
+            self._smiles_tokeniser,
+            self._max_encoder_seq_length
         )
-        self.decoder_data_processor = TokenisedSmilesPreprocessor(
-            self.smiles_tokeniser,
-            self.max_decoder_seq_length
+        self._decoder_data_processor = TokenisedSmilesPreprocessor(
+            self._smiles_tokeniser,
+            self._max_decoder_seq_length
         )
 
         # Preprocess training data
-        self.train_data = self._preprocess_data_pair(
-            self.tokenised_products_x_train_data,
-            self.tokenised_reactants_y_train_data
+        self._train_data = self._preprocess_data_pair(
+            self._tokenised_products_x_train_data,
+            self._tokenised_reactants_y_train_data
         )
 
         # Preprocess test data
-        self.test_data = self._preprocess_data_pair(
-            self.tokenised_products_x_test_data,
-            self.tokenised_reactants_y_test_data
+        self._test_data = self._preprocess_data_pair(
+            self._tokenised_products_x_test_data,
+            self._tokenised_reactants_y_test_data
         )
 
         # Preprocess validation data
-        self.valid_data = self._preprocess_data_pair(
-            self.tokenised_products_x_valid_data,
-            self.tokenised_reactants_y_valid_data
+        self._valid_data = self._preprocess_data_pair(
+            self._tokenised_products_x_valid_data,
+            self._tokenised_reactants_y_valid_data
         )
 
     def _preprocess_data_pair(
-        self,encoder_data: List[str],
+        self,
+        encoder_data: List[str],
         decoder_data: List[str]
     ) -> Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]:
         """
@@ -296,8 +299,8 @@ class DataLoader:
             - decoder_target : tf.Tensor
                 Decoder target tensor.
         """
-        encoder_input = self.encoder_data_processor.preprocess_smiles(encoder_data)
-        decoder_full = self.decoder_data_processor.preprocess_smiles(decoder_data)
+        encoder_input = self._encoder_data_processor.preprocess_smiles(encoder_data)
+        decoder_full = self._decoder_data_processor.preprocess_smiles(decoder_data)
         decoder_input = decoder_full[:, :-1]
         decoder_target = decoder_full[:, 1:]
         return (encoder_input, decoder_input), decoder_target
@@ -334,10 +337,10 @@ class DataLoader:
         ))
 
         if training:
-            dataset = dataset.shuffle(self.buffer_size)
+            dataset = dataset.shuffle(self._buffer_size)
 
-        # Use drop_remainder=True during training to ensure consistent batch sizes
-        dataset = dataset.batch(self.batch_size, drop_remainder=training)
+        # Use `drop_remainder=True` during training to ensure consistent batch sizes
+        dataset = dataset.batch(self._batch_size, drop_remainder=training)
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
         return dataset
 
@@ -352,10 +355,10 @@ class DataLoader:
         tf.data.Dataset
             The training dataset.
         """
-        if self.train_data is None:
+        if self._train_data is None:
             raise ValueError("Training data has not been loaded and preprocessed.")
 
-        return self.get_dataset(self.train_data, training=True)
+        return self.get_dataset(self._train_data, training=True)
 
     def get_valid_dataset(self) -> tf.data.Dataset:
         """
@@ -368,10 +371,10 @@ class DataLoader:
         tf.data.Dataset
             The validation dataset.
         """
-        if self.valid_data is None:
+        if self._valid_data is None:
             raise ValueError("Validation data has not been loaded and preprocessed.")
 
-        return self.get_dataset(self.valid_data, training=False)
+        return self.get_dataset(self._valid_data, training=False)
 
     def get_test_dataset(self) -> tf.data.Dataset:
         """
@@ -384,7 +387,68 @@ class DataLoader:
         tf.data.Dataset
             The test dataset.
         """
-        if self.test_data is None:
+        if self._test_data is None:
             raise ValueError("Test data has not been loaded and preprocessed.")
 
-        return self.get_dataset(self.test_data, training=False)
+        return self.get_dataset(self._test_data, training=False)
+
+    @property
+    def vocab_size(self) -> int:
+        """
+        Returns the size of the tokeniser's vocabulary.
+
+        Returns
+        -------
+        int
+            Vocabulary size.
+        """
+        self._logger.info(f"Tokeniser Vocabulary Size: {self._smiles_tokeniser.vocab_size}")
+        return self._smiles_tokeniser.vocab_size
+
+    @property
+    def smiles_tokeniser(self) -> 'SmilesTokeniser':
+        """
+        Returns the SMILES tokeniser instance.
+
+        Returns
+        -------
+        SmilesTokeniser
+            The tokeniser used for tokenising SMILES strings.
+        """
+        return self._smiles_tokeniser
+
+    @property
+    def test_size(self) -> int:
+        """
+        Returns the number of data points in the test dataset.
+
+        Returns
+        -------
+        int
+            Test dataset size.
+        """
+        return self._test_size
+
+    @property
+    def max_decoder_seq_length(self) -> int:
+        """
+        Returns the maximum length of the decoder sequence.
+
+        Returns
+        -------
+        int
+            Decoder sequence maximum length.
+        """
+        return self._max_decoder_seq_length
+
+    @property
+    def random_state(self) -> int:
+        """
+        Returns the random state seed integer.
+
+        Returns
+        -------
+        int
+            Random state seed.
+        """
+        return self._random_state

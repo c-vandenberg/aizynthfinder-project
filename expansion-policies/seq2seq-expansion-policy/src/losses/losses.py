@@ -3,9 +3,141 @@ from typing import Any, Dict
 import tensorflow as tf
 from tensorflow.keras.losses import Loss
 
+@tf.keras.utils.register_keras_serializable()
+class WeightedSparseCategoricalCrossEntropy(Loss):
+    """
+    A custom Weighted Sparse Categorical Crossentropy class.
+
+    This loss applies a per-token weight factor and masks out padding tokens.
+
+    Padding tokens are used in sequence modeling tasks to ensure uniform input lengths. By masking these tokens,
+    the loss calculation focuses only on meaningful parts of the sequences, improving training efficiency and
+    performance.
+
+    Parameters
+    ----------
+    token_to_weight_map : tf.Tensor
+        A 1D tensor of shape [vocab_size] where token_to_weight_map[i]
+        is the weight for token i.
+    padding_token_id : int
+        The token ID used for padding. Will be excluded from the loss.
+    from_logits : bool
+        Whether y_pred is expected to be logits or probabilities (softmax).
+    name : str
+        Optional name for the loss.
+    """
+
+    def __init__(
+        self,
+        token_to_weight_map: tf.Tensor,
+        padding_token_id: int = 0,
+        from_logits: bool = False,
+        name: str = "WeightedSparseCategoricalCrossEntropy"
+    ):
+        super().__init__(name=name, reduction=tf.keras.losses.Reduction.NONE)
+        self._token_to_weight_map = token_to_weight_map
+        self._padding_token_id = padding_token_id
+        self._from_logits = from_logits
+
+        self._loss = tf.keras.losses.SparseCategoricalCrossentropy(
+            from_logits=self._from_logits,
+            reduction=tf.keras.losses.Reduction.NONE
+        )
+
+    def call(self, y_true, y_pred):
+        """
+        Computes the masked sparse categorical cross-entropy loss.
+
+        Parameters
+        ----------
+        y_true : tf.Tensor
+            Ground truth token tensor of shape `(batch_size, sequence_length)`.
+            Each entry should be an integer representing the correct token class.
+        y_pred : tf.Tensor
+            Predicted token tensor of shape `(batch_size, sequence_length, vocab_size)`.
+            Represents the probability distribution (float) over token classes for each timestep.
+
+        Returns
+        -------
+        tf.Tensor
+            Scalar tensor representing the mean loss over non-padding tokens.
+
+        Raises
+        ------
+        ValueError
+            If `y_true` is not a 2D tensor or `y_pred` is not a 3D tensor.
+        """
+        # 1) Validate input dimensions
+        if y_true.ndim != 2:
+            raise ValueError(f"y_true must be a 2D tensor, got {y_true.ndim}D tensor.")
+        if y_pred.ndim != 3:
+            raise ValueError(f"y_pred must be a 3D tensor, got {y_pred.ndim}D tensor.")
+
+        # 2) Defensive logic to cast `y_true` to int32 to ensure tf.gather can handle it
+        y_true = tf.cast(y_true, tf.int32)
+
+        # 3) Compute raw per-token crossentropy, shape = (batch_size, seq_length)
+        per_token_loss = self._loss(y_true, y_pred)
+
+        # 4) Gather weights for each token in y_true
+        weights = tf.gather(self._token_to_weight_map, y_true)  # shape: (batch, seq_len)
+
+        # 5) Mask out pad tokens (zero their loss contribution)
+        mask = tf.cast(tf.not_equal(y_true, self._padding_token_id), tf.float32)
+
+        # 6) Multiply raw loss for each token by weights to give weighted loss for each token, and then mask out
+        #    padding tokens (zero their loss contribution)
+        weighted_per_token_loss = per_token_loss * weights * mask
+
+        # 7) Sum the weighted losses
+        total_loss = tf.reduce_sum(weighted_per_token_loss)
+
+        # 8) Sum the effective weights
+        total_weight = tf.reduce_sum(weights * mask) + 1e-7  # small epsilon to avoid /0
+
+        # 9) Return average weighted loss
+        return total_loss / total_weight
+
+    def get_config(self) -> Dict[str, Any]:
+        """
+        Returns the configuration of the loss function for serialization.
+
+        This configuration can be used to re-instantiate the loss function with the same parameters.
+
+        Returns
+        -------
+        config : Dict[str, Any]
+            Configuration dictionary containing all necessary parameters to recreate the loss function.
+        """
+        config = super(WeightedSparseCategoricalCrossEntropy, self).get_config()
+        config.update({
+            'token_to_weight_map': self._token_to_weight_map,
+            'padding_token_id': self._padding_token_id,
+            'from_logits': self._from_logits,
+        })
+
+        return config
+
+    @classmethod
+    def from_config(cls, config: dict) -> 'WeightedSparseCategoricalCrossEntropy':
+        """
+        Creates an instance of the loss function from its configuration.
+
+        Parameters
+        ----------
+        config : Dict[str, Any]
+            Configuration dictionary.
+
+        Returns
+        -------
+        WeightedSparseCategoricalCrossEntropy
+            An instance of the loss function configured as per the provided dictionary.
+        """
+        return cls(**config)
+
 
 @tf.keras.utils.register_keras_serializable()
-class MaskedSparseCategoricalCrossentropy(Loss):
+class MaskedSparseCategoricalCrossEntropy(Loss):
     """
     Masked Sparse Categorical Crossentropy Loss Function.
 
@@ -57,7 +189,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         name: str = "masked_sparse_categorical_crossentropy",
         **kwargs
     ) -> None:
-        super(MaskedSparseCategoricalCrossentropy, self).__init__(name=name, **kwargs)
+        super(MaskedSparseCategoricalCrossEntropy, self).__init__(name=name, **kwargs)
         self.padding_idx = padding_idx
         self.label_smoothing = label_smoothing
         self.reduction = tf.keras.losses.Reduction.NONE
@@ -69,11 +201,11 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         Parameters
         ----------
         y_true : tf.Tensor
-            Ground truth tensor of shape `(batch_size, sequence_length)`.
-            Each entry should be an integer representing the correct class.
+            Ground truth token tensor of shape `(batch_size, sequence_length)`.
+            Each entry should be an integer representing the correct token class.
         y_pred : tf.Tensor
-            Predicted tensor of shape `(batch_size, sequence_length, vocab_size)`.
-            Represents the probability distribution over classes for each timestep.
+            Predicted token tensor of shape `(batch_size, sequence_length, vocab_size)`.
+            Represents the probability distribution (float) over token classes for each timestep.
 
         Returns
         -------
@@ -145,7 +277,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         config : Dict[str, Any]
             Configuration dictionary containing all necessary parameters to recreate the loss function.
         """
-        config = super(MaskedSparseCategoricalCrossentropy, self).get_config()
+        config = super(MaskedSparseCategoricalCrossEntropy, self).get_config()
         config.update({
             'padding_idx': self.padding_idx,
             'label_smoothing': self.label_smoothing,
@@ -153,7 +285,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
         return config
 
     @classmethod
-    def from_config(cls, config: dict) -> 'MaskedSparseCategoricalCrossentropy':
+    def from_config(cls, config: dict) -> 'MaskedSparseCategoricalCrossEntropy':
         """
         Creates an instance of the loss function from its configuration.
 
@@ -164,7 +296,7 @@ class MaskedSparseCategoricalCrossentropy(Loss):
 
         Returns
         -------
-        MaskedSparseCategoricalCrossentropy
+        MaskedSparseCategoricalCrossEntropy
             An instance of the loss function configured as per the provided dictionary.
         """
         return cls(**config)

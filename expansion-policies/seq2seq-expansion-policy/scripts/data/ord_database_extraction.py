@@ -78,7 +78,8 @@ def main():
     try:
         ord_extractor = OpenReactionDatabaseExtractor(
             ord_data_dir=args.ord_data_dir,
-            smiles_preprocessor=smiles_preprocessor
+            smiles_preprocessor=smiles_preprocessor,
+            logger=logger
         )
         logger.debug("Initialised OpenReactionDatabaseExtractor.")
     except Exception as e:
