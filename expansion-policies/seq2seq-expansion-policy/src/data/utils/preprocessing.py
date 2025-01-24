@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import logging
-from typing import List, Tuple, Optional, Union
+from typing import List, Tuple, Optional
 
 import tensorflow as tf
 from rdkit import Chem
@@ -29,8 +29,8 @@ class SmilesDataPreprocessor:
             List containing lists of reactant SMILES strings for each reaction.
             If None, initializes as an empty list.
         """
-        self.products_smiles: List[List[str]] = products_smiles if products_smiles is not None else []
-        self.reactants_smiles: List[List[str]] = reactants_smiles if reactants_smiles is not None else []
+        self._products_smiles: List[List[str]] = products_smiles if products_smiles is not None else []
+        self._reactants_smiles: List[List[str]] = reactants_smiles if reactants_smiles is not None else []
 
         self._logger = logger if logger else logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ class SmilesDataPreprocessor:
             for idx, (product_smiles, reactant_smiles) in enumerate(zip(self.products_smiles, self.reactants_smiles), 1):
                 reactant_line = '.'.join(reactant_smiles) if reactant_smiles else ''
                 product_line = '.'.join(product_smiles) if product_smiles else ''
-                cleaned_product_line = self.remove_non_product_fragment_smiles(product_line)
+                cleaned_product_line = self._remove_non_product_fragment_smiles(product_line)
 
                 reactants_file.write(reactant_line + '\n')
                 products_file.write(cleaned_product_line + '\n')
@@ -241,8 +241,8 @@ class SmilesDataPreprocessor:
 
         self._logger.info(f"Deduplication completed. Unique reactions: {len(unique_products)}")
 
-        self.products_smiles = unique_products
-        self.reactants_smiles = unique_reactants
+        self._products_smiles = unique_products
+        self._reactants_smiles = unique_reactants
 
     def _extract_unique_reactions_from_db(self, db_path: str = 'seen_pairs.db') -> None:
         """
@@ -266,8 +266,8 @@ class SmilesDataPreprocessor:
             rows = cursor.fetchall()
             self._logger.debug(f"Fetched {len(rows)} unique reactions from the database.")
 
-            self.reactants_smiles = [reactant.split('.') for reactant, _ in rows]
-            self.products_smiles = [product.split('.') for _, product in rows]
+            self._reactants_smiles = [reactant.split('.') for reactant, _ in rows]
+            self._products_smiles = [product.split('.') for _, product in rows]
 
             self._logger.info(f"Assigned {len(self.products_smiles)} unique reactions to in-memory datasets.")
         except sqlite3.Error as e:
@@ -289,7 +289,7 @@ class SmilesDataPreprocessor:
         """
         Canonicalises SMILES strings using `rdkit.Chem.MolFromSmiles()`.
 
-        Correctly handles reactant SMILES separated by `.` by canonicalizing each separately
+        Correctly handles reactant SMILES separated by `.` by canonicalising each separately
         and reassembling them in the same order with a `.` separator.
 
         Parameters
@@ -322,7 +322,7 @@ class SmilesDataPreprocessor:
         return canonical_smiles
 
     @staticmethod
-    def remove_non_product_fragment_smiles(smiles: str):
+    def _remove_non_product_fragment_smiles(smiles: str):
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             return smiles
@@ -334,6 +334,32 @@ class SmilesDataPreprocessor:
         main_frag = max(frags, key=lambda frag: frag.GetNumHeavyAtoms())
 
         return Chem.MolToSmiles(main_frag, canonical=True, isomericSmiles=True)
+
+    @property
+    def products_smiles(self) -> List[List[str]]:
+        """
+        Returns the list of product SMILES strings for each reaction
+
+        Returns
+        ----------
+        products_smiles : List[List[str]], optional
+            List containing lists of product SMILES strings for each reaction.
+            If None, initializes as an empty list.
+        """
+        return self._products_smiles
+
+    @property
+    def reactants_smiles(self) -> List[List[str]]:
+        """
+        Returns the list of reactant SMILES strings for each reaction
+
+        Returns
+        ----------
+        reactants_smiles : List[List[str]], optional
+            List containing lists of reactant SMILES strings for each reaction.
+            If None, initializes as an empty list.
+        """
+        return self._reactants_smiles
 
 
 class TokenisedSmilesPreprocessor:
