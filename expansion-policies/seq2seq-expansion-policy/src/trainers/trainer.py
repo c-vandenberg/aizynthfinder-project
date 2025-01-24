@@ -51,7 +51,7 @@ class Trainer:
         -------
         None
         """
-        self._config:Dict[str, Any] = self.load_config(config_path)
+        self._config:Dict[str, Any] = self._load_config(config_path)
 
         self._tokeniser: Optional[SmilesTokeniser] = None
         self._data_loader: Optional[DataLoader] = None
@@ -73,7 +73,7 @@ class Trainer:
         self._initialize_components()
 
     @staticmethod
-    def load_config(config_path: str) -> dict:
+    def _load_config(config_path: str) -> dict:
         """
         Loads configuration from a YAML file.
 
@@ -553,7 +553,7 @@ class Trainer:
         testing_metrics_time = testing_metrics_end_time - testing_metrics_start_time
         self._logger.info(f'Testing Metrics Time: {round(testing_metrics_time)} seconds')
 
-    def save_model(self) -> None:
+    def _save_model(self) -> None:
         """
         Saves the trained model in TensorFlow SavedModel format and ONNX format.
 
@@ -641,7 +641,7 @@ class Trainer:
             self._setup_callbacks()
             self._train()
             self._model.summary()
-            self.save_model()
+            self._save_model()
             self._evaluate()
         except Exception as e:
             self._logger.error(f"An error occurred during the training pipeline: {e}")

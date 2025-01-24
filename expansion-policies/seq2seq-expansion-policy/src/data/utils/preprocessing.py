@@ -105,7 +105,7 @@ class SmilesDataPreprocessor:
             for idx, (product_smiles, reactant_smiles) in enumerate(zip(self.products_smiles, self.reactants_smiles), 1):
                 reactant_line = '.'.join(reactant_smiles) if reactant_smiles else ''
                 product_line = '.'.join(product_smiles) if product_smiles else ''
-                cleaned_product_line = self.remove_non_product_fragment_smiles(product_line)
+                cleaned_product_line = self._remove_non_product_fragment_smiles(product_line)
 
                 reactants_file.write(reactant_line + '\n')
                 products_file.write(cleaned_product_line + '\n')
@@ -322,7 +322,7 @@ class SmilesDataPreprocessor:
         return canonical_smiles
 
     @staticmethod
-    def remove_non_product_fragment_smiles(smiles: str):
+    def _remove_non_product_fragment_smiles(smiles: str):
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             return smiles

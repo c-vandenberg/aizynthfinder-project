@@ -73,13 +73,65 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         self._use_remote_models = bool(kwargs.get("use_remote_models", True))
         self._return_top_n = min(int(kwargs.get("return_top_n", 1)), self._beam_width)
 
-        self._model = self.load_model(model_path)
-        self._smiles_tokenizer = self.load_tokenizer(tokenizer_path)
+        self._model = self._load_model(model_path)
+        self._smiles_tokenizer = self._load_tokenizer(tokenizer_path)
         self._model._smiles_tokenizer = self._smiles_tokenizer
 
         self._logger.info(f"Loaded Seq2Seq model and tokenizers for expansion policy {self.key}")
 
-    def load_model(self, model_path: str) -> RetrosynthesisSeq2SeqModel:
+    def get_actions(
+        self,
+        molecules: Sequence[TreeMolecule],
+        cache_molecules: Optional[Sequence[TreeMolecule]] = None,
+    ) -> Tuple[List[RetroReaction], List[float]]:
+        """
+        Generate retrosynthetic actions using the Seq2Seq model.
+
+        Parameters
+        ----------
+        molecules : sequence of TreeMolecule
+            The target molecules to consider for expansion.
+        cache_molecules : sequence of TreeMolecule, optional
+            Additional molecules to submit to the expansion policy but that will only be cached
+            for later use. Default is None.
+
+        Returns
+        -------
+        possible_actions : List[RetroReaction]
+            The list of generated retrosynthetic reactions.
+        priors : List[float]
+            The corresponding probabilities (priors) of the generated actions.
+        """
+        possible_actions = []
+        priors = []
+
+        smiles_list = [mol.smiles for mol in molecules]
+        self._logger.debug(f"Target molecules: {smiles_list}")
+        predicted_precursors_list, probabilities_list = self._predict_precursors(smiles_list)
+
+        for idx, (mol, predicted_precursors, probs) in enumerate(
+                zip(molecules, predicted_precursors_list, probabilities_list)):
+            self._logger.debug(f"Predictions for molecule {mol.smiles}:")
+            for precursor_smiles, prob in zip(predicted_precursors, probs):
+                self._logger.debug(f"  Precursor: {precursor_smiles}, Probability: {prob}")
+
+        for mol, predicted_precursors, probs in zip(molecules, predicted_precursors_list, probabilities_list):
+            for precursor_smiles, prob in zip(predicted_precursors, probs):
+                metadata = {
+                    "policy_probability": float(prob),
+                    "policy_name": self.key,
+                }
+                new_action = SmilesBasedRetroReaction(
+                    mol,
+                    metadata=metadata,
+                    reactants_str=precursor_smiles,
+                )
+                possible_actions.append(new_action)
+                priors.append(prob)
+
+        return possible_actions, priors
+
+    def _load_model(self, model_path: str) -> RetrosynthesisSeq2SeqModel:
         """
         Loads the Seq2Seq model from the specified path.
 
@@ -116,7 +168,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             raise
         return model
 
-    def load_tokenizer(self, tokenizer_path: str) -> SmilesTokeniser:
+    def _load_tokenizer(self, tokenizer_path: str) -> SmilesTokeniser:
         """
         Loads the SMILES tokenizer from the specified path.
 
@@ -136,59 +188,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         return tokenizer
 
-    def get_actions(
-        self,
-        molecules: Sequence[TreeMolecule],
-        cache_molecules: Optional[Sequence[TreeMolecule]] = None,
-    ) -> Tuple[List[RetroReaction], List[float]]:
-        """
-        Generate retrosynthetic actions using the Seq2Seq model.
-
-        Parameters
-        ----------
-        molecules : sequence of TreeMolecule
-            The target molecules to consider for expansion.
-        cache_molecules : sequence of TreeMolecule, optional
-            Additional molecules to submit to the expansion policy but that will only be cached
-            for later use. Default is None.
-
-        Returns
-        -------
-        possible_actions : List[RetroReaction]
-            The list of generated retrosynthetic reactions.
-        priors : List[float]
-            The corresponding probabilities (priors) of the generated actions.
-        """
-        possible_actions = []
-        priors = []
-
-        smiles_list = [mol.smiles for mol in molecules]
-        self._logger.debug(f"Target molecules: {smiles_list}")
-        predicted_precursors_list, probabilities_list = self.predict_precursors(smiles_list)
-
-        for idx, (mol, predicted_precursors, probs) in enumerate(
-                zip(molecules, predicted_precursors_list, probabilities_list)):
-            self._logger.debug(f"Predictions for molecule {mol.smiles}:")
-            for precursor_smiles, prob in zip(predicted_precursors, probs):
-                self._logger.debug(f"  Precursor: {precursor_smiles}, Probability: {prob}")
-
-        for mol, predicted_precursors, probs in zip(molecules, predicted_precursors_list, probabilities_list):
-            for precursor_smiles, prob in zip(predicted_precursors, probs):
-                metadata = {
-                    "policy_probability": float(prob),
-                    "policy_name": self.key,
-                }
-                new_action = SmilesBasedRetroReaction(
-                    mol,
-                    metadata=metadata,
-                    reactants_str=precursor_smiles,
-                )
-                possible_actions.append(new_action)
-                priors.append(prob)
-
-        return possible_actions, priors
-
-    def predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
+    def _predict_precursors(self, smiles_list: List[str]) -> Tuple[List[List[str]], List[List[float]]]:
         """
         Predicts precursor molecules for a list of target SMILES strings.
 

@@ -19,7 +19,7 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
     token_to_weight_map : tf.Tensor
         A 1D tensor of shape [vocab_size] where token_to_weight_map[i]
         is the weight for token i.
-    pad_token_id : int
+    padding_token_id : int
         The token ID used for padding. Will be excluded from the loss.
     from_logits : bool
         Whether y_pred is expected to be logits or probabilities (softmax).
@@ -30,13 +30,13 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
     def __init__(
         self,
         token_to_weight_map: tf.Tensor,
-        pad_token_id: int = 0,
+        padding_token_id: int = 0,
         from_logits: bool = False,
         name: str = "WeightedSparseCategoricalCrossEntropy"
     ):
         super().__init__(name=name, reduction=tf.keras.losses.Reduction.NONE)
         self._token_to_weight_map = token_to_weight_map
-        self._pad_token_id = pad_token_id
+        self._padding_token_id = padding_token_id
         self._from_logits = from_logits
 
         self._loss = tf.keras.losses.SparseCategoricalCrossentropy(
@@ -83,7 +83,7 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
         weights = tf.gather(self._token_to_weight_map, y_true)  # shape: (batch, seq_len)
 
         # 5) Mask out pad tokens (zero their loss contribution)
-        mask = tf.cast(tf.not_equal(y_true, self._pad_token_id), tf.float32)
+        mask = tf.cast(tf.not_equal(y_true, self._padding_token_id), tf.float32)
 
         # 6) Multiply raw loss for each token by weights to give weighted loss for each token, and then mask out
         #    padding tokens (zero their loss contribution)
@@ -97,6 +97,43 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
 
         # 9) Return average weighted loss
         return total_loss / total_weight
+
+    def get_config(self) -> Dict[str, Any]:
+        """
+        Returns the configuration of the loss function for serialization.
+
+        This configuration can be used to re-instantiate the loss function with the same parameters.
+
+        Returns
+        -------
+        config : Dict[str, Any]
+            Configuration dictionary containing all necessary parameters to recreate the loss function.
+        """
+        config = super(WeightedSparseCategoricalCrossEntropy, self).get_config()
+        config.update({
+            'token_to_weight_map': self._token_to_weight_map,
+            'padding_token_id': self._padding_token_id,
+            'from_logits': self._from_logits,
+        })
+
+        return config
+
+    @classmethod
+    def from_config(cls, config: dict) -> 'WeightedSparseCategoricalCrossEntropy':
+        """
+        Creates an instance of the loss function from its configuration.
+
+        Parameters
+        ----------
+        config : Dict[str, Any]
+            Configuration dictionary.
+
+        Returns
+        -------
+        WeightedSparseCategoricalCrossEntropy
+            An instance of the loss function configured as per the provided dictionary.
+        """
+        return cls(**config)
 
 
 @tf.keras.utils.register_keras_serializable()
