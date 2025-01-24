@@ -2,7 +2,7 @@ import os
 import glob
 import warnings
 import logging
-from typing import Generator, Tuple, List, Callable, Sequence, Optional
+from typing import Generator, Tuple, List, Callable, Sequence
 
 from ord_schema.message_helpers import load_message
 from ord_schema.proto import dataset_pb2
@@ -28,8 +28,8 @@ class OpenReactionDatabaseExtractor:
         if not isinstance(smiles_preprocessor, SmilesDataPreprocessor):
             raise TypeError("smiles_preprocessor must be an instance of SmilesDataPreprocessor.")
 
-        self.ord_data_dir: str = ord_data_dir
-        self.smiles_preprocessor = smiles_preprocessor
+        self._ord_data_dir: str = ord_data_dir
+        self._smiles_preprocessor = smiles_preprocessor
         self._logger = logger
 
     def extract_all_reactions(self)-> Generator[Tuple[str, str], None, None]:
@@ -39,7 +39,7 @@ class OpenReactionDatabaseExtractor:
         Yields:
             reaction_pb2.Reaction: A parsed Reaction protocol buffer message.
         """
-        pb_files = glob.glob(os.path.join(self.ord_data_dir, '**', '*.pb.gz'), recursive=True)
+        pb_files = glob.glob(os.path.join(self._ord_data_dir, '**', '*.pb.gz'), recursive=True)
 
         for pb_file in pb_files:
             dataset = load_message(pb_file, dataset_pb2.Dataset)

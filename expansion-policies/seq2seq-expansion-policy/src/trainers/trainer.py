@@ -15,6 +15,7 @@ from tensorflow.keras.callbacks import (
 from tensorflow.train import Checkpoint, CheckpointManager
 
 from data.utils.logging_utils import configure_logger
+from losses.losses import WeightedSparseCategoricalCrossEntropy
 from metrics.smiles_string_metrics import SmilesStringMetrics
 from trainers.environment import TrainingEnvironment
 from callbacks.checkpoints import BestValLossCallback
@@ -50,29 +51,29 @@ class Trainer:
         -------
         None
         """
-        self.config:Dict[str, Any] = self.load_config(config_path)
+        self._config:Dict[str, Any] = self._load_config(config_path)
 
-        self.tokeniser: Optional[SmilesTokeniser] = None
-        self.data_loader: Optional[DataLoader] = None
-        self.vocab_size: Optional[int] = None
-        self.encoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
-        self.decoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
-        self.model: Optional[RetrosynthesisSeq2SeqModel] = None
-        self.optimizer: Optional[Adam] = None
-        self.loss_function: Optional[Any] = None
-        self.metrics: Optional[List[str]] = None
-        self.callbacks: Optional[List[Callback]] = None
+        self._tokeniser: Optional[SmilesTokeniser] = None
+        self._data_loader: Optional[DataLoader] = None
+        self._vocab_size: Optional[int] = None
+        self._encoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
+        self._decoder_preprocessor: Optional[TokenisedSmilesPreprocessor] = None
+        self._model: Optional[RetrosynthesisSeq2SeqModel] = None
+        self._optimizer: Optional[Adam] = None
+        self._loss_function: Optional[Any] = None
+        self._metrics: Optional[List[str]] = None
+        self._callbacks: Optional[List[Callback]] = None
 
         os.makedirs(os.path.dirname(
-            self.config.get('data', {}).get('logger_path', 'var/log/default_logs.log')),
+            self._config.get('data', {}).get('logger_path', 'var/log/default_logs.log')),
             exist_ok=True
         )
-        self._logger = configure_logger(self.config.get('data', {}).get('logger_path', 'var/log/default_logs.log'))
+        self._logger = configure_logger(self._config.get('data', {}).get('logger_path', 'var/log/default_logs.log'))
 
-        self.initialize_components()
+        self._initialize_components()
 
     @staticmethod
-    def load_config(config_path: str) -> dict:
+    def _load_config(config_path: str) -> dict:
         """
         Loads configuration from a YAML file.
 
@@ -103,7 +104,7 @@ class Trainer:
                 raise yaml.YAMLError(f"Error parsing YAML file: {e}")
         return config
 
-    def initialize_components(self) -> None:
+    def _initialize_components(self) -> None:
         """
         Initialize DataLoader, Tokenizer, Preprocessor, and hyperparameters.
 
@@ -117,45 +118,46 @@ class Trainer:
             If required configuration keys are missing.
         """
         # Retrieve configurations
-        data_conf: Dict[str, Any] = self.config.get('data', {})
-        train_conf: Dict[str, Any] = self.config.get('training', {})
+        data_conf: Dict[str, Any] = self._config.get('data', {})
+        train_conf: Dict[str, Any] = self._config.get('training', {})
 
         # Initialize DataLoader
-        self.data_loader = DataLoader(
+        self._data_loader = DataLoader(
             products_file=data_conf.get('products_file', ''),
             reactants_file=data_conf.get('reactants_file', ''),
             test_split=data_conf.get('test_split', 0.1),
             validation_split=data_conf.get('validation_split', 0.1),
-            num_samples=train_conf.get('num_samples'),
             logger=self._logger,
+            num_samples=train_conf.get('num_samples'),
             max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
             max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140),
             batch_size=data_conf.get('batch_size', 16),
             random_state=data_conf.get('random_state', 42),
-            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True),
+            max_tokens = data_conf.get('max_tokens', 150),
+            reverse_input_sequence=train_conf.get('reverse_tokenized_input_sequence', True)
         )
 
         # Load and prepare data
-        self.data_loader.load_and_prepare_data()
+        self._data_loader.load_and_prepare_data()
 
         # Access tokenizer and vocab size
-        self.tokeniser = self.data_loader.smiles_tokeniser
-        self.vocab_size = self.data_loader.vocab_size
+        self._tokeniser = self._data_loader.smiles_tokeniser
+        self._vocab_size = self._data_loader.vocab_size
 
         # Save the tokenizer
-        self.save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
+        self._save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
 
         # Initialize Preprocessors
-        self.encoder_preprocessor = TokenisedSmilesPreprocessor(
-            smiles_tokenizer=self.data_loader.smiles_tokeniser,
+        self._encoder_preprocessor = TokenisedSmilesPreprocessor(
+            smiles_tokenizer=self._data_loader.smiles_tokeniser,
             max_seq_length=data_conf.get('max_encoder_seq_length', 140)
         )
-        self.decoder_preprocessor = TokenisedSmilesPreprocessor(
-            smiles_tokenizer=self.data_loader.smiles_tokeniser,
+        self._decoder_preprocessor = TokenisedSmilesPreprocessor(
+            smiles_tokenizer=self._data_loader.smiles_tokeniser,
             max_seq_length=data_conf.get('max_decoder_seq_length', 140)
         )
 
-    def save_tokenizer(self, tokenizer_path: str) -> None:
+    def _save_tokenizer(self, tokenizer_path: str) -> None:
         """
         Saves the tokenizer's vocabulary to a JSON file.
 
@@ -176,13 +178,13 @@ class Trainer:
         os.makedirs(os.path.dirname(tokenizer_path), exist_ok=True)
         try:
             with open(tokenizer_path, 'w') as f:
-                json.dump(self.tokeniser.word_index, f, indent=4)
+                json.dump(self._tokeniser.word_index, f, indent=4)
             self._logger.info(f"Tokenizer vocabulary saved to {tokenizer_path}")
         except IOError as e:
             self._logger.error(f"Failed to save tokenizer to {tokenizer_path}: {e}")
             raise
 
-    def setup_model(self) -> None:
+    def _setup_model(self) -> None:
         """
         Initializes and compiles the Seq2Seq model.
 
@@ -195,7 +197,8 @@ class Trainer:
         KeyError
             If required model configuration keys are missing.
         """
-        model_conf: Dict[str, Any] = self.config.get('model', {})
+        model_conf: Dict[str, Any] = self._config.get('model', {})
+        data_conf: Dict[str, Any] = self._config.get('data', {})
 
         # Retrieve model parameters with defaults
         encoder_embedding_dim: int = model_conf.get('encoder_embedding_dim', 256)
@@ -209,13 +212,13 @@ class Trainer:
         learning_rate: float = model_conf.get('learning_rate', 0.0001)
 
         # Initialise the model
-        self.model: RetrosynthesisSeq2SeqModel = RetrosynthesisSeq2SeqModel(
-            input_vocab_size=self.vocab_size,
-            output_vocab_size=self.vocab_size,
+        self._model: RetrosynthesisSeq2SeqModel = RetrosynthesisSeq2SeqModel(
+            input_vocab_size=self._vocab_size,
+            output_vocab_size=self._vocab_size,
             encoder_embedding_dim=encoder_embedding_dim,
             decoder_embedding_dim=decoder_embedding_dim,
             attention_dim=attention_dim,
-            smiles_tokenizer=self.tokeniser,
+            smiles_tokenizer=self._tokeniser,
             units=units,
             num_encoder_layers=encoder_num_layers,
             num_decoder_layers=decoder_num_layers,
@@ -224,25 +227,45 @@ class Trainer:
         )
 
         # Set up the optimiser
-        self.optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
+        self._optimizer: Adam = Adam(learning_rate=learning_rate, clipnorm=5.0)
 
         # Set up the loss function and metrics.
-        # For accuracy, because our sequences are integer-encoded, we have to specify `SparseCategoricalAccuracy`
-        # (Kera's default accuracy is CategoricalAccuracy, which is for sequences that are one-hot encoded)
-        self.loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
-        self.metrics = [
+        # For loss:
+        #   - If `use_weighted_loss` config is `True`, we build a token-to-weight map where a tokens weight is
+        #     dictated by its frequency in the training dataset. These weights are then applied to each token class in
+        #     a custom `WeightedSparseCategoricalCrossEntropy`.
+        #   - If `use_weighted_loss` config is `False`, we simply use the core
+        #     `tf.keras.losses.SparseCategoricalCrossentropy()` method.
+        #
+        # For accuracy:
+        #   - Because our sequences are integer-encoded, we have to specify `SparseCategoricalAccuracy`
+        #     (Kera's default accuracy is CategoricalAccuracy, which is for sequences that are one-hot encoded)
+        use_weighted_loss: bool = data_conf.get('use_weighted_loss', False)
+        if use_weighted_loss:
+            token_to_weight_map = self._tokeniser.build_token_weight_map(
+                token_counts=self._tokeniser.token_counts
+            )
+
+            self._loss_function = WeightedSparseCategoricalCrossEntropy(
+                token_to_weight_map=token_to_weight_map,
+                from_logits=False
+            )
+        else:
+            self._loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
+
+        self._metrics = [
             tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
-            Perplexity(loss_function=self.loss_function)
+            Perplexity(loss_function=self._loss_function)
         ]
 
         # Compile the model
-        self.model.compile(
-            optimizer=self.optimizer,
-            loss=self.loss_function,
-            metrics=self.metrics
+        self._model.compile(
+            optimizer=self._optimizer,
+            loss=self._loss_function,
+            metrics=self._metrics
         )
 
-    def build_model(self) -> None:
+    def _build_model(self) -> None:
         """
         Builds the model by running a sample input through it to initialize weights.
 
@@ -258,7 +281,7 @@ class Trainer:
         self._logger.info("Building the model with sample data to initialize variables...")
 
         # Get a batch from the training dataset
-        train_dataset = self.data_loader.get_train_dataset()
+        train_dataset = self._data_loader.get_train_dataset()
         try:
             sample_batch = next(iter(train_dataset))
         except StopIteration:
@@ -267,11 +290,11 @@ class Trainer:
         (sample_encoder_input, sample_decoder_input), _ = sample_batch
 
         # Run the model on sample data
-        self.model([sample_encoder_input, sample_decoder_input])
+        self._model([sample_encoder_input, sample_decoder_input])
 
         self._logger.info("Model built successfully.\n")
 
-    def setup_callbacks(self) -> None:
+    def _setup_callbacks(self) -> None:
         """
         Sets up training callbacks including EarlyStopping, TensorBoard, Checkpointing, and Learning Rate Scheduler.
 
@@ -284,7 +307,7 @@ class Trainer:
         KeyError
             If required training configuration keys are missing.
         """
-        training_conf: Dict[str, Any] = self.config.get('training', {})
+        training_conf: Dict[str, Any] = self._config.get('training', {})
 
         # Early Stopping
         early_stopping: EarlyStopping = EarlyStopping(
@@ -296,7 +319,7 @@ class Trainer:
         # Checkpoint manager
         checkpoint_dir = training_conf.get('checkpoint_dir', './checkpoints')
         os.makedirs(checkpoint_dir, exist_ok=True)
-        checkpoint: Checkpoint = Checkpoint(model=self.model, optimizer=self.optimizer)
+        checkpoint: Checkpoint = Checkpoint(model=self._model, optimizer=self._optimizer)
         checkpoint_manager: CheckpointManager = CheckpointManager(
             checkpoint,
             directory=checkpoint_dir,
@@ -326,12 +349,12 @@ class Trainer:
         valid_metrics_dir: str = training_conf.get('valid_metrics_dir', './validation-metrics')
         tensorboard_dir: str = training_conf.get('tensorboard_dir', './tensorboard')
         validation_metrics_callback: ValidationMetricsCallback = ValidationMetricsCallback(
-            tokenizer=self.tokeniser,
-            validation_data=self.data_loader.get_valid_dataset(),
+            tokenizer=self._tokeniser,
+            validation_data=self._data_loader.get_valid_dataset(),
             validation_metrics_dir=valid_metrics_dir,
             tensorboard_dir=os.path.join(tensorboard_dir, 'validation_metrics'),
             logger=self._logger,
-            max_length=self.data_loader.max_decoder_seq_length
+            max_length=self._data_loader.max_decoder_seq_length
         )
 
         # TensorBoard
@@ -344,7 +367,7 @@ class Trainer:
             log_dir=os.path.join(tensorboard_dir, 'gradients')
         )
 
-        self.callbacks = [
+        self._callbacks = [
             early_stopping,
             best_val_loss_checkpoint_callback,
             lr_scheduler,
@@ -352,7 +375,7 @@ class Trainer:
             tensorboard_callback
         ]
 
-    def train(self) -> None:
+    def _train(self) -> None:
         """
         Trains the Seq2Seq model using the training and validation datasets.
 
@@ -365,25 +388,25 @@ class Trainer:
         ValueError
             If dataloader or training/validation datasets are not initialised.
         """
-        training_conf: Dict[str, Any] = self.config.get('training', {})
+        training_conf: Dict[str, Any] = self._config.get('training', {})
 
-        if self.data_loader is None:
+        if self._data_loader is None:
             raise ValueError("DataLoader is not initialised.")
 
-        train_dataset = self.data_loader.get_train_dataset()
-        valid_dataset = self.data_loader.get_valid_dataset()
+        train_dataset = self._data_loader.get_train_dataset()
+        valid_dataset = self._data_loader.get_valid_dataset()
 
         if train_dataset is None or valid_dataset is None:
             raise ValueError("Training or validation datasets are not available.")
 
-        self.model.fit(
+        self._model.fit(
             train_dataset,
             epochs=training_conf.get('epochs', 10),
             validation_data=valid_dataset,
-            callbacks=self.callbacks
+            callbacks=self._callbacks
         )
 
-    def evaluate(self) -> None:
+    def _evaluate(self) -> None:
         """
         Evaluates the trained model on the test dataset.
 
@@ -399,13 +422,13 @@ class Trainer:
         ValueError
             If tokenizer is not set or if required metrics functions are not available.
         """
-        if self.tokeniser is None:
+        if self._tokeniser is None:
             raise ValueError("Tokenizer is not initialized.")
 
-        training_conf: Dict[str, Any] = self.config.get('training', {})
-        model_conf: Dict[str, Any] = self.config.get('model', {})
+        training_conf: Dict[str, Any] = self._config.get('training', {})
+        model_conf: Dict[str, Any] = self._config.get('model', {})
 
-        test_dataset = self.data_loader.get_test_dataset()
+        test_dataset = self._data_loader.get_test_dataset()
 
         # Get test subset fraction for partial test evaluation
         test_subset_fraction: float = training_conf.get('test_subset_fraction', 1.0)
@@ -415,13 +438,13 @@ class Trainer:
                              f"{test_subset_fraction} found")
 
         if test_subset_fraction < 1.0:
-            test_dataset_size: int = self.data_loader.test_size
+            test_dataset_size: int = self._data_loader.test_size
             partial_count: int = int(test_dataset_size * test_subset_fraction)
 
             # Shuffle and take the first `partial_count` samples
             test_dataset = (
                 test_dataset
-                .shuffle(buffer_size=test_dataset_size, seed=self.data_loader.random_state)
+                .shuffle(buffer_size=test_dataset_size, seed=self._data_loader.random_state)
                 .take(partial_count)
             )
 
@@ -433,7 +456,7 @@ class Trainer:
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
 
         # Evaluate the model on the test dataset
-        evaluation_results: List[float] = self.model.evaluate(test_dataset)
+        evaluation_results: List[float] = self._model.evaluate(test_dataset)
         if len(evaluation_results) < 3:
             raise ValueError("Expected at least three evaluation metrics (loss, accuracy, perplexity).")
 
@@ -443,29 +466,29 @@ class Trainer:
         hypotheses: List[List[str]] = []
         target_smiles: List[str] = []
         predicted_smiles: List[str] = []
-        start_token: str = self.tokeniser.start_token
-        end_token: str = self.tokeniser.end_token
+        start_token: str = self._tokeniser.start_token
+        end_token: str = self._tokeniser.end_token
 
         beam_search_start_time: float = time.time()
         for (encoder_input, decoder_input), target_sequences in test_dataset:
             # Generate sequences
-            predicted_sequences_list, predicted_scores_list = self.model.predict_sequence_beam_search(
+            predicted_sequences_list, predicted_scores_list = self._model.predict_sequence_beam_search(
                 encoder_input=encoder_input,
                 beam_width=model_conf.get('beam_width', 5),
-                max_length=self.data_loader.max_decoder_seq_length,
-                start_token_id=self.tokeniser.word_index.get(start_token),
-                end_token_id=self.tokeniser.word_index.get(end_token),
+                max_length=self._data_loader.max_decoder_seq_length,
+                start_token_id=self._tokeniser.word_index.get(start_token),
+                end_token_id=self._tokeniser.word_index.get(end_token),
                 return_top_n=1
             )
 
             top_predicted_sequences = [seq_list[0] for seq_list in predicted_sequences_list]
 
             # Convert sequences to text
-            predicted_texts: List[str]  = self.tokeniser.sequences_to_texts(
+            predicted_texts: List[str]  = self._tokeniser.sequences_to_texts(
                 top_predicted_sequences,
                 is_input_sequence=False
             )
-            target_texts: List[str]  = self.tokeniser.sequences_to_texts(
+            target_texts: List[str]  = self._tokeniser.sequences_to_texts(
                 target_sequences,
                 is_input_sequence=False
             )
@@ -530,7 +553,7 @@ class Trainer:
         testing_metrics_time = testing_metrics_end_time - testing_metrics_start_time
         self._logger.info(f'Testing Metrics Time: {round(testing_metrics_time)} seconds')
 
-    def save_model(self) -> None:
+    def _save_model(self) -> None:
         """
         Saves the trained model in TensorFlow SavedModel format and ONNX format.
 
@@ -546,9 +569,9 @@ class Trainer:
         Exception
             If any of the model saving processes fail.
         """
-        Seq2SeqModelUtils.inspect_model_layers(model=self.model)
-        training_conf: Dict[str, Any] = self.config.get('training', {})
-        data_conf: Dict[str, Any] = self.config.get('data', {})
+        Seq2SeqModelUtils.inspect_model_layers(model=self._model)
+        training_conf: Dict[str, Any] = self._config.get('training', {})
+        data_conf: Dict[str, Any] = self._config.get('data', {})
         model_save_dir: str = training_conf.get('model_save_dir', './model')
         keras_save_dir: str = os.path.join(model_save_dir, 'keras')
         hdf5_save_dir: str = os.path.join(model_save_dir, 'hdf5')
@@ -558,7 +581,7 @@ class Trainer:
         try:
             Seq2SeqModelUtils.model_save_keras_format(
                 keras_save_dir=keras_save_dir,
-                model=self.model
+                model=self._model
             )
         except Exception as e:
             self._logger.error(f"Error saving model in Keras format: {e}")
@@ -566,7 +589,7 @@ class Trainer:
         try:
             Seq2SeqModelUtils.model_save_hdf5_format(
                 hdf5_save_dir=hdf5_save_dir,
-                model=self.model
+                model=self._model
             )
         except Exception as e:
             self._logger.error(f"Error saving model in HDF5 format: {e}")
@@ -574,7 +597,7 @@ class Trainer:
         try:
             Seq2SeqModelUtils.model_save_onnx_format(
                 onnx_output_dir=onnx_save_dir,
-                model=self.model,
+                model=self._model,
                 max_encoder_seq_length=data_conf.get('max_encoder_seq_length', 140),
                 max_decoder_seq_length=data_conf.get('max_decoder_seq_length', 140)
             )
@@ -584,7 +607,7 @@ class Trainer:
         try:
             Seq2SeqModelUtils.save_saved_model_format(
                 model_save_path=saved_model_save_dir,
-                model=self.model
+                model=self._model
             )
         except Exception as e:
             self._logger.error(f"Error saving model in SavedModel format: {e}")
@@ -612,14 +635,14 @@ class Trainer:
             If any step in the training pipeline fails.
         """
         try:
-            TrainingEnvironment.setup_environment(self.config)
-            self.setup_model()
-            self.build_model()
-            self.setup_callbacks()
-            self.train()
-            self.model.summary()
-            self.save_model()
-            self.evaluate()
+            TrainingEnvironment.setup_environment(self._config)
+            self._setup_model()
+            self._build_model()
+            self._setup_callbacks()
+            self._train()
+            self._model.summary()
+            self._save_model()
+            self._evaluate()
         except Exception as e:
             self._logger.error(f"An error occurred during the training pipeline: {e}")
             raise

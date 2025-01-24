@@ -1,4 +1,4 @@
-from typing import Optional, Union, Tuple, Any, List, Dict
+from typing import Optional, Union, Tuple, List, Dict
 
 import tensorflow as tf
 from tensorflow.keras.regularizers import l2
@@ -31,17 +31,16 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
     Architecture:
         - Embedding Layer: Converts input token indices into dense embedding vectors, enabling the model
-                                                to learn meaningful representations of tokens.
+            to learn meaningful representations of tokens.
         - Stacked Bidirectional LSTM Layers: Processes embeddings in both forward and backward directions
-                                                across multiple layers to capture intricate sequential
-                                                dependencies and contextual information.
+            across multiple layers to capture intricate sequential
+            dependencies and contextual information.
         - Dropout Layers: Applies dropout after each LSTM layer to prevent overfitting by randomly
-                                                deactivating a subset of neurons during training.
+            deactivating a subset of neurons during training.
         - Layer Normalization Layers: Normalizes the outputs of each LSTM layer to stabilize and accelerate
-                                                the training process by reducing internal covariate shift.
+            the training process by reducing internal covariate shift.
         - Residual Connections: Implements skip connections from the input of each LSTM layer to its output
-                                                to facilitate better gradient flow and mitigate vanishing
-                                                gradient issues in deep networks.
+            to facilitate better gradient flow and mitigate vanishing gradient issues in deep networks.
 
     Parameters
     ----------
@@ -62,15 +61,15 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
     Attributes
     ----------
-    embedding : Embedding
+    _embedding : Embedding
         Embedding layer that transforms input token indices into dense vectors.
-    bidirectional_lstm_layers : List[Bidirectional]
+    _bidirectional_lstm_layers : List[Bidirectional]
         List of stacked Bidirectional LSTM layers.
-    dropout_layers : List[Dropout]
+    _dropout_layers : List[Dropout]
         List of Dropout layers applied after each LSTM layer.
-    layer_norm_layers : List[LayerNormalization]
+    _layer_norm_layers : List[LayerNormalization]
         List of Layer Normalization layers applied after each LSTM layer.
-    supports_masking : bool
+    _supports_masking : bool
         Indicates that the layer supports masking.
 
     Methods
@@ -101,23 +100,24 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         num_layers: int,
         dropout_rate: float = 0.2,
         weight_decay: float = 1e-4,
+        supports_masking: Optional[bool] = True,
         **kwargs
     ) -> None:
         super(StackedBidirectionalLSTMEncoder, self).__init__(**kwargs)
-        self.vocab_size = vocab_size
-        self.embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
-        self.units= units
-        self.num_layers = num_layers
-        self.dropout_rate= dropout_rate
-        self.weight_decay = weight_decay
+        self._vocab_size = vocab_size
+        self._embedding = Embedding(vocab_size, encoder_embedding_dim, mask_zero=True)
+        self._units= units
+        self._num_layers = num_layers
+        self._dropout_rate = dropout_rate
+        self._weight_decay = weight_decay
 
-        self.supports_masking = True
+        self._supports_masking = supports_masking
 
         # Build first Bidirectional LSTM layer
-        self.bidirectional_lstm_layers = []
-        self.dropout_layers = []
-        self.layer_norm_layers = []
-        self.residual_projection_layers = []
+        self._bidirectional_lstm_layers = []
+        self._dropout_layers = []
+        self._layer_norm_layers = []
+        self._residual_projection_layers = []
         for i in range(num_layers):
             lstm_layer = Bidirectional(
                 LSTM(
@@ -128,13 +128,13 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
                 ),
                 name=f'bidirectional_lstm_encoder_{i + 1}'
             )
-            self.bidirectional_lstm_layers.append(lstm_layer)
+            self._bidirectional_lstm_layers.append(lstm_layer)
 
             dropout_layer = Dropout(dropout_rate, name=f'encoder_dropout_{i + 1}')
-            self.dropout_layers.append(dropout_layer)
+            self._dropout_layers.append(dropout_layer)
 
             layer_norm_layer = LayerNormalization(name=f'encoder_layer_norm_{i + 1}')
-            self.layer_norm_layers.append(layer_norm_layer)
+            self._layer_norm_layers.append(layer_norm_layer)
 
     def call(
         self,
@@ -176,8 +176,8 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             raise ValueError("encoder_input must be a 2D tensor (batch_size, seq_len).")
 
         # Embed the input and obtain mask
-        encoder_output: tf.Tensor = self.embedding(encoder_input) # Shape: (batch_size, seq_len, embedding_dim)
-        encoder_mask: tf.Tensor = self.embedding.compute_mask(encoder_input) # Shape: (batch_size, seq_len)
+        encoder_output: tf.Tensor = self._embedding(encoder_input) # Shape: (batch_size, seq_len, embedding_dim)
+        encoder_mask: tf.Tensor = self._embedding.compute_mask(encoder_input) # Shape: (batch_size, seq_len)
 
         final_state_h: Union[None, tf.Tensor] = None
         final_state_c: Union[None, tf.Tensor] = None
@@ -187,7 +187,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
 
         # Iterate through each stacked Bidirectional LSTM layer
         for i, (lstm_layer, dropout_layer, layer_norm_layer) in enumerate(
-                zip(self.bidirectional_lstm_layers, self.dropout_layers, self.layer_norm_layers)
+                zip(self._bidirectional_lstm_layers, self._dropout_layers, self._layer_norm_layers)
         ):
             # Pass through the Bidirectional LSTM layer
             # encoder_output shape: (batch_size, seq_len, units * 2)
@@ -251,7 +251,7 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         Optional[tf.Tensor]
             The mask tensor based on the encoder's input mask. Returns `None` if no mask is computed.
         """
-        return self.embedding.compute_mask(inputs, mask)
+        return self._embedding.compute_mask(inputs, mask)
 
     def get_config(self) -> Dict:
         """
@@ -269,12 +269,12 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
         """
         config = super(StackedBidirectionalLSTMEncoder, self).get_config()
         config.update({
-            'vocab_size': self.embedding.input_dim,
-            'encoder_embedding_dim': self.embedding.output_dim,
-            'units': self.units,
-            'num_layers': self.num_layers,
-            'dropout_rate': self.dropout_rate,
-            'weight_decay': self.weight_decay
+            'vocab_size': self._embedding.input_dim,
+            'encoder_embedding_dim': self._embedding.output_dim,
+            'units': self._units,
+            'num_layers': self._num_layers,
+            'dropout_rate': self._dropout_rate,
+            'weight_decay': self._weight_decay
         })
         return config
 
@@ -297,3 +297,27 @@ class StackedBidirectionalLSTMEncoder(EncoderInterface):
             A new instance of `StackedBidirectionalLSTMEncoder` configured using the provided config.
         """
         return cls(**config)
+
+    @property
+    def embedding(self) -> Embedding:
+        """
+        Returns the Embedding layer that transforms target token indices into dense vectors.
+
+        Returns
+        -------
+        Embedding
+            The decoders embedding layer.
+        """
+        return self._embedding
+
+    @property
+    def num_layers(self):
+        """
+        Returns the number of stacked Bidirectional LSTM layers in the encoder.
+
+        Returns
+        -------
+        int
+            Number of stacked Bidirectional LSTM layers.
+        """
+        return self._num_layers

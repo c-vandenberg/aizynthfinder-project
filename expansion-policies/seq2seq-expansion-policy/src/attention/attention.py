@@ -61,13 +61,18 @@ class BahdanauAttention(AttentionInterface):
         The attention weights for each encoder output.
         Shape: (batch_size, seq_len_dec, seq_len_enc)
     """
-    def __init__(self, units: int, **kwargs) -> None:
+    def __init__(
+        self,
+        units: int,
+        supports_masking: Optional[bool] = True,
+        **kwargs
+    ) -> None:
         super(BahdanauAttention, self).__init__(**kwargs)
-        self.units = units
-        self.attention_dense1 = Dense(units, name='attention_dense1')
-        self.attention_dense2 = Dense(units, name='attention_dense2')
-        self.attention_v = Dense(1, name='attention_v')
-        self.supports_masking = True
+        self._units = units
+        self._attention_dense1 = Dense(units, name='attention_dense1')
+        self._attention_dense2 = Dense(units, name='attention_dense2')
+        self._attention_v = Dense(1, name='attention_v')
+        self._supports_masking = supports_masking
 
     def call(
         self,
@@ -122,8 +127,8 @@ class BahdanauAttention(AttentionInterface):
         encoder_output, decoder_output = inputs
 
         # Transform encoder and decoder outputs
-        score_enc: tf.Tensor = self.attention_dense1(encoder_output)  # Shape: (batch_size, seq_len_enc, units)
-        score_dec: tf.Tensor = self.attention_dense2(decoder_output)  # Shape: (batch_size, seq_len_dec, units)
+        score_enc: tf.Tensor = self._attention_dense1(encoder_output)  # Shape: (batch_size, seq_len_enc, units)
+        score_dec: tf.Tensor = self._attention_dense2(decoder_output)  # Shape: (batch_size, seq_len_dec, units)
 
         # Expand dimensions to enable broadcasting for addition
         score_enc_expanded: tf.Tensor = tf.expand_dims(score_enc, axis=1) # Shape: (batch_size, 1, seq_len_enc, units)
@@ -135,7 +140,7 @@ class BahdanauAttention(AttentionInterface):
         )  # Shape: (batch_size, seq_len_dec, seq_len_enc, units)
 
         # Compute final attention scores
-        score: tf.Tensor = self.attention_v(score_combined)  # Shape: (batch_size, seq_len_dec, seq_len_enc, 1)
+        score: tf.Tensor = self._attention_v(score_combined)  # Shape: (batch_size, seq_len_dec, seq_len_enc, 1)
 
         # Remove the last dimension of size 1
         score = tf.squeeze(score, axis=-1)  # Shape: (batch_size, seq_len_dec, seq_len_enc)
@@ -196,7 +201,7 @@ class BahdanauAttention(AttentionInterface):
         """
         config = super(BahdanauAttention, self).get_config()
         config.update({
-            'units': self.units,
+            'units': self._units,
         })
         return config
 
