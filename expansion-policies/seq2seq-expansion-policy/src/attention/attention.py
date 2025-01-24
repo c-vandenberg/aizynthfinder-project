@@ -61,13 +61,18 @@ class BahdanauAttention(AttentionInterface):
         The attention weights for each encoder output.
         Shape: (batch_size, seq_len_dec, seq_len_enc)
     """
-    def __init__(self, units: int, **kwargs) -> None:
+    def __init__(
+        self,
+        units: int,
+        supports_masking: Optional[bool] = True,
+        **kwargs
+    ) -> None:
         super(BahdanauAttention, self).__init__(**kwargs)
         self._units = units
         self._attention_dense1 = Dense(units, name='attention_dense1')
         self._attention_dense2 = Dense(units, name='attention_dense2')
         self._attention_v = Dense(1, name='attention_v')
-        self._supports_masking = True
+        self._supports_masking = supports_masking
 
     def call(
         self,

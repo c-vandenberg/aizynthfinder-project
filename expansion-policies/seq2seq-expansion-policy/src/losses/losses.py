@@ -35,12 +35,12 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
         name: str = "WeightedSparseCategoricalCrossEntropy"
     ):
         super().__init__(name=name, reduction=tf.keras.losses.Reduction.NONE)
-        self.token_to_weight_map = token_to_weight_map
-        self.pad_token_id = pad_token_id
-        self.from_logits = from_logits
+        self._token_to_weight_map = token_to_weight_map
+        self._pad_token_id = pad_token_id
+        self._from_logits = from_logits
 
-        self.loss = tf.keras.losses.SparseCategoricalCrossentropy(
-            from_logits=self.from_logits,
+        self._loss = tf.keras.losses.SparseCategoricalCrossentropy(
+            from_logits=self._from_logits,
             reduction=tf.keras.losses.Reduction.NONE
         )
 
@@ -77,13 +77,13 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
         y_true = tf.cast(y_true, tf.int32)
 
         # 3) Compute raw per-token crossentropy, shape = (batch_size, seq_length)
-        per_token_loss = self.loss(y_true, y_pred)
+        per_token_loss = self._loss(y_true, y_pred)
 
         # 4) Gather weights for each token in y_true
-        weights = tf.gather(self.token_to_weight_map, y_true)  # shape: (batch, seq_len)
+        weights = tf.gather(self._token_to_weight_map, y_true)  # shape: (batch, seq_len)
 
         # 5) Mask out pad tokens (zero their loss contribution)
-        mask = tf.cast(tf.not_equal(y_true, self.pad_token_id), tf.float32)
+        mask = tf.cast(tf.not_equal(y_true, self._pad_token_id), tf.float32)
 
         # 6) Multiply raw loss for each token by weights to give weighted loss for each token, and then mask out
         #    padding tokens (zero their loss contribution)

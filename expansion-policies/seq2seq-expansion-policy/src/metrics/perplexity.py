@@ -24,7 +24,7 @@ class Perplexity(Mean):
 
     Attributes
     ----------
-    loss_function : Callable[[tf.Tensor, tf.Tensor], tf.Tensor]
+    _loss_function : Callable[[tf.Tensor, tf.Tensor], tf.Tensor]
         The loss function used to compute the loss.
     """
     def __init__(
@@ -34,7 +34,7 @@ class Perplexity(Mean):
         **kwargs
     ) -> None:
         super(Perplexity, self).__init__(name=name, **kwargs)
-        self.loss_function = loss_function
+        self._loss_function = loss_function
 
     def update_state(
         self,
@@ -63,7 +63,7 @@ class Perplexity(Mean):
             If `y_true` or `y_pred` have incompatible shapes.
         """
         # Compute the loss per sample and per timestep
-        loss = self.loss_function(y_true, y_pred)  # Shape: (batch_size, sequence_length)
+        loss = self._loss_function(y_true, y_pred)  # Shape: (batch_size, sequence_length)
 
         # Reduce the loss to a scalar value
         loss = tf.reduce_mean(loss)  # Scalar mean loss
@@ -100,7 +100,7 @@ class Perplexity(Mean):
         """
         config = super(Perplexity, self).get_config()
         config.update({
-            'loss_function': tf.keras.losses.serialize(self.loss_function),
+            'loss_function': tf.keras.losses.serialize(self._loss_function),
         })
         return config
 

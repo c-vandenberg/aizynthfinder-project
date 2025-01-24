@@ -42,19 +42,19 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
     Attributes
     ----------
-    model : RetrosynthesisSeq2SeqModel
+    _model : RetrosynthesisSeq2SeqModel
         The loaded Seq2Seq model for prediction.
-    smiles_tokenizer : SmilesTokeniser
+    _smiles_tokenizer : SmilesTokeniser
         The tokenizer used for encoding and decoding SMILES strings.
-    max_encoder_seq_length : int
+    _max_encoder_seq_length : int
         Maximum sequence length for the encoder.
-    max_decoder_seq_length : int
+    _max_decoder_seq_length : int
         Maximum sequence length for the decoder.
-    beam_width : int
+    _beam_width : int
         Beam width for beam search decoding.
-    use_remote_models : bool
+    _use_remote_models : bool
         Whether to use remote models.
-    return_top_n : int
+    _return_top_n : int
         Number of top sequences to return.
 
     Methods
@@ -67,15 +67,15 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         model_path = kwargs["model"]
         tokenizer_path = kwargs["tokenizer"]
-        self.max_encoder_seq_length = int(kwargs.get("max_encoder_seq_length", 140))
-        self.max_decoder_seq_length = int(kwargs.get("max_decoder_seq_length", 140))
-        self.beam_width = int(kwargs.get("beam_width", 5))
-        self.use_remote_models = bool(kwargs.get("use_remote_models", True))
-        self.return_top_n = min(int(kwargs.get("return_top_n", 1)), self.beam_width)
+        self._max_encoder_seq_length = int(kwargs.get("max_encoder_seq_length", 140))
+        self._max_decoder_seq_length = int(kwargs.get("max_decoder_seq_length", 140))
+        self._beam_width = int(kwargs.get("beam_width", 5))
+        self._use_remote_models = bool(kwargs.get("use_remote_models", True))
+        self._return_top_n = min(int(kwargs.get("return_top_n", 1)), self._beam_width)
 
-        self.model = self.load_model(model_path)
-        self.smiles_tokenizer = self.load_tokenizer(tokenizer_path)
-        self.model.smiles_tokenizer = self.smiles_tokenizer
+        self._model = self.load_model(model_path)
+        self._smiles_tokenizer = self.load_tokenizer(tokenizer_path)
+        self._model._smiles_tokenizer = self._smiles_tokenizer
 
         self._logger.info(f"Loaded Seq2Seq model and tokenizers for expansion policy {self.key}")
 
@@ -209,30 +209,30 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
         This method uses beam search decoding to generate multiple predictions per molecule.
         It also filters out invalid SMILES strings from the predictions.
         """
-        tokenized_smiles_list = self.smiles_tokenizer.tokenise_list(
+        tokenized_smiles_list = self._smiles_tokenizer.tokenise_list(
             smiles_list,
             is_input_sequence=True
         )
 
         encoder_data_preprocessor = TokenisedSmilesPreprocessor(
-            smiles_tokenizer=self.smiles_tokenizer,
-            max_seq_length=self.max_encoder_seq_length
+            smiles_tokenizer=self._smiles_tokenizer,
+            max_seq_length=self._max_encoder_seq_length
         )
         preprocessed_smiles = encoder_data_preprocessor.preprocess_smiles(
             tokenized_smiles_list=tokenized_smiles_list
         )
 
-        start_token_id = self.smiles_tokenizer.word_index[self.smiles_tokenizer.start_token]
-        end_token_id = self.smiles_tokenizer.word_index[self.smiles_tokenizer.end_token]
+        start_token_id = self._smiles_tokenizer.word_index[self._smiles_tokenizer.start_token]
+        end_token_id = self._smiles_tokenizer.word_index[self._smiles_tokenizer.end_token]
 
         # Use beam search to get multiple predictions per molecule
-        predicted_seqs_list, seq_scores_list = self.model.predict_sequence_beam_search(
+        predicted_seqs_list, seq_scores_list = self._model.predict_sequence_beam_search(
             encoder_input=preprocessed_smiles,
-            beam_width=self.beam_width,
-            max_length=self.max_decoder_seq_length,
+            beam_width=self._beam_width,
+            max_length=self._max_decoder_seq_length,
             start_token_id=start_token_id,
             end_token_id=end_token_id,
-            return_top_n=self.return_top_n
+            return_top_n=self._return_top_n
         )
 
         all_predicted_smiles = []
@@ -240,7 +240,7 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
 
         for idx, (predicted_seqs, seq_scores) in enumerate(zip(predicted_seqs_list, seq_scores_list)):
             # Convert token sequences to SMILES strings
-            predicted_smiles = self.smiles_tokenizer.sequences_to_texts(
+            predicted_smiles = self._smiles_tokenizer.sequences_to_texts(
                 sequences=predicted_seqs,
                 is_input_sequence=False
             )
@@ -259,8 +259,8 @@ class Seq2SeqExpansionStrategy(ExpansionStrategy):
             for smiles_string, prob in zip(predicted_smiles, probabilities):
                 cleaned_smiles = self._clean_sequence(
                     smiles_string,
-                    self.smiles_tokenizer.start_token,
-                    self.smiles_tokenizer.end_token
+                    self._smiles_tokenizer.start_token,
+                    self._smiles_tokenizer.end_token
                 )
                 reactant_smiles_list = cleaned_smiles.split('.')
                 is_valid = all(self._is_valid_smiles(smi) for smi in reactant_smiles_list)

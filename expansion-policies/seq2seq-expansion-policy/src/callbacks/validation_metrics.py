@@ -30,15 +30,15 @@ class ValidationMetricsCallback(Callback):
 
     Attributes
     ----------
-    tokenizer : Any
+    _tokeniser : Any
         The tokenizer used to convert sequences to text.
-    validation_data : Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]]
+    _validation_data : Iterable[Tuple[Tuple[tf.Tensor, tf.Tensor], tf.Tensor]]
         The validation dataset.
-    tensorboard_dir : Optional[str]
+    _tensorboard_dir : Optional[str]
         Directory to save the TensorBoard logs.
-    max_length : int
+    _max_length : int
         The maximum length of the generated sequences.
-    file_writer : Optional[tf.summary.SummaryWriter]
+    _file_writer : Optional[tf.summary.SummaryWriter]
         TensorBoard summary writer for logging metrics.
     """
     def __init__(
@@ -51,17 +51,17 @@ class ValidationMetricsCallback(Callback):
         max_length: int = 140
     ) -> None:
         super(ValidationMetricsCallback, self).__init__()
-        self.tokenizer = tokenizer
-        self.validation_data = validation_data
-        self.validation_metrics_dir = validation_metrics_dir
-        self.tensorboard_dir = tensorboard_dir
-        self.logger = logger
-        self.max_length = max_length
+        self._tokeniser = tokenizer
+        self._validation_data = validation_data
+        self._validation_metrics_dir = validation_metrics_dir
+        self._tensorboard_dir = tensorboard_dir
+        self._logger = logger
+        self._max_length = max_length
 
-        os.makedirs(self.tensorboard_dir, exist_ok=True)
-        self.file_writer = tf.summary.create_file_writer(self.tensorboard_dir)
+        os.makedirs(self._tensorboard_dir, exist_ok=True)
+        self._file_writer = tf.summary.create_file_writer(self._tensorboard_dir)
 
-        self.smiles_string_metrics = SmilesStringMetrics()
+        self._smiles_string_metrics = SmilesStringMetrics()
 
     def on_epoch_end(self, epoch: int, logs: Optional[dict] = None) -> None:
         """
@@ -79,26 +79,26 @@ class ValidationMetricsCallback(Callback):
         hypotheses = []
         target_smiles = []
         predicted_smiles = []
-        start_token = self.tokenizer.start_token
-        end_token = self.tokenizer.end_token
+        start_token = self._tokeniser.start_token
+        end_token = self._tokeniser.end_token
 
         validation_metrics_start_time: float = time.time()
 
-        for (encoder_input, decoder_input), target_sequences in self.validation_data:
+        for (encoder_input, decoder_input), target_sequences in self._validation_data:
             # Generate sequences
             predicted_sequences = self.model.predict_sequence(
                 encoder_input,
-                max_length=self.max_length,
-                start_token_id=self.tokenizer.word_index.get(start_token),
-                end_token_id=self.tokenizer.word_index.get(end_token)
+                max_length=self._max_length,
+                start_token_id=self._tokeniser.word_index.get(start_token),
+                end_token_id=self._tokeniser.word_index.get(end_token)
             )
 
             # Convert sequences to text
-            predicted_texts = self.tokenizer.sequences_to_texts(
+            predicted_texts = self._tokeniser.sequences_to_texts(
                 predicted_sequences,
                 is_input_sequence=False
             )
-            target_texts = self.tokenizer.sequences_to_texts(
+            target_texts = self._tokeniser.sequences_to_texts(
                 target_sequences,
                 is_input_sequence=False
             )
@@ -118,14 +118,14 @@ class ValidationMetricsCallback(Callback):
             hypotheses=hypotheses,
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
-            validation_metrics_dir=self.validation_metrics_dir,
-            tensorboard_dir=self.tensorboard_dir,
-            file_writer=self.file_writer
+            validation_metrics_dir=self._validation_metrics_dir,
+            tensorboard_dir=self._tensorboard_dir,
+            file_writer=self._file_writer
         )
 
         validation_metrics_end_time: float = time.time()
         validation_metrics_time = validation_metrics_end_time - validation_metrics_start_time
-        self.logger.info(f'Epoch {epoch + 1} Validation Metrics Time: {round(validation_metrics_time)} seconds')
+        self._logger.info(f'Epoch {epoch + 1} Validation Metrics Time: {round(validation_metrics_time)} seconds')
 
     def validation(
         self,
@@ -180,20 +180,20 @@ class ValidationMetricsCallback(Callback):
             hypotheses=hypotheses,
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
-            smiles_string_metrics=self.smiles_string_metrics,
+            smiles_string_metrics=self._smiles_string_metrics,
             evaluation_stage='Validation'
         )
         metrics.update(custom_metrics)
 
         log_metrics(metrics=metrics, directory=validation_metrics_dir, epoch=epoch)
-        print_metrics(logger=self.logger, metrics=metrics, epoch=epoch)
+        print_metrics(logger=self._logger, metrics=metrics, epoch=epoch)
         log_sample_predictions(
             target_smiles=target_smiles,
             predicted_smiles=predicted_smiles,
             directory=validation_metrics_dir,
             epoch=epoch,
         )
-        print_sample_predictions(logger=self.logger, target_smiles=target_smiles, predicted_smiles=predicted_smiles)
+        print_sample_predictions(logger=self._logger, target_smiles=target_smiles, predicted_smiles=predicted_smiles)
 
         if tensorboard_dir and file_writer:
             log_to_tensorboard(file_writer, metrics, epoch)

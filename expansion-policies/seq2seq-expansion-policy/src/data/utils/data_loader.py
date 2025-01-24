@@ -413,7 +413,7 @@ class DataLoader:
         Returns
         -------
         SmilesTokeniser
-            The SMILES tokeniser used for tokenising SMILES strings.
+            The tokeniser used for tokenising SMILES strings.
         """
         return self._smiles_tokeniser
 
