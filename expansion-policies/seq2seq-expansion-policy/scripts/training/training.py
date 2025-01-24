@@ -4,11 +4,11 @@ import os
 import pydevd_pycharm
 import argparse
 
-import tensorflow as tf
-
 from trainers.trainer import Trainer
 
+# Configure training for debugging.
 # pydevd_pycharm.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True, suspend=False)
+# tf.config.run_functions_eagerly(True)
 
 def parse_arguments():
     """
