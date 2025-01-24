@@ -28,27 +28,27 @@ class RetrosynthesisSeq2SeqModel(Model):
 
     Attributes
     ----------
-    units : int
+    _units : int
         Number of units in LSTM layers.
-    attention_dim : int
+    _attention_dim : int
         Dimensionality of the attention mechanism.
-    encoder : StackedBidirectionalLSTMEncoder
+    _encoder : StackedBidirectionalLSTMEncoder
         The encoder part of the Seq2Seq model.
-    decoder : StackedLSTMDecoder
+    _decoder : StackedLSTMDecoder
         The decoder part of the Seq2Seq model.
-    input_vocab_size : int
+    _input_vocab_size : int
         Size of the input vocabulary.
-    output_vocab_size : int
+    _output_vocab_size : int
         Size of the output vocabulary.
-    enc_state_h : Dense
+    _enc_state_h : Dense
         Dense layer to map encoder hidden state to decoder initial hidden state.
-    enc_state_c : Dense
+    _enc_state_c : Dense
         Dense layer to map encoder cell state to decoder initial cell state.
-    smiles_tokenizer : Optional[SmilesTokeniser]
+    _smiles_tokenizer : Optional[SmilesTokeniser]
         Data preprocessor for the encoder and decoder inputs.
-    dropout_rate : float
+    _dropout_rate : float
         Dropout rate for regularization.
-    weight_decay : Optional[float]
+    _weight_decay : Optional[float]
         L2 regularization factor applied to the LSTM and Dense layers.
 
     Methods
@@ -83,11 +83,11 @@ class RetrosynthesisSeq2SeqModel(Model):
     ):
         super(RetrosynthesisSeq2SeqModel, self).__init__(**kwargs)
 
-        self.units = units
-        self.attention_dim = attention_dim
+        self._units = units
+        self._attention_dim = attention_dim
 
         # Encoder layer
-        self.encoder: StackedBidirectionalLSTMEncoder = StackedBidirectionalLSTMEncoder(
+        self._encoder: StackedBidirectionalLSTMEncoder = StackedBidirectionalLSTMEncoder(
             vocab_size=input_vocab_size,
             encoder_embedding_dim=encoder_embedding_dim,
             units=units,
@@ -97,7 +97,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         )
 
         # Decoder layer
-        self.decoder: StackedLSTMDecoder = StackedLSTMDecoder(
+        self._decoder: StackedLSTMDecoder = StackedLSTMDecoder(
             vocab_size=output_vocab_size,
             decoder_embedding_dim=decoder_embedding_dim,
             attention_dim=attention_dim,
@@ -107,19 +107,19 @@ class RetrosynthesisSeq2SeqModel(Model):
             weight_decay=weight_decay
         )
 
-        self.input_vocab_size = input_vocab_size
-        self.output_vocab_size = output_vocab_size
+        self._input_vocab_size = input_vocab_size
+        self._output_vocab_size = output_vocab_size
 
         # Initialise Dense layers to pass encoder final states through
-        self.enc_state_h: Dense = Dense(units, name='enc_state_h')
-        self.enc_state_c: Dense = Dense(units, name='enc_state_c')
+        self._enc_state_h: Dense = Dense(units, name='enc_state_h')
+        self._enc_state_c: Dense = Dense(units, name='enc_state_c')
 
         # Smiles tokenizer to be set externally
-        self.smiles_tokenizer = smiles_tokenizer
-        self.tokenizer_vocab_size = self.smiles_tokenizer.vocab_size
+        self._smiles_tokenizer = smiles_tokenizer
+        self._tokenizer_vocab_size = self._smiles_tokenizer.vocab_size
 
-        self.dropout_rate = dropout_rate
-        self.weight_decay = weight_decay
+        self._dropout_rate = dropout_rate
+        self._weight_decay = weight_decay
 
     def call(
         self,
@@ -158,21 +158,21 @@ class RetrosynthesisSeq2SeqModel(Model):
         encoder_output: tf.Tensor
         state_h: tf.Tensor
         state_c: tf.Tensor
-        encoder_output, state_h, state_c = self.encoder(encoder_input, training=training)
+        encoder_output, state_h, state_c = self._encoder(encoder_input, training=training)
 
         # Compute masks
-        encoder_mask:Optional[tf.Tensor]  = self.encoder.compute_mask(encoder_input)
-        decoder_mask: Optional[tf.Tensor]  = self.decoder.compute_mask([decoder_input, None, None])
+        encoder_mask:Optional[tf.Tensor]  = self._encoder.compute_mask(encoder_input)
+        decoder_mask: Optional[tf.Tensor]  = self._decoder.compute_mask([decoder_input, None, None])
 
         # Pass encoder final states through Dense layers
         # and map encoder final states to initial states for the decoder's first layer
-        decoder_initial_state_h: tf.Tensor = self.enc_state_h(state_h)  # Shape: (batch_size, units)
-        decoder_initial_state_c: tf.Tensor = self.enc_state_c(state_c)  # Shape: (batch_size, units)
+        decoder_initial_state_h: tf.Tensor = self._enc_state_h(state_h)  # Shape: (batch_size, units)
+        decoder_initial_state_c: tf.Tensor = self._enc_state_c(state_c)  # Shape: (batch_size, units)
         decoder_initial_state: List[tf.Tensor] = [decoder_initial_state_h, decoder_initial_state_c]
 
         # Prepare initial states for all decoder layers
         decoder_initial_state = (decoder_initial_state +
-                                 [tf.zeros_like(decoder_initial_state_h)] * (self.decoder.num_layers * 2 - 2))
+                                 [tf.zeros_like(decoder_initial_state_h)] * (self._decoder.num_layers * 2 - 2))
 
         # Prepare decoder inputs
         decoder_inputs: Tuple[tf.Tensor, List[tf.Tensor], tf.Tensor] = (
@@ -182,7 +182,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         )
 
         # Decoder input sequence processing
-        output: tf.Tensor = self.decoder(
+        output: tf.Tensor = self._decoder(
             decoder_inputs,
             training=training,
             mask=[decoder_mask, encoder_mask]
@@ -314,7 +314,7 @@ class RetrosynthesisSeq2SeqModel(Model):
 
         # Initialize BeamSearchDecoder
         beam_search_decoder = BeamSearchDecoder(
-            decoder=self.decoder,
+            decoder=self._decoder,
             start_token_id=start_token_id,
             end_token_id=end_token_id,
             beam_width=beam_width,
@@ -370,30 +370,30 @@ class RetrosynthesisSeq2SeqModel(Model):
         """
         # 1) Encode the input sequence
         batch_size = tf.shape(encoder_input)[0]
-        encoder_output, state_h, state_c = self.encoder(encoder_input, training=False)
+        encoder_output, state_h, state_c = self._encoder(encoder_input, training=False)
 
         # 2) Map encoder final states to first-layer decoder states
-        decoder_state_h = self.enc_state_h(state_h)
-        decoder_state_c = self.enc_state_c(state_c)
+        decoder_state_h = self._enc_state_h(state_h)
+        decoder_state_c = self._enc_state_c(state_c)
         initial_decoder_states = [decoder_state_h, decoder_state_c]
 
         # 3) Create a full set of (2 * `num_decoder_layers`) states
         #    The first pair are the mapped encoder final states, and the rest of zero-initialised
         initial_decoder_states = [decoder_state_h, decoder_state_c]
-        for _ in range(self.decoder.num_layers - 1):
+        for _ in range(self._decoder.num_layers - 1):
             initial_decoder_states.append(tf.zeros_like(decoder_state_h))
             initial_decoder_states.append(tf.zeros_like(decoder_state_c))
 
         # 4) Prepare start and end token IDs
         if start_token_id is None:
-            start_token = self.smiles_tokenizer.start_token
-            start_token_id = self.smiles_tokenizer.word_index[start_token]
+            start_token = self._smiles_tokenizer.start_token
+            start_token_id = self._smiles_tokenizer.word_index[start_token]
             if start_token_id is None:
                 raise ValueError(f"Start token '{start_token}' not found in tokenizer's word_index.")
 
         if end_token_id is None:
-            end_token = self.smiles_tokenizer.end_token
-            end_token_id = self.smiles_tokenizer.word_index[end_token]
+            end_token = self._smiles_tokenizer.end_token
+            end_token_id = self._smiles_tokenizer.word_index[end_token]
             if end_token_id is None:
                 raise ValueError(f"End token '{end_token}' not found in tokenizer's word_index.")
 
@@ -442,7 +442,7 @@ class RetrosynthesisSeq2SeqModel(Model):
         5) Returns updated loop variables
         """
         # 1) single-step decode
-        decoder_output, new_states = self.decoder.single_step(
+        decoder_output, new_states = self._decoder.single_step(
             decoder_input, decoder_states, encoder_output
         )
         # shape: (batch_size, 1, vocab_size)
@@ -475,16 +475,16 @@ class RetrosynthesisSeq2SeqModel(Model):
             Configuration dictionary containing all necessary parameters to recreate the model.
         """
         config = {
-            'input_vocab_size': self.input_vocab_size,
-            'output_vocab_size': self.output_vocab_size,
-            'encoder_embedding_dim': self.encoder.embedding.output_dim,
-            'decoder_embedding_dim': self.decoder.embedding.output_dim,
-            'units': self.units,
-            'attention_dim': self.attention_dim,
-            'num_encoder_layers': self.encoder.num_layers,
-            'num_decoder_layers': self.decoder.num_layers,
-            'dropout_rate': self.dropout_rate,
-            'weight_decay': self.weight_decay,
+            'input_vocab_size': self._input_vocab_size,
+            'output_vocab_size': self._output_vocab_size,
+            'encoder_embedding_dim': self._encoder.embedding.output_dim,
+            'decoder_embedding_dim': self._decoder.embedding.output_dim,
+            'units': self._units,
+            'attention_dim': self._attention_dim,
+            'num_encoder_layers': self._encoder.num_layers,
+            'num_decoder_layers': self._decoder.num_layers,
+            'dropout_rate': self._dropout_rate,
+            'weight_decay': self._weight_decay,
             'name': self.name,
         }
         return config
@@ -505,3 +505,15 @@ class RetrosynthesisSeq2SeqModel(Model):
             An instance of the model configured as per the provided dictionary.
         """
         return cls(**config)
+
+    @property
+    def smiles_tokeniser(self) -> 'SmilesTokeniser':
+        """
+        Returns the SMILES tokeniser instance.
+
+        Returns
+        -------
+        SmilesTokeniser
+            The tokeniser used for tokenising SMILES strings.
+        """
+        return self._smiles_tokeniser

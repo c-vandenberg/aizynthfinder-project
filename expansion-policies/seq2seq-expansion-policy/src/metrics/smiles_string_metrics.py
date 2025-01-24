@@ -86,7 +86,7 @@ class SmilesStringMetrics:
 
         try:
             valid_predictions = sum(
-                1 for hyp in predicted_smiles if SmilesStringMetrics.is_valid_smiles(hyp)
+                1 for hyp in predicted_smiles if SmilesStringMetrics._is_valid_smiles(hyp)
             )
         finally:
             RDLogger.EnableLog('rdApp.error')
@@ -220,7 +220,7 @@ class SmilesStringMetrics:
         return total_distance / len(target_smiles)
 
     @staticmethod
-    def is_valid_smiles(smiles: str) -> bool:
+    def _is_valid_smiles(smiles: str) -> bool:
         """
         Check if a SMILES string is chemically valid.
 
