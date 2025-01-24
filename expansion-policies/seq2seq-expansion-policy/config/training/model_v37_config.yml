@@ -55,15 +55,15 @@
 data:
   products_file: '../data/preprocessed/liu-et-al-ord-concatenated/products_smiles_cleaned_smarts'
   reactants_file: '../data/preprocessed/liu-et-al-ord-concatenated/reactants_smiles_cleaned_smarts'
-  tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated/model-v32/tokenizer/model_v32_tokenizer.json'
-  logger_path: '../var/log/liu-et-al-ord-concatenated/model-v32/model-v32.log'
+  tokenizer_save_path: '../data/training/liu-et-al-ord-concatenated/model-v36/tokenizer/model_v36_tokenizer.json'
+  logger_path: '../var/log/liu-et-al-ord-concatenated/model-v36/model-v36.log'
   max_encoder_seq_length: 140
   max_decoder_seq_length: 140
   batch_size: 32
   test_split: 0.1
   validation_split: 0.1
-  max_tokens: 150
-  use_weighted_loss: False
+  max_tokens: 350
+  use_weighted_loss: True
   random_state: 4
 
 # Model Configuration and Hyperparameters
@@ -86,13 +86,13 @@ training:
   epochs: 20
   patience: 5
   reverse_tokenized_input_sequence: True
-  model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v32/model/saved_model'
-  model_save_dir: '../data/training/liu-et-al-ord-concatenated/model-v32/model'
-  valid_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v32/validation-metrics'
-  test_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v32/testing-metrics'
-  tensorboard_dir: '../data/training/liu-et-al-ord-concatenated/model-v32/tensorboard'
-  log_dir: '../logs/liu-et-al-ord-concatenated/model-v32'
-  checkpoint_dir: '../data/training/liu-et-al-ord-concatenated/model-v32/checkpoints'
+  model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v36/model/saved_model'
+  model_save_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/model'
+  valid_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/validation-metrics'
+  test_metrics_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/testing-metrics'
+  tensorboard_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/tensorboard'
+  log_dir: '../logs/liu-et-al-ord-concatenated/model-v36'
+  checkpoint_dir: '../data/training/liu-et-al-ord-concatenated/model-v36/checkpoints'
   num_samples: null # Number of samples to use for debugging model
   test_subset_fraction: 0.01
 

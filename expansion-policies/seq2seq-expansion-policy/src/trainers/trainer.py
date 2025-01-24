@@ -144,6 +144,8 @@ class Trainer:
         self._tokeniser = self._data_loader.smiles_tokeniser
         self._vocab_size = self._data_loader.vocab_size
 
+        self._logger.info(f"Tokeniser Vocabulary Size: {self._vocab_size}")
+
         # Save the tokenizer
         self._save_tokenizer(data_conf.get('tokenizer_save_path', 'tokenizer.json'))
 
@@ -250,8 +252,10 @@ class Trainer:
                 token_to_weight_map=token_to_weight_map,
                 from_logits=False
             )
+            self._logger.info(f"Using custom `WeightedSparseCategoricalCrossEntropy` loss function ")
         else:
             self._loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
+            self._logger.info(f"Using core `tf.keras.losses.SparseCategoricalCrossentropy` loss function ")
 
         self._metrics = [
             tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),

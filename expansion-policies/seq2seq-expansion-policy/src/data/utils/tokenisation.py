@@ -249,6 +249,8 @@ class SmilesTokeniser:
         so that rare tokens get higher weights.
         """
         vocab_size = len(self.word_index)
+        self._logger.info(f"Building token-to-weight map for {vocab_size} token classes")
+
         weights_array = np.zeros((vocab_size,), dtype=np.float32)
 
         # Reverse mapping: idx->token
@@ -259,13 +261,17 @@ class SmilesTokeniser:
             # Default to 1 if the token isn't found in `token_counts` (i.e., a small nonzero freq to avoid dividing
             # by zero)
             freq = token_counts.get(token_str, 1)
-            freq = max(freq, min_count)  # to avoid divide by zero
+            freq = max(freq, min_count)
 
             # Square root weighting
             ## weights_array[idx] = alpha / math.sqrt(freq)
+            ## self._logger.info(f"Token weights calculated using square root weighting")
 
             # Log Weighting
             weights_array[idx] = alpha / math.log(float(freq) + math.e)
+            self._logger.info(f"Token weights calculated using log weighting")
+
+        self._logger.info(f"Token-to-weight map successfully built")
 
         return tf.constant(weights_array, dtype=tf.float32)
 
