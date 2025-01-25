@@ -264,12 +264,12 @@ class SmilesTokeniser:
             freq = max(freq, min_count)
 
             # Square root weighting
-            ## weights_array[idx] = alpha / math.sqrt(freq)
-            ## self._logger.info(f"Token {token_str} weight calculated using square root weighting")
+            weights_array[idx] = alpha / math.sqrt(freq)
+            self._logger.info(f"Token {token_str} weight calculated using square root weighting")
 
             # Log Weighting
-            weights_array[idx] = alpha / math.log(float(freq) + math.e)
-            self._logger.info(f"Token {token_str} weight calculated using log weighting")
+            ## weights_array[idx] = alpha / math.log(float(freq) + math.e)
+            ## self._logger.info(f"Token {token_str} weight calculated using log weighting")
 
         self._logger.info(f"Token-to-weight map successfully built")
 
