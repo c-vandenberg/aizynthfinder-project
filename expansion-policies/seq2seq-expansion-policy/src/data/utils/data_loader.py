@@ -402,7 +402,6 @@ class DataLoader:
         int
             Vocabulary size.
         """
-        self._logger.info(f"Tokeniser Vocabulary Size: {self._smiles_tokeniser.vocab_size}")
         return self._smiles_tokeniser.vocab_size
 
     @property
