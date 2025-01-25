@@ -1,13 +1,13 @@
 # Seq2Seq Model Architecture
-# The model architecture consts of:
+# The model architecture consists of:
 #   1. Encoder: StackedBidirectionalLSTMEncoder (2-layer Bidirectional LSTM):
 #     - A Stacked Bidirectional LSTM encoder with segregated Dropout layers.
-#     - Utilizes 2 layers of Bidirectional LSTM to capture contextual information from both directions.
+#     - Utilises 2 layers of Bidirectional LSTM to capture contextual information from both directions.
 #     - Dropout rate is set to 0.2, applied after each LSTM layer to prevent overfitting.
 #   2. Decoder: StackedLSTMDecoder (4-layer Unidirectional LSTM):
 #     - A Stacked LSTM decoder with segregated Dropout layers.
 #     - Comprises 4 layers of LSTM to generate target sequences.
-#     - Dropout rate is set to 0.2, applied after each LSTM layer to enhance generalization.
+#     - Dropout rate is set to 0.2, applied after each LSTM layer to enhance generalisation.
 #   3. Attention Mechanism: BahdanauAttention
 #     - Implements an additive attention mechanism to focus on relevant parts of the encoder's output during decoding.
 #

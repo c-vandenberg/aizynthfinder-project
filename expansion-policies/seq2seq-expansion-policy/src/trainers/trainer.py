@@ -244,6 +244,7 @@ class Trainer:
         #     (Kera's default accuracy is CategoricalAccuracy, which is for sequences that are one-hot encoded)
         use_weighted_loss: bool = data_conf.get('use_weighted_loss', False)
         if use_weighted_loss:
+            self._logger.info(f"Using custom `WeightedSparseCategoricalCrossEntropy` loss function ")
             token_to_weight_map = self._tokeniser.build_token_weight_map(
                 token_counts=self._tokeniser.token_counts
             )
@@ -252,10 +253,9 @@ class Trainer:
                 token_to_weight_map=token_to_weight_map,
                 from_logits=False
             )
-            self._logger.info(f"Using custom `WeightedSparseCategoricalCrossEntropy` loss function ")
         else:
-            self._loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
             self._logger.info(f"Using core `tf.keras.losses.SparseCategoricalCrossentropy` loss function ")
+            self._loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
 
         self._metrics = [
             tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy"),
