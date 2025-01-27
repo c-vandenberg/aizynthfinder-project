@@ -110,8 +110,10 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
             Configuration dictionary containing all necessary parameters to recreate the loss function.
         """
         config = super(WeightedSparseCategoricalCrossEntropy, self).get_config()
+        # `self._token_to_weight_map` EagerTensor is not JSON serialisable.
+        # Therefore, convert EagerTensor -> NumPy array -> Python List
         config.update({
-            'token_to_weight_map': self._token_to_weight_map,
+            'token_to_weight_map': self._token_to_weight_map.numpy().tolist(),
             'padding_token_id': self._padding_token_id,
             'from_logits': self._from_logits,
         })
@@ -133,7 +135,10 @@ class WeightedSparseCategoricalCrossEntropy(Loss):
         WeightedSparseCategoricalCrossEntropy
             An instance of the loss function configured as per the provided dictionary.
         """
-        return cls(**config)
+        # Convert token-to-weight map back to EagerTensor
+        token_to_weights_list = config.pop('token_to_weight_map')
+        token_to_weights_map = tf.constant(token_to_weights_list, dtype=tf.float32)
+        return cls(token_to_weight_map=token_to_weights_map, **config)
 
 
 @tf.keras.utils.register_keras_serializable()
