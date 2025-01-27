@@ -454,7 +454,7 @@ class Trainer:
 
             self._logger.info(
                 f"Subsampling test dataset to {partial_count} out of {test_dataset_size} "
-                f"({test_subset_fraction * 100:.1f}%)."
+                f"({test_subset_fraction * 100:.2f}%)."
             )
 
         test_metrics_dir: str = training_conf.get('test_metrics_dir', './evaluation')
