@@ -83,7 +83,7 @@ model:
 
 # Training Configuration and Hyperparameters
 training:
-  epochs: 1
+  epochs: 20
   patience: 5
   reverse_tokenized_input_sequence: True
   model_save_path: '../data/training/liu-et-al-ord-concatenated/model-v39/model/saved_model'
@@ -93,7 +93,7 @@ training:
   tensorboard_dir: '../data/training/liu-et-al-ord-concatenated/model-v39/tensorboard'
   log_dir: '../logs/liu-et-al-ord-concatenated/model-v39'
   checkpoint_dir: '../data/training/liu-et-al-ord-concatenated/model-v39/checkpoints'
-  num_samples: 1000 # Number of samples to use for debugging model
+  num_samples: null # Number of samples to use for debugging model
   test_subset_fraction: 0.01
 
 # Environment Configuration
