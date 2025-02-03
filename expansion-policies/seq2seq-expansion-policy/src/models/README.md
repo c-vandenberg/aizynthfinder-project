@@ -1230,7 +1230,7 @@ The **flow of data** through the model's **encoder-decoder architecture** is sho
 
 ### 5.5.1 Evaluation of Current Optimal Model Architecture
 
-As of **03/02/25**, the **optimal model arcitecture** has been trained on an **expanded dataset of 1,027,414 reactions**, with the latest model iteration being **Model V50**. A full breakdown of all model iterations and the optimisation process can be found [in our Notion documentation](https://www.notion.so/Seq2Seq-Model-Iterations-1854783f49a180238839d26132ed48dc).
+As of **03/02/25**, the **optimal model arcitecture** has been trained on an **expanded dataset of 1,027,414 reactions**, with the latest model iteration being **Model V50**. A full breakdown of all model iterations and the optimisation process can be found [in the Notion documentation](https://enormous-hydrant-2c9.notion.site/Seq2Seq-Model-Iterations-1854783f49a180238839d26132ed48dc).
 
 Model optimisation for this expanded dataset training regimen is ongoing. Therefore, full analysis of the performance of Model V50 is not yet covered here. Instead, the focus of the subsequent results and discussion will be on the **optimal model architecture from 26/11/24**. This model was trained on a **limited dataset of 50,000 reactions**, and evaluated using **two sets of hyperparameters**. These have been given the designations **Model V27** and **Model V28**.
 
