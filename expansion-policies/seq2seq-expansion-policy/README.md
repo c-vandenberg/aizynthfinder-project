@@ -19,7 +19,7 @@ A template-based retrosynthetic method is based on a predefined set of rules, an
 
 ## 3.2 Alternative SMILES-Based Retrosynthetic Methods
 
-A deep learning approach that **avoids a template-based/rule-based approach** could **avoid the above limitations**.
+A deep learning approach that **avoids this template-based/rule-based system** could **avoid the above limitations**.
 
 *Liu et al.* approached the problem as a **sequence-to-sequence prediction task**, **mapping a text-based linear notation of the reactants to that of the product, or vice versa**. **<sup>2</sup>** 
 
