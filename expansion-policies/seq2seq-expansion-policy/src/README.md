@@ -4,7 +4,7 @@
 
 *Liu et al.* derived their seq2seq model architecture from the large-scale analysis of **Neural Machine Translation (NMT) architecture hyperparameters** by *Britz et al.*.
 
-In their seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statistically significant results** from **random noise**.
+In this seminal paper, *Britz et al.* provide insights into the **optimisation of NMT models** (such as seq2seq models), and establish the extent to which model performance metrics are influenced by **random initialisation** and **hyperparameter variation**, helping to **distinguish statistically significant results** from **random noise**.
 
 ### 4.1.1 Embedding Dimensionality
 
