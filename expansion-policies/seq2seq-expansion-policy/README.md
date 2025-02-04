@@ -9,7 +9,7 @@ This project aims to implement a SMILES-based (template-free) retrosynthetic met
 ## 3.1 Limitations of Template-Based Retrosynthetic Methods
 
 A template-based retrosynthetic method is based on a predefined set of rules, and thus **inherits the limitations of these rules**:
-1. The primary limitation of such methods is that they are **fundamentally dependent on the rules on which the neural network is trained**, and thus these approaches have **issues with making accurate predictions outside of this rule-based knowledge base**. **<sup>2</sup>**
+1. The primary limitation of such methods is that, because they are **fundamentally dependent on the rules on which the neural network is trained**, they can have **issues with making accurate predictions outside of this rule-based knowledge base**.  **<sup>2</sup>**
    
 2. There is also an **inherent trade-off** between defining **general rules**, which can **introduce noise** and **reduce the accuracy or reliability of a model’s predictions**, and defining **very specific rules**, which **restrict the model’s predictions to a narrow set of reactants and products**. **<sup>2</sup>**
    
