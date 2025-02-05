@@ -604,7 +604,7 @@ The **Big-O complexity** of beam seach is **$$\mathcal{O}(k\left|\mathcal{Y}\rig
 
 ### 5.3.1 Optimised Encoder Architecture
 
-The encoder is a **custom TensorFlow Keras Layer** named **`StackedBidirectionalLSTMEncoder`**. The **bidirectional LSTM layers** are designed to **process input sequences** (**tokenized product SMILES strings**), and convery them into **rich, context-aware representations** that capture **both past and future information** in the sequence.
+The encoder is a **custom TensorFlow Keras Layer** named **`StackedBidirectionalLSTMEncoder`**. The **bidirectional LSTM layers** are designed to **process input sequences** (**tokenized product SMILES strings**), and convert them into **rich, context-aware representations** that capture **both past and future information** in the sequence.
 
 The **key components** of the encoder are:
 1. **Embedding Layer**
@@ -689,7 +689,7 @@ Within the Seq2Seq model, the decoder is used in the **following phases:**
     * The attention mechanism **enhances the decoder's ability** to **focus on relevant parts of the input sequence** when **generating each token**.
     * This helps in **handling long sequences** and **complex dependencies**.
 
-The **key components** of the encoder are:
+The **key components** of the decoder are:
 1. **Embedding Layer**
 2. **Masking Support**
 3. **Stacked LSTM Layers**
